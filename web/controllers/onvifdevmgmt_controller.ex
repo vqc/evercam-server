@@ -5,8 +5,8 @@ defmodule EvercamMedia.ONVIFDeviceManagementController do
   require Logger
   plug :action
 
-  def macaddr(conn, params) do
-    camera = Repo.one! Camera.by_exid(params["id"])
+  def macaddr(conn, %{"id" => id}) do
+    camera = Repo.one! Camera.by_exid id
     url = Camera.external_url camera
     [username, password] = camera
     |> Camera.auth

@@ -5,58 +5,58 @@ defmodule EvercamMedia.ONVIFPTZController do
   require Logger
   plug :action
 
-  def status(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
+  def status(conn, %{"id" => id}) do
+    [url, username, password] = get_camera_info id
     {:ok, response} = ONVIFPTZ.get_status(url, username, password, "Profile_1")
     default_respond(conn, 200, response)
   end
 
-  def presets(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
+  def presets(conn, %{"id" => id}) do
+    [url, username, password] = get_camera_info id
     {:ok, response} = ONVIFPTZ.get_presets(url, username, password, "Profile_1")
     default_respond(conn, 200, response)
   end
 
-  def stop(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
+  def stop(conn, %{"id" => id}) do
+    [url, username, password] = get_camera_info id
     {:ok, response} = ONVIFPTZ.stop(url, username, password, "Profile_1")
     default_respond(conn, 200, response)
   end
 
-  def home(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
+  def home(conn, %{"id" => id}) do
+    [url, username, password] = get_camera_info id
     {:ok, response} = ONVIFPTZ.goto_home_position(url, username, password, "Profile_1")
     default_respond(conn, 200, response)
   end
 
-  def sethome(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
+  def sethome(conn, %{"id" => id}) do
+    [url, username, password] = get_camera_info id
     {:ok, response} = ONVIFPTZ.set_home_position(url, username, password, "Profile_1")
     default_respond(conn, 200, response)
   end
 
-  def gotopreset(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
-    {:ok, response} = ONVIFPTZ.goto_preset(url, username, password, "Profile_1", params["preset_token"])
+  def gotopreset(conn, %{"id" => id, "preset_token" => token}) do
+    [url, username, password] = get_camera_info id
+    {:ok, response} = ONVIFPTZ.goto_preset(url, username, password, "Profile_1", token)
     default_respond(conn, 200, response)
   end
 
-  def setpreset(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
-    {:ok, response} = ONVIFPTZ.set_preset(url, username, password, "Profile_1", "", params["preset_token"])
+  def setpreset(conn, %{"id" => id, "preset_token" => token}) do
+    [url, username, password] = get_camera_info id
+    {:ok, response} = ONVIFPTZ.set_preset(url, username, password, "Profile_1", "", token)
     default_respond(conn, 200, response)
   end
 
-  def createpreset(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
-    {:ok, response} = ONVIFPTZ.set_preset(url, username, password, "Profile_1", params["preset_name"])
+  def createpreset(conn, %{"id" => id, "preset_name" => name}) do
+    [url, username, password] = get_camera_info id
+    {:ok, response} = ONVIFPTZ.set_preset(url, username, password, "Profile_1", name)
     default_respond(conn, 200, response)
   end
 
-  def continuousmove(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
+  def continuousmove(conn,  %{"id" => id, "direction" => direction}) do
+    [url, username, password] = get_camera_info id
     velocity =
-      case params["direction"] do
+      case direction do
         "left" -> [x: -0.1, y: 0.0]
         "right" -> [x: 0.1, y: 0.0]
         "up" -> [x: 0.0, y: 0.1]
@@ -67,10 +67,10 @@ defmodule EvercamMedia.ONVIFPTZController do
     default_respond(conn, 200, response)
   end
 
-  def continuouszoom(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
+  def continuouszoom(conn,  %{"id" => id, "mode" => mode}) do
+    [url, username, password] = get_camera_info id
     velocity =
-      case params["mode"] do
+      case mode do
         "in" -> [zoom: 0.01]
         "out" -> [zoom: -0.01]
         _ -> [zoom: 0.0]
@@ -79,8 +79,8 @@ defmodule EvercamMedia.ONVIFPTZController do
     default_respond(conn, 200, response)
   end
 
-  def relativemove(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
+  def relativemove(conn, %{"id" => id} = params) do
+    [url, username, password] = get_camera_info id
 
     left = Map.get(params, "left", "0") |> String.to_integer
     right = Map.get(params, "right", "0") |> String.to_integer
