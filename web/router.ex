@@ -47,7 +47,6 @@ defmodule EvercamMedia.Router do
     get "/cameras/:id/networkinterfaces", ONVIFDeviceManagementController, :networkinterfaces
 
     get "/cameras/:id/profiles", ONVIFMediaController, :profiles
-
   end
 
   socket "/ws", EvercamMedia do

@@ -12,7 +12,7 @@ defmodule EvercamMedia.ONVIFDeviceManagementControllerTest do
     camera_model = json_response(conn, 200) |> Map.get("Model")
     assert camera_model == "DS-2DF7286-A"
   end
- 
+
   test "GET /v1/cameras/:id/networkinterfaces, returns meaningful info" do
     conn = get conn(), "/v1/cameras/mobile-mast-test/networkinterfaces"
     enabled =  json_response(conn, 200) |> Map.get("Enabled")

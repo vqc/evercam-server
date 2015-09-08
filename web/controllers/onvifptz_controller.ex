@@ -72,7 +72,7 @@ defmodule EvercamMedia.ONVIFPTZController do
     default_respond(conn, 200, response)
   end
 
-  def continuousmove(conn,  %{"id" => id, "direction" => direction}) do
+  def continuousmove(conn, %{"id" => id, "direction" => direction}) do
     [url, username, password] = Camera.get_camera_info id
     velocity =
       case direction do
@@ -87,7 +87,7 @@ defmodule EvercamMedia.ONVIFPTZController do
     default_respond(conn, 200, response)
   end
 
-  def continuouszoom(conn,  %{"id" => id, "mode" => mode}) do
+  def continuouszoom(conn, %{"id" => id, "mode" => mode}) do
     [url, username, password] = Camera.get_camera_info id
     velocity =
       case mode do
@@ -109,11 +109,11 @@ defmodule EvercamMedia.ONVIFPTZController do
     down = Map.get(params, "down", "0") |> String.to_integer
     zoom = Map.get(params, "zoom", "0") |> String.to_integer
     x =
-      cond do 
+      cond do
         right > left -> right
         true -> -left
       end
-    y = 
+    y =
       cond do
         down > up -> down
         true -> -up
