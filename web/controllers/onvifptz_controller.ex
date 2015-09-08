@@ -1,86 +1,107 @@
 defmodule EvercamMedia.ONVIFPTZController do
   use Phoenix.Controller
-  alias EvercamMedia.Repo
   alias EvercamMedia.ONVIFPTZ
   require Logger
   plug :action
 
-  def status(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
-    {:ok, response} = ONVIFPTZ.get_status(url, username, password, "Profile_1")
+  def status(conn, %{"id" => id}) do
+    [url, username, password] = Camera.get_camera_info id
+    profile = Application.get_env(:onvif, :default_profile)
+    {:ok, response} = ONVIFPTZ.get_status(url, username, password, profile)
     default_respond(conn, 200, response)
   end
 
-  def presets(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
-    {:ok, response} = ONVIFPTZ.get_presets(url, username, password, "Profile_1")
+  def nodes(conn, %{"id" => id}) do
+    [url, username, password] = Camera.get_camera_info id
+    {:ok, response} = ONVIFPTZ.get_nodes(url, username, password)
     default_respond(conn, 200, response)
   end
 
-  def stop(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
-    {:ok, response} = ONVIFPTZ.stop(url, username, password, "Profile_1")
+  def configurations(conn, %{"id" => id}) do
+    [url, username, password] = Camera.get_camera_info id
+    {:ok, response} = ONVIFPTZ.get_configurations(url, username, password)
     default_respond(conn, 200, response)
   end
 
-  def home(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
-    {:ok, response} = ONVIFPTZ.goto_home_position(url, username, password, "Profile_1")
+  def presets(conn, %{"id" => id}) do
+    [url, username, password] = Camera.get_camera_info id
+    profile = Application.get_env(:onvif, :default_profile)
+    {:ok, response} = ONVIFPTZ.get_presets(url, username, password, profile)
     default_respond(conn, 200, response)
   end
 
-  def sethome(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
-    {:ok, response} = ONVIFPTZ.set_home_position(url, username, password, "Profile_1")
+  def stop(conn, %{"id" => id}) do
+    [url, username, password] = Camera.get_camera_info id
+    profile = Application.get_env(:onvif, :default_profile)
+    {:ok, response} = ONVIFPTZ.stop(url, username, password, profile)
     default_respond(conn, 200, response)
   end
 
-  def gotopreset(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
-    {:ok, response} = ONVIFPTZ.goto_preset(url, username, password, "Profile_1", params["preset_token"])
+  def home(conn, %{"id" => id}) do
+    [url, username, password] = Camera.get_camera_info id
+    profile = Application.get_env(:onvif, :default_profile)
+    {:ok, response} = ONVIFPTZ.goto_home_position(url, username, password, profile)
     default_respond(conn, 200, response)
   end
 
-  def setpreset(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
-    {:ok, response} = ONVIFPTZ.set_preset(url, username, password, "Profile_1", "", params["preset_token"])
+  def sethome(conn, %{"id" => id}) do
+    [url, username, password] = Camera.get_camera_info id
+    profile = Application.get_env(:onvif, :default_profile)
+    {:ok, response} = ONVIFPTZ.set_home_position(url, username, password, profile)
     default_respond(conn, 200, response)
   end
 
-  def createpreset(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
-    {:ok, response} = ONVIFPTZ.set_preset(url, username, password, "Profile_1", params["preset_name"])
+  def gotopreset(conn, %{"id" => id, "preset_token" => token}) do
+    [url, username, password] = Camera.get_camera_info id
+    profile = Application.get_env(:onvif, :default_profile)
+    {:ok, response} = ONVIFPTZ.goto_preset(url, username, password, profile, token)
     default_respond(conn, 200, response)
   end
 
-  def continuousmove(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
+  def setpreset(conn, %{"id" => id, "preset_token" => token}) do
+    [url, username, password] = Camera.get_camera_info id
+    profile = Application.get_env(:onvif, :default_profile)
+    {:ok, response} = ONVIFPTZ.set_preset(url, username, password, profile, "", token)
+    default_respond(conn, 200, response)
+  end
+
+  def createpreset(conn, %{"id" => id, "preset_name" => name}) do
+    [url, username, password] = Camera.get_camera_info id
+    profile = Application.get_env(:onvif, :default_profile)
+    {:ok, response} = ONVIFPTZ.set_preset(url, username, password, profile, name)
+    default_respond(conn, 200, response)
+  end
+
+  def continuousmove(conn,  %{"id" => id, "direction" => direction}) do
+    [url, username, password] = Camera.get_camera_info id
     velocity =
-      case params["direction"] do
+      case direction do
         "left" -> [x: -0.1, y: 0.0]
         "right" -> [x: 0.1, y: 0.0]
         "up" -> [x: 0.0, y: 0.1]
         "down" -> [x: 0.0, y: -0.1]
         _ -> [x: 0.0, y: 0.0]
       end
-    {:ok, response} = ONVIFPTZ.continuous_move(url, username, password, "Profile_1", velocity)
+    profile = Application.get_env(:onvif, :default_profile)
+    {:ok, response} = ONVIFPTZ.continuous_move(url, username, password, profile, velocity)
     default_respond(conn, 200, response)
   end
 
-  def continuouszoom(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
+  def continuouszoom(conn,  %{"id" => id, "mode" => mode}) do
+    [url, username, password] = Camera.get_camera_info id
     velocity =
-      case params["mode"] do
+      case mode do
         "in" -> [zoom: 0.01]
         "out" -> [zoom: -0.01]
         _ -> [zoom: 0.0]
       end
-    {:ok, response} = ONVIFPTZ.continuous_move(url, username, password, "Profile_1", velocity)
+    profile = Application.get_env(:onvif, :default_profile)
+    {:ok, response} = ONVIFPTZ.continuous_move(url, username, password, profile, velocity)
     default_respond(conn, 200, response)
   end
 
-  def relativemove(conn, params) do
-    [url, username, password] = get_camera_info(params["id"])
+  def relativemove(conn, %{"id" => id} = params) do
+    [url, username, password] = Camera.get_camera_info id
 
     left = Map.get(params, "left", "0") |> String.to_integer
     right = Map.get(params, "right", "0") |> String.to_integer
@@ -97,9 +118,10 @@ defmodule EvercamMedia.ONVIFPTZController do
         down > up -> down
         true -> -up
       end
+    profile = Application.get_env(:onvif, :default_profile)
     {:ok, response} = ONVIFPTZ.relative_move(
       url, username,
-      password, "Profile_1",
+      password, profile,
       [x: x / 100.0, y: y / 100.0, zoom: zoom / 100.0]
     )
     default_respond(conn, 200, response)
@@ -112,12 +134,4 @@ defmodule EvercamMedia.ONVIFPTZController do
     |> json response
   end
 
-  defp get_camera_info(camera_id) do
-    camera = Repo.one! Camera.by_exid(camera_id)
-    url = Camera.external_url camera
-    [username, password] = camera
-    |> Camera.auth
-    |> String.split ":"
-    [url, username, password]
-  end
 end
