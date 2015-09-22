@@ -14,7 +14,7 @@ defmodule EvercamMedia.Snapshot do
     case fetch_snapshot(args) do
       {:ok, response} ->
         image = response.body
-        check_jpg(response)
+        check_jpg(image)
         broadcast_snapshot(args[:camera_exid], image)
         store(args[:camera_exid], args[:camera_id], image, "Evercam Proxy")
       {:error, error} ->
