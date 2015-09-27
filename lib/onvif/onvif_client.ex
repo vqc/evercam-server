@@ -1,5 +1,6 @@
 defmodule EvercamMedia.ONVIFClient do
-  require Record
+  require Logger
+  require Record 
   Record.defrecord :xmlElement, Record.extract(:xmlElement, from_lib: "xmerl/include/xmerl.hrl")
   Record.defrecord :xmlText, Record.extract(:xmlText, from_lib: "xmerl/include/xmerl.hrl")
   Record.defrecord :xmlAttribute, Record.extract(:xmlAttribute, from_lib: "xmerl/include/xmerl.hrl")
@@ -12,12 +13,14 @@ defmodule EvercamMedia.ONVIFClient do
         :media -> "Media"
       end
 
-    response = HTTPotion.post url, [body: gen_onvif_request(service, method, username, password, parameters), headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
+    request = gen_onvif_request(service, method, username, password, parameters)
+    response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
 
     if HTTPotion.Response.success?(response) do
       {xml, _rest} = :xmerl_scan.string(to_char_list(response.body))
       {:ok, :xmerl_xpath.string(to_char_list(xpath), xml) |> parse_elements}
     else
+      Logger.warn "Error invoking #{method}. URL: #{url} username: #{username} password: #{password}. Request: #{request}. Response #{response}."
       {:error, response.status_code, response}
     end
   end
