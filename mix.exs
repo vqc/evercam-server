@@ -37,7 +37,8 @@ defmodule EvercamMedia.Mixfile do
     :postgrex,
     :calendar,
     :timex,
-    :uuid
+    :uuid,
+    :xmerl
   ]
 
   # Specifies which paths to compile per environment

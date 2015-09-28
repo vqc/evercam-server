@@ -38,10 +38,10 @@ defmodule EvercamMedia.ConnCase do
   setup_all do
     # Wrap this case in a transaction
     Ecto.Adapters.SQL.begin_test_transaction(EvercamMedia.Repo)
-    
+
     camera = %Camera{config: %{"auth" => %{"basic" => %{"password" => "mehcam", "username" => "admin"}}, "external_host" => "149.13.244.32", "external_http_port" => 8100, "external_rtsp_port" => 9100, "internal_host" => "", "internal_http_port" => "", "internal_rtsp_port" => "", "snapshots" => %{"jpg" => "/Streaming/Channels/1/picture"}}, exid: "mobile-mast-test", id: 5, is_online: true, is_public: false, name: "Test Mobile Mast", owner_id: 2}
-   EvercamMedia.Repo.insert(camera)
-    
+    EvercamMedia.Repo.insert(camera)
+
     # Roll it back once we are done
     on_exit fn ->
       Ecto.Adapters.SQL.rollback_test_transaction(EvercamMedia.Repo)
