@@ -20,7 +20,7 @@ defmodule EvercamMedia.ONVIFClient do
       {xml, _rest} = :xmerl_scan.string(to_char_list(response.body))
       {:ok, :xmerl_xpath.string(to_char_list(xpath), xml) |> parse_elements}
     else
-      Logger.warn "Error invoking #{method}. URL: #{url} username: #{username} password: #{password}. Request: #{request}. Response #{response}."
+      Logger.error "Error invoking #{method}. URL: #{url} username: #{username} password: #{password}. Request: #{inspect request}. Response #{inspect response}."
       {:error, response.status_code, response}
     end
   end
