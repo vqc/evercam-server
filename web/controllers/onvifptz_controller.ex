@@ -6,7 +6,7 @@ defmodule EvercamMedia.ONVIFPTZController do
 
   def status(conn, %{"id" => id}) do
     [url, username, password] = Camera.get_camera_info id
-    profile = Application.get_env(:onvif, :default_profile)
+    profile = "Profile_1"
     {:ok, response} = ONVIFPTZ.get_status(url, username, password, profile)
     default_respond(conn, 200, response)
   end
@@ -25,49 +25,49 @@ defmodule EvercamMedia.ONVIFPTZController do
 
   def presets(conn, %{"id" => id}) do
     [url, username, password] = Camera.get_camera_info id
-    profile = Application.get_env(:onvif, :default_profile)
+    profile = "Profile_1"
     {:ok, response} = ONVIFPTZ.get_presets(url, username, password, profile)
     default_respond(conn, 200, response)
   end
 
   def stop(conn, %{"id" => id}) do
     [url, username, password] = Camera.get_camera_info id
-    profile = Application.get_env(:onvif, :default_profile)
+    profile = "Profile_1"
     {:ok, response} = ONVIFPTZ.stop(url, username, password, profile)
     default_respond(conn, 200, response)
   end
 
   def home(conn, %{"id" => id}) do
     [url, username, password] = Camera.get_camera_info id
-    profile = Application.get_env(:onvif, :default_profile)
+    profile = "Profile_1"
     {:ok, response} = ONVIFPTZ.goto_home_position(url, username, password, profile)
     default_respond(conn, 200, response)
   end
 
   def sethome(conn, %{"id" => id}) do
     [url, username, password] = Camera.get_camera_info id
-    profile = Application.get_env(:onvif, :default_profile)
+    profile = "Profile_1"
     {:ok, response} = ONVIFPTZ.set_home_position(url, username, password, profile)
     default_respond(conn, 200, response)
   end
 
   def gotopreset(conn, %{"id" => id, "preset_token" => token}) do
     [url, username, password] = Camera.get_camera_info id
-    profile = Application.get_env(:onvif, :default_profile)
+    profile = "Profile_1"
     {:ok, response} = ONVIFPTZ.goto_preset(url, username, password, profile, token)
     default_respond(conn, 200, response)
   end
 
   def setpreset(conn, %{"id" => id, "preset_token" => token}) do
     [url, username, password] = Camera.get_camera_info id
-    profile = Application.get_env(:onvif, :default_profile)
+    profile = "Profile_1"
     {:ok, response} = ONVIFPTZ.set_preset(url, username, password, profile, "", token)
     default_respond(conn, 200, response)
   end
 
   def createpreset(conn, %{"id" => id, "preset_name" => name}) do
     [url, username, password] = Camera.get_camera_info id
-    profile = Application.get_env(:onvif, :default_profile)
+    profile = "Profile_1"
     {:ok, response} = ONVIFPTZ.set_preset(url, username, password, profile, name)
     default_respond(conn, 200, response)
   end
@@ -82,7 +82,7 @@ defmodule EvercamMedia.ONVIFPTZController do
         "down" -> [x: 0.0, y: -0.1]
         _ -> [x: 0.0, y: 0.0]
       end
-    profile = Application.get_env(:onvif, :default_profile)
+    profile = "Profile_1"
     {:ok, response} = ONVIFPTZ.continuous_move(url, username, password, profile, velocity)
     default_respond(conn, 200, response)
   end
@@ -95,7 +95,7 @@ defmodule EvercamMedia.ONVIFPTZController do
         "out" -> [zoom: -0.01]
         _ -> [zoom: 0.0]
       end
-    profile = Application.get_env(:onvif, :default_profile)
+    profile = "Profile_1"
     {:ok, response} = ONVIFPTZ.continuous_move(url, username, password, profile, velocity)
     default_respond(conn, 200, response)
   end
@@ -118,7 +118,7 @@ defmodule EvercamMedia.ONVIFPTZController do
         down > up -> down
         true -> -up
       end
-    profile = Application.get_env(:onvif, :default_profile)
+    profile = "Profile_1"
     {:ok, response} = ONVIFPTZ.relative_move(
       url, username,
       password, profile,
