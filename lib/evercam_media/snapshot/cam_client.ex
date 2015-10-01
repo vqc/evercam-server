@@ -6,6 +6,7 @@ defmodule EvercamMedia.Snapshot.CamClient do
 
   alias EvercamMedia.HTTPClient
   alias EvercamMedia.Snapshot.Util
+  require Logger
 
   @doc """
   Connect to the camera and get the snapshot
@@ -25,6 +26,9 @@ defmodule EvercamMedia.Snapshot.CamClient do
     end
   end
 
+
+  ## Private functions
+
   defp parse_snapshot_response(%HTTPotion.Response{status_code: 200} = response) do
     case Util.is_jpeg(response.body) do
       true -> {:ok, response.body}
@@ -33,6 +37,6 @@ defmodule EvercamMedia.Snapshot.CamClient do
   end
 
   defp parse_snapshot_response(error) do
-    error
+    {:error, error}
   end
 end
