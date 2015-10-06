@@ -1,4 +1,8 @@
 defmodule EvercamMedia.Snapshot.StatsHandler do
+  @moduledoc """
+  TODO
+  """
+  
   use GenEvent
 
   @doc """
