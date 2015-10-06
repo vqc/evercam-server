@@ -1,5 +1,5 @@
 defmodule EvercamMedia.Snapshot.DBHandler do
-  @doc """
+  @moduledoc """
   This module should ideally delegate all the updates to be made to the database
   on various events to another module.
 
