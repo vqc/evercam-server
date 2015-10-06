@@ -88,11 +88,13 @@ defmodule EvercamMedia.Snapshot.Poller do
     timestamp = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.unix
     case scheduled?(state.config.schedule, state.config.timezone) do
       {:ok, true} ->
-        Logger.debug "Scheduled time for fetching snapshot from #{inspect state.name}"
+        update_scheduler_log(state.name, {true, timestamp, nil})
         Worker.get_snapshot(state.name, {:poll, timestamp})
       {:ok, false} ->
+        update_scheduler_log(state.name, {false, timestamp, nil})
         Logger.debug "Not Scheduled. Skip fetching snapshot from #{inspect state.name}"
       {:error, message} ->
+        update_scheduler_log(state.name, {:error, timestamp, message})
         Logger.error "Error getting scheduler information for #{inspect state.name}"
     end
     timer = start_timer(state.config.sleep, :poll)
@@ -112,6 +114,18 @@ defmodule EvercamMedia.Snapshot.Poller do
 
   defp start_timer(sleep, message) do
     :erlang.send_after(sleep, self(), message)
+  end
+
+  defp update_scheduler_log(cam_id, {is_scheduled, timestamp, message}) do
+    ConCache.update(:snapshot_schedule, cam_id, fn(old_value) ->
+      old_value = Enum.slice List.wrap(old_value), 0, 1440
+      new_value = [
+        is_scheduled: is_scheduled,
+        timestamp: timestamp,
+        message: message
+      ]
+      [new_value | old_value]
+    end)
   end
 
 end

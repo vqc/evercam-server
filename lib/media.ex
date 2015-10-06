@@ -17,7 +17,14 @@ defmodule EvercamMedia do
           ttl: :timer.seconds(3*24*60*60) # 3 days * 24 hrs * 60 mins * 60 sec
         ],
         [name: :snapshot_error]
-      ], id: :snapshot_error)
+      ], id: :snapshot_error),
+      worker(ConCache, [
+        [
+          ttl_check: 100,
+          ttl: 1500
+        ],
+        [name: :snapshot_schedule]
+      ], id: :snapshot_schedule)
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
