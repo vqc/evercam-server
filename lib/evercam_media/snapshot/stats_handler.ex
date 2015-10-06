@@ -2,7 +2,7 @@ defmodule EvercamMedia.Snapshot.StatsHandler do
   @moduledoc """
   TODO
   """
-  
+
   use GenEvent
 
   @doc """
@@ -18,12 +18,24 @@ defmodule EvercamMedia.Snapshot.StatsHandler do
   if the configuration of the camera says so.
   """
   def handle_event({:snapshot_error, data}, state) do
-    # Handle stats
+    store_error(:snapshot_error, data)
     {:ok, state}
   end
 
   def handle_event(_, state) do
     {:ok, state}
+  end
+
+  defp store_error(:snapshot_error, {camera_exid, timestamp, error}) do
+    ConCache.update(:snapshot_error, camera_exid, fn(old_value) ->
+      old_value = Enum.slice List.wrap(old_value), 0, 99
+      new_value = [
+        timestamp: timestamp,
+        type: Map.get(error, :__struct__),
+        error: error
+      ]
+      [new_value | old_value]
+    end)
   end
 
 end

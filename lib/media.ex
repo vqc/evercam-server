@@ -10,7 +10,14 @@ defmodule EvercamMedia do
       supervisor(EvercamMedia.Endpoint, []),
       supervisor(EvercamMedia.Repo, []),
       supervisor(EvercamMedia.Snapshot.WorkerSupervisor, []),
-      worker(ConCache, [[ttl_check: 100, ttl: 1500], [name: :cache]])
+      worker(ConCache, [[ttl_check: 100, ttl: 1500], [name: :cache]]),
+      worker(ConCache, [
+        [
+          ttl_check: :timer.seconds(60*60),
+          ttl: :timer.seconds(3*24*60*60) # 3 days * 24 hrs * 60 mins * 60 sec
+        ],
+        [name: :snapshot_error]
+      ], id: :snapshot_error)
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
