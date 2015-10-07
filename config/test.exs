@@ -18,4 +18,5 @@ config :evercam_media, EvercamMedia.Repo,
   extensions: [{EvercamMedia.Types.JSON.Extension, library: Poison}],
   username: "postgres",
   password: "postgres",
-  database: "evercam_tst"
+  database: "evercam_tst",
+  pool: Ecto.Adapters.SQL.Sandbox

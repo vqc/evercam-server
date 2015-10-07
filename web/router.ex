@@ -48,8 +48,4 @@ defmodule EvercamMedia.Router do
 
     get "/cameras/:id/profiles", ONVIFMediaController, :profiles
   end
-
-  socket "/ws", EvercamMedia do
-    channel "cameras:*", SnapshotChannel
-  end
 end

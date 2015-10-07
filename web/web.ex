@@ -19,6 +19,9 @@ defmodule EvercamMedia.Web do
   def model do
     quote do
       use Ecto.Model
+
+      import Ecto.Changeset
+      import Ecto.Query, only: [from: 1, from: 2]
     end
   end
 
@@ -26,12 +29,10 @@ defmodule EvercamMedia.Web do
     quote do
       use Phoenix.Controller
 
-      # Alias the data repository and import query/model functions
       alias EvercamMedia.Repo
       import Ecto.Model
-      import Ecto.Query, only: [from: 2]
+      import Ecto.Query, only: [from: 1, from: 2]
 
-      # Import URL helpers from the router
       import EvercamMedia.Router.Helpers
     end
   end
@@ -43,11 +44,10 @@ defmodule EvercamMedia.Web do
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_csrf_token: 0, get_flash: 2, view_module: 1]
 
-      # Import URL helpers from the router
-      import EvercamMedia.Router.Helpers
-
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
+
+      import EvercamMedia.Router.Helpers
     end
   end
 
@@ -61,11 +61,9 @@ defmodule EvercamMedia.Web do
     quote do
       use Phoenix.Channel
 
-      # Alias the data repository and import query/model functions
       alias EvercamMedia.Repo
       import Ecto.Model
-      import Ecto.Query, only: [from: 2]
-
+      import Ecto.Query, only: [from: 1, from: 2]
     end
   end
 
