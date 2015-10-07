@@ -55,7 +55,6 @@ defmodule EvercamMedia.Schedule do
     {h, _} = Integer.parse(hours)
     {m, _} = Integer.parse(minutes)
     erl_date_time = {{year, month, day}, {h, m, 0}}
-    IO.puts inspect erl_date_time
     Calendar.DateTime.from_erl!(erl_date_time, timezone)
     |> Calendar.DateTime.Format.unix
   end
