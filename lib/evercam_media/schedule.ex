@@ -5,8 +5,8 @@ defmodule EvercamMedia.Schedule do
   end
 
   def scheduled?(schedule, check_time, timezone \\ nil) do
-    check_date_schedule = check_time |> Calendar.Date.day_of_week_name
-    iterate(schedule, check_time, timezone)
+    check_day = check_time |> Calendar.Date.day_of_week_name
+    iterate(schedule[check_day], check_time, timezone)
   end
 
   defp iterate([head|tail], check_time, timezone) do
@@ -34,7 +34,7 @@ defmodule EvercamMedia.Schedule do
 
   end
 
-  defp iterate(nil, check_time, zone) do
+  defp iterate(nil, check_time, timezone) do
     {:ok, false}
   end
 
@@ -55,6 +55,7 @@ defmodule EvercamMedia.Schedule do
     {h, _} = Integer.parse(hours)
     {m, _} = Integer.parse(minutes)
     erl_date_time = {{year, month, day}, {h, m, 0}}
+    IO.puts inspect erl_date_time
     Calendar.DateTime.from_erl!(erl_date_time, timezone)
     |> Calendar.DateTime.Format.unix
   end
