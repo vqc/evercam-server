@@ -86,7 +86,7 @@ defmodule EvercamMedia.Snapshot.Poller do
     {:ok, timer} = Map.fetch(state, :timer)
     :erlang.cancel_timer(timer)
     timestamp = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.unix
-    case scheduled?(state.config.schedule, state.config.timezone) do
+    case scheduled_now?(state.config.schedule, state.config.timezone) do
       {:ok, true} ->
         update_scheduler_log(state.name, {true, timestamp, nil})
         Worker.get_snapshot(state.name, {:poll, timestamp})
