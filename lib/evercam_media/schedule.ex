@@ -1,14 +1,15 @@
 defmodule EvercamMedia.Schedule do
-  def scheduled?(schedule, timezone) do
-    today_name = Timex.Date.local
-    |> Timex.Date.weekday
-    |> Timex.Date.day_name
-
-    today_schedule = schedule[today_name]
-    iterate(today_schedule, timezone)
+  def scheduled_now?(schedule, timezone) do
+    now = Calendar.DateTime.now_utc
+    scheduled?(schedule, now, timezone)
   end
 
-  defp iterate([head|tail], timezone) do
+  def scheduled?(schedule, check_time, timezone \\ nil) do
+    check_date_schedule = check_time |> Calendar.Date.day_of_week_name
+    iterate(schedule, check_time, timezone)
+  end
+
+  defp iterate([head|tail], check_time, timezone) do
     # We expect the head to be in the format "HH:MM-HH:MM"
     head_pattern = ~r/^\d{2}:\d{2}-\d{2}:\d{2}$/
     case Regex.match? head_pattern, head do
@@ -17,27 +18,15 @@ defmodule EvercamMedia.Schedule do
         [from_hour, from_minute] = String.split from, ":"
         [to_hour, to_minute] = String.split to, ":"
 
-        from_date = to_date(from_hour, from_minute, timezone)
-        to_date = to_date(to_hour, to_minute, timezone)
-        now = Timex.Date.now
+        check_time_unix_timestamp = check_time |> Calendar.DateTime.Format.unix
+        from_unix_timestamp = unix_timestamp(from_hour, from_minute, check_time, timezone)
+        to_unix_timestamp = unix_timestamp(to_hour, to_minute, check_time, timezone)
 
-        date_format = "{ISOz}"
-        {_, now_str} = Timex.DateFormat.format(now, date_format)
-        {_, from_str} = Timex.DateFormat.format(from_date, date_format)
-        {_, to_str} = Timex.DateFormat.format(to_date, date_format)
-
-        from_date_now = Timex.Date.compare(from_date, now)
-        now_to_date = Timex.Date.compare(now, to_date)
-
-        case {from_date_now, now_to_date} do
-          {-1, -1} ->
-            {:ok, true}
-          {0, -1} ->
-            {:ok, true}
-          {-1, 0} ->
+        case between(check_time_unix_timestamp, from_unix_timestamp, to_unix_timestamp) do
+          true ->
             {:ok, true}
           _ ->
-            iterate(tail, timezone)
+            iterate(tail, check_time, timezone)
         end
       _ ->
         {:error, "Scheduler got an invalid time format: #{inspect(head)}. Expecting Time in the format HH:MM-HH:MM"}
@@ -45,23 +34,28 @@ defmodule EvercamMedia.Schedule do
 
   end
 
-  defp iterate(nil, timezone) do
+  defp iterate(nil, check_time, zone) do
     {:ok, false}
   end
 
-  defp iterate([], timezone) do
+  defp iterate([], check_time,  timezone) do
     {:ok, false}
   end
 
-  defp to_date(hours, minutes, nil) do
-    to_date(hours, minutes, "UTC")
+  defp between(check, start, the_end) do
+    check >= start && check <= the_end
   end
 
-  defp to_date(hours, minutes, timezone) do
-    today = {Timex.Date.now.year, Timex.Date.now.month, Timex.Date.now.day}
+  defp unix_timestamp(hours, minutes, date, nil) do
+    unix_timestamp(hours, minutes, date, "UTC")
+  end
+
+  defp unix_timestamp(hours, minutes, date, timezone) do
+    %{year: year, month: month, day: day} = date
     {h, _} = Integer.parse(hours)
     {m, _} = Integer.parse(minutes)
-    time = {h, m, 0}
-    Timex.Date.from({today, time}, timezone)
+    erl_date_time = {{year, month, day}, {h, m, 0}}
+    Calendar.DateTime.from_erl!(erl_date_time, timezone)
+    |> Calendar.DateTime.Format.unix
   end
 end
