@@ -38,4 +38,9 @@ defmodule EvercamMedia.Snapshot.SchedulerTest do
    assert EvercamMedia.Schedule.scheduled?(schedule, check_time, timezone) == {:ok, true}
  end
 
+ test "scheduler return true at any time for all day recording - not timezone given", %{schedule: schedule} do
+   check_time = Calendar.DateTime.now!("UTC")
+   assert EvercamMedia.Schedule.scheduled?(schedule, check_time, nil) == {:ok, true}
+ end
+
 end
