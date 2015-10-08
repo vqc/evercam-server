@@ -14,16 +14,33 @@ defmodule EvercamMedia.Snapshot.SchedulerTest do
    {:ok, schedule: schedule}
  end
 
- test "scheduler return true at zero hours for all day recording", %{schedule: schedule} do
-   all_day_schedule = schedule["Monday"]
-   check_time = Calendar.DateTime.from_erl!({{2015, 10, 7}, {00, 59, 59}}, "UTC")
-   assert EvercamMedia.Schedule.scheduled?(all_day_schedule, check_time, nil) == {:ok, true}
+ test "scheduler return true at zero hours for all day recording - US Timezone", %{schedule: schedule} do
+   timezone = "America/New_York"
+   check_time = Calendar.DateTime.from_erl!({{2015, 10, 8}, {2, 35, 0}}, timezone)
+   assert EvercamMedia.Schedule.scheduled?(schedule, check_time, timezone) == {:ok, true}
  end
 
- test "scheduler return true at 23 hours for all day recording", %{schedule: schedule} do
-   all_day_schedule = schedule["Monday"]
-   check_time = Calendar.DateTime.from_erl!({{2015, 10, 7}, {23, 59, 00}}, "UTC")
-   assert EvercamMedia.Schedule.scheduled?(all_day_schedule, check_time, nil) == {:ok, true}
+ test "scheduler return true at 23 hours for all day recording - US Timezone", %{schedule: schedule} do
+   timezone = "America/New_York"
+   check_time = Calendar.DateTime.from_erl!({{2015, 10, 7}, {23, 59, 00}}, timezone)
+   assert EvercamMedia.Schedule.scheduled?(schedule, check_time, timezone) == {:ok, true}
+ end
+
+ test "scheduler return true at zero hours for all day recording - UTC", %{schedule: schedule} do
+   timezone = "UTC"
+   check_time = Calendar.DateTime.from_erl!({{2015, 10, 8}, {2, 35, 0}}, timezone)
+   assert EvercamMedia.Schedule.scheduled?(schedule, check_time, timezone) == {:ok, true}
+ end
+
+ test "scheduler return true at 23 hours for all day recording - UTC", %{schedule: schedule} do
+   timezone = "UTC"
+   check_time = Calendar.DateTime.from_erl!({{2015, 10, 7}, {23, 59, 00}}, timezone)
+   assert EvercamMedia.Schedule.scheduled?(schedule, check_time, timezone) == {:ok, true}
+ end
+
+ test "scheduler return true at any time for all day recording - not timezone given", %{schedule: schedule} do
+   check_time = Calendar.DateTime.now!("UTC")
+   assert EvercamMedia.Schedule.scheduled?(schedule, check_time, nil) == {:ok, true}
  end
 
 end

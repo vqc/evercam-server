@@ -83,9 +83,8 @@ defmodule EvercamMedia.Snapshot.Poller do
   Server callback for polling
   """
   def handle_info(:poll, state) do
-    now = Calendar.DateTime.now!("UTC")
-    timestamp = now |> Calendar.DateTime.Format.unix
-    case scheduled?(state.config.schedule, now, state.config.timezone) do
+    timestamp = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.unix
+    case scheduled_now?(state.config.schedule, state.config.timezone) do
       {:ok, true} ->
         update_scheduler_log(state.name, {true, timestamp, nil})
         Logger.info "Polling camera: #{state.name} for snapshot"

@@ -1,6 +1,9 @@
 defmodule EvercamMedia.Schedule do
   def scheduled_now?(schedule, timezone) do
-    now = Calendar.DateTime.now_utc
+    if(timezone == nil) do
+      timezone = "UTC"
+    end
+    now = Calendar.DateTime.now!(timezone)
     scheduled?(schedule, now, timezone)
   end
 
