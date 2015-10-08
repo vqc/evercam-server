@@ -26,7 +26,7 @@ config :evercam_media, EvercamMedia.Endpoint,
 # disk for the key and cert.
 
 # Do not print debug messages in production
-config :logger, level: :error
+config :logger, level: :info
 
 # ## Using releases
 #
