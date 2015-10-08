@@ -2,7 +2,6 @@ defmodule EvercamMedia.ONVIFDeviceManagementController do
   use Phoenix.Controller
   alias EvercamMedia.ONVIFDeviceManagement
   require Logger
-  plug :action
 
   def macaddr(conn, %{"id" => id}) do
     [url, username, password] = Camera.get_camera_info id

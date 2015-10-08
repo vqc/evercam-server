@@ -2,7 +2,6 @@ defmodule EvercamMedia.ONVIFPTZController do
   use Phoenix.Controller
   alias EvercamMedia.ONVIFPTZ
   require Logger
-  plug :action
 
   def status(conn, %{"id" => id}) do
     [url, username, password] = Camera.get_camera_info id

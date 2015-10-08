@@ -2,7 +2,6 @@ defmodule EvercamMedia.ONVIFMediaController do
   use Phoenix.Controller
   alias EvercamMedia.ONVIFMedia
   require Logger
-  plug :action
 
   def profiles(conn, %{"id" => id}) do
     [url, username, password] = Camera.get_camera_info id
