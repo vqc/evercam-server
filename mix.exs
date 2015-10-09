@@ -61,8 +61,7 @@ defmodule EvercamMedia.Mixfile do
      {:timex, "~> 0.19", override: true},
      {:porcelain, "~> 2.0"},
      {:erlcloud, github: 'gleber/erlcloud'},
-     {:exq, github: "akira/exq"},
-     {:eredis, github: 'wooga/eredis', tag: 'v1.0.5', override: true},
+     {:exq, "~> 0.2.3"},
      {:uuid, github: 'zyro/elixir-uuid', override: true},
      {:exrm, "~> 0.14.16"}]
   end
