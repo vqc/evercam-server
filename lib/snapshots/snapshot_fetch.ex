@@ -85,6 +85,7 @@ defmodule EvercamMedia.Snapshot do
 
   def check_jpg(response) do
     if String.valid?(response) do
+      Logger.info response
       raise SnapshotError
     end
   end
