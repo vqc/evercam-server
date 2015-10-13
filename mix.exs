@@ -53,7 +53,7 @@ defmodule EvercamMedia.Mixfile do
      {:cowboy, "~> 1.0"},
      {:con_cache, "~> 0.6.0"},
      {:httpotion, github: "myfreeweb/httpotion"},
-     {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.1.1", override: true},
+     {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.2", override: true},
      {:httpoison, "~> 0.7.2"},
      {:calendar, "~> 0.10.0"},
      {:dotenv, "~> 0.0.4"},
