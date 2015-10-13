@@ -40,14 +40,14 @@ defmodule EvercamMedia.Snapshot.Poller do
   Get the configuration of the camera worker.
   """
   def get_config(cam_server) do
-    GenServer.call(cam_server, :get_camera_config)
+    GenServer.call(cam_server, :get_poller_config)
   end
 
   @doc """
   Update the configuration of the camera worker
   """
   def update_config(cam_server, config) do
-    GenServer.call(cam_server, {:update_camera_config, config})
+    GenServer.cast(cam_server, {:update_camera_config, config})
   end
 
 
@@ -73,10 +73,26 @@ defmodule EvercamMedia.Snapshot.Poller do
   end
 
   @doc """
+  Server callback for getting camera poller state
+  """
+  def handle_call(:get_poller_config, _from, state) do
+    {:reply, state, state}
+  end
+
+  @doc """
   Server callback for stopping camera poller
   """
   def handle_call(:stop_camera_timer, _from, state) do
     {:reply, nil, state}
+  end
+
+  def handle_cast({:update_camera_config, new_config}, state) do
+    :timer.cancel(state.timer)
+    new_timer = start_timer(new_config.config.sleep, :poll)
+    new_config = Map.merge new_config, %{
+      timer: new_timer
+    }
+    {:noreply, new_config}
   end
 
   @doc """

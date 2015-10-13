@@ -2,10 +2,12 @@ defmodule EvercamMedia.Snapshot.PollHandler do
   @moduledoc """
   TODO
   """
-  
+  alias EvercamMedia.Snapshot.Poller
+
   use GenEvent
 
   def handle_event({:update_camera_config, worker_state}, state) do
+    Poller.update_config(worker_state.poller, worker_state)
     {:ok, state}
   end
 
