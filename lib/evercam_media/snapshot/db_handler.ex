@@ -35,13 +35,13 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     ecto_timestamp = Ecto.DateTime.utc
     case Map.get(error, :message) do
       "req_timedout" ->
-        Logger.error "Request timeout for camera #{camera_exid}"
+        Logger.info "Request timeout for camera #{camera_exid}"
       "econnrefused" ->
-        Logger.error "Connection refused for camera #{camera_exid}"
+        Logger.info "Connection refused for camera #{camera_exid}"
         update_camera_status("#{camera_exid}", ecto_timestamp, timestamp, false)
        _ ->
          update_camera_status("#{camera_exid}", ecto_timestamp, timestamp, false)
-         Logger.error "Unhandled HTTPError #{inspect error}"
+         Logger.info "Unhandled HTTPError #{inspect error}"
     end
     {:ok, state}
   end
@@ -101,7 +101,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   defp error_handler(error) do
-    Logger.error inspect(error)
-    Logger.error Exception.format_stacktrace System.stacktrace
+    Logger.info inspect(error)
+    Logger.info Exception.format_stacktrace System.stacktrace
   end
 end
