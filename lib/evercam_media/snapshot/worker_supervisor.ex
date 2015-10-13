@@ -40,14 +40,12 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   Start
   """
   def start_worker(camera) do
-    url = "#{Camera.external_url(camera)}#{Camera.res_url(camera, "jpg")}"
-    parsed_uri = URI.parse url
-
-    case parsed_uri.host do
-      nil -> Logger.info "Skipping camera worker as the host is invalid"
-      _   ->
-        Logger.info "Starting worker for #{camera.exid}"
-        Supervisor.start_child(__MODULE__, [get_config(camera, url)])
+    case get_config(camera) do
+      {:ok, settings} ->
+        Logger.info "Starting worker for #{settings.config.camera_exid}"
+        Supervisor.start_child(__MODULE__, [settings])
+      {:error, message} ->
+        Logger.info "Skipping camera worker as the host is invalid"
     end
   end
 
@@ -67,24 +65,33 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   @doc """
   Given a camera, it returns a map of values required for starting a camera worker.
   """
-  defp get_config(camera, url) do
-    #TODO: There seems to be more db queries than necessary. Cut it down.
-    camera = EvercamMedia.Repo.preload camera, :cloud_recordings
-    %{
-      event_handlers: @event_handlers,
-      name: camera.exid |> String.to_atom,
-      config: %{
-        camera_id: camera.id,
-        camera_exid: camera.exid,
-        vendor_exid: Camera.get_vendor_exid_by_camera_exid(camera.exid),
-        schedule: Camera.schedule(camera),
-        timezone: camera.timezone,
-        url: url,
-        auth: Camera.auth(camera),
-        sleep: Camera.sleep(camera),
-        initial_sleep: Camera.initial_sleep(camera)
-      }
-    }
+  def get_config(camera) do
+    url = "#{Camera.external_url(camera)}#{Camera.res_url(camera, "jpg")}"
+    parsed_uri = URI.parse url
+
+    case parsed_uri.host do
+      nil ->
+        {:error, "Invalid url for camera"}
+      _   ->
+        #TODO: There seems to be more db queries than necessary. Cut it down.
+        camera = EvercamMedia.Repo.preload camera, :cloud_recordings
+        {:ok, %{
+            event_handlers: @event_handlers,
+            name: camera.exid |> String.to_atom,
+            config: %{
+              camera_id: camera.id,
+              camera_exid: camera.exid,
+              vendor_exid: Camera.get_vendor_exid_by_camera_exid(camera.exid),
+              schedule: Camera.schedule(camera),
+              timezone: camera.timezone,
+              url: url,
+              auth: Camera.auth(camera),
+              sleep: Camera.sleep(camera),
+              initial_sleep: Camera.initial_sleep(camera)
+            }
+          }
+        }
+    end
   end
 
 end
