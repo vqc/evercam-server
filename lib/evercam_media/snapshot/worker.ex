@@ -35,6 +35,13 @@ defmodule EvercamMedia.Snapshot.Worker do
   end
 
   @doc """
+  Get the state of the camera worker.
+  """
+  def get_state(cam_server) do
+    GenServer.call(cam_server, :get_state)
+  end
+
+  @doc """
   Get the configuration of the camera worker.
   """
   def get_config(cam_server) do
@@ -45,7 +52,7 @@ defmodule EvercamMedia.Snapshot.Worker do
   Update the configuration of the camera worker
   """
   def update_config(cam_server, config) do
-    GenServer.call(cam_server, {:update_camera_config, config})
+    GenServer.cast(cam_server, {:update_camera_config, config})
   end
 
   @doc """
@@ -94,17 +101,14 @@ defmodule EvercamMedia.Snapshot.Worker do
   Server callback for getting camera config
   """
   def handle_call(:get_camera_config, _from, state) do
-    {:reply, get_state(:config, state), state}
+    {:reply, get_from_state(:config, state), state}
   end
 
   @doc """
-  Server callback for updating camera config
+  Server callback for getting worker state
   """
-  def handle_call({:update_camera_config, config}, _from, state) do
-    {:ok, old_config} = get_state(:config, state)
-    updated_config = Map.merge old_config, config
-    state = Map.merge(state, %{config: updated_config})
-    {:reply, nil, state}
+  def handle_call(:get_state, _from, state) do
+    {:reply, state, state}
   end
 
   @doc """
@@ -128,6 +132,14 @@ defmodule EvercamMedia.Snapshot.Worker do
     {:noreply, state}
   end
 
+  @doc """
+  Server callback for updating camera config
+  """
+  def handle_cast({:update_camera_config, config}, state) do
+    updated_config = Map.merge state, config
+    GenEvent.sync_notify(state.event_manager, {:update_camera_config, updated_config})
+    {:noreply, updated_config}
+  end
 
   #####################
   # Private functions #
@@ -143,12 +155,12 @@ defmodule EvercamMedia.Snapshot.Worker do
   @doc """
   Gets camera config from the server state
   """
-  defp get_state(:config, state) do
+  defp get_from_state(:config, state) do
     Map.get(state, :config)
   end
 
   defp _get_snapshot(state) do
-    config = get_state(:config, state)
+    config = get_from_state(:config, state)
     CamClient.fetch_snapshot(config)
   end
 
