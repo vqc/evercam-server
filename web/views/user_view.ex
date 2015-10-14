@@ -10,7 +10,9 @@ defmodule EvercamMedia.UserView do
         firstname: user.firstname,
         lastname: user.lastname,
         username: user.username,
-        token: token.request
+        api_id: user.api_id,
+        api_key: user.api_key,
+        confirmed_at: user.confirmed_at
       }
     }
   end

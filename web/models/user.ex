@@ -12,13 +12,16 @@ defmodule User do
     field :firstname, :string
     field :lastname, :string
     field :email, :string
+    field :api_id, :string
+    field :api_key, :string
 
+    field :confirmed_at, Ecto.DateTime
     field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
 
   @required_fields ~w(username password firstname lastname email country_id)
-  @optional_fields ~w()
+  @optional_fields ~w(api_id api_key confirmed_at)
 
   def changeset(model, params \\ :empty) do
     model

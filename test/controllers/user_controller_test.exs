@@ -14,7 +14,9 @@ defmodule EvercamMedia.UserControllerTest do
     assert response["user"]["lastname"] == "Doe"
     assert response["user"]["country_id"] == country.id
     refute response["user"]["id"] == ""
-    assert response["user"]["token"] == AccessToken.active_token_for(response["user"]["id"]).request
+    refute response["user"]["api_id"] == ""
+    refute response["user"]["api_id"] == ""
+    assert response["user"]["confirmed_at"] == nil
   end
 
   test "POST /v1/users - returns a conflict error for a duplicate user name" do
@@ -53,6 +55,18 @@ defmodule EvercamMedia.UserControllerTest do
     conn = conn()
       |> post("/v1/users", params)
 
-    response = json_response(conn, 400)
+    json_response(conn, 400)
+  end
+
+  test "POST /v1/users - when key is supplied, creates the user, sets the confirmed_at field and returns the json" do
+    {:ok, country } = EvercamMedia.Repo.insert(%Country{ name: "Whatever", iso3166_a2: "WHTEVR" })
+    params = %{ "user" => %{ firstname: "John" , lastname: "Doe", 
+        email: "johndoe@example.com", username: "johnd", country_id: country.id, password: "some_password"}, key: "some_key_here" }
+    conn = conn()
+      |> post("/v1/users", params)
+
+    response = json_response(conn, 201)
+
+    refute response["user"]["confirmed_at"] == ""
   end
 end
