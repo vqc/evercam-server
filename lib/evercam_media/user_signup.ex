@@ -1,4 +1,4 @@
-defmodule EvercamMedia.RegistrationFactory do
+defmodule EvercamMedia.UserSignup do
   alias EvercamMedia.Repo
 
   def create(user_changeset) do

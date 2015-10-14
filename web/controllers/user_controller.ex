@@ -4,7 +4,7 @@ defmodule EvercamMedia.UserController do
   def create(conn, %{ "user" => user_params }) do
     user_changeset = User.changeset(%User{}, user_params)
 
-    case EvercamMedia.RegistrationFactory.create(user_changeset) do
+    case EvercamMedia.UserSignup.create(user_changeset) do
       { :invalid_user, changeset } ->
         handle_error(conn, :bad_request, changeset)
       { :duplicate_user,  changeset } ->
