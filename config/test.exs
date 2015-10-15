@@ -7,7 +7,8 @@ config :evercam_media,
 # you can enable the server option below.
 config :evercam_media, EvercamMedia.Endpoint,
   http: [port: 4001],
-  server: false
+  server: false,
+  email: "evercam.io <env.test@evercam.io>"
 
 # Print only warnings and errors during test
 config :logger, level: :warn
@@ -20,3 +21,10 @@ config :evercam_media, EvercamMedia.Repo,
   password: "postgres",
   database: "evercam_tst",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :evercam_media, mailgun_config: [ 
+    domain: "some_domain",
+    key: "some_key",
+    mode: :test,
+    test_file_path: "/tmp/mailgun_test.json"
+  ]
