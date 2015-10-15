@@ -33,7 +33,12 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def handle_event({:snapshot_error, data}, state) do
     {camera_exid, timestamp, error} = data
     ecto_timestamp = Ecto.DateTime.utc
-    case Map.get(error, :message) do
+    if is_map(error) do
+      message = Map.get(error, :message)
+    else
+      message = nil
+    end
+    case message do
       "req_timedout" ->
         Logger.info "Request timeout for camera #{camera_exid}"
       "econnrefused" ->
