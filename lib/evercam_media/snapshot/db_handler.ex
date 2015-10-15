@@ -22,17 +22,15 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
-    ecto_timestamp = Ecto.DateTime.utc
     spawn fn ->
-        update_camera_status("#{camera_exid}", ecto_timestamp, timestamp, true)
-        |> save_snapshot_record(ecto_timestamp)
+        update_camera_status("#{camera_exid}", timestamp, true)
+        |> save_snapshot_record(timestamp)
     end
     {:ok, state}
   end
 
   def handle_event({:snapshot_error, data}, state) do
     {camera_exid, timestamp, error} = data
-    ecto_timestamp = Ecto.DateTime.utc
     if is_map(error) do
       message = Map.get(error, :message)
     else
@@ -43,9 +41,9 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.info "Request timeout for camera #{camera_exid}"
       "econnrefused" ->
         Logger.info "Connection refused for camera #{camera_exid}"
-        update_camera_status("#{camera_exid}", ecto_timestamp, timestamp, false)
+        update_camera_status("#{camera_exid}", timestamp, false)
        _ ->
-         update_camera_status("#{camera_exid}", ecto_timestamp, timestamp, false)
+         update_camera_status("#{camera_exid}", timestamp, false)
          Logger.info "Unhandled HTTPError #{inspect error}"
     end
     {:ok, state}
@@ -55,18 +53,21 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     {:ok, state}
   end
 
-  def update_camera_status(camera_exid, ecto_timestamp, timestamp, status) do
+  def update_camera_status(camera_exid, timestamp, status) do
     #TODO Improve the db queries here
+    {:ok, datetime} = Calendar.DateTime.Parse.unix!(timestamp)
+               |> Calendar.DateTime.to_erl
+               |> Ecto.DateTime.cast
     camera = Repo.one! Camera.by_exid(camera_exid)
     camera_is_online = camera.is_online
-    camera = construct_camera(camera, ecto_timestamp, status, camera_is_online == status)
+    camera = construct_camera(camera, datetime, status, camera_is_online == status)
     file_path = "/#{camera.exid}/snapshots/#{timestamp}.jpg"
     camera = %{camera | thumbnail_url: S3.file_url(file_path)}
     Repo.update camera
 
     unless camera_is_online == status do
       try do
-        log_camera_status(camera.id, status, ecto_timestamp)
+        log_camera_status(camera.id, status, datetime)
       rescue
         _error ->
           error_handler(_error)
@@ -81,28 +82,31 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     camera
   end
 
-  def log_camera_status(camera_id, true, timestamp) do
-    Repo.insert %CameraActivity{camera_id: camera_id, action: "online", done_at: timestamp}
+  def log_camera_status(camera_id, true, datetime) do
+    Repo.insert %CameraActivity{camera_id: camera_id, action: "online", done_at: datetime}
   end
 
-  def log_camera_status(camera_id, false, timestamp) do
-    Repo.insert %CameraActivity{camera_id: camera_id, action: "offline", done_at: timestamp}
+  def log_camera_status(camera_id, false, datetime) do
+    Repo.insert %CameraActivity{camera_id: camera_id, action: "offline", done_at: datetime}
   end
 
   defp save_snapshot_record(camera, timestamp) do
-    Repo.insert %Snapshot{camera_id: camera.id, data: "S3", notes: "Evercam Proxy", created_at: timestamp}
+    {:ok, datetime} = Calendar.DateTime.Parse.unix!(timestamp)
+               |> Calendar.DateTime.to_erl
+               |> Ecto.DateTime.cast
+    Repo.insert %Snapshot{camera_id: camera.id, data: "S3", notes: "Evercam Proxy", created_at: datetime}
   end
 
-  defp construct_camera(camera, timestamp, _, true) do
-    %{camera | last_polled_at: timestamp}
+  defp construct_camera(camera, datetime, _, true) do
+    %{camera | last_polled_at: datetime}
   end
 
-  defp construct_camera(camera, timestamp, false, false) do
-    %{camera | last_polled_at: timestamp, is_online: false}
+  defp construct_camera(camera, datetime, false, false) do
+    %{camera | last_polled_at: datetime, is_online: false}
   end
 
-  defp construct_camera(camera, timestamp, true, false) do
-    %{camera | last_polled_at: timestamp, is_online: true, last_online_at: timestamp}
+  defp construct_camera(camera, datetime, true, false) do
+    %{camera | last_polled_at: datetime, is_online: true, last_online_at: datetime}
   end
 
   defp error_handler(error) do
