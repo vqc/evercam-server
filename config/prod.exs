@@ -9,8 +9,7 @@ use Mix.Config
 config :evercam_media, EvercamMedia.Endpoint,
   check_origin: false,
   http: [port: 4000],
-  url: [host: "evercam.io"],
-  cache_static_manifest: "priv/static/manifest.json"
+  url: [host: "evercam.io"]
 
 # ## SSL Support
 #
