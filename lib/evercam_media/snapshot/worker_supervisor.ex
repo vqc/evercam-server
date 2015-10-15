@@ -21,7 +21,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
     EvercamMedia.Snapshot.DBHandler,
     EvercamMedia.Snapshot.PollHandler,
     EvercamMedia.Snapshot.S3UploadHandler,
-    EvercamMedia.Snapshot.StatsHandler
+    # EvercamMedia.Snapshot.StatsHandler
   ]
 
   def start_link(opts \\ []) do
@@ -44,8 +44,8 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
       {:ok, settings} ->
         Logger.info "Starting worker for #{settings.config.camera_exid}"
         Supervisor.start_child(__MODULE__, [settings])
-      {:error, message} ->
-        Logger.info "Skipping camera worker as the host is invalid"
+      {:error, message, url} ->
+        Logger.error "Skipping camera worker as the host is invalid: #{camera.exid}: #{url}"
     end
   end
 
@@ -69,10 +69,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
     url = "#{Camera.external_url(camera)}#{Camera.res_url(camera, "jpg")}"
     parsed_uri = URI.parse url
 
-    case parsed_uri.host do
-      nil ->
-        {:error, "Invalid url for camera"}
-      _   ->
+    if parsed_uri.host != nil && parsed_uri.port > 0 && parsed_uri.port < 65535 do
         #TODO: There seems to be more db queries than necessary. Cut it down.
         camera = EvercamMedia.Repo.preload camera, :cloud_recordings
         {:ok, %{
@@ -91,6 +88,8 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
             }
           }
         }
+    else
+        {:error, "Invalid url for camera", url}
     end
   end
 
