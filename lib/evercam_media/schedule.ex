@@ -14,7 +14,7 @@ defmodule EvercamMedia.Schedule do
 
   defp iterate([head|tail], check_time, timezone) do
     # We expect the head to be in the format "HH:MM-HH:MM"
-    head_pattern = ~r/^\d{2}:\d{2}-\d{2}:\d{2}$/
+    head_pattern = ~r/^\d{1,2}:\d{1,2}-\d{1,2}:\d{1,2}$/
     case Regex.match? head_pattern, head do
       true ->
         [from, to] = String.split head, "-"
