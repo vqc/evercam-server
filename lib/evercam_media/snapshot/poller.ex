@@ -87,7 +87,8 @@ defmodule EvercamMedia.Snapshot.Poller do
   end
 
   def handle_cast({:update_camera_config, new_config}, state) do
-    :timer.cancel(state.timer)
+    {:ok, timer} = Map.fetch(state, :timer)
+    :erlang.cancel_timer(timer)
     new_timer = start_timer(new_config.config.sleep, :poll)
     new_config = Map.merge new_config, %{
       timer: new_timer
@@ -99,20 +100,23 @@ defmodule EvercamMedia.Snapshot.Poller do
   Server callback for polling
   """
   def handle_info(:poll, state) do
+    {:ok, timer} = Map.fetch(state, :timer)
+    :erlang.cancel_timer(timer)
     timestamp = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.unix
     case scheduled_now?(state.config.schedule, state.config.timezone) do
       {:ok, true} ->
-        update_scheduler_log(state.name, {true, timestamp, nil})
+        # update_scheduler_log(state.name, {true, timestamp, nil})
         Logger.info "Polling camera: #{state.name} for snapshot"
         Worker.get_snapshot(state.name, {:poll, timestamp})
       {:ok, false} ->
-        update_scheduler_log(state.name, {false, timestamp, nil})
+        # update_scheduler_log(state.name, {false, timestamp, nil})
         Logger.info "Not Scheduled. Skip fetching snapshot from #{inspect state.name}"
       {:error, message} ->
-        update_scheduler_log(state.name, {:error, timestamp, message})
+        # update_scheduler_log(state.name, {:error, timestamp, message})
         Logger.error "Error getting scheduler information for #{inspect state.name}"
     end
-    {:noreply, state}
+    timer = start_timer(state.config.sleep, :poll)
+    {:noreply, Map.put(state, :timer, timer)}
   end
 
   @doc """
@@ -127,7 +131,7 @@ defmodule EvercamMedia.Snapshot.Poller do
   #######################
 
   defp start_timer(sleep, message) do
-    :timer.send_interval(sleep, message)
+    :erlang.send_after(sleep, self(), message)
   end
 
   defp update_scheduler_log(cam_id, {is_scheduled, timestamp, message}) do
