@@ -23,8 +23,13 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
     spawn fn ->
+      try do
         update_camera_status("#{camera_exid}", timestamp, true)
         |> save_snapshot_record(timestamp)
+      rescue
+        _error ->
+          error_handler(_error)
+      end
     end
     {:ok, state}
   end
@@ -66,12 +71,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     Repo.update camera
 
     unless camera_is_online == status do
-      try do
-        log_camera_status(camera.id, status, datetime)
-      rescue
-        _error ->
-          error_handler(_error)
-      end
+      log_camera_status(camera.id, status, datetime)
       Exq.Enqueuer.enqueue(
         :exq_enqueuer,
         "cache",
