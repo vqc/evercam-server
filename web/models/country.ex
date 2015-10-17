@@ -8,12 +8,12 @@ defmodule Country do
     field :name, :string
   end
 
-  @required_fields ~w(name iso_3166_a2)
+  @required_fields ~w(name iso3166_a2)
   @optional_fields ~w()
 
   def changeset(model, params \\ :empty) do
     model
     |> cast(params, @required_fields, @optional_fields)
-    |> unique_constraint(:iso_3166_a2, [name: "ux_countries_iso3166_a2"])
+    |> unique_constraint(:iso3166_a2, [name: "ux_countries_iso3166_a2"])
   end
 end
