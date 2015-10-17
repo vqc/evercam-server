@@ -19,13 +19,15 @@ defmodule EvercamMedia.ModelCase do
       alias EvercamMedia.Repo
       import Ecto.Model
       import Ecto.Query, only: [from: 2]
-      import EvercamMedia.ModelCase
     end
   end
 
-  setup tags do
-    unless tags[:async] do
-      Ecto.Adapters.SQL.restart_test_transaction(EvercamMedia.Repo, [])
+  setup do
+    # Wrap this case in a transaction
+    Ecto.Adapters.SQL.begin_test_transaction(EvercamMedia.Repo)
+
+    on_exit fn ->
+      Ecto.Adapters.SQL.rollback_test_transaction(EvercamMedia.Repo)
     end
 
     :ok
