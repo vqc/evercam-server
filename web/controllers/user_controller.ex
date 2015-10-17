@@ -15,7 +15,11 @@ defmodule EvercamMedia.UserController do
   end
 
   defp handle_user_signup conn, user_changeset, key \\ nil do
-    case EvercamMedia.UserSignup.create(user_changeset, key) do
+    case user_changeset
+         |> EvercamMedia.UserSignup.set_api_keys
+         |> EvercamMedia.UserSignup.set_confirmed_at(key)
+         |> EvercamMedia.UserSignup.create
+    do
       { :invalid_user, changeset } ->
         handle_error(conn, :bad_request, changeset)
       { :duplicate_user,  changeset } ->
@@ -23,7 +27,7 @@ defmodule EvercamMedia.UserController do
       { :invalid_token, changeset } ->
         handle_error(conn, :unprocessable_entity, changeset)
       { :success, user, token } ->
-        if key, do: EvercamMedia.UserMailer.confirm(user, key) 
+        if key, do: EvercamMedia.UserMailer.confirm(user, key)
         conn
         |> put_status(:created)
         |> put_resp_header("access-control-allow-origin", "*")
