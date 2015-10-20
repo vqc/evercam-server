@@ -2,7 +2,7 @@ defmodule EvercamMedia.HTTPClient do
   alias EvercamMedia.HTTPClient.DigestAuth
 
   def get(url) do
-    HTTPotion.get url
+    HTTPoison.get! url
   end
 
   def get(url, ":") do
@@ -10,7 +10,9 @@ defmodule EvercamMedia.HTTPClient do
   end
 
   def get(:basic_auth, url, username, password) do
-    HTTPotion.get url, [basic_auth: {username, password}]
+    hackney = [basic_auth: {username, password}]
+
+    HTTPoison.get! url, [], [ hackney: hackney ]
   end
 
   def get(:digest_auth, url, username, password) do
@@ -22,18 +24,22 @@ defmodule EvercamMedia.HTTPClient do
     u = URI.parse(snapshot_url)
     login_url = u.scheme <> "://" <> u.authority <> "/login.cgi"
     cookie = get_cookie(login_url, username, password)
-    HTTPotion.get snapshot_url, [headers: ["Cookie": cookie]]
+
+    headers = [
+      "Cookie": cookie
+    ]
+    HTTPoison.get! snapshot_url, headers
   end
 
   def get(:digest_auth, response, url, username, password) do
     digest_token =  DigestAuth.get_digest_token(response, url, username, password)
-    HTTPotion.get url, headers: ["Authorization": "Digest #{digest_token}"]
+    HTTPoison.get! url, ["Authorization": "Digest #{digest_token}"]
   end
 
   defp get_cookie(url, username, password) do
-    request = HTTPotion.get url
+    request = HTTPoison.get! url
     cookie = parse_cookie_header(request)
-    HTTPotion.post url, [body: multipart_text(username, password), headers: ["Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryEq1VsbBovj79sSoL", "Cookie": cookie]]
+    HTTPoison.post! url, multipart_text(username, password), ["Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryEq1VsbBovj79sSoL", "Cookie": cookie]
     cookie
   end
 
