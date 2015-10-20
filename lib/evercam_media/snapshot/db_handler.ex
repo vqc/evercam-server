@@ -22,15 +22,29 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
+
+    case previous_image = ConCache.get(:cache, camera_exid) do
+      %{} ->
+        Logger.info "Going to calculate MD"
+        motion_level = EvercamMedia.MotionDetection.Lib.compare(image,previous_image[:image])
+        Logger.info "calculated motion level is #{motion_level}"
+      _ ->
+        Logger.info "No previous image found in the cache"
+        motion_level = nil
+    end
+
+
     spawn fn ->
       try do
         update_camera_status("#{camera_exid}", timestamp, true)
-        |> save_snapshot_record(timestamp)
+        |> save_snapshot_record(timestamp, motion_level)
       rescue
         _error ->
           error_handler(_error)
       end
     end
+    note = "Evercam Proxy"
+    ConCache.put(:cache, camera_exid, %{image: image, timestamp: timestamp, notes: note})
     {:ok, state}
   end
 
@@ -90,11 +104,11 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     Repo.insert %CameraActivity{camera_id: camera_id, action: "offline", done_at: datetime}
   end
 
-  defp save_snapshot_record(camera, timestamp) do
+  defp save_snapshot_record(camera, timestamp, motion_level) do
     {:ok, datetime} = Calendar.DateTime.Parse.unix!(timestamp)
                |> Calendar.DateTime.to_erl
                |> Ecto.DateTime.cast
-    Repo.insert %Snapshot{camera_id: camera.id, data: "S3", notes: "Evercam Proxy", created_at: datetime}
+    Repo.insert %Snapshot{camera_id: camera.id, data: "S3", notes: "Evercam Proxy", motionlevel: motion_level, created_at: datetime}
   end
 
   defp construct_camera(camera, datetime, _, true) do

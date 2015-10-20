@@ -17,12 +17,12 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
 
   @event_handlers [
     EvercamMedia.Snapshot.BroadcastHandler,
-    EvercamMedia.Snapshot.CacheHandler,
+    # EvercamMedia.Snapshot.CacheHandler,
     EvercamMedia.Snapshot.DBHandler,
     EvercamMedia.Snapshot.PollHandler,
     EvercamMedia.Snapshot.S3UploadHandler,
     # EvercamMedia.Snapshot.StatsHandler
-    EvercamMedia.MotionDetection.ComparatorHandler
+    # EvercamMedia.MotionDetection.ComparatorHandler
   ]
 
   def start_link(opts \\ []) do
