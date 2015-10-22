@@ -31,4 +31,11 @@ defmodule User do
     |> validate_format(:email, ~r/^.+@.+\..+$/)
   end
 
+  def find_by_api_keys(api_id, api_key) do
+    from(u in User,
+         where: u.api_id == ^api_id,
+         where: u.api_key == ^api_key,
+         select: u)
+  end
+
 end

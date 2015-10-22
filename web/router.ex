@@ -11,6 +11,10 @@ defmodule EvercamMedia.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug EvercamMedia.AuthenticationPlug
+  end
+
   scope "/", EvercamMedia do
     pipe_through :browser
 
@@ -33,9 +37,14 @@ defmodule EvercamMedia.Router do
     pipe_through :api
 
     post "/users", UserController, :create
-    put "/users", UserController, :update
-    post "/sessions", SessionController, :create
-    delete "/sessions", SessionController, :delete
+
+    scope "/" do
+      pipe_through :auth
+
+      put "/users/:id", UserController, :update
+      post "/sessions", SessionController, :create
+      delete "/sessions", SessionController, :delete
+    end
 
     get "/cameras/:id/ptz/status", ONVIFPTZController, :status
     get "/cameras/:id/ptz/presets", ONVIFPTZController, :presets
