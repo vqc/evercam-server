@@ -69,4 +69,22 @@ defmodule EvercamMedia.UserControllerTest do
 
     refute response["user"]["confirmed_at"] == ""
   end
+
+  test "PUT /v1/users/:id - updates the User with the supplied id" do
+    {:ok, country} = EvercamMedia.Repo.insert(%Country{ name: "Whatever", iso3166_a2: "WHTEVR" })
+    {:ok, user} =  EvercamMedia.Repo.insert(%User{firstname: "John" , lastname: "Doe", 
+        email: "johndoe@example.com", username: "johnd", country_id: country.id, 
+        password: "some_password", api_id: "api_id", api_key: "api_key"})
+    params = %{"user" => %{ firstname: "Jonnathan" }}
+
+    conn = conn()
+      |> Plug.Conn.put_req_header("x-api-id", user.api_id)
+      |> Plug.Conn.put_req_header("x-api-key", user.api_key)
+      |> put("/v1/users/#{user.id}", params)
+
+    response = json_response(conn, 200)
+
+    assert response["user"]["firstname"] == "Jonnathan"
+    assert response["user"]["lastname"] == "Doe"
+  end
 end

@@ -11,7 +11,19 @@ defmodule EvercamMedia.UserController do
     handle_user_signup(conn, user_changeset)
   end
 
-  def update(conn, %{ "token" => token, "user" => user_params }) do
+  def update(conn, %{ "id" => id, "user" => user_params }) do
+    user = Repo.get!(User, id)
+    user_changeset  = User.changeset(user, user_params)
+
+    case Repo.update(user_changeset) do
+      {:ok, user} ->
+        conn
+        |> put_status(:ok)
+        |> put_resp_header("access-control-allow-origin", "*")
+        |> render("user.json", %{ user: user, token: nil })
+      {:error, changeset} ->
+        handle_error(conn, 400, changeset)
+    end
   end
 
   defp handle_user_signup conn, user_changeset, key \\ nil do
