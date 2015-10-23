@@ -5,12 +5,8 @@ defmodule EvercamMedia.AuthenticationPlug do
   end
   
   def call(conn, _) do
-    api_key = conn
-              |> Plug.Conn.get_req_header("x-api-key")
-              |> List.first
-    api_id = conn
-             |> Plug.Conn.get_req_header("x-api-id")
-             |> List.first
+    api_key = extract_api_credential(conn, %{header: "x-api-key", query: "api_key"})
+    api_id  = extract_api_credential(conn, %{header: "x-api-id", query: "api_id"})
 
     case EvercamMedia.Auth.validate(api_id, api_key) do
       :valid ->
@@ -21,5 +17,20 @@ defmodule EvercamMedia.AuthenticationPlug do
         |> send_resp()
         |> halt()
     end
+  end
+
+  defp extract_api_credential(c, %{ header: header_name, query: query_string_name }) do
+    extract_credential_from_query_string(c, query_string_name) || extract_credential_from_header(c, header_name)
+  end
+
+  defp extract_credential_from_query_string(c, query_string_name) do
+   Plug.Conn.fetch_query_params(c, query_string_name)
+   Map.get(c.params, query_string_name, nil)
+  end
+
+  defp extract_credential_from_header(c, header_name) do
+    c 
+    |> Plug.Conn.get_req_header(header_name)
+    |> List.first
   end
 end
