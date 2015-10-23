@@ -9,6 +9,7 @@ defmodule EvercamMedia.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      compilers: [:make, :phoenix] ++ Mix.compilers,
+     aliases: aliases,
      deps: deps]
   end
 
@@ -60,7 +61,7 @@ defmodule EvercamMedia.Mixfile do
      {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.2", override: true},
      {:httpoison, "~> 0.7.2"},
      {:calendar, "~> 0.10.0"},
-     {:calecto, "~> 0.4.0"}, 
+     {:calecto, "~> 0.4.0"},
      {:dotenv, "~> 0.0.4"},
      {:poison, "~> 1.5"},
      {:timex, "~> 0.19", override: true},
