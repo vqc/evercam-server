@@ -9,7 +9,7 @@ use Mix.Config
 config :evercam_media, EvercamMedia.Endpoint,
   check_origin: false,
   http: [port: 4000],
-  url: [host: "evercam.io"]
+  url: [host: "evercam.io"],
   cache_static_manifest: "priv/static/manifest.json",
   email: "evercam.io <support@evercam.io>"
 
@@ -60,7 +60,7 @@ config :evercam_media, EvercamMedia.Repo,
   size: 50,
   ssl: true
 
-config :evercam_media, mailgun_config: [ 
+config :evercam_media, mailgun_config: [
     domain: System.get_env("MAILGUN_DOMAIN"),
     key: System.get_env("MAILGUN_KEY"),
   ]
