@@ -30,6 +30,9 @@ config :evercam_media, EvercamMedia.Endpoint,
 # Do not print debug messages in production
 config :logger, level: :warn
 
+# Filter out these fields from the logs
+config :phoenix, :filter_parameters, ["password", "api_key"]
+
 # ## Using releases
 #
 # If you are doing OTP releases, you need to instruct Phoenix
