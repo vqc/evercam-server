@@ -31,7 +31,7 @@ config :evercam_media, EvercamMedia.Endpoint,
 config :logger, level: :warn
 
 # Filter out these fields from the logs
-config :phoenix, :filter_parameters, ["password", "api_id", "api_key"]
+config :phoenix, :filter_parameters, ["password", "api_key"]
 
 # ## Using releases
 #
