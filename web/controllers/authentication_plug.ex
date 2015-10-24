@@ -19,17 +19,17 @@ defmodule EvercamMedia.AuthenticationPlug do
     end
   end
 
-  defp extract_api_credential(c, %{ header: header_name, query: query_string_name }) do
-    extract_credential_from_query_string(c, query_string_name) || extract_credential_from_header(c, header_name)
+  defp extract_api_credential(conn, %{ header: header_name, query: query_string_name }) do
+    extract_credential_from_query_string(conn, query_string_name) || extract_credential_from_header(conn, header_name)
   end
 
-  defp extract_credential_from_query_string(c, query_string_name) do
-   Plug.Conn.fetch_query_params(c, query_string_name)
+  defp extract_credential_from_query_string(conn, query_string_name) do
+   Plug.Conn.fetch_query_params(conn, query_string_name)
    Map.get(c.params, query_string_name, nil)
   end
 
-  defp extract_credential_from_header(c, header_name) do
-    c 
+  defp extract_credential_from_header(conn, header_name) do
+    conn
     |> Plug.Conn.get_req_header(header_name)
     |> List.first
   end
