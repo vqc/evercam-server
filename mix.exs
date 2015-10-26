@@ -60,7 +60,7 @@ defmodule EvercamMedia.Mixfile do
      {:httpotion, github: "myfreeweb/httpotion"},
      {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.2", override: true},
      {:httpoison, "~> 0.7.2"},
-     {:calendar, "~> 0.10.0"},
+     {:calendar, "~> 0.10.1"},
      {:calecto, "~> 0.4.0"},
      {:dotenv, "~> 0.0.4"},
      {:poison, "~> 1.5"},
