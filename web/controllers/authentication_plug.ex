@@ -3,7 +3,7 @@ defmodule EvercamMedia.AuthenticationPlug do
 
   def init(_opts) do
   end
-  
+
   def call(conn, _) do
     api_key = extract_api_credential(conn, %{header: "x-api-key", query: "api_key"})
     api_id  = extract_api_credential(conn, %{header: "x-api-id", query: "api_id"})
@@ -25,7 +25,7 @@ defmodule EvercamMedia.AuthenticationPlug do
 
   defp extract_credential_from_query_string(conn, query_string_name) do
    Plug.Conn.fetch_query_params(conn, query_string_name)
-   Map.get(c.params, query_string_name, nil)
+   Map.get(conn.params, query_string_name, nil)
   end
 
   defp extract_credential_from_header(conn, header_name) do
