@@ -1,6 +1,20 @@
 defmodule EvercamMedia.UserController do
   use EvercamMedia.Web, :controller
 
+  def show(conn, %{ "id" => user_id }) do
+    if user = EvercamMedia.Repo.get(User, user_id) do
+      conn
+      |> put_status(:ok)
+      |> put_resp_header("access-control-allow-origin", "*")
+      |> render(EvercamMedia.UserView, "user.json", %{ user: user })
+    else
+      conn
+      |> put_status(:not_found)
+      |> put_resp_header("access-control-allow-origin", "*")
+      |> render(EvercamMedia.ErrorView, "error.json", %{ message: "User not found.", status: 404 })
+    end
+  end
+
   def create(conn, %{ "user" => user_params, "key" => share_key }) do
     user_changeset = User.changeset(%User{}, user_params)
     handle_user_signup(conn, user_changeset, share_key)
@@ -20,7 +34,7 @@ defmodule EvercamMedia.UserController do
         conn
         |> put_status(:ok)
         |> put_resp_header("access-control-allow-origin", "*")
-        |> render("user.json", %{ user: user, token: nil })
+        |> render("user.json", %{ user: user })
       {:error, changeset} ->
         handle_error(conn, 400, changeset)
     end
@@ -43,7 +57,7 @@ defmodule EvercamMedia.UserController do
         conn
         |> put_status(:created)
         |> put_resp_header("access-control-allow-origin", "*")
-        |> render("user.json", %{ user: user, token: token })
+        |> render("user.json", %{ user: user })
     end
   end
 

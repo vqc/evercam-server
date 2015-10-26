@@ -41,9 +41,8 @@ defmodule EvercamMedia.Router do
     scope "/" do
       pipe_through :auth
 
+      get "/users/:id", UserController, :show
       put "/users/:id", UserController, :update
-      post "/sessions", SessionController, :create
-      delete "/sessions", SessionController, :delete
     end
 
     get "/cameras/:id/ptz/status", ONVIFPTZController, :status

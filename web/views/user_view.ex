@@ -1,7 +1,7 @@
 defmodule EvercamMedia.UserView do
   use EvercamMedia.Web, :view
 
-  def render("user.json", %{ user: user, token: token }) do
+  def render("user.json", %{ user: user }) do
     %{
       user: %{
         id: user.id,

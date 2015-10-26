@@ -1,6 +1,15 @@
 defmodule EvercamMedia.ErrorView do
   use EvercamMedia.Web, :view
 
+  def render("error.json", %{message: message, status: status}) do
+    %{
+      errors: %{
+        status: status,
+        message: message
+      }
+    }
+  end
+
   def render("404.html", _assigns) do
     "Page not found - 404"
   end
