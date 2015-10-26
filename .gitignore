@@ -14,6 +14,9 @@ erl_crash.dump
 # comment this depending on your deployment strategy.
 /priv/static/
 
+# Ignore compiled code for motion detection
+/priv_dir/lib_elixir_motiondetection.so
+
 # Evercam specific files
 .env
 rel
