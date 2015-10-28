@@ -11,6 +11,7 @@ defmodule EvercamMedia do
       supervisor(EvercamMedia.Repo, []),
       supervisor(EvercamMedia.SnapshotRepo, []),
       supervisor(EvercamMedia.Snapshot.WorkerSupervisor, []),
+      :hackney_pool.child_spec(:snapshot_pool,  [timeout: 10000, max_connections: 1000]),
       worker(ConCache, [[ttl_check: 100, ttl: 2000], [name: :cache]]),
       worker(ConCache, [
         [
