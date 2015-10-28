@@ -59,7 +59,7 @@ defmodule EvercamMedia.HTTPClient do
     session_string =
       case session_header do
         [hd|tl] -> session_header |> Enum.join(",")
-        _ ->  session_header
+        _ ->  ""
       end
 
     cookie = Regex.run(~r/(AIROS_SESSIONID=[a-z0-9]+)/, session_string) |> hd
