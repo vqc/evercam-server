@@ -63,6 +63,13 @@ config :evercam_media, EvercamMedia.Repo,
   size: 50,
   ssl: true
 
+config :evercam_media, EvercamMedia.SnapshotRepo,
+  adapter: Ecto.Adapters.Postgres,
+  extensions: [{EvercamMedia.Types.JSON.Extension, library: Poison}],
+  url: System.get_env("SNAPSHOT_DATABASE_URL"),
+  size: 50,
+  ssl: true
+
 config :evercam_media, mailgun_config: [
     domain: System.get_env("MAILGUN_DOMAIN"),
     key: System.get_env("MAILGUN_KEY"),

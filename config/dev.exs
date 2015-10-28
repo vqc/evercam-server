@@ -17,7 +17,7 @@ config :evercam_media, EvercamMedia.Endpoint,
   watchers: [node: ["node_modules/brunch/bin/brunch", "watch"]],
   email: "evercam.io <env.dev@evercam.io>"
 
-config :evercam_media, mailgun_config: [ 
+config :evercam_media, mailgun_config: [
     domain: System.get_env("MAILGUN_SANDBOX_DOMAIN"),
     key: System.get_env("MAILGUN_SANDBOX_KEY")
   ]
@@ -42,6 +42,13 @@ config :phoenix, :stacktrace_depth, 20
 
 # Configure your database
 config :evercam_media, EvercamMedia.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  extensions: [{EvercamMedia.Types.JSON.Extension, library: Poison}],
+  username: "postgres",
+  password: "postgres",
+  database: System.get_env["db"] || "evercam_dev"
+
+config :evercam_media, EvercamMedia.SnapshotRepo,
   adapter: Ecto.Adapters.Postgres,
   extensions: [{EvercamMedia.Types.JSON.Extension, library: Poison}],
   username: "postgres",
