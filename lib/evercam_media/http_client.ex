@@ -2,7 +2,7 @@ defmodule EvercamMedia.HTTPClient do
   alias EvercamMedia.HTTPClient.DigestAuth
 
   def get(url) do
-    HTTPoison.get! url
+    HTTPoison.get url
   end
 
   def get(url, ":") do
@@ -12,12 +12,21 @@ defmodule EvercamMedia.HTTPClient do
   def get(:basic_auth, url, username, password) do
     hackney = [basic_auth: {username, password}]
 
-    HTTPoison.get! url, [], [ hackney: hackney ]
+    HTTPoison.get url, [], [ hackney: hackney ]
   end
 
   def get(:digest_auth, url, username, password) do
-    response = get(url)
-    get(:digest_auth, response, url, username, password)
+    case get(url) do
+      {:ok, response} ->
+        get(:digest_auth, response, url, username, password)
+      response ->
+        response
+    end
+  end
+
+  def get(:digest_auth, response, url, username, password) do
+    digest_token =  DigestAuth.get_digest_token(response, url, username, password)
+    HTTPoison.get url, ["Authorization": "Digest #{digest_token}"]
   end
 
   def get(:cookie_auth, snapshot_url, username, password) do
@@ -28,23 +37,22 @@ defmodule EvercamMedia.HTTPClient do
     headers = [
       "Cookie": cookie
     ]
-    HTTPoison.get! snapshot_url, headers
-  end
-
-  def get(:digest_auth, response, url, username, password) do
-    digest_token =  DigestAuth.get_digest_token(response, url, username, password)
-    HTTPoison.get! url, ["Authorization": "Digest #{digest_token}"]
+    HTTPoison.get snapshot_url, headers
   end
 
   defp get_cookie(url, username, password) do
-    request = HTTPoison.get! url
-    cookie = parse_cookie_header(request)
-    HTTPoison.post! url, multipart_text(username, password), ["Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryEq1VsbBovj79sSoL", "Cookie": cookie]
-    cookie
+    case get(url) do
+      {:ok, response} ->
+        cookie = parse_cookie_header(response)
+        HTTPoison.post url, multipart_text(username, password), ["Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryEq1VsbBovj79sSoL", "Cookie": cookie]
+        cookie
+      response ->
+        response
+    end
   end
 
-  defp parse_cookie_header(request) do
-    session_header = Dict.get(request.headers, :"Set-Cookie")
+  defp parse_cookie_header(response) do
+    session_header = Dict.get(response.headers, :"Set-Cookie")
     session_string =
       case session_header do
         [hd|tl] -> session_header |> Enum.join(",")
