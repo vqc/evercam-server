@@ -1,5 +1,6 @@
 defmodule EvercamMedia.HTTPClient do
   alias EvercamMedia.HTTPClient.DigestAuth
+  require Logger
 
   def get(url) do
     hackney = [pool: :snapshot_pool]
@@ -46,6 +47,10 @@ defmodule EvercamMedia.HTTPClient do
     case get(url) do
       {:ok, response} ->
         cookie = parse_cookie_header(response)
+        if cookie == nil do
+          Logger.error "Cookie is not set for url: #{url}"
+          raise "Cookie is not set for url: #{url}"
+        end
         hackney = [pool: :snapshot_pool]
         HTTPoison.post url, multipart_text(username, password), ["Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryEq1VsbBovj79sSoL", "Cookie": cookie], hackney: hackney
         cookie
@@ -62,7 +67,10 @@ defmodule EvercamMedia.HTTPClient do
         _ ->  ""
       end
 
-    cookie = Regex.run(~r/(AIROS_SESSIONID=[a-z0-9]+)/, session_string) |> hd
+    case res = Regex.run(~r/(AIROS_SESSIONID=[a-z0-9]+)/, session_string) do
+      [h|t] -> h
+      _ -> nil
+    end
   end
 
   defp multipart_text(username, password) do
