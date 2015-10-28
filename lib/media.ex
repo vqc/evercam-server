@@ -9,6 +9,7 @@ defmodule EvercamMedia do
     children = [
       supervisor(EvercamMedia.Endpoint, []),
       supervisor(EvercamMedia.Repo, []),
+      supervisor(EvercamMedia.SnapshotRepo, []),
       supervisor(EvercamMedia.Snapshot.WorkerSupervisor, []),
       worker(ConCache, [[ttl_check: 100, ttl: 1500], [name: :cache]]),
       worker(ConCache, [
