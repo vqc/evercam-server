@@ -17,6 +17,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   use GenEvent
   require Logger
   alias EvercamMedia.Repo
+  alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.S3
 
 
@@ -108,7 +109,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     {:ok, datetime} = Calendar.DateTime.Parse.unix!(timestamp)
                |> Calendar.DateTime.to_erl
                |> Ecto.DateTime.cast
-    Repo.insert %Snapshot{camera_id: camera.id, data: "S3", notes: "Evercam Proxy", motionlevel: motion_level, created_at: datetime}
+    SnapshotRepo.insert %Snapshot{camera_id: camera.id, data: "S3", notes: "Evercam Proxy", motionlevel: motion_level, created_at: datetime}
   end
 
   defp construct_camera(camera, datetime, _, true) do

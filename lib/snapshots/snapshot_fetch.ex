@@ -1,5 +1,6 @@
 defmodule EvercamMedia.Snapshot do
   alias EvercamMedia.Repo
+  alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.S3
   alias EvercamMedia.HTTPClient
   require Logger
@@ -96,7 +97,7 @@ defmodule EvercamMedia.Snapshot do
   end
 
   def save_snapshot_record(camera_exid, camera_id, notes, snap_timestamp, file_timestamp, true, file_path) do
-    Repo.insert %Snapshot{camera_id: camera_id, data: "S3", notes: notes, created_at: snap_timestamp}
+    SnapshotRepo.insert %Snapshot{camera_id: camera_id, data: "S3", notes: notes, created_at: snap_timestamp}
     update_thumbnail_url(camera_exid, file_path)
   end
 
