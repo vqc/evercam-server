@@ -2,7 +2,8 @@ defmodule EvercamMedia.HTTPClient do
   alias EvercamMedia.HTTPClient.DigestAuth
 
   def get(url) do
-    HTTPoison.get url
+    hackney = [pool: :snapshot_pool]
+    HTTPoison.get url, [], hackney: hackney
   end
 
   def get(url, ":") do
@@ -10,9 +11,9 @@ defmodule EvercamMedia.HTTPClient do
   end
 
   def get(:basic_auth, url, username, password) do
-    hackney = [basic_auth: {username, password}]
+    hackney = [basic_auth: {username, password}, pool: :snapshot_pool]
 
-    HTTPoison.get url, [], [ hackney: hackney ]
+    HTTPoison.get url, [], hackney: hackney
   end
 
   def get(:digest_auth, url, username, password) do
@@ -26,25 +27,27 @@ defmodule EvercamMedia.HTTPClient do
 
   def get(:digest_auth, response, url, username, password) do
     digest_token =  DigestAuth.get_digest_token(response, url, username, password)
-    HTTPoison.get url, ["Authorization": "Digest #{digest_token}"]
+    hackney = [pool: :snapshot_pool]
+    HTTPoison.get url, ["Authorization": "Digest #{digest_token}"], hackney: hackney
   end
 
   def get(:cookie_auth, snapshot_url, username, password) do
     u = URI.parse(snapshot_url)
     login_url = u.scheme <> "://" <> u.authority <> "/login.cgi"
     cookie = get_cookie(login_url, username, password)
-
+    hackney = [pool: :snapshot_pool]
     headers = [
       "Cookie": cookie
     ]
-    HTTPoison.get snapshot_url, headers
+    HTTPoison.get snapshot_url, headers, hackney: hackney
   end
 
   defp get_cookie(url, username, password) do
     case get(url) do
       {:ok, response} ->
         cookie = parse_cookie_header(response)
-        HTTPoison.post url, multipart_text(username, password), ["Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryEq1VsbBovj79sSoL", "Cookie": cookie]
+        hackney = [pool: :snapshot_pool]
+        HTTPoison.post url, multipart_text(username, password), ["Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryEq1VsbBovj79sSoL", "Cookie": cookie], hackney: hackney
         cookie
       response ->
         response
