@@ -10,7 +10,6 @@ config :evercam_media, EvercamMedia.Endpoint,
   check_origin: false,
   http: [port: 4000],
   url: [host: "evercam.io"],
-  cache_static_manifest: "priv/static/manifest.json",
   email: "evercam.io <support@evercam.io>"
 
 # ## SSL Support
