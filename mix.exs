@@ -76,7 +76,7 @@ defmodule EvercamMedia.Mixfile do
 end
 
 defmodule Mix.Tasks.Compile.Make do
-  @shortdoc "Compiles helper in c_src"
+  @shortdoc "Compiles helper in src/"
 
   def run(_) do
     {result, _error_code} = System.cmd("make", [], stderr_to_stdout: true)
@@ -87,7 +87,7 @@ defmodule Mix.Tasks.Compile.Make do
 end
 
 defmodule Mix.Tasks.Clean.Make do
-  @shortdoc "Cleans helper in c_src"
+  @shortdoc "Cleans helper in src/"
 
   def run(_) do
     {result, _error_code} = System.cmd("make", ['clean'], stderr_to_stdout: true)
