@@ -3,7 +3,7 @@ defmodule EvercamMedia.CameraController do
   alias EvercamMedia.Snapshot.WorkerSupervisor
   alias EvercamMedia.Snapshot.Worker
   alias EvercamMedia.Repo
-  import EvercamMedia.Snapshot
+  import EvercamMedia.SnapshotFetch
   require Logger
 
   def update(conn, %{"id" => exid, "token" => token}) do

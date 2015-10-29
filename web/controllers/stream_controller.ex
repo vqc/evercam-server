@@ -2,7 +2,7 @@ defmodule EvercamMedia.StreamController do
   use Phoenix.Controller
   use Timex
   alias EvercamMedia.Repo
-  import EvercamMedia.Snapshot
+  import EvercamMedia.SnapshotFetch
   require Logger
 
   def rtmp(conn, params) do

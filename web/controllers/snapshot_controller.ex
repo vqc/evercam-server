@@ -1,7 +1,7 @@
 defmodule EvercamMedia.SnapshotController do
   use Phoenix.Controller
   use Timex
-  import EvercamMedia.Snapshot
+  import EvercamMedia.SnapshotFetch
   alias EvercamMedia.HTTPClient
   require Logger
 

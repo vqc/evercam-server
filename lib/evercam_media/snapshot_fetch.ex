@@ -1,4 +1,4 @@
-defmodule EvercamMedia.Snapshot do
+defmodule EvercamMedia.SnapshotFetch do
   alias EvercamMedia.Repo
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.S3

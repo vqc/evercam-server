@@ -1,5 +1,5 @@
 defmodule EvercamMedia.S3 do
-  import EvercamMedia.Snapshot
+  import EvercamMedia.SnapshotFetch
   require Logger
 
   def upload(camera_id, image, file_path, timestamp) do
