@@ -56,7 +56,7 @@ defmodule EvercamMedia.Mixfile do
      {:phoenix_html, "~> 2.1"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:cowboy, "~> 1.0"},
-     {:con_cache, "~> 0.6.0"},
+     {:con_cache, "~> 0.9.0"},
      {:httpotion, github: "myfreeweb/httpotion"},
      {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.2", override: true},
      {:httpoison, "~> 0.7.2"},
