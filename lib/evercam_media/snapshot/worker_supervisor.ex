@@ -70,7 +70,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
     url = "#{Camera.external_url(camera)}#{Camera.res_url(camera, "jpg")}"
     parsed_uri = URI.parse url
 
-    if parsed_uri.host != nil && parsed_uri.port > 0 && parsed_uri.port < 65535 do
+    if String.strip("#{parsed_uri.host}") != "" && parsed_uri.port > 0 && parsed_uri.port < 65535 do
         #TODO: There seems to be more db queries than necessary. Cut it down.
         camera = EvercamMedia.Repo.preload camera, :cloud_recordings
         {:ok, %{
