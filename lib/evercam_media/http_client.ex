@@ -67,8 +67,8 @@ defmodule EvercamMedia.HTTPClient do
         _ ->  ""
       end
 
-    case res = Regex.run(~r/(AIROS_SESSIONID=[a-z0-9]+)/, session_string) do
-      [h|t] -> h
+    case Regex.run(~r/(AIROS_SESSIONID=[a-z0-9]+)/, session_string) do
+      [h|_] -> h
       _ -> nil
     end
   end
