@@ -36,6 +36,7 @@ defmodule EvercamMedia.Mixfile do
     :tzdata,
     :httpoison,
     :inets,
+    :mailgun,
     :phoenix,
     :porcelain,
     :postgrex,
