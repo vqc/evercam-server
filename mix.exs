@@ -38,6 +38,7 @@ defmodule EvercamMedia.Mixfile do
     :inets,
     :mailgun,
     :phoenix,
+    :phoenix_html,
     :porcelain,
     :postgrex,
     :calendar,
