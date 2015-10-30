@@ -1,6 +1,34 @@
 defmodule EvercamMedia.UserControllerTest do
   use EvercamMedia.ConnCase
 
+  test "GET /v1/users/:id - if found, returns info about the user with specified id" do
+    {:ok, country} = EvercamMedia.Repo.insert(%Country{ name: "Whatever", iso3166_a2: "WHTEVR" })
+    {:ok, user} =  EvercamMedia.Repo.insert(%User{firstname: "John" , lastname: "Doe",
+        email: "johndoe@example.com", username: "johnd", country_id: country.id,
+        password: "some_password", api_id: "api_id", api_key: "api_key"})
+
+    conn = get(conn(), "/v1/users/#{user.id}?api_id=#{user.api_id}&api_key=#{user.api_key}")
+
+    response = json_response(conn, 200)
+
+    assert response["user"]["firstname"] == user.firstname
+    assert response["user"]["lastname"] == user.lastname
+  end
+
+  test "GET /v1/users/:id - if not found, returns error message" do
+    {:ok, country} = EvercamMedia.Repo.insert(%Country{ name: "Whatever", iso3166_a2: "WHTEVR" })
+    {:ok, user} =  EvercamMedia.Repo.insert(%User{firstname: "John" , lastname: "Doe",
+        email: "johndoe@example.com", username: "johnd", country_id: country.id,
+        password: "some_password", api_id: "api_id", api_key: "api_key"})
+
+    conn = get(conn(), "/v1/users/123?api_id=#{user.api_id}&api_key=#{user.api_key}")
+
+    response = json_response(conn, 404)
+
+    assert response["errors"]["message"] == "User not found."
+    assert response["errors"]["status"] == 404
+  end
+
   test "POST /v1/users - creates the user and returns the json" do
     {:ok, country } = EvercamMedia.Repo.insert(%Country{ name: "Whatever", iso3166_a2: "WHTEVR" })
     params = %{ "user" => %{ firstname: "John" , lastname: "Doe", 
