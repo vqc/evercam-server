@@ -43,6 +43,13 @@ defmodule Camera do
     preload: :owner
   end
 
+  def by_id_with_owner(camera_id) do
+    from cam in Camera,
+    where: cam.id == ^camera_id,
+    select: cam,
+    preload: :owner
+  end
+
   def limit(count) do
     from cam in Camera,
     limit: ^count

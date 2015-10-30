@@ -147,6 +147,10 @@ defmodule EvercamMedia.SnapshotFetch do
 
   def log_camera_status(camera_id, false, timestamp) do
     Repo.insert %CameraActivity{camera_id: camera_id, action: "offline", done_at: timestamp}
+    camera = Repo.one! Camera.by_id_with_owner(camera_id)
+    if camera.owner.username == "vq" || camera.owner.username == "marco" do
+      EvercamMedia.UserMailer.camera_offline(camera.owner, camera)
+    end
   end
 
   defp construct_camera(camera, timestamp, _, true) do
