@@ -16,6 +16,10 @@ config :evercam_media, EvercamMedia.Endpoint,
   pubsub: [name: EvercamMedia.PubSub,
            adapter: Phoenix.PubSub.PG2]
 
+config :evercam_media, 
+  mailgun_domain: System.get_env("MAILGUN_DOMAIN"), 
+  mailgun_key: System.get_env("MAILGUN_KEY")
+
 config :logger, :console,
   format: "$date $time $metadata[$level] $message\n",
   metadata: [:request_id]

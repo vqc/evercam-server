@@ -1,5 +1,5 @@
 defmodule EvercamMedia.UserMailer do
-  use Mailgun.Client, Application.get_env(:evercam_media, :mailgun_config)
+  use Mailgun.Client, domain: Application.get_env(:evercam_media, :mailgun_domain), key: Application.get_env(:evercam_media, :mailgun_key)
  
   def confirm(user, code) do
     send_email to: user.email,

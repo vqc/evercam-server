@@ -69,11 +69,6 @@ config :evercam_media, EvercamMedia.SnapshotRepo,
   size: 50,
   ssl: true
 
-config :evercam_media, mailgun_config: [
-    domain: System.get_env("MAILGUN_DOMAIN"),
-    key: System.get_env("MAILGUN_KEY"),
-  ]
-
 # Finally import the config/prod.secret.exs
 # which should be versioned separately.
 import_config "prod.secret.exs"

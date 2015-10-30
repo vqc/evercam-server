@@ -17,11 +17,6 @@ config :evercam_media, EvercamMedia.Endpoint,
   watchers: [node: ["node_modules/brunch/bin/brunch", "watch"]],
   email: "evercam.io <env.dev@evercam.io>"
 
-config :evercam_media, mailgun_config: [
-    domain: System.get_env("MAILGUN_SANDBOX_DOMAIN"),
-    key: System.get_env("MAILGUN_SANDBOX_KEY")
-  ]
-
 # Watch static and templates for browser reloading.
 config :evercam_media, EvercamMedia.Endpoint,
   live_reload: [
