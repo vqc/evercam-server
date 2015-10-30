@@ -1,5 +1,8 @@
 defmodule EvercamMedia.UserMailer do
-  use Mailgun.Client
+  use Mailgun.Client,
+    domain: Application.get_env(:evercam_media, :mailgun_domain),
+    key: Application.get_env(:evercam_media, :mailgun_key)
+
 
   def confirm(user, code) do
     send_email to: user.email,
@@ -15,13 +18,6 @@ defmodule EvercamMedia.UserMailer do
                from: sender_email,
                html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.html", user: user, camera: camera),
                text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.txt", user: user, camera: camera)
-  end
-
-  def conf do
-    [
-      domain: Application.get_env(:evercam_media, :mailgun_domain),
-      key: Application.get_env(:evercam_media, :mailgun_key)
-    ]
   end
 
   defp sender_email do
