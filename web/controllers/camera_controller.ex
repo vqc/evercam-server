@@ -1,14 +1,14 @@
 defmodule EvercamMedia.CameraController do
   use Phoenix.Controller
+  alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.WorkerSupervisor
   alias EvercamMedia.Snapshot.Worker
   alias EvercamMedia.Repo
-  import EvercamMedia.SnapshotFetch
   require Logger
 
   def update(conn, %{"id" => exid, "token" => token}) do
     try do
-      [_, _, _, _, _] = decode_request_token(token)
+      [_, _, _, _, _] = Util.decode_request_token(token)
       Logger.info "Camera update for #{exid}"
       camera = Camera.by_exid(exid) |> Repo.one
       worker = exid |> String.to_atom |> Process.whereis

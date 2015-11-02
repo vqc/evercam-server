@@ -2,6 +2,7 @@ defmodule EvercamMedia.SnapshotController do
   use Phoenix.Controller
   use Timex
   import EvercamMedia.SnapshotFetch
+  alias EvercamMedia.Util
   alias EvercamMedia.HTTPClient
   require Logger
 
@@ -101,7 +102,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp snapshot(camera_id, token, notes \\ "Evercam Proxy") do
-    [url, auth, credentials, time, _] = decode_request_token(token)
+    [url, auth, credentials, time, _] = Util.decode_request_token(token)
     [username, password] = String.split(auth, ":")
     worker_id = camera_id |> String.to_atom
     camera = Camera.by_exid(camera_id) |> EvercamMedia.Repo.one
@@ -119,7 +120,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp snapshot_test(camera_id, token, vendor_exid) do
-    [url, auth, credentials, time, _] = decode_request_token(token)
+    [url, auth, credentials, time, _] = Util.decode_request_token(token)
     [username, password] = String.split(auth, ":")
     worker_id = camera_id |> String.to_atom
     camera = Camera.by_exid(camera_id) |> EvercamMedia.Repo.one
