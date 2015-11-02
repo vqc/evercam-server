@@ -1,6 +1,25 @@
 defmodule EvercamMedia.Util do
   require Logger
 
+  @doc ~S"""
+  Checks if a given binary data is a valid jpeg or not
+
+  ## Examples
+
+      iex> EvercamMedia.Util.is_jpeg("string")
+      false
+
+      iex> EvercamMedia.Util.is_jpeg("binaryimage")
+      true
+  """
+
+  def is_jpeg(data) do
+    case data do
+      <<0xFF,0xD8, data :: binary>> -> true
+      _ -> false
+    end
+  end
+
   def decode_request_token(token) do
     {_, encrypted_message} = Base.url_decode64(token)
     message = :crypto.block_decrypt(

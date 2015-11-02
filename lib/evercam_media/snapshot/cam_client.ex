@@ -5,7 +5,7 @@ defmodule EvercamMedia.Snapshot.CamClient do
   """
 
   alias EvercamMedia.HTTPClient
-  alias EvercamMedia.Snapshot.Util
+  alias EvercamMedia.Util
   require Logger
 
   @doc """
