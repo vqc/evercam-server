@@ -116,6 +116,7 @@ defmodule EvercamMedia.SnapshotController do
       check_jpg(data)
       broadcast_snapshot(camera_id, data)
       file_timestamp = Calendar.DateTime.now_utc |> Calendar.DateTime.Format.unix
+      ConCache.put(:cache, camera_id, %{image: data, timestamp: file_timestamp, notes: notes})
       response =  %{camera_id: camera_id, image: data, timestamp: file_timestamp, notes: "Evercam Proxy"}
       [200, response]
     rescue
