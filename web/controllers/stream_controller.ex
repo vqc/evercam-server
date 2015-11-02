@@ -43,7 +43,7 @@ defmodule EvercamMedia.StreamController do
       200
     rescue
       _error ->
-        error_handler(_error)
+        Util.error_handler(_error)
         401
     end
   end

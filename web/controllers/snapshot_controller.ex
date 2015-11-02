@@ -1,7 +1,6 @@
 defmodule EvercamMedia.SnapshotController do
   use Phoenix.Controller
   use Timex
-  import EvercamMedia.SnapshotFetch
   alias EvercamMedia.Util
   alias EvercamMedia.HTTPClient
   require Logger
@@ -110,7 +109,7 @@ defmodule EvercamMedia.SnapshotController do
 
     case EvercamMedia.Snapshot.Worker.get_snapshot(worker_id) do
       {:ok, data} ->
-        broadcast_snapshot(camera_id, data)
+        Util.broadcast_snapshot(camera_id, data)
         file_timestamp = Calendar.DateTime.now_utc |> Calendar.DateTime.Format.unix
         response =  %{camera_id: camera_id, image: data, timestamp: file_timestamp, notes: "Evercam Proxy"}
         [200, response]
@@ -128,7 +127,7 @@ defmodule EvercamMedia.SnapshotController do
 
     case EvercamMedia.Snapshot.Worker.get_snapshot(worker_id) do
       {:ok, data} ->
-        broadcast_snapshot(camera_id, data)
+        Util.broadcast_snapshot(camera_id, data)
         file_timestamp = Calendar.DateTime.now_utc |> Calendar.DateTime.Format.unix
         response =  %{camera_id: camera_id, image: data, timestamp: file_timestamp, notes: "Evercam Proxy"}
         [200, response]
