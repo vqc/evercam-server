@@ -42,7 +42,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   def test(conn, params) do
-    [code, response] = snapshot_test(params["id"], params["token"], params["vendor_exid"])
+    [code, response] = snapshot_test(params["token"], params["vendor_exid"])
     test_respond(conn, code, response, params)
   end
 
@@ -118,21 +118,32 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  defp snapshot_test(camera_id, token, vendor_exid) do
-    [url, auth, credentials, time, _] = Util.decode_request_token(token)
-    [username, password] = String.split(auth, ":")
-    worker_id = camera_id |> String.to_atom
-    camera = Camera.by_exid(camera_id) |> EvercamMedia.Repo.one
-    vendor_exid = Camera.get_vendor_exid_by_camera_exid(camera_id)
+  defp snapshot_test(token, vendor_exid) do
+    try do
+      [url, auth, credentials, time, _] = Util.decode_request_token(token)
+      [username, password] = String.split(auth, ":")
+      response = case vendor_exid do
+        "samsung" -> HTTPClient.get(:digest_auth, url, username, password)
+        "ubiquiti" -> HTTPClient.get(:cookie_auth, url, username, password)
+        _ -> HTTPClient.get(:basic_auth, url, username, password)
+      end
 
-    case EvercamMedia.Snapshot.Worker.get_snapshot(worker_id) do
-      {:ok, data} ->
-        Util.broadcast_snapshot(camera_id, data)
-        file_timestamp = Calendar.DateTime.now_utc |> Calendar.DateTime.Format.unix
-        response =  %{camera_id: camera_id, image: data, timestamp: file_timestamp, notes: "Evercam Proxy"}
-        [200, response]
-      {:error, error}->
+      check_jpg(response.body)
+      data = %{image: response.body}
+
+      [200, data]
+    rescue
+      error in [FunctionClauseError] ->
+        error_handler(error)
+        [401, %{message: "Unauthorized."}]
+      _error in [SnapshotError] ->
         [504, %{message: "Camera didn't respond with an image."}]
+      _error in [HTTPotion.HTTPError] ->
+        timestamp = Ecto.DateTime.utc
+        [504, %{message: "Camera seems to be offline."}]
+      _error ->
+        Util.error_handler(_error)
+        [500, %{message: "Sorry, we dropped the ball."}]
     end
   end
 
