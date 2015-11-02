@@ -128,13 +128,16 @@ defmodule EvercamMedia.SnapshotController do
         _ -> HTTPClient.get(:basic_auth, url, username, password)
       end
 
-      check_jpg(response.body)
-      data = %{image: response.body}
+      case Util.is_jpeg(response.body) do
+        false -> raise "Not an image"
+        _ ->
+          data = %{image: response.body}
+          [200, data]
+      end
 
-      [200, data]
     rescue
       error in [FunctionClauseError] ->
-        error_handler(error)
+        Util.error_handler(error)
         [401, %{message: "Unauthorized."}]
       _error in [SnapshotError] ->
         [504, %{message: "Camera didn't respond with an image."}]
