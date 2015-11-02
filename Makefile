@@ -9,6 +9,7 @@ ifneq ($(OS),Windows_NT)
 	CFLAGS += -fPIC
 
 	ifeq ($(shell uname),Darwin)
+	  CFLAGS += -I/usr/local/Cellar/jpeg/8d/include/ -L/usr/local/Cellar/jpeg/8d/lib
 		LDFLAGS += -dynamiclib -undefined dynamic_lookup -ljpeg
 	endif
 
