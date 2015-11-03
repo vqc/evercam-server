@@ -63,8 +63,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.info "Connection refused for camera #{camera_exid}"
         update_camera_status("#{camera_exid}", timestamp, false)
        _ ->
-         update_camera_status("#{camera_exid}", timestamp, false)
-         Logger.info "Unhandled HTTPError #{inspect error}"
+         Logger.error "Unhandled HTTPError #{inspect error}"
     end
     {:ok, state}
   end
