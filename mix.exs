@@ -3,7 +3,7 @@ defmodule EvercamMedia.Mixfile do
 
   def project do
     [app: :evercam_media,
-     version: "1.0.0",
+     version: "1.0.1",
      elixir: "> 1.0.0",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
