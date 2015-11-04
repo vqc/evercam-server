@@ -60,17 +60,25 @@ defmodule EvercamMedia.HTTPClient do
   end
 
   defp parse_cookie_header(response) do
-    session_header = Dict.get(response.headers, :"Set-Cookie")
-    session_string =
-      case session_header do
-        [hd|tl] -> session_header |> Enum.join(",")
-        _ ->  ""
-      end
-
-    case Regex.run(~r/(AIROS_SESSIONID=[a-z0-9]+)/, session_string) do
-      [h|_] -> h
-      _ -> nil
+    case response.headers |> Enum.find(fn({k,v}) -> k == "Set-Cookie" end ) do
+      {"Set-Cookie", cookie_string} ->
+        case Regex.run(~r/(AIROS_SESSIONID=[a-z0-9]+)/, cookie_string) do
+          [h|_] -> h
+          _ -> nil
+        end
+      _ ->
     end
+    # session_header = Dict.get(response.headers, :"Set-Cookie")
+    # session_string =
+    #   case session_header do
+    #     [hd|tl] -> session_header |> Enum.join(",")
+    #     _ ->  ""
+    #   end
+    #
+    # case Regex.run(~r/(AIROS_SESSIONID=[a-z0-9]+)/, session_string) do
+    #   [h|_] -> h
+    #   _ -> nil
+    # end
   end
 
   defp multipart_text(username, password) do
@@ -81,34 +89,42 @@ end
 
 defmodule EvercamMedia.HTTPClient.DigestAuth do
   def get_digest_token(response, url, username, password) do
-    digest_head = parse_digest_header(response.headers |> Dict.get(:"WWW-Authenticate"))
-    %{"realm" => realm, "nonce"  => nonce} = digest_head
-    cnonce = :crypto.strong_rand_bytes(16) |> md5
-    url = URI.parse(url)
-    response = create_digest_response(
-      username,
-      password,
-      realm,
-      digest_head |> Map.get("qop"),
-      url.path,
-      nonce,
-      cnonce
-    )
-    [{"username", username},
-     {"realm", realm},
-     {"nonce", nonce},
-     {"uri", url.path},
-     {"cnonce", cnonce},
-     {"response", response}]
-    |> add_opaque(digest_head |> Map.get("opaque"))
-    |> Enum.map(fn {key, val} -> {key, "\"#{val}\""} end)
-    |> add_nonce_counter
-    |> add_auth(digest_head |> Map.get("qop"))
-    |> Enum.map(fn {key, val} -> "#{key}=#{val}" end)
-    |> Enum.join(", ")
+
+    case response.headers |> Enum.find(fn({k,v}) -> k == "WWW-Authenticate" end ) do
+      {"WWW-Authenticate", auth_string} ->
+        digest_head = parse_digest_header(auth_string)
+        %{"realm" => realm, "nonce"  => nonce} = digest_head
+        cnonce = :crypto.strong_rand_bytes(16) |> md5
+        url = URI.parse(url)
+        response = create_digest_response(
+          username,
+          password,
+          realm,
+          digest_head |> Map.get("qop"),
+          url.path,
+          nonce,
+          cnonce
+        )
+        IO.puts inspect response
+        [{"username", username},
+         {"realm", realm},
+         {"nonce", nonce},
+         {"uri", url.path},
+         {"cnonce", cnonce},
+         {"response", response}]
+        |> add_opaque(digest_head |> Map.get("opaque"))
+        |> Enum.map(fn {key, val} -> {key, "\"#{val}\""} end)
+        |> add_nonce_counter
+        |> add_auth(digest_head |> Map.get("qop"))
+        |> Enum.map(fn {key, val} -> "#{key}=#{val}" end)
+        |> Enum.join(", ")
+      _ ->
+        raise "No string found"
+    end
   end
 
   defp parse_digest_header(auth_head) do
+    IO.puts inspect auth_head
     cond do
       parsed = Regex.scan(~r/(\w+\s*)=\"([\w=\s\\]+)/, auth_head) -> parsed
       |> Enum.map(fn [_, key, val] -> {key, val} end)
