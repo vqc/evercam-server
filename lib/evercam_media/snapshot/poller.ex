@@ -106,11 +106,11 @@ defmodule EvercamMedia.Snapshot.Poller do
     case scheduled_now?(state.config.schedule, state.config.timezone) do
       {:ok, true} ->
         # update_scheduler_log(state.name, {true, timestamp, nil})
-        Logger.info "Polling camera: #{state.name} for snapshot"
+        Logger.debug "Polling camera: #{state.name} for snapshot"
         Worker.get_snapshot(state.name, {:poll, timestamp})
       {:ok, false} ->
         # update_scheduler_log(state.name, {false, timestamp, nil})
-        Logger.info "Not Scheduled. Skip fetching snapshot from #{inspect state.name}"
+        Logger.debug "Not Scheduled. Skip fetching snapshot from #{inspect state.name}"
       {:error, message} ->
         # update_scheduler_log(state.name, {:error, timestamp, message})
         Logger.error "Error getting scheduler information for #{inspect state.name}"

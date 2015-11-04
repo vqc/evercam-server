@@ -26,11 +26,11 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
     case previous_image = ConCache.get(:cache, camera_exid) do
       %{} ->
-        Logger.info "Going to calculate MD"
+        Logger.debug "Going to calculate MD"
         motion_level = EvercamMedia.MotionDetection.Lib.compare(image,previous_image[:image])
-        Logger.info "calculated motion level is #{motion_level}"
+        Logger.debug "calculated motion level is #{motion_level}"
       _ ->
-        Logger.info "No previous image found in the cache"
+        Logger.debug "No previous image found in the cache"
         motion_level = nil
     end
 
@@ -63,7 +63,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.info "Connection refused for camera #{camera_exid}"
         update_camera_status("#{camera_exid}", timestamp, false)
        _ ->
-         update_camera_status("#{camera_exid}", timestamp, false)
          Logger.info "Unhandled HTTPError #{inspect error}"
     end
     {:ok, state}
@@ -129,7 +128,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   defp error_handler(error) do
-    Logger.info inspect(error)
-    Logger.info Exception.format_stacktrace System.stacktrace
+    Logger.error inspect(error)
+    Logger.error Exception.format_stacktrace System.stacktrace
   end
 end

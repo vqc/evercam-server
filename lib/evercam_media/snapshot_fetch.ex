@@ -45,8 +45,7 @@ defmodule EvercamMedia.SnapshotFetch do
         Logger.error "Connection refused for camera #{args[:camera_exid]}"
         update_camera_status(args[:camera_exid], timestamp, false)
        _ ->
-         update_camera_status(args[:camera_exid], timestamp, false)
-         Logger.error "Unhandled HTTPError #{inspect error}"
+         Logger.warn "Unhandled HTTPError #{inspect error}"
     end
   end
 
