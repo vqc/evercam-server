@@ -1,8 +1,8 @@
 defmodule EvercamMedia.StreamController do
   use Phoenix.Controller
   use Timex
+  alias EvercamMedia.Util
   alias EvercamMedia.Repo
-  import EvercamMedia.SnapshotFetch
   require Logger
 
   def rtmp(conn, params) do
@@ -36,14 +36,14 @@ defmodule EvercamMedia.StreamController do
 
   defp request_stream(camera_id, token, command) do
     try do
-      [username, password, rtsp_url, _] = decode_request_token(token)
+      [username, password, rtsp_url, _] = Util.decode_request_token(token)
       camera = Repo.one! Camera.by_exid(camera_id)
       check_auth(camera, username, password)
       stream(camera_id, rtsp_url, token, command)
       200
     rescue
       _error ->
-        error_handler(_error)
+        Util.error_handler(_error)
         401
     end
   end

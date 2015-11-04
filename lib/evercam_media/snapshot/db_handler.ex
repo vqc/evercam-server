@@ -18,7 +18,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   require Logger
   alias EvercamMedia.Repo
   alias EvercamMedia.SnapshotRepo
-  alias EvercamMedia.S3
+  alias EvercamMedia.Util
 
 
   def handle_event({:got_snapshot, data}, state) do
@@ -41,7 +41,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         |> save_snapshot_record(timestamp, motion_level)
       rescue
         _error ->
-          error_handler(_error)
+          Util.error_handler(_error)
       end
     end
     note = "Evercam Proxy"
@@ -81,7 +81,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     camera_is_online = camera.is_online
     camera = construct_camera(camera, datetime, status, camera_is_online == status)
     file_path = "/#{camera.exid}/snapshots/#{timestamp}.jpg"
-    camera = %{camera | thumbnail_url: S3.file_url(file_path)}
+    camera = %{camera | thumbnail_url: Util.s3_file_url(file_path)}
     Repo.update camera
 
     unless camera_is_online == status do
@@ -127,8 +127,4 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     %{camera | last_polled_at: datetime, is_online: true, last_online_at: datetime}
   end
 
-  defp error_handler(error) do
-    Logger.error inspect(error)
-    Logger.error Exception.format_stacktrace System.stacktrace
-  end
 end

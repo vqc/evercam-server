@@ -5,7 +5,7 @@ defmodule EvercamMedia.Snapshot.CamClient do
   """
 
   alias EvercamMedia.HTTPClient
-  alias EvercamMedia.Snapshot.Util
+  alias EvercamMedia.Util
   require Logger
 
   @doc """
@@ -32,7 +32,7 @@ defmodule EvercamMedia.Snapshot.CamClient do
   defp parse_snapshot_response(%HTTPotion.Response{status_code: 200} = response) do
     case Util.is_jpeg(response.body) do
       true -> {:ok, response.body}
-      _ -> {:error, "Response not a jpeg image: #{inspect response}"}
+      _ -> {:error, "Response not a jpeg image"}
     end
   end
 

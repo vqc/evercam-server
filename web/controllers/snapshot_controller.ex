@@ -1,8 +1,8 @@
 defmodule EvercamMedia.SnapshotController do
   use Phoenix.Controller
   use Timex
-  import EvercamMedia.SnapshotFetch
-  alias EvercamMedia.HTTPClient
+  alias EvercamMedia.Util
+  alias EvercamMedia.Snapshot.CamClient
   require Logger
 
   def show(conn, params) do
@@ -101,66 +101,31 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp snapshot(camera_id, token, notes \\ "Evercam Proxy") do
-    try do
-      [url, auth, credentials, time, _] = decode_request_token(token)
-      [username, password] = String.split(auth, ":")
-      camera = Camera.by_exid(camera_id) |> EvercamMedia.Repo.one
-      vendor_exid = Camera.get_vendor_exid_by_camera_exid(camera_id)
-      response = case vendor_exid do
-        "samsung" -> HTTPClient.get(:digest_auth, url, username, password)
-        "ubiquiti" -> HTTPClient.get(:cookie_auth, url, username, password)
-        _ -> HTTPClient.get(:basic_auth, url, username, password)
-      end
-
-      data = response.body
-      check_jpg(data)
-      broadcast_snapshot(camera_id, data)
-      file_timestamp = Calendar.DateTime.now_utc |> Calendar.DateTime.Format.unix
-      ConCache.put(:cache, camera_id, %{image: data, timestamp: file_timestamp, notes: notes})
-      response =  %{camera_id: camera_id, image: data, timestamp: file_timestamp, notes: "Evercam Proxy"}
-      [200, response]
-    rescue
-      error in [FunctionClauseError] ->
-        error_handler(error)
-        [401, %{message: "Unauthorized."}]
-      _error in [SnapshotError] ->
-        [504, %{message: "Camera didn't respond with an image."}]
-      _error in [HTTPotion.HTTPError] ->
-        timestamp = Ecto.DateTime.utc
-        update_camera_status(camera_id, timestamp, false)
-        [504, %{message: "Camera seems to be offline."}]
-      _error ->
-        error_handler(_error)
-        [500, %{message: "Sorry, we dropped the ball."}]
-    end
+    vendor_exid = Camera.get_vendor_exid_by_camera_exid(camera_id)
+    get_snapshot_response(token, vendor_exid)
   end
 
   defp snapshot_test(token, vendor_exid) do
-    try do
-      [url, auth, credentials, time, _] = decode_request_token(token)
-      [username, password] = String.split(auth, ":")
-      response = case vendor_exid do
-        "samsung" -> HTTPClient.get(:digest_auth, url, username, password)
-        "ubiquiti" -> HTTPClient.get(:cookie_auth, url, username, password)
-        _ -> HTTPClient.get(:basic_auth, url, username, password)
-      end
+    get_snapshot_response(token, vendor_exid)
+  end
 
-      check_jpg(response.body)
-      data = %{image: response.body}
-
-      [200, data]
-    rescue
-      error in [FunctionClauseError] ->
-        error_handler(error)
-        [401, %{message: "Unauthorized."}]
-      _error in [SnapshotError] ->
+  defp get_snapshot_response(token, vendor_exid) do
+    [url, auth, credentials, time, _] = Util.decode_request_token(token)
+    args = %{
+      vendor_exid: vendor_exid,
+      url: url,
+      auth: auth
+    }
+    case CamClient.fetch_snapshot(args) do
+      {:ok, data} ->
+        response =  %{image: data}
+        [200, response]
+      {:error, "Response not a jpeg image"} ->
         [504, %{message: "Camera didn't respond with an image."}]
-      _error in [HTTPotion.HTTPError] ->
-        timestamp = Ecto.DateTime.utc
+      {:error, %HTTPotion.HTTPError{}} ->
         [504, %{message: "Camera seems to be offline."}]
-      _error ->
-        error_handler(_error)
-        [500, %{message: "Sorry, we dropped the ball."}]
+       _ ->
+         [500, %{message: "Sorry, we dropped the ball."}]
     end
   end
 
