@@ -113,8 +113,13 @@ defmodule EvercamMedia.SnapshotController do
         file_timestamp = Calendar.DateTime.now_utc |> Calendar.DateTime.Format.unix
         response =  %{camera_id: camera_id, image: data, timestamp: file_timestamp, notes: "Evercam Proxy"}
         [200, response]
-      {:error, error}->
+      {:error, "Response not a jpeg image"} ->
         [504, %{message: "Camera didn't respond with an image."}]
+      {:error, %HTTPotion.HTTPError{}} ->
+        [504, %{message: "Camera seems to be offline."}]
+       _ ->
+         Util.error_handler(_error)
+         [500, %{message: "Sorry, we dropped the ball."}]
     end
   end
 
