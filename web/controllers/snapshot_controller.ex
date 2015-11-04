@@ -122,9 +122,9 @@ defmodule EvercamMedia.SnapshotController do
         [200, response]
       {:error, "Response not a jpeg image"} ->
         [504, %{message: "Camera didn't respond with an image."}]
-      {:error, %HTTPotion.Response{}} ->
-        [504, %{message: res.body}]        
-      {:error, %HTTPotion.HTTPError{}} ->
+      {:error, %HTTPoison.Response{}} ->
+        [504, %{message: res.body}]
+      {:error, %HTTPoison.Error{}} ->
         [504, %{message: "Camera seems to be offline."}]
        _ ->
          [500, %{message: "Sorry, we dropped the ball."}]
