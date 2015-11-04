@@ -105,7 +105,6 @@ defmodule EvercamMedia.HTTPClient.DigestAuth do
           nonce,
           cnonce
         )
-        IO.puts inspect response
         [{"username", username},
          {"realm", realm},
          {"nonce", nonce},
@@ -124,7 +123,6 @@ defmodule EvercamMedia.HTTPClient.DigestAuth do
   end
 
   defp parse_digest_header(auth_head) do
-    IO.puts inspect auth_head
     cond do
       parsed = Regex.scan(~r/(\w+\s*)=\"([\w=\s\\]+)/, auth_head) -> parsed
       |> Enum.map(fn [_, key, val] -> {key, val} end)
