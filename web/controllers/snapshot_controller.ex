@@ -116,12 +116,14 @@ defmodule EvercamMedia.SnapshotController do
       url: url,
       auth: auth
     }
-    case CamClient.fetch_snapshot(args) do
+    case res = CamClient.fetch_snapshot(args) do
       {:ok, data} ->
         response =  %{image: data}
         [200, response]
       {:error, "Response not a jpeg image"} ->
         [504, %{message: "Camera didn't respond with an image."}]
+      {:error, %HTTPotion.Response{}} ->
+        [504, %{message: res.body}]        
       {:error, %HTTPotion.HTTPError{}} ->
         [504, %{message: "Camera seems to be offline."}]
        _ ->
