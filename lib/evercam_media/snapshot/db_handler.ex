@@ -52,14 +52,14 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def handle_event({:snapshot_error, data}, state) do
     {camera_exid, timestamp, error} = data
     if is_map(error) do
-      message = Map.get(error, :message)
+      reason = Map.get(error, :reason)
     else
-      message = nil
+      reason = nil
     end
-    case message do
-      "req_timedout" ->
+    case reason do
+      :connect_timeout ->
         Logger.info "Request timeout for camera #{camera_exid}"
-      "econnrefused" ->
+      :econnrefused ->
         Logger.info "Connection refused for camera #{camera_exid}"
         update_camera_status("#{camera_exid}", timestamp, false)
        _ ->
