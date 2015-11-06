@@ -11,7 +11,6 @@ defmodule EvercamMedia do
       supervisor(EvercamMedia.Repo, []),
       supervisor(EvercamMedia.SnapshotRepo, []),
       supervisor(EvercamMedia.Snapshot.WorkerSupervisor, []),
-      :hackney_pool.child_spec(:snapshot_pool,  [timeout: 10000, max_connections: 1000]),
       worker(ConCache, [[ttl_check: 100, ttl: 2000], [name: :cache]]),
       worker(ConCache, [
         [
@@ -26,7 +25,8 @@ defmodule EvercamMedia do
           ttl: 1500
         ],
         [name: :snapshot_schedule]
-      ], id: :snapshot_schedule)
+      ], id: :snapshot_schedule),
+      :hackney_pool.child_spec(:snapshot_pool,  [timeout: 10000, max_connections: 1000])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
