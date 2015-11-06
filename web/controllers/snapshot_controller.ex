@@ -1,36 +1,40 @@
 defmodule EvercamMedia.SnapshotController do
   use Phoenix.Controller
   use Timex
+  use Calendar
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.CamClient
   require Logger
 
   def show(conn, params) do
+    timestamp = DateTime.now_utc |> DateTime.Format.unix
     [code, response] = [200, ConCache.get(:cache, params["id"])]
     unless response do
       [code, response] = snapshot(params["id"], params["token"])
     end
-    show_respond(conn, code, response, params["id"])
+    show_respond(conn, code, response, params["id"], timestamp)
   end
 
   def show_last(conn, params) do
+    timestamp = DateTime.now_utc |> DateTime.Format.unix
     camera_exid = params["id"]
     camera_exid_last = "#{camera_exid}_last"
     [code, response] = [200, ConCache.get(:cache, camera_exid_last)]
     unless response do
       [code, response] = snapshot(params["id"], params["token"])
     end
-    show_respond(conn, code, response, params["id"])
+    show_respond(conn, code, response, params["id"], timestamp)
   end
 
   def show_previous(conn, params) do
+    timestamp = DateTime.now_utc |> DateTime.Format.unix
     camera_exid = params["id"]
     camera_exid_previous = "#{camera_exid}_previous"
     [code, response] = [200, ConCache.get(:cache, camera_exid_previous)]
     unless response do
       [code, response] = snapshot(params["id"], params["token"])
     end
-    show_respond(conn, code, response, params["id"])
+    show_respond(conn, code, response, params["id"], timestamp)
   end
 
   def create(conn, params) do
@@ -46,8 +50,8 @@ defmodule EvercamMedia.SnapshotController do
     test_respond(conn, code, response, params)
   end
 
-  defp show_respond(conn, 200, response, camera_id) do
-    Util.broadcast_snapshot(camera_id, response[:image])
+  defp show_respond(conn, 200, response, camera_id, timestamp) do
+    Util.broadcast_snapshot(camera_id, response[:image], timestamp)
 
     conn
     |> put_status(200)
@@ -56,7 +60,7 @@ defmodule EvercamMedia.SnapshotController do
     |> text response[:image]
   end
 
-  defp show_respond(conn, code, response, _) do
+  defp show_respond(conn, code, response, _, _) do
     conn
     |> put_status(code)
     |> put_resp_header("access-control-allow-origin", "*")
