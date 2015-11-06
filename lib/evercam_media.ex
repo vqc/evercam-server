@@ -11,7 +11,7 @@ defmodule EvercamMedia do
       supervisor(EvercamMedia.Repo, []),
       supervisor(EvercamMedia.SnapshotRepo, []),
       supervisor(EvercamMedia.Snapshot.WorkerSupervisor, []),
-      worker(ConCache, [[ttl_check: 100, ttl: 2000], [name: :cache]]),
+      worker(ConCache, [[ttl_check: 100, ttl: 1500], [name: :cache]]),
       worker(ConCache, [
         [
           ttl_check: :timer.seconds(60*60),
