@@ -46,7 +46,9 @@ defmodule EvercamMedia.SnapshotController do
     test_respond(conn, code, response, params)
   end
 
-  defp show_respond(conn, 200, response, _camera_id) do
+  defp show_respond(conn, 200, response, camera_id) do
+    Util.broadcast_snapshot(camera_id, response[:image])
+
     conn
     |> put_status(200)
     |> put_resp_header("content-type", "image/jpg")
