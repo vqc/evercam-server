@@ -43,10 +43,10 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   def start_worker(camera) do
     case get_config(camera) do
       {:ok, settings} ->
-        Logger.info "Starting worker for #{settings.config.camera_exid}"
+        Logger.debug "Starting worker for #{settings.config.camera_exid}"
         Supervisor.start_child(__MODULE__, [settings])
       {:error, message, url} ->
-        Logger.error "Skipping camera worker as the host is invalid: #{camera.exid}: #{url}"
+        Logger.warn "Skipping camera worker as the host is invalid: #{camera.exid}: #{url}"
     end
   end
 
@@ -61,7 +61,6 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
     |> EvercamMedia.Repo.all([timeout: 15000])
     |> Enum.map(&(start_worker &1))
   end
-
 
   @doc """
   Given a camera, it returns a map of values required for starting a camera worker.
@@ -98,5 +97,4 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
         {:error, "Invalid url for camera", url}
     end
   end
-
 end
