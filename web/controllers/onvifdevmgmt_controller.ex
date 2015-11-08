@@ -2,25 +2,10 @@ defmodule EvercamMedia.ONVIFDeviceManagementController do
   use Phoenix.Controller
   alias EvercamMedia.ONVIFDeviceManagement
   require Logger
-
-  def get_device_information(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
-    |> ONVIFDeviceManagement.get_device_information
-    default_respond(conn, 200, response)
-  end
-
-  def get_network_interfaces(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
-    |> ONVIFDeviceManagement.get_network_interfaces
-    default_respond(conn, 200, response)
-  end
-
-   def get_capabilities(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
-    |> ONVIFDeviceManagement.get_capabilities
+  
+  def invoke_no_params(conn, _params) do 
+    {:ok, response} = conn.assigns.onvif_access_info 
+    |> ONVIFDeviceManagement.device_management_request List.last conn.path_info
     default_respond(conn, 200, response)
   end
 

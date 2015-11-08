@@ -3,77 +3,67 @@ defmodule EvercamMedia.ONVIFPTZController do
   alias EvercamMedia.ONVIFPTZ
   require Logger
 
-  def status(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+  def status(conn, _params) do
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.get_status "Profile_1"
     default_respond(conn, 200, response)
   end
 
-  def nodes(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+  def nodes(conn, _params) do
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.get_nodes
     default_respond(conn, 200, response)
   end
 
-  def configurations(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+  def configurations(conn, _params) do
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.get_configurations
     default_respond(conn, 200, response)
   end
 
-  def presets(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+  def presets(conn, _params) do
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.get_presets "Profile_1"
     default_respond(conn, 200, response)
   end
 
-  def stop(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+  def stop(conn, _params) do
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.stop "Profile_1"
     default_respond(conn, 200, response)
   end
 
-  def home(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+  def home(conn, _params) do
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.goto_home_position "Profile_1"
     default_respond(conn, 200, response)
   end
 
-  def sethome(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+  def sethome(conn, _params) do
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.set_home_position "Profile_1"
     default_respond(conn, 200, response)
   end
 
-  def gotopreset(conn, %{"id" => id, "preset_token" => token}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+  def gotopreset(conn, %{"preset_token" => token}) do
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.goto_preset("Profile_1", token)
     default_respond(conn, 200, response)
   end
 
-  def setpreset(conn, %{"id" => id, "preset_token" => token}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+  def setpreset(conn, %{"preset_token" => token}) do
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.set_preset("Profile_1", "", token)
     default_respond(conn, 200, response)
   end
 
-  def createpreset(conn, %{"id" => id, "preset_name" => name}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+  def createpreset(conn, %{"preset_name" => name}) do
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.set_preset("Profile_1", name)
     default_respond(conn, 200, response)
   end
 
-  def continuousmove(conn, %{"id" => id, "direction" => direction}) do
+  def continuousmove(conn, %{"direction" => direction}) do
     velocity =
       case direction do
         "left" -> [x: -0.1, y: 0.0]
@@ -82,26 +72,24 @@ defmodule EvercamMedia.ONVIFPTZController do
         "down" -> [x: 0.0, y: -0.1]
         _ -> [x: 0.0, y: 0.0]
       end
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+    {:ok, response} = conn.assignbs.onvif_access_info 
     |> ONVIFPTZ.continuous_move("Profile_1", velocity)
     default_respond(conn, 200, response)
   end
 
-  def continuouszoom(conn, %{"id" => id, "mode" => mode}) do
+  def continuouszoom(conn, %{"mode" => mode}) do
     velocity =
       case mode do
         "in" -> [zoom: 0.01]
         "out" -> [zoom: -0.01]
         _ -> [zoom: 0.0]
       end
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.continuous_move("Profile_1", velocity)
     default_respond(conn, 200, response)
   end
 
-  def relativemove(conn, %{"id" => id} = params) do
+  def relativemove(conn, params) do
 
     left = Map.get(params, "left", "0") |> String.to_integer
     right = Map.get(params, "right", "0") |> String.to_integer
@@ -119,8 +107,7 @@ defmodule EvercamMedia.ONVIFPTZController do
         true -> -up
       end
     
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFPTZ.relative_move(
       "Profile_1",
       [x: x / 100.0, y: y / 100.0, zoom: zoom / 100.0]

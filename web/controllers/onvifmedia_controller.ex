@@ -3,23 +3,14 @@ defmodule EvercamMedia.ONVIFMediaController do
   alias EvercamMedia.ONVIFMedia
   require Logger
 
-  def get_profiles(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info
-    |> ONVIFMedia.get_profiles
+  def invoke_no_params(conn, _params) do 
+    {:ok, response} = conn.assigns.onvif_access_info 
+    |> ONVIFMedia.media_request List.last conn.path_info
     default_respond(conn, 200, response)
   end
 
-  def get_service_capabilities(conn, %{"id" => id}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
-    |> ONVIFMedia.get_service_capabilities
-    default_respond(conn, 200, response)
-  end
-
-  def get_snapshot_uri(conn, %{"id" => id, "profile" => profile}) do
-    {:ok, response} = id
-    |> Camera.get_camera_info 
+  def get_snapshot_uri(conn, %{"profile" => profile}) do
+    {:ok, response} = conn.assigns.onvif_access_info
     |> ONVIFMedia.get_snapshot_uri profile
     default_respond(conn, 200, response)
   end

@@ -15,6 +15,10 @@ defmodule EvercamMedia.Router do
     plug EvercamMedia.AuthenticationPlug
   end
 
+  pipeline :onvif do
+    plug EvercamMedia.ONVIFAccessPlug
+  end
+
   scope "/", EvercamMedia do
     pipe_through :browser
 
@@ -44,28 +48,32 @@ defmodule EvercamMedia.Router do
       get "/users/:id", UserController, :show
       put "/users/:id", UserController, :update
     end
+    
+    scope "/" do
+      pipe_through :onvif
+      
+      get "/cameras/:id/ptz/status", ONVIFPTZController, :status
+      get "/cameras/:id/ptz/presets", ONVIFPTZController, :presets
+      get "/cameras/:id/ptz/nodes", ONVIFPTZController, :nodes
+      get "/cameras/:id/ptz/configurations", ONVIFPTZController, :configurations
+      post "/cameras/:id/ptz/home", ONVIFPTZController, :home
+      post "/cameras/:id/ptz/home/set", ONVIFPTZController, :sethome
+      post "/cameras/:id/ptz/presets/:preset_token", ONVIFPTZController, :setpreset
+      post "/cameras/:id/ptz/presets/create/:preset_name", ONVIFPTZController, :createpreset
+      post "/cameras/:id/ptz/presets/go/:preset_token", ONVIFPTZController, :gotopreset
+      post "/cameras/:id/ptz/continuous/start/:direction", ONVIFPTZController, :continuousmove
+      post "/cameras/:id/ptz/continuous/zoom/:mode", ONVIFPTZController, :continuouszoom
+      post "/cameras/:id/ptz/continuous/stop", ONVIFPTZController, :stop
+      post "/cameras/:id/ptz/relative", ONVIFPTZController, :relativemove
 
-    get "/cameras/:id/ptz/status", ONVIFPTZController, :status
-    get "/cameras/:id/ptz/presets", ONVIFPTZController, :presets
-    get "/cameras/:id/ptz/nodes", ONVIFPTZController, :nodes
-    get "/cameras/:id/ptz/configurations", ONVIFPTZController, :configurations
-    post "/cameras/:id/ptz/home", ONVIFPTZController, :home
-    post "/cameras/:id/ptz/home/set", ONVIFPTZController, :sethome
-    post "/cameras/:id/ptz/presets/:preset_token", ONVIFPTZController, :setpreset
-    post "/cameras/:id/ptz/presets/create/:preset_name", ONVIFPTZController, :createpreset
-    post "/cameras/:id/ptz/presets/go/:preset_token", ONVIFPTZController, :gotopreset
-    post "/cameras/:id/ptz/continuous/start/:direction", ONVIFPTZController, :continuousmove
-    post "/cameras/:id/ptz/continuous/zoom/:mode", ONVIFPTZController, :continuouszoom
-    post "/cameras/:id/ptz/continuous/stop", ONVIFPTZController, :stop
-    post "/cameras/:id/ptz/relative", ONVIFPTZController, :relativemove
+      get "/devices/:id/onvif/v20/GetDeviceInformation", ONVIFDeviceManagementController, :invoke_no_params
+      get "/devices/:id/onvif/v20/GetNetworkInterfaces", ONVIFDeviceManagementController, :invoke_no_params
+      get "/devices/:id/onvif/v20/GetCapabilities", ONVIFDeviceManagementController, :invoke_no_params
 
-    get "/devices/:id/onvif/v20/GetDeviceInformation", ONVIFDeviceManagementController, :get_device_information
-    get "/devices/:id/onvif/v20/GetNetworkInterfaces", ONVIFDeviceManagementController, :get_network_interfaces
-    get "/devices/:id/onvif/v20/GetCapabilities", ONVIFDeviceManagementController, :get_capabilities
-
-    get "/devices/:id/onvif/v20/GetProfiles", ONVIFMediaController, :get_profiles
-    get "/devices/:id/onvif/v20/GetServiceCapabilities", ONVIFMediaController, :get_service_capabilities
-    get "/devices/:id/onvif/v20/GetSnapshotUri/:profile", ONVIFMediaController, :get_snapshot_uri
+      get "/devices/:id/onvif/v20/GetProfiles", ONVIFMediaController, :invoke_no_params
+      get "/devices/:id/onvif/v20/GetServiceCapabilities", ONVIFMediaController, :invoke_no_params
+      get "/devices/:id/onvif/v20/GetSnapshotUri/:profile", ONVIFMediaController, :get_snapshot_uri
+    end
 
   end
 end
