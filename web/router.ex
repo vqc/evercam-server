@@ -59,10 +59,12 @@ defmodule EvercamMedia.Router do
     post "/cameras/:id/ptz/continuous/stop", ONVIFPTZController, :stop
     post "/cameras/:id/ptz/relative", ONVIFPTZController, :relativemove
 
-    get "/cameras/:id/macaddr", ONVIFDeviceManagementController, :macaddr
-    get "/cameras/:id/camerainfo", ONVIFDeviceManagementController, :camerainfo
-    get "/cameras/:id/networkinterfaces", ONVIFDeviceManagementController, :networkinterfaces
+    get "/devices/:id/onvif/v20/GetDeviceInformation", ONVIFDeviceManagementController, :get_device_information
+    get "/devices/:id/onvif/v20/GetNetworkInterfaces", ONVIFDeviceManagementController, :get_network_interfaces
+    get "/devices/:id/onvif/v20/GetCapabilities", ONVIFDeviceManagementController, :get_capabilities
 
-    get "/cameras/:id/profiles", ONVIFMediaController, :profiles
+    get "/devices/:id/onvif/v20/GetProfiles", ONVIFMediaController, :get_profiles
+    get "/devices/:id/onvif/v20/GetServiceCapabilities", ONVIFMediaController, :get_service_capabilities
+
   end
 end

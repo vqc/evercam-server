@@ -1,21 +1,28 @@
 defmodule EvercamMedia.ONVIFDeviceManagementControllerTest do
   use EvercamMedia.ConnCase
 
-  test "GET /v1/cameras/:id/macaddr, returns MAC address" do
-    conn = get conn(), "/v1/cameras/mobile-mast-test/macaddr"
-    mac_address = json_response(conn, 200) |> Map.get("mac_address")
-    assert mac_address == "44:19:b6:4b:f1:a2"
-  end
-
-  test "GET /v1/cameras/:id/camerainfo, returns meaningful info" do
-    conn = get conn(), "/v1/cameras/mobile-mast-test/camerainfo"
+ 
+  test "GET /v1/devices/:id/onvif/v20/GetDeviceInformation, returns meaningful info" do
+    conn = get conn(), "/v1/devices/mobile-mast-test/onvif/v20/GetDeviceInformation"
     camera_model = json_response(conn, 200) |> Map.get("Model")
     assert camera_model == "DS-2DF7286-A"
   end
 
-  test "GET /v1/cameras/:id/networkinterfaces, returns meaningful info" do
-    conn = get conn(), "/v1/cameras/mobile-mast-test/networkinterfaces"
-    enabled =  json_response(conn, 200) |> Map.get("Enabled")
+  test "GET /v1/devices/:id/onvif/v20/GetNetworkInterfaces, returns meaningful info" do
+    conn = get conn(), "/v1/devices/mobile-mast-test/onvif/v20/GetNetworkInterfaces"
+    enabled =  json_response(conn, 200)
+    |> Map.get("NetworkInterfaces") 
+    |> Map.get("Enabled")
     assert enabled == "true"
   end
+
+  test "GET /v1/devices/:id/onvif/v20/GetCapabilities, returns meaningful info" do
+    conn = get conn(), "/v1/devices/mobile-mast-test/onvif/v20/GetCapabilities"
+    device_xaddr = json_response(conn, 200)
+    |> Map.get("Capabilities")
+    |> Map.get("Device")
+    |> Map.get("XAddr")
+    assert device_xaddr == "http://192.168.1.100:8100/onvif/device_service"
+  end 
+    
 end

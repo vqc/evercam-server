@@ -1,88 +1,79 @@
 defmodule EvercamMedia.ONVIFPTZ do
   alias EvercamMedia.ONVIFClient
 
-  def get_nodes(url, username, password) do
-    method = "GetNodes"
-    xpath = "/env:Envelope/env:Body/tptz:GetNodesResponse"
-    ptz_request(url, method, xpath, username, password)
+  def get_nodes(access_info) do
+    access_info
+    |> ptz_request "GetNodes"
   end
 
-  def get_configurations(url, username, password) do
-    method = "GetConfigurations"
-    xpath = "/env:Envelope/env:Body/tptz:GetConfigurationsResponse"
-    ptz_request(url, method, xpath, username, password)
+  def get_configurations(access_info) do
+    access_info
+    |> ptz_request "GetConfigurations"
   end
 
-  def get_presets(url, username, password, profile_token) do
-    method = "GetPresets"
-    xpath = "/env:Envelope/env:Body/tptz:GetPresetsResponse"
+  def get_presets(access_info, profile_token) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>"
-    {:ok, response} = ptz_request(url, method, xpath, username, password, parameters)
-    presets = response |> Map.get("Preset") |> Enum.filter(&(Map.get(&1, "Name") != nil))
+    {:ok, response} = access_info
+    |> ptz_request("GetPresets", parameters)
+    presets = response 
+    |> Map.get("Preset") 
+    |> Enum.filter(&(Map.get(&1, "Name") != nil))
     {:ok, Map.put(%{}, "Presets", presets)}
   end
 
-  def get_status(url, username, password, profile_token) do
-    method = "GetStatus"
-    xpath = "/env:Envelope/env:Body/tptz:GetStatusResponse"
+  def get_status(access_info, profile_token) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>"
-    ptz_request(url, method, xpath, username, password, parameters)
+    access_info
+    |> ptz_request("GetStatus", parameters)
   end
 
-  def goto_preset(url, username, password, profile_token, preset_token, speed \\ []) do
-    method = "GotoPreset"
-    xpath = "/env:Envelope/env:Body/tptz:GotoPresetResponse"
+  def goto_preset(access_info, profile_token, preset_token, speed \\ []) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken><PresetToken>#{preset_token}</PresetToken>" <>
       case pan_tilt_zoom_vector speed do
         "" -> ""
         vector -> "<Speed>#{vector}</Speed>"
       end
-    ptz_request(url, method, xpath, username, password, parameters)
+    access_info
+    |> ptz_request("GotoPreset", parameters)
   end
 
-  def relative_move(url, username, password, profile_token, translation, speed \\ []) do
-    method = "RelativeMove"
-    xpath = "/env:Envelope/env:Body/tptz:RelativeMoveResponse"
+  def relative_move(access_info, profile_token, translation, speed \\ []) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken><Translation>#{pan_tilt_zoom_vector translation}</Translation>" <>
       case pan_tilt_zoom_vector speed do
         "" -> ""
         vector -> "<Speed>#{vector}</Speed>"
       end
-    ptz_request(url, method, xpath,username, password, parameters)
+    access_info
+    |> ptz_request("RelativeMove", parameters)
   end
 
-  def continuous_move(url, username, password, profile_token, velocity \\ []) do
-    method = "ContinuousMove"
-    xpath = "/env:Envelope/env:Body/tptz:ContinuousMoveResponse"
+  def continuous_move(access_info, profile_token, velocity \\ []) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>" <>
       case pan_tilt_zoom_vector velocity do
         "" -> ""
         vector -> "<Velocity>#{vector}</Velocity>"
       end
-    ptz_request(url, method, xpath, username, password, parameters)
+    access_info
+    |> ptz_request("ContinuousMove", parameters)
   end
 
-  def goto_home_position(url, username, password, profile_token, speed \\ []) do
-    method = "GotoHomePosition"
-    xpath = "/env:Envelope/env:Body/tptz:GotoHomePositionResponse"
+  def goto_home_position(access_info, profile_token, speed \\ []) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>" <>
       case pan_tilt_zoom_vector speed do
         "" -> ""
         vector  -> "<Speed>#{vector}</Speed>"
       end
-    ptz_request(url, method, xpath, username, password, parameters)
+    access_info
+    |> ptz_request("GotoHomePosition", parameters)
   end
 
-  def remove_preset(url, username, password, profile_token, preset_token) do
-    method = "RemovePreset"
-    xpath = "/env:Envelope/env:Body/tptz:RemovePresetResponse"
+  def remove_preset(access_info, profile_token, preset_token) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken><PresetToken>#{preset_token}</PresetToken>"
-    ptz_request(url, method, xpath, username, password, parameters)
+    access_info
+    |> ptz_request("RemovePreset", parameters)
   end
 
-  def set_preset(url, username, password, profile_token, preset_name \\ "", preset_token \\ "") do
-    method = "SetPreset"
-    xpath = "/env:Envelope/env:Body/tptz:SetPresetResponse"
+  def set_preset(access_info, profile_token, preset_name \\ "", preset_token \\ "") do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>" <>
       case preset_name do
         "" -> ""
@@ -92,21 +83,20 @@ defmodule EvercamMedia.ONVIFPTZ do
         "" -> ""
         _ -> "<PresetToken>#{preset_token}</PresetToken>"
       end
-    ptz_request(url, method, xpath, username, password, parameters)
+    access_info
+    |> ptz_request("SetPreset", parameters)
   end
 
-  def set_home_position(url, username, password, profile_token) do
-    method = "SetHomePosition"
-    xpath = "/env:Envelope/env:Body/tptz:SetHomePositionResponse"
+  def set_home_position(access_info, profile_token) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>"
-    ptz_request(url, method, xpath, username, password, parameters)
+    access_info
+    |> ptz_request("SetHomePosition", parameters)
   end
 
-  def stop(url, username, password, profile_token) do
-    method = "Stop"
-    xpath = "/env:Envelope/env:Body/tptz:StopResponse"
+  def stop(access_info, profile_token) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>"
-    ptz_request(url, method, xpath, username, password, parameters)
+    access_info
+    |> ptz_request("Stop", parameters)
   end
 
   def pan_tilt_zoom_vector(vector) do
@@ -124,7 +114,9 @@ defmodule EvercamMedia.ONVIFPTZ do
     pan_tilt <> zoom
   end
 
-  defp ptz_request(url, method, xpath, username, password, parameters \\ "") do
-    ONVIFClient.onvif_call(url, :ptz, method, xpath, username, password, parameters)
+  defp ptz_request(access_info, method, parameters \\ "") do
+    xpath = "/env:Envelope/env:Body/tptz:#{method}Response"
+    ONVIFClient.onvif_call(access_info, :ptz, method, xpath, parameters)
   end
+
 end

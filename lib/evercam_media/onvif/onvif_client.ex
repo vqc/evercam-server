@@ -5,17 +5,19 @@ defmodule EvercamMedia.ONVIFClient do
   Record.defrecord :xmlText, Record.extract(:xmlText, from_lib: "xmerl/include/xmerl.hrl")
   Record.defrecord :xmlAttribute, Record.extract(:xmlAttribute, from_lib: "xmerl/include/xmerl.hrl")
 
-  def onvif_call(base_url, service, method, xpath, username, password, parameters \\ "") do
+  def onvif_call(%{url: base_url, auth: auth}, service, method, xpath, parameters \\ "") do
     url = "#{base_url}/onvif/" <>
       case service do
         :ptz -> "PTZ"
         :device ->"device_service"
         :media -> "Media"
+        :recording -> "Recording"
       end
-
+    [username, password] = auth |> String.split ":" 
     request = gen_onvif_request(service, method, username, password, parameters)
     response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
 
+    # IO.puts inspect response
     if HTTPotion.Response.success?(response) do
       {xml, _rest} = :xmerl_scan.string(to_char_list(response.body))
       {:ok, :xmerl_xpath.string(to_char_list(xpath), xml) |> parse_elements}
@@ -31,6 +33,7 @@ defmodule EvercamMedia.ONVIFClient do
         :ptz -> "http://www.onvif.org/ver10/ptz/wsdl"
         :device -> "http://www.onvif.org/ver20/device/wsdl"
         :media -> "http://www.onvif.org/ver10/media/wsdl"
+        :recording -> "http://www.onvif.org/ver10/recording/wsdl"
       end
 
     {wsse_username, wsse_password, wsse_nonce, wsse_created} = get_wsse_header_data(username,password)
