@@ -32,7 +32,7 @@ defmodule EvercamMedia.ONVIFPTZController do
   end
 
   def stop(conn, %{"id" => id}) do
-		{:ok, response} = id
+    {:ok, response} = id
     |> Camera.get_camera_info 
     |> ONVIFPTZ.stop "Profile_1"
     default_respond(conn, 200, response)

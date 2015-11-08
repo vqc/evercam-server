@@ -17,6 +17,13 @@ defmodule EvercamMedia.ONVIFMediaController do
     default_respond(conn, 200, response)
   end
 
+  def get_snapshot_uri(conn, %{"id" => id, "profile" => profile}) do
+    {:ok, response} = id
+    |> Camera.get_camera_info 
+    |> ONVIFMedia.get_snapshot_uri profile
+    default_respond(conn, 200, response)
+  end
+
   defp default_respond(conn, code, response) do
     conn
     |> put_status(code)
