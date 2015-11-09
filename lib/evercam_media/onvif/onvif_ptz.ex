@@ -115,8 +115,7 @@ defmodule EvercamMedia.ONVIFPTZ do
   end
 
   defp ptz_request(access_info, method, parameters \\ "") do
-    xpath = "/env:Envelope/env:Body/tptz:#{method}Response"
-    ONVIFClient.onvif_call(access_info, :ptz, method, xpath, parameters)
+    ONVIFClient.request(access_info, "PTZ", method, parameters)
   end
 
 end

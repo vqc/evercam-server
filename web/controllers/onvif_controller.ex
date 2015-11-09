@@ -1,17 +1,17 @@
-defmodule EvercamMedia.ONVIFMediaController do
+defmodule EvercamMedia.ONVIFController do
   use Phoenix.Controller
-  alias EvercamMedia.ONVIFMedia
+  alias EvercamMedia.ONVIFClient
   require Logger
-
-  def invoke_no_params(conn, _params) do 
+  
+  def invoke_no_params(conn, %{"service" => service, "method" => method}) do 
     {:ok, response} = conn.assigns.onvif_access_info 
-    |> ONVIFMedia.media_request List.last conn.path_info
+    |> ONVIFClient.request(service, method)
     default_respond(conn, 200, response)
   end
 
   def get_snapshot_uri(conn, %{"profile" => profile}) do
     {:ok, response} = conn.assigns.onvif_access_info
-    |> ONVIFMedia.get_snapshot_uri profile
+    |> ONVIFClient.request("media", "GetSnapshotUri", "<ProfileToken>#{profile}</ProfileToken>")
     default_respond(conn, 200, response)
   end
 
