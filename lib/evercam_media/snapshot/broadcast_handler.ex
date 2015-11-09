@@ -1,4 +1,5 @@
 defmodule EvercamMedia.Snapshot.BroadcastHandler do
+  use Calendar
   use GenEvent
 
   @moduledoc """
@@ -6,7 +7,8 @@ defmodule EvercamMedia.Snapshot.BroadcastHandler do
   """
 
   def handle_event({:got_snapshot, data}, state) do
-    {camera_exid, timestamp, image} = data
+    timestamp = DateTime.now_utc |> DateTime.Format.unix
+    {camera_exid, _, image} = data
     EvercamMedia.Endpoint.broadcast(
       "cameras:#{camera_exid}",
       "snapshot-taken",
@@ -18,5 +20,4 @@ defmodule EvercamMedia.Snapshot.BroadcastHandler do
   def handle_event(_, state) do
     {:ok, state}
   end
-
 end
