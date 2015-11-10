@@ -64,7 +64,11 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       :ehostunreach ->
         pid = camera_exid |> String.to_atom |> Process.whereis
         Process.exit pid, :shutdown
-        Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: ehostunreach"            
+        Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: ehostunreach"
+      :enetunreach ->
+        pid = camera_exid |> String.to_atom |> Process.whereis
+        Process.exit pid, :shutdown
+        Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: enetunreach"
       :connect_timeout ->
         Logger.info "Request timeout for camera #{camera_exid}"
       :econnrefused ->
