@@ -57,6 +57,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       reason = nil
     end
     case reason do
+      :nxdomain ->
+        pid = camera_exid |> String.to_atom |> Process.whereis
+        Process.exit pid, :shutdown
+        Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: nxdomain"      
       :connect_timeout ->
         Logger.info "Request timeout for camera #{camera_exid}"
       :econnrefused ->
