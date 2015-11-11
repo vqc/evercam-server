@@ -95,55 +95,6 @@ defmodule Camera do
     [url, username, password]
   end
 
-  def recording?(camera_with_recordings) do
-    recording_cameras = [
-      "bankers",
-      "beefcammobile",
-      "bennett",
-      "carrollszoocam",
-      "centralbankbuild",
-      "dancecam",
-      "daqrihack1",
-      "daqrihack2",
-      "dcctestdumpinghk",
-      "devilsbitcidercam",
-      "evercam-remembrance-camera",
-      "gemcon-cathalbrugha",
-      "gpocam",
-      "hikdemo",
-      "hw-hack-auditorium",
-      "kanoodle-monks-back-door",
-      "kanoodle-monks-bar",
-      "kanoodle-monks-kitch",
-      "kanoodle-monks-seats",
-      "kanoodle-monks-stair",
-      "kanoodle-monks-till",
-      "landing-zone-backdoor",
-      "landing-zone-front",
-      "mac1",
-      "mac2",
-      "pch-hackcam1",
-      "pch-hackcam2",
-      "smartcity1",
-      "stephens-green",
-      "treacyconsulting1",
-      "treacyconsulting2",
-      "treacyconsulting3",
-      "wayra-agora",
-      "wayra_office",
-      "wayrahikvision",
-      "zipyard-navan-foh",
-      "zipyard-ranelagh-foh"
-    ]
-
-    cloud_recording = List.first(camera_with_recordings.cloud_recordings)
-    if cloud_recording == nil do
-      false
-    else
-      cloud_recording.frequency == 60
-    end
-  end
-
   def schedule(camera_with_recordings) do
     cloud_recording = List.first(camera_with_recordings.cloud_recordings)
     if cloud_recording == nil do
