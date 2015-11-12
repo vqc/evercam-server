@@ -67,15 +67,15 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.error "emfile error. Traceback."
         Util.error_handler(error)
       :nxdomain ->
-        pid = camera_exid |> String.to_atom |> Process.whereis
+        pid = camera_exid |> Process.whereis
         Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: nxdomain"
         Process.exit pid, :shutdown
       :ehostunreach ->
-        pid = camera_exid |> String.to_atom |> Process.whereis
+        pid = camera_exid |> Process.whereis
         Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: ehostunreach"
         Process.exit pid, :shutdown
       :enetunreach ->
-        pid = camera_exid |> String.to_atom |> Process.whereis
+        pid = camera_exid |> Process.whereis
         Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: enetunreach"
         Process.exit pid, :shutdown
       :timeout ->
