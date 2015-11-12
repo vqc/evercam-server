@@ -5,17 +5,17 @@ defmodule EvercamMedia.ONVIFClient do
   Record.defrecord :xmlText, Record.extract(:xmlText, from_lib: "xmerl/include/xmerl.hrl")
   Record.defrecord :xmlAttribute, Record.extract(:xmlAttribute, from_lib: "xmerl/include/xmerl.hrl")
 
-  def request(%{url: base_url, auth: auth}, service, method, parameters \\ "") do
+  def request(%{"url" => base_url, "auth" => auth}, service, operation, parameters \\ "") do
     url = "#{base_url}/onvif/#{service}"
     namespace =  case service do
                    "PTZ" -> "tptz"
                    "device_service" -> "tds"
                    "media" -> "trt"
                   end
-    xpath = "/env:Envelope/env:Body/#{namespace}:#{method}Response"
+    xpath = "/env:Envelope/env:Body/#{namespace}:#{operation}Response"
 
     [username, password] = auth |> String.split ":" 
-    request = gen_onvif_request(service, method, username, password, parameters)
+    request = gen_onvif_request(namespace, operation, username, password, parameters)
     response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
 
     # IO.puts inspect response
@@ -23,17 +23,17 @@ defmodule EvercamMedia.ONVIFClient do
       {xml, _rest} = :xmerl_scan.string(to_char_list(response.body))
       {:ok, :xmerl_xpath.string(to_char_list(xpath), xml) |> parse_elements}
     else
-      Logger.error "Error invoking #{method}. URL: #{url} username: #{username} password: #{password}. Request: #{inspect request}. Response #{inspect response}."
+      Logger.error "Error invoking #{operation}. URL: #{url} username: #{username} password: #{password}. Request: #{inspect request}. Response #{inspect response}."
       {:error, response.status_code, response}
     end
   end
 
-  defp gen_onvif_request(service, method, username, password, parameters) do
+  defp gen_onvif_request(namespace, operation, username, password, parameters) do
     wsdl_url =
-      case service do
-        "PTZ" -> "http://www.onvif.org/ver10/ptz/wsdl"
-        "device_service" -> "http://www.onvif.org/ver20/device/wsdl"
-        "media" -> "http://www.onvif.org/ver10/media/wsdl"
+      case namespace do
+        "tptz" -> "http://www.onvif.org/ver10/ptz/wsdl"
+        "tds" -> "http://www.onvif.org/ver20/device/wsdl"
+        "trt" -> "http://www.onvif.org/ver10/media/wsdl"
       end
 
     {wsse_username, wsse_password, wsse_nonce, wsse_created} = get_wsse_header_data(username,password)
@@ -48,7 +48,7 @@ defmodule EvercamMedia.ONVIFClient do
     <wsse:Nonce>#{wsse_nonce}</wsse:Nonce>
     <wsu:Created>#{wsse_created}</wsu:Created></wsse:UsernameToken>
     </wsse:Security></SOAP-ENV:Header><SOAP-ENV:Body>
-    <tds:#{method} xmlns:tds=\"#{wsdl_url}\">#{parameters}</tds:#{method}>
+    <#{namespace}:#{operation} xmlns:#{namespace}=\"#{wsdl_url}\">#{parameters}</#{namespace}:#{operation}>
     </SOAP-ENV:Body></SOAP-ENV:Envelope>"
   end
 

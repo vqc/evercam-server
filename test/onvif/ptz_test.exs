@@ -2,8 +2,10 @@ defmodule PTZTest do
   use ExUnit.Case
   alias EvercamMedia.ONVIFPTZ
   
+  @access_info %{"url" => "http://149.13.244.32:8100", "auth" => "admin:mehcam"}
+  
   test "get_nodes method on hikvision camera" do
-    {:ok, response} = ONVIFPTZ.get_nodes(%{url: "http://149.13.244.32:8100", auth: "admin:mehcam"})
+    {:ok, response} = ONVIFPTZ.get_nodes @access_info
     assert response 
            |> Map.get("PTZNode")
            |> Map.get("Name") == "PTZNODE"
@@ -14,7 +16,7 @@ defmodule PTZTest do
    end 
 
   test "get_configurations method on hikvision camera" do
-    {:ok, response} = ONVIFPTZ.get_configurations(%{url: "http://149.13.244.32:8100", auth: "admin:mehcam"})
+    {:ok, response} = ONVIFPTZ.get_configurations @access_info
     assert response
            |> Map.get("PTZConfiguration")
            |> Map.get("Name") == "PTZ"
@@ -24,7 +26,7 @@ defmodule PTZTest do
   end 
 
   test "get_presets method on hikvision camera" do
-    {:ok, response} = ONVIFPTZ.get_presets(%{url: "http://149.13.244.32:8100", auth: "admin:mehcam"}, "Profile_1")
+    {:ok, response} = ONVIFPTZ.get_presets(@access_info, "Profile_1")
     [first_preset | _] = 
       response
       |> Map.get("Presets")
@@ -35,36 +37,36 @@ defmodule PTZTest do
   end   
 
   test "goto_preset method on hikvision camera" do
-    {:ok, response} = ONVIFPTZ.goto_preset(%{url: "http://149.13.244.32:8100", auth: "admin:mehcam"}, "Profile_1", "6")
+    {:ok, response} = ONVIFPTZ.goto_preset(@access_info, "Profile_1", "6")
     assert response == :ok
   end   
 
   test "set_preset and remove_preset method on hikvision camera" do
-    {:ok, response} = ONVIFPTZ.set_preset(%{url: "http://149.13.244.32:8100", auth: "admin:mehcam"}, "Profile_1")
+    {:ok, response} = ONVIFPTZ.set_preset(@access_info, "Profile_1")
 	  preset_token = response |> Map.get("PresetToken")
-    {:ok, response} = ONVIFPTZ.remove_preset(%{url: "http://149.13.244.32:8100", auth: "admin:mehcam"}, "Profile_1", preset_token)
+    {:ok, response} = ONVIFPTZ.remove_preset(@access_info, "Profile_1", preset_token)
 	  assert response == :ok
   end
 
   test "set_home_position method on hikvision camera" do
-    {:ok, response} = ONVIFPTZ.set_home_position(%{url: "http://149.13.244.32:8100", auth: "admin:mehcam"}, "Profile_1")
+    {:ok, response} = ONVIFPTZ.set_home_position(@access_info, "Profile_1")
 	  assert response == :ok
   end
 
   test "goto_home_position method on hikvision camera" do
-    {:ok, response} = ONVIFPTZ.goto_home_position(%{url: "http://149.13.244.32:8100", auth: "admin:mehcam"}, "Profile_1")
+    {:ok, response} = ONVIFPTZ.goto_home_position(@access_info, "Profile_1")
 	  assert response == :ok
   end   
 
   test "relative_move method on hikvision camera" do
-    {:ok, response} = ONVIFPTZ.relative_move(%{url: "http://149.13.244.32:8100", auth: "admin:mehcam"}, "Profile_1", [x: 0.0, y: 0.0, zoom: 0.0])
+    {:ok, response} = ONVIFPTZ.relative_move(@access_info, "Profile_1", [x: 0.0, y: 0.0, zoom: 0.0])
 	  assert response == :ok
   end   
   
   test "stop method on hikvision camera" do
-    {:ok, response} = ONVIFPTZ.continuous_move(%{url: "http://149.13.244.32:8100", auth: "admin:mehcam"}, "Profile_1", [x: 0.1, y: 0.0])
+    {:ok, response} = ONVIFPTZ.continuous_move(@access_info, "Profile_1", [x: 0.1, y: 0.0])
     assert response == :ok
-    {:ok, response} = ONVIFPTZ.stop(%{url: "http://149.13.244.32:8100", auth: "admin:mehcam"}, "Profile_1")
+    {:ok, response} = ONVIFPTZ.stop(@access_info, "Profile_1")
     assert response == :ok
   end
 

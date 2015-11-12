@@ -5,8 +5,12 @@ defmodule EvercamMedia.ONVIFAccessPlug do
   end
 
   def call(conn, _) do
-    %{"id" => id} = conn.params
-    assign(conn, :onvif_access_info, Camera.get_camera_info id)
+    access_info =  case conn.query_params do
+                     %{"auth" => _auth, "url" => _url} -> conn.query_params
+                     _ -> %{"id" => id} = conn.params
+                          Camera.get_camera_info id
+                   end
+    assign(conn, :onvif_access_info, access_info)
   end
 
 end

@@ -3,9 +3,9 @@ defmodule EvercamMedia.ONVIFController do
   alias EvercamMedia.ONVIFClient
   require Logger
   
-  def invoke_no_params(conn, %{"service" => service, "method" => method}) do 
+  def invoke_no_params(conn, %{"service" => service, "operation" => operation}) do 
     {:ok, response} = conn.assigns.onvif_access_info 
-    |> ONVIFClient.request(service, method)
+    |> ONVIFClient.request(service, operation)
     default_respond(conn, 200, response)
   end
 

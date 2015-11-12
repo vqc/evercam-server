@@ -114,8 +114,8 @@ defmodule EvercamMedia.ONVIFPTZ do
     pan_tilt <> zoom
   end
 
-  defp ptz_request(access_info, method, parameters \\ "") do
-    ONVIFClient.request(access_info, "PTZ", method, parameters)
+  defp ptz_request(access_info, operation, parameters \\ "") do
+    ONVIFClient.request(access_info, "PTZ", operation, parameters)
   end
 
 end

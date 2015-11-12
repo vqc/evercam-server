@@ -89,8 +89,8 @@ defmodule Camera do
   def get_camera_info(camera_id) do
     camera = EvercamMedia.Repo.one! by_exid(camera_id)
    %{
-      url: external_url(camera),
-      auth: auth(camera)
+      "url" => external_url(camera),
+      "auth" => auth(camera)
     }
   end
 

@@ -68,7 +68,7 @@ defmodule EvercamMedia.Router do
 
       get "/devices/:id/onvif/v20/media/GetSnapshotUri/:profile", ONVIFController, :get_snapshot_uri
 
-      get "/devices/:id/onvif/v20/:service/:method", ONVIFController, :invoke_no_params
+      get "/onvif/v20/:service/:operation", ONVIFController, :invoke_no_params
     end
 
   end
