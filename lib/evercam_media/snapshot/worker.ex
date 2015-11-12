@@ -121,7 +121,15 @@ defmodule EvercamMedia.Snapshot.Worker do
   @doc """
   """
   def handle_cast({:get_camera_snapshot, timestamp}, state) do
-    case _get_snapshot(state) do
+    _get_snapshot(state, timestamp)
+    {:noreply, state}
+  end
+
+  @doc """
+  Server callback for camera_reply
+  """
+  def handle_info({:camera_reply, result, timestamp}, state) do
+    case result do
       {:ok, image} ->
         data = {state.name, timestamp, image}
         GenEvent.sync_notify(state.event_manager, {:got_snapshot, data})
@@ -155,13 +163,27 @@ defmodule EvercamMedia.Snapshot.Worker do
   @doc """
   Gets camera config from the server state
   """
+
   defp get_from_state(:config, state) do
     Map.get(state, :config)
   end
 
   defp _get_snapshot(state) do
     config = get_from_state(:config, state)
-    CamClient.fetch_snapshot(config)
+    worker = self
+    spawn fn ->
+      result = CamClient.fetch_snapshot(config)
+      send worker, {:camera_reply, result}
+    end
+  end
+
+  defp _get_snapshot(state, timestamp) do
+    config = get_from_state(:config, state)
+    worker = self
+    spawn fn ->
+      result = CamClient.fetch_snapshot(config)
+      send worker, {:camera_reply, result, timestamp}
+    end
   end
 
 end
