@@ -2,7 +2,7 @@ defmodule EvercamMedia.UserSocket do
   use Phoenix.Socket
 
   ## Channels
-  channel "cameras:*", EvercamMedia.SnapshotChannel
+  # channel "cameras:*", EvercamMedia.SnapshotChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket, check_origin: false

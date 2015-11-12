@@ -32,11 +32,11 @@ defmodule EvercamMedia.Util do
   end
 
   def broadcast_snapshot(camera_id, image, timestamp) do
-    EvercamMedia.Endpoint.broadcast(
-      "cameras:#{camera_id}",
-      "snapshot-taken",
-      %{image: Base.encode64(image), timestamp: timestamp}
-    )
+    # EvercamMedia.Endpoint.broadcast(
+    #   "cameras:#{camera_id}",
+    #   "snapshot-taken",
+    #   %{image: Base.encode64(image), timestamp: timestamp}
+    # )
   end
 
   def s3_file_url(file_name) do
