@@ -5,6 +5,9 @@
 # is restricted to this project.
 use Mix.Config
 
+config :hackney,
+  :timeout, 5000
+
 # Configures the endpoint
 config :evercam_media, EvercamMedia.Endpoint,
   check_origin: false,
@@ -16,8 +19,8 @@ config :evercam_media, EvercamMedia.Endpoint,
   pubsub: [name: EvercamMedia.PubSub,
            adapter: Phoenix.PubSub.PG2]
 
-config :evercam_media, 
-  mailgun_domain: System.get_env("MAILGUN_DOMAIN"), 
+config :evercam_media,
+  mailgun_domain: System.get_env("MAILGUN_DOMAIN"),
   mailgun_key: System.get_env("MAILGUN_KEY")
 
 config :logger, :console,
