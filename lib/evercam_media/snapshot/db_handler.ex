@@ -60,6 +60,9 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       :system_limit ->
         Logger.error "SYSTEM LIMIT reached. Traceback."
         Util.error_handler(error)
+      :closed ->
+        Logger.error "closed error. Traceback."
+        Util.error_handler(error)
       :emfile ->
         Logger.error "emfile error. Traceback."
         Util.error_handler(error)
