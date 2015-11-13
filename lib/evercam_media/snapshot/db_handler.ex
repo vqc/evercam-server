@@ -34,7 +34,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         motion_level = nil
     end
 
-
     spawn fn ->
       try do
         update_camera_status("#{camera_exid}", timestamp, true)
@@ -88,8 +87,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         update_camera_status("#{camera_exid}", timestamp, false)
       "Response not a jpeg image" ->
         Logger.info "Response not a jpeg image for camera #{camera_exid}"
-       _ ->
-         Logger.info "Unhandled HTTPError #{inspect error} for #{camera_exid}"
+      _ ->
+        Logger.info "Unhandled HTTPError #{inspect error} for #{camera_exid}"
     end
     {:ok, state}
   end
@@ -152,5 +151,4 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   defp construct_camera(camera, datetime, true, false) do
     %{camera | last_polled_at: datetime, is_online: true, last_online_at: datetime}
   end
-
 end
