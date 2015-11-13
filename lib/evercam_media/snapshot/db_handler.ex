@@ -68,14 +68,17 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       :nxdomain ->
         pid = camera_exid |> Process.whereis
         Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: nxdomain"
+        update_camera_status("#{camera_exid}", timestamp, false)
         Process.exit pid, :shutdown
       :ehostunreach ->
         pid = camera_exid |> Process.whereis
         Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: ehostunreach"
+        update_camera_status("#{camera_exid}", timestamp, false)
         Process.exit pid, :shutdown
       :enetunreach ->
         pid = camera_exid |> Process.whereis
         Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: enetunreach"
+        update_camera_status("#{camera_exid}", timestamp, false)
         Process.exit pid, :shutdown
       :timeout ->
         Logger.info "Request timeout for camera #{camera_exid}"
