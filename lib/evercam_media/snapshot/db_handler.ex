@@ -82,6 +82,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.info "Request timeout for camera #{camera_exid}"
       :connect_timeout ->
         Logger.info "Request connect_timeout for camera #{camera_exid}"
+        update_camera_status("#{camera_exid}", timestamp, false)
       :econnrefused ->
         Logger.info "Connection refused for camera #{camera_exid}"
         update_camera_status("#{camera_exid}", timestamp, false)
