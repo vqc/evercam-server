@@ -54,14 +54,39 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     if is_map(error) do
       reason = Map.get(error, :reason)
     else
-      reason = nil
+      reason = error
     end
     case reason do
-      :connect_timeout ->
+      :system_limit ->
+        Logger.error "SYSTEM LIMIT reached. Traceback."
+        Util.error_handler(error)
+      :closed ->
+        Logger.error "closed error. Traceback."
+        Util.error_handler(error)
+      :emfile ->
+        Logger.error "emfile error. Traceback."
+        Util.error_handler(error)
+      :nxdomain ->
+        pid = camera_exid |> Process.whereis
+        Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: nxdomain"
+        Process.exit pid, :shutdown
+      :ehostunreach ->
+        pid = camera_exid |> Process.whereis
+        Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: ehostunreach"
+        Process.exit pid, :shutdown
+      :enetunreach ->
+        pid = camera_exid |> Process.whereis
+        Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: enetunreach"
+        Process.exit pid, :shutdown
+      :timeout ->
         Logger.info "Request timeout for camera #{camera_exid}"
+      :connect_timeout ->
+        Logger.info "Request connect_timeout for camera #{camera_exid}"
       :econnrefused ->
         Logger.info "Connection refused for camera #{camera_exid}"
         update_camera_status("#{camera_exid}", timestamp, false)
+      "Response not a jpeg image" ->
+        Logger.info "Response not a jpeg image for camera #{camera_exid}"
        _ ->
          Logger.info "Unhandled HTTPError #{inspect error} for #{camera_exid}"
     end
