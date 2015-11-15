@@ -10,7 +10,21 @@ defmodule EvercamMedia.ONVIFAccessPlug do
                      _ -> %{"id" => id} = conn.params
                           Camera.get_camera_info id
                    end
-    assign(conn, :onvif_access_info, access_info)
+    parameters = case conn.path_info do
+                   ["v1", "onvif", "v20", _service, _operation | parameters_list] -> build_parameters parameters_list
+                   _ -> ""  
+                 end
+    conn
+    |> assign(:onvif_parameters, parameters)
+    |> assign(:onvif_access_info, access_info)
   end
 
-end
+
+  def build_parameters(parameters_list), do: build_parameters(parameters_list, "")
+  def build_parameters([], acc), do: acc
+  def build_parameters([param | rest], acc) do
+    [param_name, value] = param |> String.split "="
+    build_parameters(rest, "#{acc}<#{param_name}>#{value}</#{param_name}>")
+  end
+
+end 

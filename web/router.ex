@@ -66,9 +66,13 @@ defmodule EvercamMedia.Router do
       post "/cameras/:id/ptz/continuous/stop", ONVIFPTZController, :stop
       post "/cameras/:id/ptz/relative", ONVIFPTZController, :relativemove
 
-      get "/devices/:id/onvif/v20/media/GetSnapshotUri/:profile", ONVIFController, :get_snapshot_uri
-
-      get "/onvif/v20/:service/:operation", ONVIFController, :invoke_no_params
+      get "/onvif/v20/:service/:operation", ONVIFController, :invoke
+      get "/onvif/v20/:service/:operation/:p1", ONVIFController, :invoke
+      get "/onvif/v20/:service/:operation/:p1/:p2", ONVIFController, :invoke
+      get "/onvif/v20/:service/:operation/:p1/:p2/:p3", ONVIFController, :invoke
+      get "/onvif/v20/:service/:operation/:p1/:p2/:p3/:p4", ONVIFController, :invoke
+      get "/onvif/v20/:service/:operation/:p1/:p2/:p3/:p4/:p5", ONVIFController, :invoke
+      
     end
 
   end

@@ -3,15 +3,9 @@ defmodule EvercamMedia.ONVIFController do
   alias EvercamMedia.ONVIFClient
   require Logger
   
-  def invoke_no_params(conn, %{"service" => service, "operation" => operation}) do 
+  def invoke(conn, %{"service" => service, "operation" => operation}) do 
     {:ok, response} = conn.assigns.onvif_access_info 
-    |> ONVIFClient.request(service, operation)
-    default_respond(conn, 200, response)
-  end
-
-  def get_snapshot_uri(conn, %{"profile" => profile}) do
-    {:ok, response} = conn.assigns.onvif_access_info
-    |> ONVIFClient.request("media", "GetSnapshotUri", "<ProfileToken>#{profile}</ProfileToken>")
+    |> ONVIFClient.request(service, operation, conn.assigns.onvif_parameters)
     default_respond(conn, 200, response)
   end
 
