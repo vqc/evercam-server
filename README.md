@@ -28,4 +28,6 @@ And, there's a reward of a lifetime's subscription to [Elixir Sips](http://elixi
 
 The entire Evercam codebase is open source, see details: http://www.evercam.io/open-source
 
+**All** of the documentation about Evercam can be found here: https://github.com/evercam/evercam-api/wiki
+
 Any questions or suggestions, drop us a line: http://www.evercam.io/contact
