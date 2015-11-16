@@ -39,8 +39,8 @@ defmodule EvercamMedia.ONVIFControllerTest do
     assert snapshot_uri == "true"
   end
 
-   test "GET /v1/onvif/v20/media/GetSnapshotUri/ProfileToken/Profile_1, returns snapshot uri" do
-    conn = get conn(), "/v1/onvif/v20/media/GetSnapshotUri/ProfileToken=Profile_1?url=http://149.13.244.32:8100&auth=admin:mehcam"
+   test "GET /v1/onvif/v20/media/GetSnapshotUri, returns snapshot uri" do
+    conn = get conn(), "/v1/onvif/v20/media/GetSnapshotUri?url=http://149.13.244.32:8100&auth=admin:mehcam&ProfileToken=Profile_1"
     snapshot_uri = json_response(conn, 200)
     |> Map.get("MediaUri")
     |> Map.get("Uri")
