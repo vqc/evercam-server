@@ -46,7 +46,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   def test(conn, params) do
-    [code, response] = snapshot_test(params["token"], params["vendor_exid"])
+    [code, response] = get_snapshot_response(params["username"], params["password"], params["url"], params["vendor_exid"])
     test_respond(conn, code, response, params)
   end
 
@@ -111,8 +111,14 @@ defmodule EvercamMedia.SnapshotController do
     get_snapshot_response(token, vendor_exid)
   end
 
-  defp snapshot_test(token, vendor_exid) do
-    get_snapshot_response(token, vendor_exid)
+  defp get_snapshot_response(username, password, url, vendor_exid) do
+    args = %{
+      vendor_exid: vendor_exid,
+      url: url,
+      username: username,
+      password: password
+    }
+    get_snapshot(args)
   end
 
   defp get_snapshot_response(token, vendor_exid) do
@@ -122,6 +128,10 @@ defmodule EvercamMedia.SnapshotController do
       url: url,
       auth: auth
     }
+    get_snapshot(args)
+  end
+
+  defp get_snapshot(args) do
     case res = CamClient.fetch_snapshot(args) do
       {:ok, data} ->
         response =  %{image: data}
