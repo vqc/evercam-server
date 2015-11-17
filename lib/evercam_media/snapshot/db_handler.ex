@@ -102,9 +102,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def update_camera_status(camera_exid, timestamp, status) do
     #TODO Improve the db queries here
-    {:ok, datetime} = Calendar.DateTime.Parse.unix!(timestamp)
-               |> Calendar.DateTime.to_erl
-               |> Ecto.DateTime.cast
+    {:ok, datetime} =
+      Calendar.DateTime.Parse.unix!(timestamp)
+      |> Calendar.DateTime.to_erl
+      |> Ecto.DateTime.cast
     camera = Repo.one! Camera.by_exid(camera_exid)
     camera_is_online = camera.is_online
     camera = construct_camera(camera, datetime, status, camera_is_online == status)
@@ -137,9 +138,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   defp save_snapshot_record(camera, timestamp, motion_level) do
-    {:ok, datetime} = Calendar.DateTime.Parse.unix!(timestamp)
-               |> Calendar.DateTime.to_erl
-               |> Ecto.DateTime.cast
+    {:ok, datetime} =
+      Calendar.DateTime.Parse.unix!(timestamp)
+      |> Calendar.DateTime.to_erl
+      |> Ecto.DateTime.cast
     SnapshotRepo.insert %Snapshot{camera_id: camera.id, data: "S3", notes: "Evercam Proxy", motionlevel: motion_level, created_at: datetime}
   end
 
