@@ -104,7 +104,7 @@ defmodule EvercamMedia.ONVIFPTZController do
 
     left = Map.get(params, "left", "0") |> String.to_integer
     right = Map.get(params, "right", "0") |> String.to_integer
-		up = Map.get(params, "up", "0") |> String.to_integer
+    up = Map.get(params, "up", "0") |> String.to_integer
     down = Map.get(params, "down", "0") |> String.to_integer
     zoom = Map.get(params, "zoom", "0") |> String.to_integer
     x =
@@ -132,5 +132,4 @@ defmodule EvercamMedia.ONVIFPTZController do
     |> put_resp_header("access-control-allow-origin", "*")
     |> json response
   end
-
 end
