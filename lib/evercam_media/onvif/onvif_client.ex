@@ -10,7 +10,12 @@ defmodule EvercamMedia.ONVIFClient do
     namespace =  case service do
                    "PTZ" -> "tptz"
                    "device_service" -> "tds"
-                   "media" -> "trt"
+                   "Media" -> "trt"
+                   "display" -> "tls"
+                   "Events" -> "tev"
+                   "Analytics" -> "tan"
+                   "DeviceIO" -> "tmd"
+                   "Imaging" -> "timg"
                   end
     xpath = "/env:Envelope/env:Body/#{namespace}:#{operation}Response"
 
@@ -18,7 +23,6 @@ defmodule EvercamMedia.ONVIFClient do
     request = gen_onvif_request(namespace, operation, username, password, parameters)
     response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
 
-    # IO.puts inspect response
     if HTTPotion.Response.success?(response) do
       {xml, _rest} = :xmerl_scan.string(to_char_list(response.body))
       {:ok, :xmerl_xpath.string(to_char_list(xpath), xml) |> parse_elements}
@@ -31,10 +35,20 @@ defmodule EvercamMedia.ONVIFClient do
   defp gen_onvif_request(namespace, operation, username, password, parameters) do
     wsdl_url =
       case namespace do
-        "tptz" -> "http://www.onvif.org/ver10/ptz/wsdl"
+        "tptz" -> "http://www.onvif.org/ver20/ptz/wsdl"
         "tds" -> "http://www.onvif.org/ver20/device/wsdl"
         "trt" -> "http://www.onvif.org/ver10/media/wsdl"
-      end
+        "tls" -> "http://www.onvif.org/ver10/display/wsdl"
+        "tev" -> "http://www.onvif.org/ver10/events/wsdl"  
+        "timg" -> "http://www.onvif.org/ver20/imaging/wsdl"  
+        "tan" -> "http://www.onvif.org/ver20/analytics/wsdl" 
+        "tst" -> "http://www.onvif.org/ver10/storage/wsdl" 
+        "dn" -> "http://www.onvif.org/ver10/network/wsdl" 
+        "tmd" -> "http://www.onvif.org/ver10/deviceIO/wsdl" 
+        "trc" -> "http://www.onvif.org/ver10/recording/wsdl" 
+        "tse" -> "http://www.onvif.org/ver10/search/wsdl" 
+        "trp" -> "http://www.onvif.org/ver10/replay/wsdl" 
+       end
 
     {wsse_username, wsse_password, wsse_nonce, wsse_created} = get_wsse_header_data(username,password)
 

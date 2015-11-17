@@ -1,14 +1,16 @@
 defmodule EvercamMedia.ONVIFControllerTest do
   use EvercamMedia.ConnCase
+
+  @access_params "url=http://149.13.244.32:8100&auth=admin:mehcam"
  
   test "GET /v1/onvif/v20/device_service/GetDeviceInformation, returns meaningful info" do
-    conn = get conn(), "/v1/onvif/v20/device_service/GetDeviceInformation?url=http://149.13.244.32:8100&auth=admin:mehcam"
+    conn = get conn(), "/v1/onvif/v20/device_service/GetDeviceInformation?#{@access_params}"
     camera_model = json_response(conn, 200) |> Map.get("Model")
     assert camera_model == "DS-2DF7286-A"
   end
 
   test "GET /v1/onvif/v20/device_service/GetNetworkInterfaces, returns meaningful info" do
-    conn = get conn(), "/v1/onvif/v20/device_service/GetNetworkInterfaces?url=http://149.13.244.32:8100&auth=admin:mehcam"
+    conn = get conn(), "/v1/onvif/v20/device_service/GetNetworkInterfaces?#{@access_params}"
     enabled =  json_response(conn, 200)
     |> Map.get("NetworkInterfaces") 
     |> Map.get("Enabled")
@@ -16,7 +18,7 @@ defmodule EvercamMedia.ONVIFControllerTest do
   end
 
   test "GET /v1/onvif/v20/device_service/GetCapabilities, returns meaningful info" do
-    conn = get conn(), "/v1/onvif/v20/device_service/GetCapabilities?url=http://149.13.244.32:8100&auth=admin:mehcam"
+    conn = get conn(), "/v1/onvif/v20/device_service/GetCapabilities?#{@access_params}"
     device_xaddr = json_response(conn, 200)
     |> Map.get("Capabilities")
     |> Map.get("Device")
@@ -26,13 +28,13 @@ defmodule EvercamMedia.ONVIFControllerTest do
 
 
   test "GET /v1/onvif/v20/media/GetProfiles, returns profile information" do
-    conn = get conn(), "/v1/onvif/v20/media/GetProfiles?url=http://149.13.244.32:8100&auth=admin:mehcam"
+    conn = get conn(), "/v1/onvif/v20/Media/GetProfiles?#{@access_params}"
     [profile_1, _, _] = json_response(conn, 200) |> Map.get("Profiles")
     assert Map.get(profile_1, "token")  == "Profile_1"
   end
 
   test "GET /v1/onvif/v20/media/GetServiceCapabilities, returns profile information" do
-    conn = get conn(), "/v1/onvif/v20/media/GetServiceCapabilities?url=http://149.13.244.32:8100&auth=admin:mehcam"
+    conn = get conn(), "/v1/onvif/v20/Media/GetServiceCapabilities?#{@access_params}"
     snapshot_uri = json_response(conn, 200)
     |> Map.get("Capabilities")
     |> Map.get("SnapshotUri")
@@ -40,7 +42,7 @@ defmodule EvercamMedia.ONVIFControllerTest do
   end
 
    test "GET /v1/onvif/v20/media/GetSnapshotUri, returns snapshot uri" do
-    conn = get conn(), "/v1/onvif/v20/media/GetSnapshotUri?url=http://149.13.244.32:8100&auth=admin:mehcam&ProfileToken=Profile_1"
+    conn = get conn(), "/v1/onvif/v20/Media/GetSnapshotUri?#{@access_params}&ProfileToken=Profile_1"
     snapshot_uri = json_response(conn, 200)
     |> Map.get("MediaUri")
     |> Map.get("Uri")
