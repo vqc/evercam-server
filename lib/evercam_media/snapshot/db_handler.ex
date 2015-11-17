@@ -109,8 +109,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     camera = Repo.one! Camera.by_exid(camera_exid)
     camera_is_online = camera.is_online
     camera = construct_camera(camera, datetime, status, camera_is_online == status)
-    file_path = "/#{camera.exid}/snapshots/#{timestamp}.jpg"
-    camera = %{camera | thumbnail_url: Util.s3_file_url(file_path)}
+    if status == true do
+      file_path = "/#{camera.exid}/snapshots/#{timestamp}.jpg"
+      camera = %{camera | thumbnail_url: Util.s3_file_url(file_path)}
+    end
     Repo.update camera
 
     unless camera_is_online == status do
