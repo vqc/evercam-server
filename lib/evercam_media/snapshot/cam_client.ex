@@ -12,7 +12,7 @@ defmodule EvercamMedia.Snapshot.CamClient do
   Connect to the camera and get the snapshot
   """
   def fetch_snapshot(args) do
-    [username, password] = String.split(args[:auth], ":")
+    [username, password] = extract_auth_credentials(args)
     try do
       response =
         case args[:vendor_exid] do
@@ -38,5 +38,17 @@ defmodule EvercamMedia.Snapshot.CamClient do
 
   defp parse_snapshot_response(response) do
     response
+  end
+
+  defp extract_auth_credentials(%{vendor_exid: _vendor_exid, url: _url, username: username, password: password}) do
+    [username, password]
+  end
+
+  defp extract_auth_credentials(%{vendor_exid: _vendor_exid, url: _url, auth: auth}) do
+    String.split(auth, ":")
+  end
+
+  defp extract_auth_credentials(args) do
+    String.split(args[:auth], ":")
   end
 end
