@@ -73,6 +73,7 @@ defmodule EvercamMedia.Mixfile do
      {:exq, "~> 0.2.3"},
      {:uuid, github: 'zyro/elixir-uuid', override: true},
      {:exrm, "~> 0.14.16"},
+     {:credo, "~> 0.1.0", only: :dev},
      {:mailgun, github: "phanimahesh/mailgun"}]
   end
 end
