@@ -142,8 +142,8 @@ defmodule EvercamMedia.SnapshotController do
         [504, %{message: res.body}]
       {:error, %HTTPoison.Error{}} ->
         [504, %{message: "Camera seems to be offline."}]
-       _ ->
-         [500, %{message: "Sorry, we dropped the ball."}]
+      _ ->
+        [500, %{message: "Sorry, we dropped the ball."}]
     end
   end
 
