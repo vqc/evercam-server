@@ -57,6 +57,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   is initiated.
   """
   def initiate_workers do
+    Logger.info "Initiate workers for snapshot recording."
     Camera
     |> EvercamMedia.Repo.all([timeout: 15000])
     |> Enum.map(&(start_worker &1))

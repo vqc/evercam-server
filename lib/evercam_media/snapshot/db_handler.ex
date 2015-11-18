@@ -57,41 +57,44 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
     case reason do
       :system_limit ->
-        Logger.error "SYSTEM LIMIT reached. Traceback."
+        Logger.error "[#{camera_exid}] SYSTEM LIMIT reached. Traceback."
         Util.error_handler(error)
       :closed ->
-        Logger.error "closed error. Traceback."
+        Logger.error "[#{camera_exid}] - closed error. Traceback."
         Util.error_handler(error)
       :emfile ->
-        Logger.error "emfile error. Traceback."
+        Logger.error "[#{camera_exid}] - emfile error. Traceback."
         Util.error_handler(error)
       :nxdomain ->
         pid = camera_exid |> Process.whereis
-        Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: nxdomain"
+        Logger.info "[#{camera_exid}] Shutting down worker - reason: nxdomain"
         update_camera_status("#{camera_exid}", timestamp, false)
         Process.exit pid, :shutdown
       :ehostunreach ->
         pid = camera_exid |> Process.whereis
-        Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: ehostunreach"
+        Logger.info "[#{camera_exid}] Shutting down worker - reason: ehostunreach"
         update_camera_status("#{camera_exid}", timestamp, false)
         Process.exit pid, :shutdown
       :enetunreach ->
         pid = camera_exid |> Process.whereis
-        Logger.info "[#{camera_exid}] Shutting down worker for camera - reason: enetunreach"
+        Logger.info "[#{camera_exid}] Shutting down worker - reason: enetunreach"
         update_camera_status("#{camera_exid}", timestamp, false)
         Process.exit pid, :shutdown
       :timeout ->
-        Logger.info "Request timeout for camera #{camera_exid}"
+        Logger.info "[#{camera_exid}] Request timeout"
       :connect_timeout ->
-        Logger.info "Request connect_timeout for camera #{camera_exid}"
+        pid = camera_exid |> Process.whereis
+        Logger.info "[#{camera_exid}] Shutting down worker - reason: connect_timeout"
+        Logger.info "Request connect_timeout - #{camera_exid}"
         update_camera_status("#{camera_exid}", timestamp, false)
+        Process.exit pid, :shutdown
       :econnrefused ->
-        Logger.info "Connection refused for camera #{camera_exid}"
+        Logger.info "[#{camera_exid}] Connection refused"
         update_camera_status("#{camera_exid}", timestamp, false)
       "Response not a jpeg image" ->
-        Logger.info "Response not a jpeg image for camera #{camera_exid}"
+        Logger.info "[#{camera_exid}] Response not a jpeg image"
       _ ->
-        Logger.info "Unhandled HTTPError #{inspect error} for #{camera_exid}"
+        Logger.info "[#{camera_exid}] Unhandled HTTPError #{inspect error}"
     end
     {:ok, state}
   end
