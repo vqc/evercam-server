@@ -1,5 +1,5 @@
 defmodule User do
-  use EvercamMedia.Web, :model 
+  use EvercamMedia.Web, :model
 
   schema "users" do
     belongs_to :country, Country, foreign_key: :country_id
@@ -37,5 +37,4 @@ defmodule User do
          where: u.api_key == ^api_key,
          select: u)
   end
-
 end
