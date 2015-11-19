@@ -11,6 +11,12 @@ defmodule EvercamMedia.ONVIFControllerDeviceIOTest do
     assert token == "AudioOutputToken"
   end
 
- 
+   test "GET /v1/onvif/v20/DeviceIO/GetAudioOutputConfiguration" do
+    conn = get conn(), "/v1/onvif/v20/DeviceIO/GetAudioOutputConfiguration?#{@access_params}&AudioOutputToken=AudioOutputToken"
+    send_primacy = inspect json_response(conn, 200)
+    |> Map.get("AudioOutputConfiguration")
+    |> Map.get("SendPrimacy")
+    assert send_primacy == "\"www.onvif.org/ver20/HalfDuplex/Server\""
+  end 
     
 end

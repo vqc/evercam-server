@@ -8,10 +8,7 @@ defmodule EvercamMedia.ONVIFAccessPlug do
     access_info =  case conn.query_params do
                      %{"auth" => _auth, "url" => _url} -> conn.query_params
                      %{"id" => id} -> Camera.get_camera_info id
-                     _ -> conn
-                          |> resp(400, Poison.encode!(%{ error: %{ message: "Missing camera access info" }}, []))
-                          |> send_resp()
-                          |> halt()
+                     _ -> Camera.get_camera_info conn.params["id"]                        
                    end
 
     parameters = conn.query_params
