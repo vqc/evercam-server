@@ -72,10 +72,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         update_camera_status("#{camera_exid}", timestamp, false)
         Process.exit pid, :shutdown
       :ehostunreach ->
-        pid = camera_exid |> Process.whereis
-        Logger.info "[#{camera_exid}] [snapshot_error] [ehostunreach] Shutting down worker."
+        Logger.info "[#{camera_exid}] [snapshot_error] [ehostunreach]"
         update_camera_status("#{camera_exid}", timestamp, false)
-        Process.exit pid, :shutdown
       :enetunreach ->
         pid = camera_exid |> Process.whereis
         Logger.info "[#{camera_exid}] [snapshot_error] [enetunreach] Shutting down worker."
