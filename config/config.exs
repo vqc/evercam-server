@@ -6,7 +6,7 @@
 use Mix.Config
 
 config :hackney,
-  :timeout, 5000
+  :timeout, 15000
 
 # Configures the endpoint
 config :evercam_media, EvercamMedia.Endpoint,
