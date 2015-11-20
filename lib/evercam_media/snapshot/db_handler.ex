@@ -83,11 +83,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       :timeout ->
         Logger.info "[#{camera_exid}] Request timeout"
       :connect_timeout ->
-        pid = camera_exid |> Process.whereis
-        Logger.info "[#{camera_exid}] Shutting down worker - reason: connect_timeout"
-        Logger.info "Request connect_timeout - #{camera_exid}"
-        update_camera_status("#{camera_exid}", timestamp, false)
-        Process.exit pid, :shutdown
+        Logger.info "[#{camera_exid}] Request connect_timeout"
       :econnrefused ->
         Logger.info "[#{camera_exid}] Connection refused"
         update_camera_status("#{camera_exid}", timestamp, false)
