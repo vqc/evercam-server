@@ -57,40 +57,40 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
     case reason do
       :system_limit ->
-        Logger.error "[#{camera_exid}] SYSTEM LIMIT reached. Traceback."
+        Logger.error "[#{camera_exid}] [snapshot_error] [system_limit] Traceback."
         Util.error_handler(error)
       :closed ->
-        Logger.error "[#{camera_exid}] - closed error. Traceback."
+        Logger.error "[#{camera_exid}] [snapshot_error] [closed] Traceback."
         Util.error_handler(error)
       :emfile ->
-        Logger.error "[#{camera_exid}] - emfile error. Traceback."
+        Logger.error "[#{camera_exid}] [snapshot_error] [emfile] Traceback."
         Util.error_handler(error)
       :nxdomain ->
         pid = camera_exid |> Process.whereis
-        Logger.info "[#{camera_exid}] Shutting down worker - reason: nxdomain"
+        Logger.info "[#{camera_exid}] [snapshot_error] [nxdomain] Shutting down worker."
         update_camera_status("#{camera_exid}", timestamp, false)
         Process.exit pid, :shutdown
       :ehostunreach ->
         pid = camera_exid |> Process.whereis
-        Logger.info "[#{camera_exid}] Shutting down worker - reason: ehostunreach"
+        Logger.info "[#{camera_exid}] [snapshot_error] [ehostunreach] Shutting down worker."
         update_camera_status("#{camera_exid}", timestamp, false)
         Process.exit pid, :shutdown
       :enetunreach ->
         pid = camera_exid |> Process.whereis
-        Logger.info "[#{camera_exid}] Shutting down worker - reason: enetunreach"
+        Logger.info "[#{camera_exid}] [snapshot_error] [enetunreach] Shutting down worker."
         update_camera_status("#{camera_exid}", timestamp, false)
         Process.exit pid, :shutdown
       :timeout ->
-        Logger.info "[#{camera_exid}] Request timeout"
+        Logger.info "[#{camera_exid}] [snapshot_error] [timeout]"
       :connect_timeout ->
-        Logger.info "[#{camera_exid}] Request connect_timeout"
+        Logger.info "[#{camera_exid}] [snapshot_error] [connect_timeout]"
       :econnrefused ->
-        Logger.info "[#{camera_exid}] Connection refused"
+        Logger.info "[#{camera_exid}] [snapshot_error] [econnrefused]"
         update_camera_status("#{camera_exid}", timestamp, false)
       "Response not a jpeg image" ->
-        Logger.info "[#{camera_exid}] Response not a jpeg image"
+        Logger.info "[#{camera_exid}] [snapshot_error] [not_a_jpeg]"
       _ ->
-        Logger.info "[#{camera_exid}] Unhandled HTTPError #{inspect error}"
+        Logger.info "[#{camera_exid}] [snapshot_error] [unhandled] #{inspect error}"
     end
     {:ok, state}
   end

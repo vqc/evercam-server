@@ -43,10 +43,10 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   def start_worker(camera) do
     case get_config(camera) do
       {:ok, settings} ->
-        Logger.debug "Starting worker for #{settings.config.camera_exid}"
+        Logger.debug "[#{settings.config.camera_exid}] Starting worker"
         Supervisor.start_child(__MODULE__, [settings])
       {:error, message, url} ->
-        Logger.warn "Skipping camera worker as the host is invalid: #{camera.exid}: #{url}"
+        Logger.warn "[#{camera.exid}] Skipping camera worker as the host is invalid: #{url}"
     end
   end
 
