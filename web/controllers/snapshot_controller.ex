@@ -147,6 +147,8 @@ defmodule EvercamMedia.SnapshotController do
         [504, %{message: "Camera didn't respond with an image."}]
       {:error, %HTTPoison.Response{}} ->
         [504, %{message: res.body}]
+      {:error, %HTTPoison.Error{id: nil, reason: :timeout}} ->
+        [504, %{message: "Camera response timed out."}]
       {:error, %HTTPoison.Error{}} ->
         [504, %{message: "Camera seems to be offline."}]
       _ ->
