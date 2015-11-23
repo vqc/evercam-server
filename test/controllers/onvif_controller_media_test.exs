@@ -33,5 +33,13 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
     |> Map.get("token")
     assert token == "VideoAnalyticsToken"
   end
+
+  test "GET /v1/onvif/v20/Media/GetVideoSources" do
+    conn = get conn(), "/v1/onvif/v20/Media/GetVideoSources?#{@access_params}"
+    video_source = json_response(conn, 200)
+    |> Map.get("VideoSources")
+    |> Map.get("token")
+    assert video_source == "VideoSource_1" 
+  end
     
 end

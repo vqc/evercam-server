@@ -5,10 +5,10 @@ defmodule EvercamMedia.ONVIFControllerAnalyticsTest do
  
   test "GET /v1/onvif/v20/Analytics/GetServiceCapabilities" do
     conn = get conn(), "/v1/onvif/v20/Analytics/GetServiceCapabilities?#{@access_params}"
-    analytics_module_support = inspect json_response(conn, 200)
+    analytics_module_support = json_response(conn, 200)
     |> Map.get("Capabilities")
     |> Map.get("AnalyticsModuleSupport")
-    assert analytics_module_support == "\"true\""
+    assert analytics_module_support == "true"
   end
 
   
