@@ -6,6 +6,7 @@ defmodule CloudRecording do
 
     field :frequency, :integer
     field :storage_duration, :integer
+    field :status, :string
     field :schedule, EvercamMedia.Types.JSON
   end
 end
