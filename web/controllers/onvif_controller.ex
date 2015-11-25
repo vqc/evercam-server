@@ -4,9 +4,10 @@ defmodule EvercamMedia.ONVIFController do
   require Logger
   
   def invoke(conn, %{"service" => service, "operation" => operation}) do 
-    {:ok, response} = conn.assigns.onvif_access_info 
-    |> ONVIFClient.request(service, operation, conn.assigns.onvif_parameters)
-    default_respond(conn, 200, response)
+    case ONVIFClient.request(conn.assigns.onvif_access_info, service, operation, conn.assigns.onvif_parameters) do
+      {:ok, response} -> default_respond(conn, 200, response)
+      {:error, code, response} -> default_respond(conn, code, response)
+    end
   end
 
   defp default_respond(conn, code, response) do

@@ -10,7 +10,12 @@ defmodule EvercamMedia.ONVIFControllerEventsTest do
     |> Map.get("WSSubscriptionPolicySupport")
     assert subscription_policy_support == "true"
   end
-    
- 
-    
+
+  test "GET /v1/onvif/v20/Events/GetEventProperties, returns something" do
+    conn = get conn(), "/v1/onvif/v20/Events/GetEventProperties?#{@access_params}"
+    fixed_topic_set = json_response(conn, 200)
+    |> Map.get("FixedTopicSet")
+    assert fixed_topic_set == "true"
+  end
 end
+

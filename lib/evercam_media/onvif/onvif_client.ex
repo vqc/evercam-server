@@ -11,24 +11,39 @@ defmodule EvercamMedia.ONVIFClient do
                    "PTZ" -> "tptz"
                    "device_service" -> "tds"
                    "Media" -> "trt"
-                   "display" -> "tls"
+                   "Display" -> "tls"
                    "Events" -> "tev"
                    "Analytics" -> "tan"
                    "DeviceIO" -> "tmd"
                    "Imaging" -> "timg"
+                   "Search" -> "tse"
+                   "Replay" -> "trp"
+                   "Recording" -> "trc"
+                   "Storage" -> "tst"
                   end
-    xpath = "/env:Envelope/env:Body/#{namespace}:#{operation}Response"
 
     [username, password] = auth |> String.split ":" 
     request = gen_onvif_request(namespace, operation, username, password, parameters)
     response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
 
+    {xml, _rest} = response.body
+    |> to_char_list 
+    |> :xmerl_scan.string
+      
     if HTTPotion.Response.success?(response) do
-      {xml, _rest} = :xmerl_scan.string(to_char_list(response.body))
-      {:ok, :xmerl_xpath.string(to_char_list(xpath), xml) |> parse_elements}
+      {:ok, 
+       "/env:Envelope/env:Body/#{namespace}:#{operation}Response"
+       |> to_char_list
+       |> :xmerl_xpath.string(xml) 
+       |> parse_elements}
     else
       Logger.error "Error invoking #{operation}. URL: #{url} username: #{username} password: #{password}. Request: #{inspect request}. Response #{inspect response}."
-      {:error, response.status_code, response}
+       {:error,
+        response.status_code,
+       "/env:Envelope/env:Body"
+       |> to_char_list
+       |> :xmerl_xpath.string(xml) 
+       |> parse_elements}
     end
   end
 
@@ -107,15 +122,18 @@ defmodule EvercamMedia.ONVIFClient do
   defp parse(node) do
     cond do
       Record.is_record(node, :xmlElement) ->
-        [_ns,name] = xmlElement(node, :name)
-        |> to_string
-        |> String.split ":"
+        name = case xmlElement(node, :name) |> to_string |> String.split ":" do
+                 [_ns,name] -> name
+                 [name] -> name
+               end
         content = xmlElement(node, :content)
         case xmlElement(node, :attributes) do
           [] -> Map.put(%{}, name, parse(content))
-          attributes -> Map.put(%{}, name, parse(content) |> Map.merge(parse(attributes)))
+          attributes ->  case parse(content) do 
+                           value when is_map(value) -> Map.put(%{}, name, value |> Map.merge(parse(attributes)))
+                           value -> Map.put(%{}, name, value)
+                         end
         end
-
       Record.is_record(node, :xmlAttribute) ->
         name = xmlAttribute(node, :name) |> to_string
         value = xmlAttribute(node, :value) |> to_string
