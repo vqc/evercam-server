@@ -23,7 +23,7 @@ defmodule EvercamMedia.ONVIFPTZControllerTest do
     conn = post conn(), "/v1/cameras/mobile-mast-test/ptz/home"
     assert json_response(conn, 200) == "ok"
     # give time to the camera to move
-    :timer.sleep(3000)
+    :timer.sleep(5000)
     conn = get conn(), "/v1/cameras/mobile-mast-test/ptz/status"
     response = json_response(conn, 200)
     x_before = extract_position(response, "x")
@@ -35,7 +35,7 @@ defmodule EvercamMedia.ONVIFPTZControllerTest do
     )
     assert json_response(conn, 200) == "ok"
     # give time to the camera to move
-    :timer.sleep(3000)
+    :timer.sleep(5000)
     conn = get conn(), "/v1/cameras/mobile-mast-test/ptz/status"
     response = json_response(conn, 200)
     x_after = extract_position(response, "x")
@@ -50,7 +50,7 @@ defmodule EvercamMedia.ONVIFPTZControllerTest do
     conn = post conn(), "/v1/cameras/mobile-mast-test/ptz/home"
     assert json_response(conn, 200) == "ok"
     # give time to the camera to move
-    :timer.sleep(3000)
+    :timer.sleep(5000)
     conn = get conn(), "/v1/cameras/mobile-mast-test/ptz/status"
     response = json_response(conn, 200)
     x_before = extract_position(response, "x")
@@ -62,7 +62,7 @@ defmodule EvercamMedia.ONVIFPTZControllerTest do
     )
     assert json_response(conn, 200) == "ok"
     # give time to the camera to move
-    :timer.sleep(3000)
+    :timer.sleep(5000)
     conn = get conn(), "/v1/cameras/mobile-mast-test/ptz/status"
     response = json_response(conn, 200)
     x_after = extract_position(response, "x")

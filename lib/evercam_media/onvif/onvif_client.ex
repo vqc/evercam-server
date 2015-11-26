@@ -14,12 +14,14 @@ defmodule EvercamMedia.ONVIFClient do
                    "Display" -> "tls"
                    "Events" -> "tev"
                    "Analytics" -> "tan"
+                   "AnalyticsDevice" -> "tad"
                    "DeviceIO" -> "tmd"
                    "Imaging" -> "timg"
                    "Search" -> "tse"
                    "Replay" -> "trp"
                    "Recording" -> "trc"
                    "Storage" -> "tst"
+                   "Network" -> "dn"
                   end
 
     [username, password] = auth |> String.split ":" 
@@ -29,7 +31,7 @@ defmodule EvercamMedia.ONVIFClient do
     {xml, _rest} = response.body
     |> to_char_list 
     |> :xmerl_scan.string
-      
+
     if HTTPotion.Response.success?(response) do
       {:ok, 
        "/env:Envelope/env:Body/#{namespace}:#{operation}Response"
@@ -56,7 +58,8 @@ defmodule EvercamMedia.ONVIFClient do
         "tls" -> "http://www.onvif.org/ver10/display/wsdl"
         "tev" -> "http://www.onvif.org/ver10/events/wsdl"  
         "timg" -> "http://www.onvif.org/ver20/imaging/wsdl"  
-        "tan" -> "http://www.onvif.org/ver20/analytics/wsdl" 
+        "tan" -> "http://www.onvif.org/ver20/analytics/wsdl"
+        "tad" -> "http://www.onvif.org/ver10/analyticsdevice/wsdl" 
         "tst" -> "http://www.onvif.org/ver10/storage/wsdl" 
         "dn" -> "http://www.onvif.org/ver10/network/wsdl" 
         "tmd" -> "http://www.onvif.org/ver10/deviceIO/wsdl" 
