@@ -18,7 +18,7 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
     assert snapshot_uri == "true"
   end
 
-   test "GET /v1/onvif/v20/Media/GetSnapshotUri, returns snapshot uri" do
+  test "GET /v1/onvif/v20/Media/GetSnapshotUri, returns snapshot uri" do
     conn = get conn(), "/v1/onvif/v20/Media/GetSnapshotUri?#{@access_params}&ProfileToken=Profile_1"
     snapshot_uri = json_response(conn, 200)
     |> Map.get("MediaUri")
@@ -26,7 +26,7 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
     assert snapshot_uri == "http://192.168.1.100:8100/onvif/snapshot"
   end
 
-   test "GET /v1/onvif/v20/Media/GetVideoAnalyticsConfigurations" do
+  test "GET /v1/onvif/v20/Media/GetVideoAnalyticsConfigurations" do
     conn = get conn(), "/v1/onvif/v20/Media/GetVideoAnalyticsConfigurations?#{@access_params}"
     token = json_response(conn, 200) 
     |> Map.get("Configurations")
@@ -40,6 +40,14 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
     |> Map.get("VideoSources")
     |> Map.get("token")
     assert video_source == "VideoSource_1" 
+  end
+
+  test "GET /v1/onvif/v20/Media/GetSnapshotUri using camera_id" do
+    conn = get conn(), "/v1/onvif/v20/Media/GetSnapshotUri?id=mobile-mast-test&ProfileToken=Profile_1"
+    snapshot_uri = json_response(conn, 200)
+    |> Map.get("MediaUri")
+    |> Map.get("Uri")
+    assert snapshot_uri == "http://192.168.1.100:8100/onvif/snapshot"
   end
     
 end
