@@ -59,4 +59,16 @@ defmodule EvercamMedia.Util do
       to_char_list(System.get_env["AWS_SECRET_KEY"])
     )
   end
+
+  def format_snapshot_id(camera_id, snapshot_timestamp) do
+    "#{camera_id}_#{format_snapshot_timestamp(snapshot_timestamp)}"
+  end
+
+  def format_snapshot_timestamp(<<snapshot_timestamp::bytes-size(14)>>) do
+    "#{snapshot_timestamp}000"
+  end
+
+  def format_snapshot_timestamp(<<snapshot_timestamp::bytes-size(17)>>) do
+    snapshot_timestamp
+  end
 end
