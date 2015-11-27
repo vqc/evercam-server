@@ -89,9 +89,10 @@ defmodule Camera do
   def get_camera_info(camera_id) do
     camera = EvercamMedia.Repo.one! by_exid(camera_id)
     url = external_url camera
-    [username, password] = camera
-    |> auth
-    |> String.split ":"
+    [username, password] =
+      camera
+      |> auth
+      |> String.split(":")
     [url, username, password]
   end
 
