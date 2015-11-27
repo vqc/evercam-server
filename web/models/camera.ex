@@ -97,16 +97,8 @@ defmodule Camera do
 
   def schedule(camera_with_recordings) do
     cloud_recording = List.first(camera_with_recordings.cloud_recordings)
-    if cloud_recording == nil do
-      %{
-        "Monday" => ["00:00-23:59"],
-        "Tuesday" => ["00:00-23:59"],
-        "Wednesday" => ["00:00-23:59"],
-        "Thursday" => ["00:00-23:59"],
-        "Friday" => ["00:00-23:59"],
-        "Saturday" => ["00:00-23:59"],
-        "Sunday" => ["00:00-23:59"],
-      }
+    if cloud_recording == nil || cloud_recording.status == "off" do
+      %{}
     else
       cloud_recording.schedule
     end
