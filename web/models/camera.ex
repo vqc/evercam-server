@@ -114,7 +114,7 @@ defmodule Camera do
 
   def initial_sleep(camera_with_recordings) do
     cloud_recording = List.first(camera_with_recordings.cloud_recordings)
-    if cloud_recording == nil || cloud_recording.frequency == 1 || cloud_recording.status do
+    if cloud_recording == nil || cloud_recording.frequency == 1 || cloud_recording.status == "off" do
       :crypto.rand_uniform(1, 60) * 1000
     else
       1000
