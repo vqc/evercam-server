@@ -7,7 +7,7 @@ defmodule EvercamMedia.HTTPClient do
     HTTPoison.get url, [], hackney: hackney
   end
 
-  def get(url, ":") do
+  def get(:basic_auth, url, "", "") do
     get(url)
   end
 
