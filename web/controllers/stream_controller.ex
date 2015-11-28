@@ -42,8 +42,8 @@ defmodule EvercamMedia.StreamController do
       stream(camera_id, rtsp_url, token, command)
       200
     rescue
-      _error ->
-        Util.error_handler(_error)
+      error ->
+        Util.error_handler(error)
         401
     end
   end

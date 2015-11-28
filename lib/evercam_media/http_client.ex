@@ -13,7 +13,6 @@ defmodule EvercamMedia.HTTPClient do
 
   def get(:basic_auth, url, username, password) do
     hackney = [basic_auth: {username, password}, pool: :snapshot_pool]
-
     HTTPoison.get url, [], hackney: hackney
   end
 
