@@ -5,18 +5,13 @@ defmodule EvercamMedia.ONVIFControllerImagingTest do
  
   test "GET /v1/onvif/v20/DeviceIO/GetImagingSettings" do
     conn = get conn(), "/v1/onvif/v20/Imaging/GetImagingSettings?#{@access_params}&VideoSourceToken=VideoSource_1"
-    brightness = json_response(conn, 200)
-    |> Map.get("ImagingSettings")
-    |> Map.get("Brightness")
+    brightness = json_response(conn, 200) |> Map.get("ImagingSettings") |> Map.get("Brightness")
     assert brightness == "50"
   end
 
   test "GET /v1/onvif/v20/DeviceIO/GetServiceCapabilities" do
     conn = get conn(), "/v1/onvif/v20/Imaging/GetServiceCapabilities?#{@access_params}"
-    image_stabilization = json_response(conn, 200)
-    |> Map.get("Capabilities")
-    |> Map.get("ImageStabilization")
+    image_stabilization = json_response(conn, 200) |> Map.get("Capabilities") |> Map.get("ImageStabilization")
     assert image_stabilization == "false"
-  end 
-    
+  end    
 end

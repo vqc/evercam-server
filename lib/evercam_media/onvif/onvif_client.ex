@@ -28,24 +28,13 @@ defmodule EvercamMedia.ONVIFClient do
     request = gen_onvif_request(namespace, operation, username, password, parameters)
     response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
 
-    {xml, _rest} = response.body
-    |> to_char_list 
-    |> :xmerl_scan.string
+    {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
 
     if HTTPotion.Response.success?(response) do
-      {:ok, 
-       "/env:Envelope/env:Body/#{namespace}:#{operation}Response"
-       |> to_char_list
-       |> :xmerl_xpath.string(xml) 
-       |> parse_elements}
+      {:ok, "/env:Envelope/env:Body/#{namespace}:#{operation}Response" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
     else
-      Logger.error "Error invoking #{operation}. URL: #{url} username: #{username} password: #{password}. Request: #{inspect request}. Response #{inspect response}."
-       {:error,
-        response.status_code,
-       "/env:Envelope/env:Body"
-       |> to_char_list
-       |> :xmerl_xpath.string(xml) 
-       |> parse_elements}
+      Logger.error "Error invoking #{operation}. URL: #{url} auth: #{auth}. Request: #{inspect request}. Response #{inspect response}."
+      {:error, response.status_code, "/env:Envelope/env:Body" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
     end
   end
 
@@ -96,9 +85,7 @@ defmodule EvercamMedia.ONVIFClient do
   end
 
   defp format_date_time({{year, month, day}, {hour, minute, second}}) do
-    :io_lib.format("~4..0B-~2..0B-~2..0BT~2..0B:~2..0B:~2..0BZ", [year, month, day, hour, minute, second])
-    |> List.flatten
-    |> to_string
+    :io_lib.format("~4..0B-~2..0B-~2..0BT~2..0B:~2..0B:~2..0BZ", [year, month, day, hour, minute, second]) |> List.flatten |> to_string
   end
 
   defp nonce(0,l) do

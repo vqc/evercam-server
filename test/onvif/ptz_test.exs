@@ -6,34 +6,21 @@ defmodule PTZTest do
   
   test "get_nodes method on hikvision camera" do
     {:ok, response} = ONVIFPTZ.get_nodes @access_info
-    assert response 
-           |> Map.get("PTZNode")
-           |> Map.get("Name") == "PTZNODE"
-    
-    assert response 
-           |> Map.get("PTZNode")
-           |> Map.get("token") == "PTZNODETOKEN"
-   end 
+    assert response |> Map.get("PTZNode") |> Map.get("Name") == "PTZNODE"
+    assert response |> Map.get("PTZNode") |> Map.get("token") == "PTZNODETOKEN"
+  end 
 
   test "get_configurations method on hikvision camera" do
     {:ok, response} = ONVIFPTZ.get_configurations @access_info
-    assert response
-           |> Map.get("PTZConfiguration")
-           |> Map.get("Name") == "PTZ"
-    assert response
-           |> Map.get("PTZConfiguration")
-           |> Map.get("NodeToken") == "PTZNODETOKEN"
+    assert response |> Map.get("PTZConfiguration") |> Map.get("Name") == "PTZ"
+    assert response |> Map.get("PTZConfiguration") |> Map.get("NodeToken") == "PTZNODETOKEN"
   end 
 
   test "get_presets method on hikvision camera" do
     {:ok, response} = ONVIFPTZ.get_presets(@access_info, "Profile_1")
-    [first_preset | _] = 
-      response
-      |> Map.get("Presets")
-    assert first_preset 
-           |> Map.get("Name") == "Back Main Yard"
-    assert first_preset
-           |> Map.get("token") == "1"
+    [first_preset | _] = response |> Map.get("Presets")
+    assert first_preset |> Map.get("Name") == "Back Main Yard"
+    assert first_preset |> Map.get("token") == "1"
   end   
 
   test "goto_preset method on hikvision camera" do

@@ -2,29 +2,26 @@ defmodule EvercamMedia.ONVIFPTZ do
   alias EvercamMedia.ONVIFClient
 
   def get_nodes(access_info) do
-    access_info
-    |> ptz_request "GetNodes"
+    access_info |> ptz_request "GetNodes"
   end
 
   def get_configurations(access_info) do
-    access_info
-    |> ptz_request "GetConfigurations"
+    access_info |> ptz_request "GetConfigurations"
   end
 
   def get_presets(access_info, profile_token) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>"
-    {:ok, response} = access_info
-    |> ptz_request("GetPresets", parameters)
-    presets = response 
-    |> Map.get("Preset") 
-    |> Enum.filter(&(Map.get(&1, "Name") != nil))
+    {:ok, response} = access_info |> ptz_request("GetPresets", parameters)
+    presets = 
+      response 
+      |> Map.get("Preset") 
+      |> Enum.filter(&(Map.get(&1, "Name") != nil))
     {:ok, Map.put(%{}, "Presets", presets)}
   end
 
   def get_status(access_info, profile_token) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>"
-    access_info
-    |> ptz_request("GetStatus", parameters)
+    access_info |> ptz_request("GetStatus", parameters)
   end
 
   def goto_preset(access_info, profile_token, preset_token, speed \\ []) do
@@ -33,8 +30,7 @@ defmodule EvercamMedia.ONVIFPTZ do
         "" -> ""
         vector -> "<Speed>#{vector}</Speed>"
       end
-    access_info
-    |> ptz_request("GotoPreset", parameters)
+    access_info |> ptz_request("GotoPreset", parameters)
   end
 
   def relative_move(access_info, profile_token, translation, speed \\ []) do
@@ -43,8 +39,7 @@ defmodule EvercamMedia.ONVIFPTZ do
         "" -> ""
         vector -> "<Speed>#{vector}</Speed>"
       end
-    access_info
-    |> ptz_request("RelativeMove", parameters)
+    access_info |> ptz_request("RelativeMove", parameters)
   end
 
   def continuous_move(access_info, profile_token, velocity \\ []) do
@@ -53,8 +48,7 @@ defmodule EvercamMedia.ONVIFPTZ do
         "" -> ""
         vector -> "<Velocity>#{vector}</Velocity>"
       end
-    access_info
-    |> ptz_request("ContinuousMove", parameters)
+    access_info |> ptz_request("ContinuousMove", parameters)
   end
 
   def goto_home_position(access_info, profile_token, speed \\ []) do
@@ -63,8 +57,7 @@ defmodule EvercamMedia.ONVIFPTZ do
         "" -> ""
         vector  -> "<Speed>#{vector}</Speed>"
       end
-    access_info
-    |> ptz_request("GotoHomePosition", parameters)
+    access_info |> ptz_request("GotoHomePosition", parameters)
   end
 
   def remove_preset(access_info, profile_token, preset_token) do
@@ -83,20 +76,17 @@ defmodule EvercamMedia.ONVIFPTZ do
         "" -> ""
         _ -> "<PresetToken>#{preset_token}</PresetToken>"
       end
-    access_info
-    |> ptz_request("SetPreset", parameters)
+    access_info |> ptz_request("SetPreset", parameters)
   end
 
   def set_home_position(access_info, profile_token) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>"
-    access_info
-    |> ptz_request("SetHomePosition", parameters)
+    access_info |> ptz_request("SetHomePosition", parameters)
   end
 
   def stop(access_info, profile_token) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>"
-    access_info
-    |> ptz_request("Stop", parameters)
+    access_info |> ptz_request("Stop", parameters)
   end
 
   def pan_tilt_zoom_vector(vector) do
@@ -117,5 +107,4 @@ defmodule EvercamMedia.ONVIFPTZ do
   defp ptz_request(access_info, operation, parameters \\ "") do
     ONVIFClient.request(access_info, "PTZ", operation, parameters)
   end
-
 end
