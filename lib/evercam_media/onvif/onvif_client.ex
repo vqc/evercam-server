@@ -21,6 +21,7 @@ defmodule EvercamMedia.ONVIFClient do
                    "Replay" -> "trp"
                    "Recording" -> "trc"
                    "Storage" -> "tst"
+                   "Receiver" -> "trv"
                    "Network" -> "dn"
                   end
 
@@ -54,7 +55,8 @@ defmodule EvercamMedia.ONVIFClient do
         "tmd" -> "http://www.onvif.org/ver10/deviceIO/wsdl" 
         "trc" -> "http://www.onvif.org/ver10/recording/wsdl" 
         "tse" -> "http://www.onvif.org/ver10/search/wsdl" 
-        "trp" -> "http://www.onvif.org/ver10/replay/wsdl" 
+        "trp" -> "http://www.onvif.org/ver10/replay/wsdl"
+        "trv" -> "http://www.onvif.org/ver10/receiver/wsdl" 
        end
 
     {wsse_username, wsse_password, wsse_nonce, wsse_created} = get_wsse_header_data(username,password)
