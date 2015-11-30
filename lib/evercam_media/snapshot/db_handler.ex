@@ -146,7 +146,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.Strftime.strftime "%Y%m%d%H%M%S%f"
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
-    SnapshotRepo.insert(%Snapshot{camera_id: camera.id, data: "S3", notes: "Evercam Proxy", motionlevel: motion_level, created_at: datetime, snapshot_id = snapshot_id})
+    SnapshotRepo.insert(%Snapshot{camera_id: camera.id, data: "S3", notes: "Evercam Proxy", motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
   end
 
   defp construct_camera(camera, datetime, _, true) do
