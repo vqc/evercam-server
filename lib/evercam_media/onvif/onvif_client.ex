@@ -27,18 +27,21 @@ defmodule EvercamMedia.ONVIFClient do
 
     [username, password] = auth |> String.split ":" 
     request = gen_onvif_request(namespace, operation, username, password, parameters)
-    response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
-
-    {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
-    if HTTPotion.Response.success?(response) do
-      {:ok, "/env:Envelope/env:Body/#{namespace}:#{operation}Response" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
-    else
-      Logger.error "Error invoking #{operation}. URL: #{url} auth: #{auth}. Request: #{inspect request}. Response #{inspect response}."
-      xpath_contents = case contents = "/env:Envelope/env:Body" |> to_char_list |> :xmerl_xpath.string(xml) do
-                         [] -> "/html" |> to_char_list |> :xmerl_xpath.string(xml)
-                         _ -> contents
-                       end 
-      {:error, response.status_code, xpath_contents |> parse_elements}
+    try do
+      response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
+      {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
+      if HTTPotion.Response.success?(response) do
+        {:ok, "/env:Envelope/env:Body/#{namespace}:#{operation}Response" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
+      else
+        Logger.error "Error invoking #{operation}. URL: #{url} auth: #{auth}. Request: #{inspect request}. Response #{inspect response}."
+        xpath_contents = case contents = "/env:Envelope/env:Body" |> to_char_list |> :xmerl_xpath.string(xml) do
+                           [] -> "/html" |> to_char_list |> :xmerl_xpath.string(xml)
+                           _ -> contents
+                         end 
+        {:error, response.status_code, xpath_contents |> parse_elements}
+      end
+    rescue
+      error in HTTPotion.HTTPError -> {:error, 500, %{"message" => error.message}}
     end
   end
 
@@ -80,7 +83,7 @@ defmodule EvercamMedia.ONVIFClient do
 
   #### WSSE
 
-  def get_wsse_header_data(user, password) do
+  defp get_wsse_header_data(user, password) do
     {a, b, c} = :os.timestamp
     :random.seed(a, b, c)
     nonce = nonce(20, []) |> to_string
@@ -103,7 +106,7 @@ defmodule EvercamMedia.ONVIFClient do
 
   #### XML Parsing
 
-  def parse_elements(event_elements) do
+  defp parse_elements(event_elements) do
     [response] = Enum.map(event_elements, fn(event_element) ->
       parse(xmlElement(event_element, :content))
     end)

@@ -33,6 +33,18 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
     assert title == "Document Error: Not Found"
   end
 
+  test "request timeout" do
+    conn = get conn(), "/v1/onvif/v20/device_service/GetNetworkInterfaces?url=http://192.10.20.30:8100&auth=foo:bar"
+    error_message = json_response(conn, 500) |> Map.get("message")
+    assert error_message == "req_timedout" 
+  end
+
+  test "bad url" do
+    conn = get conn(), "/v1/onvif/v20/device_service/GetNetworkInterfaces?url=abcde&auth=foo:bar"
+    error_message = json_response(conn, 500) |> Map.get("message")
+    assert error_message == "nxdomain" 
+  end
+
   defp parse_error_type(response) do
     response
     |> Map.get("Fault")
