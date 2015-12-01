@@ -4,7 +4,6 @@ defmodule Snapshot do
   schema "snapshots" do
     belongs_to :camera, Camera
 
-    field :data, :string
     field :notes, :string
     field :snapshot_id, :string
     field :motionlevel, :integer
