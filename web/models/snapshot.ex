@@ -1,11 +1,11 @@
 defmodule Snapshot do
   use Ecto.Model
 
+  @primary_key {:snapshot_id, :string, autogenerate: false}
   schema "snapshots" do
     belongs_to :camera, Camera
 
     field :notes, :string
-    field :snapshot_id, :string
     field :motionlevel, :integer
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
