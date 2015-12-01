@@ -27,6 +27,12 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
     assert error_type == "ter:InvalidArgVal"
   end
 
+  test "OnVIF not available" do
+    conn = get conn(), "/v1/onvif/v20/device_service/GetNetworkInterfaces?url=http://treacyconsulting.dyndns.org:8100&auth=foo:bar"
+    title = json_response(conn, 404) |> Map.get("head") |> Map.get("title")
+    assert title == "Document Error: Not Found"
+  end
+
   defp parse_error_type(response) do
     response
     |> Map.get("Fault")

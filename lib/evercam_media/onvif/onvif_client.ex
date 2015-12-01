@@ -30,12 +30,15 @@ defmodule EvercamMedia.ONVIFClient do
     response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
 
     {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
-
     if HTTPotion.Response.success?(response) do
       {:ok, "/env:Envelope/env:Body/#{namespace}:#{operation}Response" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
     else
       Logger.error "Error invoking #{operation}. URL: #{url} auth: #{auth}. Request: #{inspect request}. Response #{inspect response}."
-      {:error, response.status_code, "/env:Envelope/env:Body" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
+      xpath_contents = case contents = "/env:Envelope/env:Body" |> to_char_list |> :xmerl_xpath.string(xml) do
+                         [] -> "/html" |> to_char_list |> :xmerl_xpath.string(xml)
+                         _ -> contents
+                       end 
+      {:error, response.status_code, xpath_contents |> parse_elements}
     end
   end
 
