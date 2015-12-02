@@ -12,9 +12,9 @@ defmodule EvercamMedia.ONVIFPTZ do
   def get_presets(access_info, profile_token) do
     parameters = "<ProfileToken>#{profile_token}</ProfileToken>"
     {:ok, response} = access_info |> ptz_request("GetPresets", parameters)
-    presets = 
-      response 
-      |> Map.get("Preset") 
+    presets =
+      response
+      |> Map.get("Preset")
       |> Enum.filter(&(Map.get(&1, "Name") != nil))
     {:ok, Map.put(%{}, "Presets", presets)}
   end

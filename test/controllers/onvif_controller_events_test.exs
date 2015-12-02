@@ -15,4 +15,3 @@ defmodule EvercamMedia.ONVIFControllerEventsTest do
     assert fixed_topic_set == "true"
   end
 end
-

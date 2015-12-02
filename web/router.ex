@@ -48,10 +48,10 @@ defmodule EvercamMedia.Router do
       get "/users/:id", UserController, :show
       put "/users/:id", UserController, :update
     end
-    
+
     scope "/" do
       pipe_through :onvif
-      
+
       get "/cameras/:id/ptz/status", ONVIFPTZController, :status
       get "/cameras/:id/ptz/presets", ONVIFPTZController, :presets
       get "/cameras/:id/ptz/nodes", ONVIFPTZController, :nodes
@@ -66,7 +66,7 @@ defmodule EvercamMedia.Router do
       post "/cameras/:id/ptz/continuous/stop", ONVIFPTZController, :stop
       post "/cameras/:id/ptz/relative", ONVIFPTZController, :relativemove
 
-      get "/onvif/v20/:service/:operation", ONVIFController, :invoke      
+      get "/onvif/v20/:service/:operation", ONVIFController, :invoke
     end
   end
 end

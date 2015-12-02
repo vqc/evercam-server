@@ -25,7 +25,7 @@ defmodule EvercamMedia.ONVIFClient do
                    "Network" -> "dn"
                   end
 
-    [username, password] = auth |> String.split ":" 
+    [username, password] = auth |> String.split ":"
     request = gen_onvif_request(namespace, operation, username, password, parameters)
     try do
       response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
@@ -37,7 +37,7 @@ defmodule EvercamMedia.ONVIFClient do
         xpath_contents = case contents = "/env:Envelope/env:Body" |> to_char_list |> :xmerl_xpath.string(xml) do
                            [] -> "/html" |> to_char_list |> :xmerl_xpath.string(xml)
                            _ -> contents
-                         end 
+                         end
         {:error, response.status_code, xpath_contents |> parse_elements}
       end
     rescue
@@ -52,17 +52,17 @@ defmodule EvercamMedia.ONVIFClient do
         "tds" -> "http://www.onvif.org/ver20/device/wsdl"
         "trt" -> "http://www.onvif.org/ver10/media/wsdl"
         "tls" -> "http://www.onvif.org/ver10/display/wsdl"
-        "tev" -> "http://www.onvif.org/ver10/events/wsdl"  
-        "timg" -> "http://www.onvif.org/ver20/imaging/wsdl"  
+        "tev" -> "http://www.onvif.org/ver10/events/wsdl"
+        "timg" -> "http://www.onvif.org/ver20/imaging/wsdl"
         "tan" -> "http://www.onvif.org/ver20/analytics/wsdl"
-        "tad" -> "http://www.onvif.org/ver10/analyticsdevice/wsdl" 
-        "tst" -> "http://www.onvif.org/ver10/storage/wsdl" 
-        "dn" -> "http://www.onvif.org/ver10/network/wsdl" 
-        "tmd" -> "http://www.onvif.org/ver10/deviceIO/wsdl" 
-        "trc" -> "http://www.onvif.org/ver10/recording/wsdl" 
-        "tse" -> "http://www.onvif.org/ver10/search/wsdl" 
+        "tad" -> "http://www.onvif.org/ver10/analyticsdevice/wsdl"
+        "tst" -> "http://www.onvif.org/ver10/storage/wsdl"
+        "dn" -> "http://www.onvif.org/ver10/network/wsdl"
+        "tmd" -> "http://www.onvif.org/ver10/deviceIO/wsdl"
+        "trc" -> "http://www.onvif.org/ver10/recording/wsdl"
+        "tse" -> "http://www.onvif.org/ver10/search/wsdl"
         "trp" -> "http://www.onvif.org/ver10/replay/wsdl"
-        "trv" -> "http://www.onvif.org/ver10/receiver/wsdl" 
+        "trv" -> "http://www.onvif.org/ver10/receiver/wsdl"
        end
 
     {wsse_username, wsse_password, wsse_nonce, wsse_created} = get_wsse_header_data(username,password)
@@ -127,7 +127,7 @@ defmodule EvercamMedia.ONVIFClient do
         content = xmlElement(node, :content)
         case xmlElement(node, :attributes) do
           [] -> Map.put(%{}, name, parse(content))
-          attributes ->  case parse(content) do 
+          attributes ->  case parse(content) do
                            value when is_map(value) -> Map.put(%{}, name, value |> Map.merge(parse(attributes)))
                            value -> Map.put(%{}, name, value)
                          end

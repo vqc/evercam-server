@@ -2,8 +2,8 @@ defmodule EvercamMedia.ONVIFController do
   use Phoenix.Controller
   alias EvercamMedia.ONVIFClient
   require Logger
-  
-  def invoke(conn, %{"service" => service, "operation" => operation}) do 
+
+  def invoke(conn, %{"service" => service, "operation" => operation}) do
     case ONVIFClient.request(conn.assigns.onvif_access_info, service, operation, conn.assigns.onvif_parameters) do
       {:ok, response} -> default_respond(conn, 200, response)
       {:error, code, response} -> default_respond(conn, code, response)

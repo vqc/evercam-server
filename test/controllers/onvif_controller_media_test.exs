@@ -2,7 +2,6 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
   use EvercamMedia.ConnCase
 
   @access_params "url=http://149.13.244.32:8100&auth=admin:mehcam"
- 
 
   test "GET /v1/onvif/v20/Media/GetProfiles, returns profile information" do
     conn = get conn(), "/v1/onvif/v20/Media/GetProfiles?#{@access_params}"
@@ -31,12 +30,12 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
   test "GET /v1/onvif/v20/Media/GetVideoSources" do
     conn = get conn(), "/v1/onvif/v20/Media/GetVideoSources?#{@access_params}"
     video_source = json_response(conn, 200) |> Map.get("VideoSources") |> Map.get("token")
-    assert video_source == "VideoSource_1" 
+    assert video_source == "VideoSource_1"
   end
 
   test "GET /v1/onvif/v20/Media/GetSnapshotUri using camera_id" do
     conn = get conn(), "/v1/onvif/v20/Media/GetSnapshotUri?id=mobile-mast-test&ProfileToken=Profile_1"
     snapshot_uri = json_response(conn, 200) |> Map.get("MediaUri") |> Map.get("Uri")
     assert snapshot_uri == "http://192.168.1.100:8100/onvif/snapshot"
-  end    
+  end
 end
