@@ -62,7 +62,7 @@ defmodule EvercamMedia.ONVIFPTZController do
         "down" -> [x: 0.0, y: -0.1]
         _ -> [x: 0.0, y: 0.0]
       end
-    {:ok, response} = conn.assignbs.onvif_access_info |> ONVIFPTZ.continuous_move("Profile_1", velocity)
+    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.continuous_move("Profile_1", velocity)
     default_respond(conn, 200, response)
   end
 
