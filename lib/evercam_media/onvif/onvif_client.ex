@@ -5,33 +5,65 @@ defmodule EvercamMedia.ONVIFClient do
   Record.defrecord :xmlText, Record.extract(:xmlText, from_lib: "xmerl/include/xmerl.hrl")
   Record.defrecord :xmlAttribute, Record.extract(:xmlAttribute, from_lib: "xmerl/include/xmerl.hrl")
 
-  def onvif_call(base_url, service, method, xpath, username, password, parameters \\ "") do
-    url = "#{base_url}/onvif/" <>
-      case service do
-        :ptz -> "PTZ"
-        :device ->"device_service"
-        :media -> "Media"
+  def request(%{"url" => base_url, "auth" => auth}, service, operation, parameters \\ "") do
+    url = "#{base_url}/onvif/#{service}"
+    namespace =  case service do
+                   "PTZ" -> "tptz"
+                   "device_service" -> "tds"
+                   "Media" -> "trt"
+                   "Display" -> "tls"
+                   "Events" -> "tev"
+                   "Analytics" -> "tan"
+                   "AnalyticsDevice" -> "tad"
+                   "DeviceIO" -> "tmd"
+                   "Imaging" -> "timg"
+                   "Search" -> "tse"
+                   "Replay" -> "trp"
+                   "Recording" -> "trc"
+                   "Storage" -> "tst"
+                   "Receiver" -> "trv"
+                   "Network" -> "dn"
+                  end
+
+    [username, password] = auth |> String.split ":" 
+    request = gen_onvif_request(namespace, operation, username, password, parameters)
+    try do
+      response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
+      {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
+      if HTTPotion.Response.success?(response) do
+        {:ok, "/env:Envelope/env:Body/#{namespace}:#{operation}Response" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
+      else
+        Logger.error "Error invoking #{operation}. URL: #{url} auth: #{auth}. Request: #{inspect request}. Response #{inspect response}."
+        xpath_contents = case contents = "/env:Envelope/env:Body" |> to_char_list |> :xmerl_xpath.string(xml) do
+                           [] -> "/html" |> to_char_list |> :xmerl_xpath.string(xml)
+                           _ -> contents
+                         end 
+        {:error, response.status_code, xpath_contents |> parse_elements}
       end
-
-    request = gen_onvif_request(service, method, username, password, parameters)
-    response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
-
-    if HTTPotion.Response.success?(response) do
-      {xml, _rest} = :xmerl_scan.string(to_char_list(response.body))
-      {:ok, :xmerl_xpath.string(to_char_list(xpath), xml) |> parse_elements}
-    else
-      Logger.error "Error invoking #{method}. URL: #{url} username: #{username} password: #{password}. Request: #{inspect request}. Response #{inspect response}."
-      {:error, response.status_code, response}
+    rescue
+      error in HTTPotion.HTTPError -> {:error, 500, %{"message" => error.message}}
     end
   end
 
-  defp gen_onvif_request(service, method, username, password, parameters) do
+  defp gen_onvif_request(namespace, operation, username, password, parameters) do
     wsdl_url =
-      case service do
-        :ptz -> "http://www.onvif.org/ver10/ptz/wsdl"
-        :device -> "http://www.onvif.org/ver20/device/wsdl"
-        :media -> "http://www.onvif.org/ver10/media/wsdl"
-      end
+      case namespace do
+        "tptz" -> "http://www.onvif.org/ver20/ptz/wsdl"
+        "tds" -> "http://www.onvif.org/ver20/device/wsdl"
+        "trt" -> "http://www.onvif.org/ver10/media/wsdl"
+        "tls" -> "http://www.onvif.org/ver10/display/wsdl"
+        "tev" -> "http://www.onvif.org/ver10/events/wsdl"  
+        "timg" -> "http://www.onvif.org/ver20/imaging/wsdl"  
+        "tan" -> "http://www.onvif.org/ver20/analytics/wsdl"
+        "tad" -> "http://www.onvif.org/ver10/analyticsdevice/wsdl" 
+        "tst" -> "http://www.onvif.org/ver10/storage/wsdl" 
+        "dn" -> "http://www.onvif.org/ver10/network/wsdl" 
+        "tmd" -> "http://www.onvif.org/ver10/deviceIO/wsdl" 
+        "trc" -> "http://www.onvif.org/ver10/recording/wsdl" 
+        "tse" -> "http://www.onvif.org/ver10/search/wsdl" 
+        "trp" -> "http://www.onvif.org/ver10/replay/wsdl"
+        "trv" -> "http://www.onvif.org/ver10/receiver/wsdl" 
+       end
 
     {wsse_username, wsse_password, wsse_nonce, wsse_created} = get_wsse_header_data(username,password)
 
@@ -45,13 +77,13 @@ defmodule EvercamMedia.ONVIFClient do
     <wsse:Nonce>#{wsse_nonce}</wsse:Nonce>
     <wsu:Created>#{wsse_created}</wsu:Created></wsse:UsernameToken>
     </wsse:Security></SOAP-ENV:Header><SOAP-ENV:Body>
-    <tds:#{method} xmlns:tds=\"#{wsdl_url}\">#{parameters}</tds:#{method}>
+    <#{namespace}:#{operation} xmlns:#{namespace}=\"#{wsdl_url}\">#{parameters}</#{namespace}:#{operation}>
     </SOAP-ENV:Body></SOAP-ENV:Envelope>"
   end
 
   #### WSSE
 
-  def get_wsse_header_data(user, password) do
+  defp get_wsse_header_data(user, password) do
     {a, b, c} = :os.timestamp
     :random.seed(a, b, c)
     nonce = nonce(20, []) |> to_string
@@ -61,9 +93,7 @@ defmodule EvercamMedia.ONVIFClient do
   end
 
   defp format_date_time({{year, month, day}, {hour, minute, second}}) do
-    :io_lib.format("~4..0B-~2..0B-~2..0BT~2..0B:~2..0B:~2..0BZ", [year, month, day, hour, minute, second])
-    |> List.flatten
-    |> to_string
+    :io_lib.format("~4..0B-~2..0B-~2..0BT~2..0B:~2..0B:~2..0BZ", [year, month, day, hour, minute, second]) |> List.flatten |> to_string
   end
 
   defp nonce(0,l) do
@@ -76,7 +106,7 @@ defmodule EvercamMedia.ONVIFClient do
 
   #### XML Parsing
 
-  def parse_elements(event_elements) do
+  defp parse_elements(event_elements) do
     [response] = Enum.map(event_elements, fn(event_element) ->
       parse(xmlElement(event_element, :content))
     end)
@@ -90,15 +120,18 @@ defmodule EvercamMedia.ONVIFClient do
   defp parse(node) do
     cond do
       Record.is_record(node, :xmlElement) ->
-        [_ns,name] = xmlElement(node, :name)
-        |> to_string
-        |> String.split ":"
+        name = case xmlElement(node, :name) |> to_string |> String.split ":" do
+                 [_ns,name] -> name
+                 [name] -> name
+               end
         content = xmlElement(node, :content)
         case xmlElement(node, :attributes) do
           [] -> Map.put(%{}, name, parse(content))
-          attributes -> Map.put(%{}, name, parse(content) |> Map.merge(parse(attributes)))
+          attributes ->  case parse(content) do 
+                           value when is_map(value) -> Map.put(%{}, name, value |> Map.merge(parse(attributes)))
+                           value -> Map.put(%{}, name, value)
+                         end
         end
-
       Record.is_record(node, :xmlAttribute) ->
         name = xmlAttribute(node, :name) |> to_string
         value = xmlAttribute(node, :value) |> to_string
