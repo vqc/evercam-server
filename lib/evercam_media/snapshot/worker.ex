@@ -139,7 +139,7 @@ defmodule EvercamMedia.Snapshot.Worker do
         data = {state.name, timestamp, error}
         GenEvent.sync_notify(state.event_manager, {:snapshot_error, data})
     end
-    if reply_to != nil do
+    if is_pid(reply_to) do
       send reply_to, result
     end
     {:noreply, state}
