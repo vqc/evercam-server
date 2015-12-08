@@ -51,6 +51,15 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def handle_event({:snapshot_error, data}, state) do
     {camera_exid, timestamp, error} = data
+    parse_snapshot_error(camera_exid, timestamp, error)
+    {:ok, state}
+  end
+
+  def handle_event(_, state) do
+    {:ok, state}
+  end
+
+  def parse_snapshot_error(camera_exid, timestamp, error) do
     if is_map(error) do
       reason = Map.get(error, :reason)
     else
@@ -91,11 +100,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       _ ->
         Logger.info "[#{camera_exid}] [snapshot_error] [unhandled] #{inspect error}"
     end
-    {:ok, state}
-  end
-
-  def handle_event(_, state) do
-    {:ok, state}
   end
 
   def update_camera_status(camera_exid, timestamp, status) do

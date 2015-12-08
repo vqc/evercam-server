@@ -58,8 +58,9 @@ defmodule EvercamMedia.Snapshot.Worker do
   @doc """
   Get a snapshot from the camera server
   """
-  def get_snapshot(cam_server) do
-    GenServer.call(cam_server, :get_camera_snapshot)
+  def get_snapshot(cam_server, reply_to) do
+    timestamp = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.unix
+    GenServer.cast(cam_server, {:get_camera_snapshot, timestamp, reply_to})
   end
   def get_snapshot(cam_server, {:poll, timestamp}) do
     GenServer.cast(cam_server, {:get_camera_snapshot, timestamp})
@@ -114,8 +115,9 @@ defmodule EvercamMedia.Snapshot.Worker do
   @doc """
   Server callback for getting snapshot
   """
-  def handle_call(:get_camera_snapshot, _from, state) do
-    {:reply, _get_snapshot(state), state}
+  def handle_cast({:get_camera_snapshot, timestamp, reply_to}, state) do
+    _get_snapshot(state, timestamp, reply_to)
+    {:noreply, state}
   end
 
   @doc """
@@ -128,7 +130,7 @@ defmodule EvercamMedia.Snapshot.Worker do
   @doc """
   Server callback for camera_reply
   """
-  def handle_info({:camera_reply, result, timestamp}, state) do
+  def handle_info({:camera_reply, result, timestamp, reply_to}, state) do
     case result do
       {:ok, image} ->
         data = {state.name, timestamp, image}
@@ -136,6 +138,9 @@ defmodule EvercamMedia.Snapshot.Worker do
       {:error, error}->
         data = {state.name, timestamp, error}
         GenEvent.sync_notify(state.event_manager, {:snapshot_error, data})
+    end
+    if reply_to != nil do
+      send reply_to, result
     end
     {:noreply, state}
   end
@@ -168,21 +173,12 @@ defmodule EvercamMedia.Snapshot.Worker do
     Map.get(state, :config)
   end
 
-  defp _get_snapshot(state) do
+  defp _get_snapshot(state, timestamp, reply_to \\ nil) do
     config = get_from_state(:config, state)
     worker = self
     spawn fn ->
       result = CamClient.fetch_snapshot(config)
-      send worker, {:camera_reply, result}
-    end
-  end
-
-  defp _get_snapshot(state, timestamp) do
-    config = get_from_state(:config, state)
-    worker = self
-    spawn fn ->
-      result = CamClient.fetch_snapshot(config)
-      send worker, {:camera_reply, result, timestamp}
+      send worker, {:camera_reply, result, timestamp, reply_to}
     end
   end
 

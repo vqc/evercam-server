@@ -3,7 +3,7 @@ defmodule EvercamMedia.SnapshotController do
   use Timex
   use Calendar
   alias EvercamMedia.Util
-  alias EvercamMedia.Snapshot.CamClient
+  alias EvercamMedia.Snapshot.Worker
   require Logger
 
   def show(conn, params) do
@@ -114,8 +114,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp snapshot(camera_id, token, notes \\ "Evercam Proxy") do
-    vendor_exid = Camera.get_vendor_exid_by_camera_exid(camera_id)
-    get_snapshot_response(token, vendor_exid)
+    get_snapshot_response(camera_id)
   end
 
   defp get_snapshot_response(username, password, url, vendor_exid) do
@@ -128,14 +127,24 @@ defmodule EvercamMedia.SnapshotController do
     get_snapshot(args)
   end
 
-  defp get_snapshot_response(token, vendor_exid) do
-    [url, auth, credentials, time, _] = Util.decode_request_token(token)
-    args = %{
-      vendor_exid: vendor_exid,
-      url: url,
-      auth: auth
-    }
-    get_snapshot(args)
+  defp get_snapshot_response(camera_id) do
+    camera_id
+    |> String.to_atom
+    |> Process.whereis
+    |> Worker.get_snapshot(self)
+    receive do
+      {:ok, data} ->
+        response =  %{image: data}
+        [200, response]
+      {:error, "Response not a jpeg image"} ->
+        [504, %{message: "Camera didn't respond with an image."}]
+      {:error, %HTTPoison.Response{} = res} ->
+        [504, %{message: res.body}]
+      {:error, %HTTPoison.Error{}} ->
+        [504, %{message: "Camera seems to be offline."}]
+      _ ->
+        [500, %{message: "Sorry, we dropped the ball."}]
+    end
   end
 
   defp get_snapshot(args) do
