@@ -77,29 +77,23 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
       vendor_exid = ""
     end
 
-    if String.strip(url_string) != ""
-       && String.contains?(url_string, ".")
-       && parsed_uri.port > 0
-       && parsed_uri.port < 65535
-       do
-        {:ok, %{
-            event_handlers: @event_handlers,
-            name: camera.exid |> String.to_atom,
-            config: %{
-              camera_id: camera.id,
-              camera_exid: camera.exid,
-              vendor_exid: vendor_exid,
-              schedule: Camera.schedule(camera),
-              timezone: camera.timezone,
-              url: url,
-              auth: Camera.auth(camera),
-              sleep: Camera.sleep(camera),
-              initial_sleep: Camera.initial_sleep(camera)
-            }
-          }
+    {
+      :ok,
+      %{
+        event_handlers: @event_handlers,
+        name: camera.exid |> String.to_atom,
+        config: %{
+          camera_id: camera.id,
+          camera_exid: camera.exid,
+          vendor_exid: vendor_exid,
+          schedule: Camera.schedule(camera),
+          timezone: camera.timezone,
+          url: url,
+          auth: Camera.auth(camera),
+          sleep: Camera.sleep(camera),
+          initial_sleep: Camera.initial_sleep(camera)
         }
-    else
-        {:error, "Invalid url for camera", url}
-    end
+      }
+    }
   end
 end
