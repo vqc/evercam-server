@@ -4,6 +4,7 @@ defmodule EvercamMedia.SnapshotController do
   use Calendar
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.Worker
+  alias EvercamMedia.Snapshot.CamClient
   require Logger
 
   def show(conn, params) do
@@ -151,15 +152,15 @@ defmodule EvercamMedia.SnapshotController do
     case response = CamClient.fetch_snapshot(args) do
       {:ok, data} ->
         [200, %{image: data}]
-      {:error, "Response not a jpeg image"} ->
-        [504, %{message: "Camera didn't respond with an image."}]
+      {:error, %{reason: "Response not a jpeg image", response: response}} ->
+        [504, %{message: "Camera didn't respond with an image.", response: response}]
       {:error, %HTTPoison.Response{}} ->
         [504, %{message: response.body}]
       {:error, %HTTPoison.Error{id: nil, reason: :timeout}} ->
         [504, %{message: "Camera response timed out."}]
       {:error, %HTTPoison.Error{}} ->
         [504, %{message: "Camera seems to be offline."}]
-      _ ->
+      _error ->
         [500, %{message: "Sorry, we dropped the ball."}]
     end
   end
