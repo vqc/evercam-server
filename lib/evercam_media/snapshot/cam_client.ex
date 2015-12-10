@@ -33,7 +33,7 @@ defmodule EvercamMedia.Snapshot.CamClient do
   defp parse_snapshot_response({:ok, response}) do
     case Util.is_jpeg(response.body) do
       true -> {:ok, response.body}
-      _ -> {:error, "Response not a jpeg image"}
+      _ -> {:error, %{reason: "Response not a jpeg image", response: response.body}}
     end
   end
 
