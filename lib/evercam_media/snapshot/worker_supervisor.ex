@@ -41,12 +41,14 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   Start
   """
   def start_worker(camera) do
-    case get_config(camera) do
-      {:ok, settings} ->
-        Logger.debug "[#{settings.config.camera_exid}] Starting worker"
-        Supervisor.start_child(__MODULE__, [settings])
-      {:error, message, url} ->
-        Logger.warn "[#{camera.exid}] Skipping camera worker as the host is invalid: #{url}"
+    if camera do
+      case get_config(camera) do
+        {:ok, settings} ->
+          Logger.debug "[#{settings.config.camera_exid}] Starting worker"
+          Supervisor.start_child(__MODULE__, [settings])
+        {:error, message, url} ->
+          Logger.warn "[#{camera.exid}] Skipping camera worker as the host is invalid: #{url}"
+      end
     end
   end
 
@@ -58,8 +60,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   """
   def initiate_workers do
     Logger.info "Initiate workers for snapshot recording."
-    Camera
-    |> EvercamMedia.Repo.all([timeout: 15000])
+    Camera.get_cameras_with_vendor_model
     |> Enum.map(&(start_worker &1))
   end
 
@@ -70,21 +71,24 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
     url = "#{Camera.external_url(camera)}#{Camera.res_url(camera, "jpg")}"
     parsed_uri = URI.parse url
     url_string = "#{parsed_uri.host}"
+    if camera.vendor_model do
+      vendor_exid = camera.vendor_model.vendor.exid
+    else
+      vendor_exid = ""
+    end
 
     if String.strip(url_string) != ""
        && String.contains?(url_string, ".")
        && parsed_uri.port > 0
        && parsed_uri.port < 65535
        do
-        #TODO: There seems to be more db queries than necessary. Cut it down.
-        camera = EvercamMedia.Repo.preload camera, :cloud_recordings
         {:ok, %{
             event_handlers: @event_handlers,
             name: camera.exid |> String.to_atom,
             config: %{
               camera_id: camera.id,
               camera_exid: camera.exid,
-              vendor_exid: Camera.get_vendor_exid_by_camera_exid(camera.exid),
+              vendor_exid: vendor_exid,
               schedule: Camera.schedule(camera),
               timezone: camera.timezone,
               url: url,

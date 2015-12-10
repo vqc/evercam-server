@@ -30,6 +30,15 @@ defmodule Camera do
     select: v.exid
   end
 
+  def get_cameras_with_vendor_model do
+    EvercamMedia.Repo.all from c in Camera,
+    full_join: vm in assoc(c, :vendor_model),
+    full_join: v in assoc(vm, :vendor),
+    preload: :cloud_recordings,
+    preload: :vendor_model,
+    preload: [vendor_model: :vendor]
+  end
+
   def by_exid(camera_id) do
     from cam in Camera,
     where: cam.exid == ^camera_id,
