@@ -37,5 +37,4 @@ defmodule EvercamMedia.Snapshot.StatsHandler do
       [new_value | old_value]
     end)
   end
-
 end

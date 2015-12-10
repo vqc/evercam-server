@@ -145,5 +145,4 @@ defmodule EvercamMedia.Snapshot.Poller do
       [new_value | old_value]
     end)
   end
-
 end

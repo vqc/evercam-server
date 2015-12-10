@@ -51,5 +51,4 @@ defmodule EvercamMedia.Snapshot.CacheHandler do
   def handle_event(_, state) do
     {:ok, state}
   end
-
 end

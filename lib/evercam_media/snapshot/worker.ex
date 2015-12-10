@@ -168,7 +168,6 @@ defmodule EvercamMedia.Snapshot.Worker do
   @doc """
   Gets camera config from the server state
   """
-
   defp get_from_state(:config, state) do
     Map.get(state, :config)
   end
@@ -181,5 +180,4 @@ defmodule EvercamMedia.Snapshot.Worker do
       send worker, {:camera_reply, result, timestamp, reply_to}
     end
   end
-
 end

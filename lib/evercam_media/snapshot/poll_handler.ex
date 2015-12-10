@@ -14,5 +14,4 @@ defmodule EvercamMedia.Snapshot.PollHandler do
   def handle_event(_, state) do
     {:ok, state}
   end
-
 end

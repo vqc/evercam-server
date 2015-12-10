@@ -2,7 +2,7 @@ defmodule EvercamMedia.Snapshot.S3UploadHandler do
   @moduledoc """
   TODO
   """
-  
+
   use GenEvent
   alias EvercamMedia.Snapshot.S3Upload
   require Logger

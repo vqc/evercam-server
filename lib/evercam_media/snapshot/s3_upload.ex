@@ -2,7 +2,7 @@ defmodule EvercamMedia.Snapshot.S3Upload do
   @moduledoc """
   TODO
   """
-  
+
   def put(camera_exid, timestamp, image) do
     file_path = "/#{camera_exid}/snapshots/#{timestamp}.jpg"
     date = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.httpdate
