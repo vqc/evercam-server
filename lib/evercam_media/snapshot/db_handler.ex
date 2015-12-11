@@ -90,6 +90,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.info "[#{camera_exid}] [snapshot_error] [timeout]"
       :connect_timeout ->
         Logger.info "[#{camera_exid}] [snapshot_error] [connect_timeout]"
+        update_camera_status("#{camera_exid}", timestamp, false)
       :econnrefused ->
         Logger.info "[#{camera_exid}] [snapshot_error] [econnrefused]"
         update_camera_status("#{camera_exid}", timestamp, false)
