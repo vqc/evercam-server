@@ -45,6 +45,14 @@ defmodule Camera do
     select: cam
   end
 
+  def by_exid_with_vendor(camera_id) do
+    from cam in Camera,
+    where: cam.exid == ^camera_id,
+    select: cam,
+    preload: :vendor_model,
+    preload: [vendor_model: :vendor]
+  end
+
   def by_exid_with_owner(camera_id) do
     from cam in Camera,
     where: cam.exid == ^camera_id,
