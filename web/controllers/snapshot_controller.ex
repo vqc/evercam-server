@@ -138,7 +138,7 @@ defmodule EvercamMedia.SnapshotController do
         response =  %{image: data}
         [200, response]
       {:error, %{reason: "Response not a jpeg image", response: response}} ->
-        [504, %{message: "Camera didn't respond with an image.", response: response}]
+        [502, %{message: "Camera didn't respond with an image.", response: response}]
       {:error, %HTTPoison.Response{} = response} ->
         [504, %{message: response.body}]
       {:error, %HTTPoison.Error{}} ->
@@ -153,7 +153,7 @@ defmodule EvercamMedia.SnapshotController do
       {:ok, data} ->
         [200, %{image: data}]
       {:error, %{reason: "Response not a jpeg image", response: response}} ->
-        [504, %{message: "Camera didn't respond with an image.", response: response}]
+        [502, %{message: "Camera didn't respond with an image.", response: response}]
       {:error, %HTTPoison.Response{}} ->
         [504, %{message: response.body}]
       {:error, %HTTPoison.Error{id: nil, reason: :timeout}} ->
