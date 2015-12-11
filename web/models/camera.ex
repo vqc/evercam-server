@@ -103,6 +103,10 @@ defmodule Camera do
     end
   end
 
+  def snapshot_url(camera) do
+    "#{external_url(camera)}#{res_url(camera)}"
+  end
+
   def get_camera_info(camera_id) do
     camera = EvercamMedia.Repo.one! by_exid(camera_id)
     %{
