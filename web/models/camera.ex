@@ -86,6 +86,14 @@ defmodule Camera do
     "#{camera.config["auth"]["basic"]["username"]}:#{camera.config["auth"]["basic"]["password"]}"
   end
 
+  def username(camera) do
+    "#{camera.config["auth"]["basic"]["username"]}"
+  end
+
+  def password(camera) do
+    "#{camera.config["auth"]["basic"]["password"]}"
+  end
+
   def res_url(camera, type \\ "jpg") do
     url = "#{camera.config["snapshots"][type]}"
     if String.starts_with?(url, "/") || String.length(url) == 0 do
