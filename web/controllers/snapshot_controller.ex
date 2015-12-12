@@ -148,22 +148,16 @@ defmodule EvercamMedia.SnapshotController do
       username: username,
       password: password
     }
-    get_snapshot(args)
-  end
 
-  defp get_snapshot_response(camera_id) do
-    camera_id
-    |> String.to_atom
-    |> Process.whereis
-    |> Worker.get_snapshot(self)
-    receive do
+    case response = CamClient.fetch_snapshot(args) do
       {:ok, data} ->
-        response =  %{image: data}
-        [200, response]
+        [200, %{image: data}]
       {:error, %{reason: "Response not a jpeg image", response: response}} ->
-        [502, %{message: "Camera didn't respond with an image.", response: response}]
-      {:error, %HTTPoison.Response{} = response} ->
+        [504, %{message: "Camera didn't respond with an image.", response: response}]
+      {:error, %HTTPoison.Response{}} ->
         [504, %{message: response.body}]
+      {:error, %HTTPoison.Error{id: nil, reason: :timeout}} ->
+        [504, %{message: "Camera response timed out."}]
       {:error, %HTTPoison.Error{}} ->
         [504, %{message: "Camera seems to be offline."}]
       _error ->
