@@ -3,7 +3,6 @@ defmodule EvercamMedia.SnapshotController do
   use Timex
   use Calendar
   alias EvercamMedia.Util
-  alias EvercamMedia.Snapshot.Worker
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.S3Upload
@@ -46,7 +45,7 @@ defmodule EvercamMedia.SnapshotController do
     unless response do
       [code, response] = snapshot(params["id"], params["token"], timestamp, true, params["notes"])
     end
-    create_respond(conn, code, response, params, params["with_data"])
+    create_respond(conn, code, response, params["with_data"])
   end
 
   def test(conn, params) do
@@ -58,7 +57,7 @@ defmodule EvercamMedia.SnapshotController do
         params["vendor_id"]
       )
 
-    test_respond(conn, code, response, params)
+    test_respond(conn, code, response)
   end
 
   defp show_respond(conn, 200, response, camera_id, timestamp) do
@@ -78,7 +77,7 @@ defmodule EvercamMedia.SnapshotController do
     |> json response
   end
 
-  defp create_respond(conn, 200, response, params, "true") do
+  defp create_respond(conn, 200, response, "true") do
     data = "data:image/jpeg;base64,#{Base.encode64(response[:image])}"
 
     conn
@@ -87,21 +86,21 @@ defmodule EvercamMedia.SnapshotController do
     |> json %{created_at: response[:timestamp], notes: response[:notes], data: data}
   end
 
-  defp create_respond(conn, 200, response, params, _) do
+  defp create_respond(conn, 200, response, _) do
     conn
     |> put_status(200)
     |> put_resp_header("access-control-allow-origin", "*")
     |> json %{created_at: response[:timestamp], notes: response[:notes]}
   end
 
-  defp create_respond(conn, code, response, _, _) do
+  defp create_respond(conn, code, response, _) do
     conn
     |> put_status(code)
     |> put_resp_header("access-control-allow-origin", "*")
     |> json response
   end
 
-  defp test_respond(conn, 200, response, params) do
+  defp test_respond(conn, 200, response) do
     data = "data:image/jpeg;base64,#{Base.encode64(response[:image])}"
 
     conn
@@ -110,7 +109,7 @@ defmodule EvercamMedia.SnapshotController do
     |> json %{data: data, status: "ok"}
   end
 
-  defp test_respond(conn, code, response, _) do
+  defp test_respond(conn, code, response) do
     conn
     |> put_status(code)
     |> put_resp_header("access-control-allow-origin", "*")
@@ -180,8 +179,8 @@ defmodule EvercamMedia.SnapshotController do
         DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true)
         |> DBHandler.save_snapshot_record(args[:timestamp], nil, args[:notes])
       rescue
-        _error ->
-          Util.error_handler(_error)
+        error ->
+          Util.error_handler(error)
       end
     end
     [200, %{image: data, timestamp: args[:timestamp], notes: args[:notes]}]
@@ -192,8 +191,8 @@ defmodule EvercamMedia.SnapshotController do
       try do
         DBHandler.update_camera_status("#{args[:camera_exid]}", args[:timestamp], true)
       rescue
-        _error ->
-          Util.error_handler(_error)
+        error ->
+          Util.error_handler(error)
       end
     end
     [200, %{image: data}]
