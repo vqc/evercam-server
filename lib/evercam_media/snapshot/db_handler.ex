@@ -23,6 +23,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
+    notes = "Evercam Proxy"
     Logger.debug "[#{camera_exid}] [snapshot_success]"
 
     case previous_image = ConCache.get(:cache, camera_exid) do
@@ -38,14 +39,13 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     spawn fn ->
       try do
         update_camera_status("#{camera_exid}", timestamp, true)
-        |> save_snapshot_record(timestamp, motion_level)
+        |> save_snapshot_record(timestamp, motion_level, notes)
       rescue
         _error ->
           Util.error_handler(_error)
       end
     end
-    note = "Evercam Proxy"
-    ConCache.put(:cache, camera_exid, %{image: image, timestamp: timestamp, notes: note})
+    ConCache.put(:cache, camera_exid, %{image: image, timestamp: timestamp, notes: notes})
     {:ok, state}
   end
 
@@ -140,7 +140,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
   end
 
-  defp save_snapshot_record(camera, timestamp, motion_level) do
+  def save_snapshot_record(camera, timestamp, motion_level, notes) do
     {:ok, datetime} =
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.DateTime.to_erl
@@ -149,7 +149,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.Strftime.strftime "%Y%m%d%H%M%S%f"
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
-    SnapshotRepo.insert(%Snapshot{camera_id: camera.id, notes: "Evercam Proxy", motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
+    SnapshotRepo.insert(%Snapshot{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
   end
 
   defp construct_camera(camera, datetime, _, true) do

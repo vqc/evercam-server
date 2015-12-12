@@ -5,13 +5,15 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.Worker
   alias EvercamMedia.Snapshot.CamClient
+  alias EvercamMedia.Snapshot.DBHandler
+  alias EvercamMedia.Snapshot.S3Upload
   require Logger
 
   def show(conn, params) do
     timestamp = DateTime.now_utc |> DateTime.Format.unix
     [code, response] = [200, ConCache.get(:cache, params["id"])]
     unless response do
-      [code, response] = snapshot(params["id"], params["token"])
+      [code, response] = snapshot(params["id"], params["token"], timestamp, false)
     end
     show_respond(conn, code, response, params["id"], timestamp)
   end
@@ -22,7 +24,7 @@ defmodule EvercamMedia.SnapshotController do
     camera_exid_last = "#{camera_exid}_last"
     [code, response] = [200, ConCache.get(:cache, camera_exid_last)]
     unless response do
-      [code, response] = snapshot(params["id"], params["token"])
+      [code, response] = snapshot(params["id"], params["token"], timestamp, false)
     end
     show_respond(conn, code, response, params["id"], timestamp)
   end
@@ -33,15 +35,16 @@ defmodule EvercamMedia.SnapshotController do
     camera_exid_previous = "#{camera_exid}_previous"
     [code, response] = [200, ConCache.get(:cache, camera_exid_previous)]
     unless response do
-      [code, response] = snapshot(params["id"], params["token"])
+      [code, response] = snapshot(params["id"], params["token"], timestamp, false)
     end
     show_respond(conn, code, response, params["id"], timestamp)
   end
 
   def create(conn, params) do
+    timestamp = DateTime.now_utc |> DateTime.Format.unix
     [code, response] = [200, ConCache.get(:cache, params["id"])]
     unless response do
-      [code, response] = snapshot(params["id"], params["token"], params["notes"])
+      [code, response] = snapshot(params["id"], params["token"], timestamp, true, params["notes"])
     end
     create_respond(conn, code, response, params, params["with_data"])
   end
@@ -114,8 +117,28 @@ defmodule EvercamMedia.SnapshotController do
     |> json response
   end
 
-  defp snapshot(camera_id, token, notes \\ "Evercam Proxy") do
-    get_snapshot_response(camera_id)
+  defp snapshot(camera_id, token, timestamp, store_snapshot, notes \\ "Evercam Proxy") do
+    camera = EvercamMedia.Repo.one! Camera.by_exid_with_vendor(camera_id)
+    unless notes do
+      notes = "Evercam Proxy"
+    end
+    if camera.vendor_model do
+      vendor_exid = camera.vendor_model.vendor.exid
+    else
+      vendor_exid = ""
+    end
+
+    args = %{
+      camera_exid: camera.exid,
+      vendor_exid: vendor_exid,
+      url: Camera.snapshot_url(camera),
+      username: Camera.username(camera),
+      password: Camera.password(camera),
+      store_snapshot: store_snapshot,
+      timestamp: timestamp,
+      notes: notes
+    }
+    get_snapshot(args)
   end
 
   defp get_snapshot_response(username, password, url, vendor_exid) do
@@ -149,18 +172,88 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp get_snapshot(args) do
-    case response = CamClient.fetch_snapshot(args) do
-      {:ok, data} ->
-        [200, %{image: data}]
-      {:error, %{reason: "Response not a jpeg image", response: response}} ->
-        [502, %{message: "Camera didn't respond with an image.", response: response}]
-      {:error, %HTTPoison.Response{}} ->
-        [504, %{message: response.body}]
-      {:error, %HTTPoison.Error{id: nil, reason: :timeout}} ->
+    response = CamClient.fetch_snapshot(args)
+    parse_camera_response(args, response, args[:store_snapshot])
+  end
+
+  defp parse_camera_response(args, {:ok, data}, true) do
+    spawn fn ->
+      Logger.debug "Uploading snapshot to S3 for camera #{args[:camera_exid]} taken at #{args[:timestamp]}"
+      S3Upload.put(args[:camera_exid], args[:timestamp], data)
+    end
+    spawn fn ->
+      try do
+        DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true)
+        |> DBHandler.save_snapshot_record(args[:timestamp], nil, args[:notes])
+      rescue
+        _error ->
+          Util.error_handler(_error)
+      end
+    end
+    [200, %{image: data, timestamp: args[:timestamp], notes: args[:notes]}]
+  end
+
+  defp parse_camera_response(args, {:ok, data}, false) do
+    spawn fn ->
+      try do
+        DBHandler.update_camera_status("#{args[:camera_exid]}", args[:timestamp], true)
+      rescue
+        _error ->
+          Util.error_handler(_error)
+      end
+    end
+    [200, %{image: data}]
+  end
+
+  defp parse_camera_response(args, {:error, error}, _store_snapshot) do
+    camera_exid = args[:camera_exid]
+    timestamp = args[:timestamp]
+    if is_map(error) do
+      reason = Map.get(error, :reason)
+    else
+      reason = error
+    end
+    case reason do
+      :system_limit ->
+        Logger.error "[#{camera_exid}] [snapshot_error] [system_limit] Traceback."
+        Util.error_handler(error)
+        [500, %{message: "Sorry, we dropped the ball."}]
+      :closed ->
+        Logger.error "[#{camera_exid}] [snapshot_error] [closed] Traceback."
+        Util.error_handler(error)
+        [504, %{message: "Connection closed."}]
+      :emfile ->
+        Logger.error "[#{camera_exid}] [snapshot_error] [emfile] Traceback."
+        Util.error_handler(error)
+        [500, %{message: "Sorry, we dropped the ball."}]
+      :nxdomain ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [nxdomain]"
+        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
+        [504, %{message: "Non-existant domain."}]
+      :ehostunreach ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [ehostunreach]"
+        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
+        [504, %{message: "No route to host."}]
+      :enetunreach ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [enetunreach]"
+        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
+        [504, %{message: "Network unreachable."}]
+      :timeout ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [timeout]"
         [504, %{message: "Camera response timed out."}]
-      {:error, %HTTPoison.Error{}} ->
-        [504, %{message: "Camera seems to be offline."}]
-      _error ->
+      :connect_timeout ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [connect_timeout]"
+        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
+        [504, %{message: "Connection to the camera timed out."}]
+      :econnrefused ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [econnrefused]"
+        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
+        [504, %{message: "Connection refused."}]
+      "Response not a jpeg image" ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [not_a_jpeg]"
+        [502, %{message: "Camera didn't respond with an image.", response: error[:response]}]
+      _reason ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [unhandled] #{inspect error}"
         [500, %{message: "Sorry, we dropped the ball."}]
     end
   end
