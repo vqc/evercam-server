@@ -38,7 +38,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
     spawn fn ->
       try do
-        update_camera_status("#{camera_exid}", timestamp, true)
+        update_camera_status("#{camera_exid}", timestamp, true, true)
         |> save_snapshot_record(timestamp, motion_level, notes)
       rescue
         _error ->
@@ -101,7 +101,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
   end
 
-  def update_camera_status(camera_exid, timestamp, status) do
+  def update_camera_status(camera_exid, timestamp, status, update_thumbnail? \\ false) do
     #TODO Improve the db queries here
     {:ok, datetime} =
       Calendar.DateTime.Parse.unix!(timestamp)
@@ -110,7 +110,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     camera = Repo.one! Camera.by_exid(camera_exid)
     camera_is_online = camera.is_online
     camera = construct_camera(camera, datetime, status, camera_is_online == status)
-    if status == true do
+    if status == true && update_thumbnail? do
       file_path = "/#{camera.exid}/snapshots/#{timestamp}.jpg"
       camera = %{camera | thumbnail_url: Util.s3_file_url(file_path)}
     end

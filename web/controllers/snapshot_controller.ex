@@ -7,6 +7,8 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.S3Upload
   require Logger
+  # TODO: refactor the functions in this module, there's
+  # a lot of duplication with db_handler functions
 
   def show(conn, params) do
     timestamp = DateTime.now_utc |> DateTime.Format.unix
@@ -176,7 +178,7 @@ defmodule EvercamMedia.SnapshotController do
     end
     spawn fn ->
       try do
-        DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true)
+        DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true, true)
         |> DBHandler.save_snapshot_record(args[:timestamp], nil, args[:notes])
       rescue
         error ->
