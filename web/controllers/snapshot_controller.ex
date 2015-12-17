@@ -153,6 +153,12 @@ defmodule EvercamMedia.SnapshotController do
     case response = CamClient.fetch_snapshot(args) do
       {:ok, data} ->
         [200, %{image: data}]
+      {:error, %{reason: "Not Found", response: response}} ->
+        [504, %{message: "Camera url is not found.", response: response}]
+      {:error, %{reason: "Device Error", response: response}} ->
+        [504, %{message: "Camera responded with a Device Error message.", response: response}]
+      {:error, %{reason: "Device busy", response: response}} ->
+        [502, %{message: "Camera responded with a Device Busy message.", response: response}]
       {:error, %{reason: "Response not a jpeg image", response: response}} ->
         [504, %{message: "Camera didn't respond with an image.", response: response}]
       {:error, %HTTPoison.Response{}} ->
@@ -208,6 +214,7 @@ defmodule EvercamMedia.SnapshotController do
     else
       reason = error
     end
+
     case reason do
       :system_limit ->
         Logger.error "[#{camera_exid}] [snapshot_error] [system_limit] Traceback."
@@ -244,9 +251,19 @@ defmodule EvercamMedia.SnapshotController do
         Logger.info "[#{camera_exid}] [snapshot_error] [econnrefused]"
         DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Connection refused."}]
+      "Not Found" ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [not_found]"
+        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
+        [504, %{message: "Camera url is not found.", response: error[:response]}]
+      "Device Error" ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [device_error]"
+        [504, %{message: "Camera responded with a Device Error message.", response: error[:response]}]
+      "Device busy" ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [device_busy]"
+        [502, %{message: "Camera responded with a Device Busy message.", response: error[:response]}]
       "Response not a jpeg image" ->
         Logger.info "[#{camera_exid}] [snapshot_error] [not_a_jpeg]"
-        [502, %{message: "Camera didn't respond with an image.", response: error[:response]}]
+        [504, %{message: "Camera didn't respond with an image.", response: error[:response]}]
       _reason ->
         Logger.info "[#{camera_exid}] [snapshot_error] [unhandled] #{inspect error}"
         [500, %{message: "Sorry, we dropped the ball."}]

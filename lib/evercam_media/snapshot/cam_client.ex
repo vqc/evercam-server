@@ -33,12 +33,25 @@ defmodule EvercamMedia.Snapshot.CamClient do
   defp parse_snapshot_response({:ok, response}) do
     case Util.is_jpeg(response.body) do
       true -> {:ok, response.body}
-      _ -> {:error, %{reason: "Response not a jpeg image", response: response.body}}
+      _ -> {:error, %{reason: parse_text_response(response.body), response: response.body}}
     end
   end
 
   defp parse_snapshot_response(response) do
     response
+  end
+
+  defp parse_text_response(response_text) do
+    cond do
+      String.contains?(response_text, "Not Found") ->
+        "Not Found"
+      String.contains?(response_text, "Device Busy") ->
+        "Device Busy"
+      String.contains?(response_text, "Device Error") ->
+        "Device Error"
+      true ->
+        "Response not a jpeg image"
+    end
   end
 
   defp extract_auth_credentials(%{vendor_exid: _vendor_exid, url: _url, username: username, password: password}) do
