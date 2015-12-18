@@ -131,6 +131,7 @@ defmodule EvercamMedia.SnapshotController do
 
     args = %{
       camera_exid: camera.exid,
+      is_online: camera.is_online,
       vendor_exid: vendor_exid,
       url: Camera.snapshot_url(camera),
       username: Camera.username(camera),
@@ -172,9 +173,20 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  defp get_snapshot(args) do
+  defp get_snapshot(args, 3) do
     response = CamClient.fetch_snapshot(args)
     parse_camera_response(args, response, args[:store_snapshot])
+  end
+
+  defp get_snapshot(args, retry \\ 1) do
+    response = CamClient.fetch_snapshot(args)
+
+    case {response, args[:is_online]} do
+      {{:error, _error}, true} ->
+        get_snapshot(args, retry+1)
+      _ ->
+        parse_camera_response(args, response, args[:store_snapshot])
+    end
   end
 
   defp parse_camera_response(args, {:ok, data}, true) do
@@ -214,7 +226,10 @@ defmodule EvercamMedia.SnapshotController do
     else
       reason = error
     end
+    handle_snapshot_error(camera_exid, timestamp, error, reason)
+  end
 
+  defp handle_snapshot_error(camera_exid, timestamp, error, reason) do
     case reason do
       :system_limit ->
         Logger.error "[#{camera_exid}] [snapshot_error] [system_limit] Traceback."
