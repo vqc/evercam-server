@@ -22,13 +22,12 @@ defmodule EvercamMedia.CameraController do
       conn
       |> send_resp(200, "Camera update request received.")
     rescue
-      e ->
+      _error ->
         Logger.info "Camera update for #{exid} requested with invalid token."
         conn
-        |> send_resp(500, "error.")
+        |> send_resp(500, "Error updating camera #{exid}")
     end
   end
-
 
   defp start_worker(camera) do
     WorkerSupervisor.start_worker(camera)
@@ -43,5 +42,4 @@ defmodule EvercamMedia.CameraController do
         Logger.info "Skipping camera worker update as the host is invalid"
     end
   end
-
 end
