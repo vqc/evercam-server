@@ -257,6 +257,7 @@ defmodule EvercamMedia.SnapshotController do
         [504, %{message: "Camera url is not found.", response: error[:response]}]
       "Device Error" ->
         Logger.info "[#{camera_exid}] [snapshot_error] [device_error]"
+        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Camera responded with a Device Error message.", response: error[:response]}]
       "Device busy" ->
         Logger.info "[#{camera_exid}] [snapshot_error] [device_busy]"
