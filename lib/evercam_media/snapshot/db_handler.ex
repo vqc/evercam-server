@@ -98,11 +98,13 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.info "[#{camera_exid}] [snapshot_error] [not_a_jpeg]"
       _ ->
         Logger.info "[#{camera_exid}] [snapshot_error] [unhandled] #{inspect error}"
+        # TODO Merge this with the snapshot controller function
     end
   end
 
   def update_camera_status(camera_exid, timestamp, status, update_thumbnail? \\ false) do
     #TODO Improve the db queries here
+    ConCache.put(:camera_status, camera_exid, status)
     {:ok, datetime} =
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.DateTime.to_erl

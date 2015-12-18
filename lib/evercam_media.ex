@@ -13,9 +13,23 @@ defmodule EvercamMedia do
       supervisor(EvercamMedia.Snapshot.WorkerSupervisor, []),
       worker(ConCache, [[ttl_check: 100, ttl: 1300], [name: :cache]]),
       worker(ConCache, [
+            [
+              ttl_check: 100,
+              ttl: :timer.seconds(60)
+            ],
+            [name: :camera_lock]
+          ], id: :camera_lock),
+      worker(ConCache, [
+            [
+              ttl_check: :timer.seconds(60*60),
+              ttl: :timer.seconds(3*24*60*60)
+            ],
+            [name: :camera_status]
+          ], id: :camera_status),
+      worker(ConCache, [
         [
           ttl_check: :timer.seconds(60*60),
-          ttl: :timer.seconds(3*24*60*60) # 3 days * 24 hrs * 60 mins * 60 sec
+          ttl: :timer.seconds(3*24*60*60)
         ],
         [name: :snapshot_error]
       ], id: :snapshot_error),
