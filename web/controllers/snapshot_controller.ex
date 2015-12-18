@@ -221,69 +221,7 @@ defmodule EvercamMedia.SnapshotController do
   defp parse_camera_response(args, {:error, error}, _store_snapshot) do
     camera_exid = args[:camera_exid]
     timestamp = args[:timestamp]
-    if is_map(error) do
-      reason = Map.get(error, :reason)
-    else
-      reason = error
-    end
-    handle_snapshot_error(camera_exid, timestamp, error, reason)
-  end
-
-  defp handle_snapshot_error(camera_exid, timestamp, error, reason) do
-    case reason do
-      :system_limit ->
-        Logger.error "[#{camera_exid}] [snapshot_error] [system_limit] Traceback."
-        Util.error_handler(error)
-        [500, %{message: "Sorry, we dropped the ball."}]
-      :closed ->
-        Logger.error "[#{camera_exid}] [snapshot_error] [closed] Traceback."
-        Util.error_handler(error)
-        [504, %{message: "Connection closed."}]
-      :emfile ->
-        Logger.error "[#{camera_exid}] [snapshot_error] [emfile] Traceback."
-        Util.error_handler(error)
-        [500, %{message: "Sorry, we dropped the ball."}]
-      :nxdomain ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [nxdomain]"
-        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
-        [504, %{message: "Non-existant domain."}]
-      :ehostunreach ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [ehostunreach]"
-        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
-        [504, %{message: "No route to host."}]
-      :enetunreach ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [enetunreach]"
-        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
-        [504, %{message: "Network unreachable."}]
-      :timeout ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [timeout]"
-        [504, %{message: "Camera response timed out."}]
-      :connect_timeout ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [connect_timeout]"
-        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
-        [504, %{message: "Connection to the camera timed out."}]
-      :econnrefused ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [econnrefused]"
-        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
-        [504, %{message: "Connection refused."}]
-      "Not Found" ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [not_found]"
-        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
-        [504, %{message: "Camera url is not found.", response: error[:response]}]
-      "Device Error" ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [device_error]"
-        DBHandler.update_camera_status("#{camera_exid}", timestamp, false)
-        [504, %{message: "Camera responded with a Device Error message.", response: error[:response]}]
-      "Device busy" ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [device_busy]"
-        [502, %{message: "Camera responded with a Device Busy message.", response: error[:response]}]
-      "Response not a jpeg image" ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [not_a_jpeg]"
-        [504, %{message: "Camera didn't respond with an image.", response: error[:response]}]
-      _reason ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [unhandled] #{inspect error}"
-        [500, %{message: "Sorry, we dropped the ball."}]
-    end
+    DBHandler.parse_snapshot_error(camera_exid, timestamp, error)
   end
 
   defp check_token_expiry(time) do
