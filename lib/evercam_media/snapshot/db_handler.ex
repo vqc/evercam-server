@@ -135,7 +135,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def log_camera_status(camera_id, false, datetime) do
     SnapshotRepo.insert %CameraActivity{camera_id: camera_id, action: "offline", done_at: datetime}
     camera = Repo.one! Camera.by_id_with_owner(camera_id)
-    if camera.owner.username == "vq" || camera.owner.username == "marco" do
+    if camera.owner.username == "vinniequinn" || camera.owner.username == "marco" do
       EvercamMedia.UserMailer.camera_offline(camera.owner, camera)
     end
   end
