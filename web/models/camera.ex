@@ -49,6 +49,7 @@ defmodule Camera do
     from cam in Camera,
     where: cam.exid == ^camera_id,
     select: cam,
+    preload: :cloud_recordings,
     preload: :vendor_model,
     preload: [vendor_model: :vendor]
   end
