@@ -113,7 +113,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.info "[#{camera_exid}] [snapshot_error] [device_error]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Camera responded with a Device Error message.", response: error[:response]}]
-      "Device busy" ->
+      "Device Busy" ->
         Logger.info "[#{camera_exid}] [snapshot_error] [device_busy]"
         [502, %{message: "Camera responded with a Device Busy message.", response: error[:response]}]
       "Response not a jpeg image" ->
