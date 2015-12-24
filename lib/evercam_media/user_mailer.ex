@@ -12,6 +12,14 @@ defmodule EvercamMedia.UserMailer do
                text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "confirm.txt", user: user, code: code)
   end
 
+  def camera_online(user, camera) do
+    send_email to: user.email,
+               subject: "Evercam Camera Online",
+               from: sender_email,
+               html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.html", user: user, camera: camera),
+               text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.txt", user: user, camera: camera)
+  end
+
   def camera_offline(user, camera) do
     send_email to: user.email,
                subject: "Evercam Camera Offline",
