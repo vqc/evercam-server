@@ -3,7 +3,7 @@ defmodule Snapshot do
 
   @primary_key {:snapshot_id, :string, autogenerate: false}
   schema "snapshots" do
-    belongs_to :camera, Camera
+    belongs_to :camera, Camera, references: :snapshot_id
 
     field :notes, :string
     field :motionlevel, :integer
