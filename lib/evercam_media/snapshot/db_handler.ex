@@ -41,8 +41,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         update_camera_status("#{camera_exid}", timestamp, true, true)
         |> save_snapshot_record(timestamp, motion_level, notes)
       rescue
-        _error ->
-          Util.error_handler(_error)
+        error ->
+          Util.error_handler(error)
       end
     end
     ConCache.put(:cache, camera_exid, %{image: image, timestamp: timestamp, notes: notes})

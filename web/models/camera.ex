@@ -80,7 +80,7 @@ defmodule Camera do
     camera_url(host, port, type)
   end
 
-  defp camera_url("", port, type) do
+  defp camera_url("", _port, _type) do
     nil
   end
 

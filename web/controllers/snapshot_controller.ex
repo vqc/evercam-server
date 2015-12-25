@@ -118,7 +118,7 @@ defmodule EvercamMedia.SnapshotController do
     |> json response
   end
 
-  defp snapshot(camera_id, token, timestamp, store_snapshot, notes \\ "Evercam Proxy") do
+  defp snapshot(camera_id, _token, timestamp, store_snapshot, notes \\ "Evercam Proxy") do
     camera = EvercamMedia.Repo.one! Camera.by_exid_with_vendor(camera_id)
     unless notes do
       notes = "Evercam Proxy"

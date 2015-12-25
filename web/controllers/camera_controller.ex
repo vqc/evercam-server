@@ -38,7 +38,7 @@ defmodule EvercamMedia.CameraController do
       {:ok, settings} ->
         Logger.info "Updating worker for #{settings.config.camera_exid}"
         Worker.update_config(worker, settings)
-      {:error, message} ->
+      {:error, _message} ->
         Logger.info "Skipping camera worker update as the host is invalid"
     end
   end
