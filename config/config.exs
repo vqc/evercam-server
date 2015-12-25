@@ -27,7 +27,7 @@ config :logger, :console,
   format: "$date $time $metadata[$level] $message\n",
   metadata: [:request_id]
 
-config :nginx_rtmp,
+config :evercam_media,
   hls_url: "http://localhost:8080"
 
 config :exq,
@@ -35,9 +35,6 @@ config :exq,
   port: 6379,
   namespace: "sidekiq",
   queues: ["to_elixir"]
-
-config :onvif,
-  default_profile: "Profile_1"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

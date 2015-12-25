@@ -45,7 +45,7 @@ config :phoenix, :filter_parameters, ["password", "api_key"]
 #     config :evercam_media, EvercamMedia.Endpoint, server: true
 #
 
-config :nginx_rtmp,
+config :evercam_media,
   hls_url: "https://media.evercam.io"
 
 config :exq,
