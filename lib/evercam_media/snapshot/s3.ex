@@ -1,9 +1,12 @@
-defmodule EvercamMedia.Snapshot.S3Upload do
+defmodule EvercamMedia.Snapshot.S3 do
   @moduledoc """
   TODO
   """
 
-  def put(camera_exid, timestamp, image) do
+  alias EvercamMedia.Repo
+  alias EvercamMedia.SnapshotRepo
+
+  def upload(camera_exid, timestamp, image) do
     file_path = "/#{camera_exid}/snapshots/#{timestamp}.jpg"
     date = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.httpdate
     host = "#{System.get_env("AWS_BUCKET")}.s3.amazonaws.com"
