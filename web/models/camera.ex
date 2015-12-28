@@ -6,8 +6,8 @@ defmodule Camera do
     belongs_to :vendor_model, VendorModel, foreign_key: :model_id
     has_many :camera_shares, CameraShare
     has_many :snapshots, Snapshot
-    has_many :cloud_recordings, CloudRecording
     has_many :apps, App
+    has_one :cloud_recordings, CloudRecording
 
     field :exid, :string
     field :name, :string
