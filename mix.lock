@@ -35,6 +35,7 @@
   "poolboy": {:hex, :poolboy, "1.5.1"},
   "porcelain": {:hex, :porcelain, "2.0.0"},
   "postgrex": {:hex, :postgrex, "0.9.1"},
+  "quantum": {:hex, :quantum, "1.6.1"},
   "ranch": {:hex, :ranch, "1.1.0"},
   "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.5"},
   "timex": {:hex, :timex, "0.19.5"},

@@ -44,6 +44,7 @@ defmodule EvercamMedia.Mixfile do
     :postgrex,
     :calendar,
     :timex,
+    :quantum,
     :uuid,
     :xmerl
   ]
@@ -60,6 +61,7 @@ defmodule EvercamMedia.Mixfile do
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:cowboy, "~> 1.0"},
      {:ex_aws, "~> 0.4.10"},
+     {:quantum, ">= 1.6.1"},
      {:con_cache, "~> 0.9.0"},
      {:httpotion, "~> 2.0"},
      {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.2", override: true},
