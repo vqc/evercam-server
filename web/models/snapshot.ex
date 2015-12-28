@@ -12,7 +12,7 @@ defmodule Snapshot do
 
   def for_camera(camera_id) do
     from snap in Snapshot,
-    where: snap.camera_id == ^camera_id,
-    select: snap
+      where: snap.camera_id == ^camera_id,
+      select: snap
   end
 end
