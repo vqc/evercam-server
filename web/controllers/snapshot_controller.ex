@@ -192,7 +192,7 @@ defmodule EvercamMedia.SnapshotController do
   defp parse_camera_response(args, {:ok, data}, true) do
     spawn fn ->
       Logger.debug "Uploading snapshot to S3 for camera #{args[:camera_exid]} taken at #{args[:timestamp]}"
-      S3.put(args[:camera_exid], args[:timestamp], data)
+      S3.upload(args[:camera_exid], args[:timestamp], data)
     end
     spawn fn ->
       try do
