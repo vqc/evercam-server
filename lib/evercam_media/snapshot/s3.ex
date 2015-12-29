@@ -25,4 +25,10 @@ defmodule EvercamMedia.Snapshot.S3 do
 
     HTTPoison.put(url, image, headers)
   end
+
+
+  def delete(snapshot, camera_exid) do
+    timestamp = snapshot.created_at |> Calendar.DateTime.Format.unix
+    ExAws.S3.delete_object "#{System.get_env("AWS_BUCKET")}", "#{camera_exid}/snapshots/#{timestamp}.jpg"
+  end
 end
