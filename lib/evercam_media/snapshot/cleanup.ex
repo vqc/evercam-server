@@ -6,13 +6,13 @@ defmodule EvercamMedia.Snapshot.Cleanup do
 
   def init do
     CloudRecording.get_all
-    |> Enum.map(fn(cl) -> run(cl) end)
+    |> Enum.map(&run(&1))
   end
 
   def run(cloud_recording) do
     cloud_recording
     |> Snapshot.expired
-    |> Enum.map(fn(snap) -> delete(snap, cloud_recording.camera.exid) end)
+    |> Enum.map(&delete(&1, cloud_recording.camera.exid))
   end
 
   def delete(snapshot, camera_exid) do
