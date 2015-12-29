@@ -1,4 +1,7 @@
 defmodule Snapshot do
+  alias Calendar.Date
+  alias Calendar.DateTime
+  alias Calendar.Strftime
   alias EvercamMedia.SnapshotRepo
   use Ecto.Model
 
@@ -27,9 +30,9 @@ defmodule Snapshot do
 
   defp expired(camera_id, storage_duration) do
     seconds_to_expired_day = storage_duration * 24 * 60 * 60 * -1
-    expired_day = Calendar.DateTime.now_utc |> Calendar.DateTime.advance!(seconds_to_expired_day)
-    begin_timestamp = expired_day |> Calendar.Strftime.strftime! "%Y%m%d"
-    end_timestamp = expired_day |> Calendar.Date.next_day! |> Calendar.Strftime.strftime! "%Y%m%d"
+    expired_day = DateTime.now_utc |> DateTime.advance!(seconds_to_expired_day)
+    begin_timestamp = expired_day |> Strftime.strftime! "%Y%m%d"
+    end_timestamp = expired_day |> Date.next_day! |> Strftime.strftime! "%Y%m%d"
 
     snapshots =
       from(snap in Snapshot,
