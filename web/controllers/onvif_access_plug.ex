@@ -12,7 +12,7 @@ defmodule EvercamMedia.ONVIFAccessPlug do
                    end
     parameters =
       conn.query_params
-      |> Enum.filter(fn({key, value}) -> key != "id" and key != "url" and key != "auth" end)
+      |> Enum.filter(fn({key, _value}) -> key != "id" and key != "url" and key != "auth" end)
       |> Enum.reduce("", fn({key,value}, acc) -> "#{acc}<#{key}>#{value}</#{key}>" end)
 
     conn

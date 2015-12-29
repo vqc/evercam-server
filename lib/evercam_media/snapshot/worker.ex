@@ -179,7 +179,7 @@ defmodule EvercamMedia.Snapshot.Worker do
     try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, 1)
   end
 
-  defp try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, 3) do
+  defp try_snapshot(_state, config, camera_exid, timestamp, reply_to, worker, 3) do
     spawn fn ->
       result = CamClient.fetch_snapshot(config)
       ConCache.delete(:camera_lock, camera_exid)

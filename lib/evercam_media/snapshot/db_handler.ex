@@ -41,8 +41,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         update_camera_status("#{camera_exid}", timestamp, true, true)
         |> save_snapshot_record(timestamp, motion_level, notes)
       rescue
-        _error ->
-          Util.error_handler(_error)
+        error ->
+          Util.error_handler(error)
       end
     end
     ConCache.put(:cache, camera_exid, %{image: image, timestamp: timestamp, notes: notes})
@@ -155,6 +155,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def log_camera_status(camera_id, true, datetime) do
     SnapshotRepo.insert %CameraActivity{camera_id: camera_id, action: "online", done_at: datetime}
+    camera = Repo.one! Camera.by_id_with_owner(camera_id)
+    if camera.is_online_email_owner_notification do
+      EvercamMedia.UserMailer.camera_online(camera.owner, camera)
+    end
   end
 
   def log_camera_status(camera_id, false, datetime) do

@@ -4,14 +4,14 @@ defmodule EvercamMedia.Snapshot.S3UploadHandler do
   """
 
   use GenEvent
-  alias EvercamMedia.Snapshot.S3Upload
+  alias EvercamMedia.Snapshot.S3
   require Logger
 
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
     spawn fn ->
       Logger.debug "Uploading snapshot to S3 for camera #{camera_exid} taken at #{timestamp}"
-      S3Upload.put(camera_exid, timestamp, image)
+      S3.upload(camera_exid, timestamp, image)
     end
     {:ok, state}
   end

@@ -37,11 +37,11 @@ defmodule EvercamMedia.Schedule do
 
   end
 
-  defp iterate(nil, check_time, timezone) do
+  defp iterate(nil, _check_time, _timezone) do
     {:ok, false}
   end
 
-  defp iterate([], check_time,  timezone) do
+  defp iterate([], _check_time,  _timezone) do
     {:ok, false}
   end
 
@@ -58,7 +58,7 @@ defmodule EvercamMedia.Schedule do
     {h, _} = Integer.parse(hours)
     {m, _} = Integer.parse(minutes)
     erl_date_time = {{year, month, day}, {h, m, 0}}
-    case result = Calendar.DateTime.from_erl(erl_date_time, timezone) do
+    case Calendar.DateTime.from_erl(erl_date_time, timezone) do
       {:ok, datetime} -> datetime |> Calendar.DateTime.Format.unix
       {:ambiguous, datetime} -> datetime.possible_date_times |> hd |> Calendar.DateTime.Format.unix
       _ -> raise "Timezone conversion error"

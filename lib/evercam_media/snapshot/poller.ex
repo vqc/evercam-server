@@ -111,7 +111,7 @@ defmodule EvercamMedia.Snapshot.Poller do
       {:ok, false} ->
         # update_scheduler_log(state.name, {false, timestamp, nil})
         Logger.debug "Not Scheduled. Skip fetching snapshot from #{inspect state.name}"
-      {:error, message} ->
+      {:error, _message} ->
         # update_scheduler_log(state.name, {:error, timestamp, message})
         Logger.error "Error getting scheduler information for #{inspect state.name}"
     end

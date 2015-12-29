@@ -6,8 +6,8 @@ defmodule Camera do
     belongs_to :vendor_model, VendorModel, foreign_key: :model_id
     has_many :camera_shares, CameraShare
     has_many :snapshots, Snapshot
-    has_many :cloud_recordings, CloudRecording
     has_many :apps, App
+    has_one :cloud_recordings, CloudRecording
 
     field :exid, :string
     field :name, :string
@@ -80,7 +80,7 @@ defmodule Camera do
     camera_url(host, port, type)
   end
 
-  defp camera_url("", port, type) do
+  defp camera_url("", _port, _type) do
     nil
   end
 

@@ -1,11 +1,15 @@
-defmodule EvercamMedia.Snapshot.S3Upload do
+defmodule EvercamMedia.Snapshot.S3 do
   @moduledoc """
   TODO
   """
 
-  def put(camera_exid, timestamp, image) do
+  alias Calendar.DateTime
+  alias EvercamMedia.Repo
+  alias EvercamMedia.SnapshotRepo
+
+  def upload(camera_exid, timestamp, image) do
     file_path = "/#{camera_exid}/snapshots/#{timestamp}.jpg"
-    date = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.httpdate
+    date = DateTime.now!("UTC") |> DateTime.Format.httpdate
     host = "#{System.get_env("AWS_BUCKET")}.s3.amazonaws.com"
     url = "#{host}#{file_path}"
     content_type = "image/jpeg"
@@ -21,5 +25,13 @@ defmodule EvercamMedia.Snapshot.S3Upload do
     ]
 
     HTTPoison.put(url, image, headers)
+  end
+
+  def delete(snapshot, camera_exid) do
+    timestamp = DateTime.Format.unix(snapshot.created_at)
+    file_path = "#{camera_exid}/snapshots/#{timestamp}.jpg"
+    s3_bucket = "#{System.get_env("AWS_BUCKET")}"
+
+    ExAws.S3.delete_object(s3_bucket, file_path)
   end
 end

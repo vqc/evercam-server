@@ -15,7 +15,7 @@ defmodule EvercamMedia.Util do
 
   def is_jpeg(data) do
     case data do
-      <<0xFF,0xD8, data :: binary>> -> true
+      <<0xFF,0xD8, _data :: binary>> -> true
       _ -> false
     end
   end
@@ -44,7 +44,7 @@ defmodule EvercamMedia.Util do
     "/" <> name = file_name
     name   = String.to_char_list(name)
     bucket = System.get_env("AWS_BUCKET") |> String.to_char_list
-    {expires, host, uri} = :erlcloud_s3.make_link(100000000, bucket, name)
+    {_expires, host, uri} = :erlcloud_s3.make_link(100000000, bucket, name)
     "#{to_string(host)}#{to_string(uri)}"
   end
 

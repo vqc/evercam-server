@@ -27,7 +27,7 @@ config :logger, :console,
   format: "$date $time $metadata[$level] $message\n",
   metadata: [:request_id]
 
-config :nginx_rtmp,
+config :evercam_media,
   hls_url: "http://localhost:8080"
 
 config :exq,
@@ -36,8 +36,18 @@ config :exq,
   namespace: "sidekiq",
   queues: ["to_elixir"]
 
-config :onvif,
-  default_profile: "Profile_1"
+config :ex_aws,
+  access_key_id: [{:system, "AWS_ACCESS_KEY"}, :instance_role],
+  secret_access_key: [{:system, "AWS_SECRET_KEY"}, :instance_role]
+
+config :ex_aws, :s3,
+  scheme: "https://",
+  host: "s3-eu-west-1.amazonaws.com",
+  region: "eu-west-1"
+
+config :quantum, cron: [
+  "@midnight": &EvercamMedia.Snapshot.Cleanup.init/0
+]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

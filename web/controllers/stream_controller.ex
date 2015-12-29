@@ -19,7 +19,7 @@ defmodule EvercamMedia.StreamController do
   defp hls_response(200, conn, params) do
     conn
     |> put_resp_header("access-control-allow-origin", "*")
-    |> redirect external: "#{Application.get_env(:nginx_rtmp, :hls_url)}/hls/#{params["camera_id"]}/index.m3u8"
+    |> redirect external: "#{Application.get_env(:evercam_media, :hls_url)}/hls/#{params["camera_id"]}/index.m3u8"
   end
 
   defp hls_response(status, conn, params) do
@@ -31,7 +31,7 @@ defmodule EvercamMedia.StreamController do
   def ts(conn, params) do
     conn
     |> put_resp_header("access-control-allow-origin", "*")
-    |> redirect external: "#{Application.get_env(:nginx_rtmp, :hls_url)}/hls/#{params["camera_id"]}/#{params["filename"]}"
+    |> redirect external: "#{Application.get_env(:evercam_media, :hls_url)}/hls/#{params["camera_id"]}/#{params["filename"]}"
   end
 
   defp request_stream(camera_id, token, command) do

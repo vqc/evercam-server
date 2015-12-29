@@ -9,4 +9,9 @@ defmodule CloudRecording do
     field :status, :string
     field :schedule, EvercamMedia.Types.JSON
   end
+
+  def get_all do
+    EvercamMedia.Repo.all from cl in CloudRecording,
+    preload: :camera
+  end
 end

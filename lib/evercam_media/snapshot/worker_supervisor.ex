@@ -25,7 +25,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
     # EvercamMedia.MotionDetection.ComparatorHandler
   ]
 
-  def start_link(opts \\ []) do
+  def start_link() do
     Supervisor.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
@@ -46,7 +46,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
         {:ok, settings} ->
           Logger.debug "[#{settings.config.camera_exid}] Starting worker"
           Supervisor.start_child(__MODULE__, [settings])
-        {:error, message, url} ->
+        {:error, _message, url} ->
           Logger.warn "[#{camera.exid}] Skipping camera worker as the host is invalid: #{url}"
       end
     end
@@ -71,7 +71,6 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
     ConCache.put(:camera_status, camera.exid, camera.is_online)
     url = "#{Camera.external_url(camera)}#{Camera.res_url(camera, "jpg")}"
     parsed_uri = URI.parse url
-    url_string = "#{parsed_uri.host}"
     if camera.vendor_model do
       vendor_exid = camera.vendor_model.vendor.exid
     else

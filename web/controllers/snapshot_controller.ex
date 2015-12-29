@@ -5,7 +5,7 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
-  alias EvercamMedia.Snapshot.S3Upload
+  alias EvercamMedia.Snapshot.S3
   require Logger
   # TODO: refactor the functions in this module, there's
   # a lot of duplication with db_handler functions
@@ -118,7 +118,7 @@ defmodule EvercamMedia.SnapshotController do
     |> json response
   end
 
-  defp snapshot(camera_id, token, timestamp, store_snapshot, notes \\ "Evercam Proxy") do
+  defp snapshot(camera_id, _token, timestamp, store_snapshot, notes \\ "Evercam Proxy") do
     camera = EvercamMedia.Repo.one! Camera.by_exid_with_vendor(camera_id)
     unless notes do
       notes = "Evercam Proxy"
@@ -192,7 +192,7 @@ defmodule EvercamMedia.SnapshotController do
   defp parse_camera_response(args, {:ok, data}, true) do
     spawn fn ->
       Logger.debug "Uploading snapshot to S3 for camera #{args[:camera_exid]} taken at #{args[:timestamp]}"
-      S3Upload.put(args[:camera_exid], args[:timestamp], data)
+      S3.upload(args[:camera_exid], args[:timestamp], data)
     end
     spawn fn ->
       try do
