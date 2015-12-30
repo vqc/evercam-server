@@ -125,8 +125,7 @@ defmodule Camera do
     }
   end
 
-  def schedule(camera_with_recordings) do
-    cloud_recording = List.first(camera_with_recordings.cloud_recordings)
+  def schedule(cloud_recording) do
     if cloud_recording == nil || cloud_recording.status == "off" do
       %{}
     else
@@ -134,8 +133,7 @@ defmodule Camera do
     end
   end
 
-  def initial_sleep(camera_with_recordings) do
-    cloud_recording = List.first(camera_with_recordings.cloud_recordings)
+  def initial_sleep(cloud_recording) do
     if cloud_recording == nil || cloud_recording.frequency == 1 || cloud_recording.status == "off" do
       :crypto.rand_uniform(1, 60) * 1000
     else
@@ -143,8 +141,7 @@ defmodule Camera do
     end
   end
 
-  def sleep(camera_with_recordings) do
-    cloud_recording = List.first(camera_with_recordings.cloud_recordings)
+  def sleep(cloud_recording) do
     if cloud_recording == nil || cloud_recording.status == "off" do
       60_000
     else
