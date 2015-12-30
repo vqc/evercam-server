@@ -31,7 +31,7 @@ defmodule Camera do
     select: v.exid
   end
 
-  def get_cameras_with_vendor_model do
+  def get_all do
     EvercamMedia.Repo.all from c in Camera,
     full_join: vm in assoc(c, :vendor_model),
     full_join: v in assoc(vm, :vendor),
