@@ -22,9 +22,10 @@ defmodule EvercamMedia.Mixfile do
      applications: app_list(Mix.env)]
   end
 
-  defp app_list(:dev), do: [:dotenv | app_list]
+  defp app_list(:dev), do: [:dotenv, :credo, :phoenix_live_reload | app_list]
   defp app_list(_), do: app_list
   defp app_list, do: [
+    :calecto,
     :con_cache,
     :cowboy,
     :ecto,
@@ -39,11 +40,13 @@ defmodule EvercamMedia.Mixfile do
     :inets,
     :mailgun,
     :phoenix,
+    :phoenix_ecto,
     :phoenix_html,
     :porcelain,
     :postgrex,
     :calendar,
     :timex,
+    :timex_ecto,
     :quantum,
     :uuid,
     :xmerl
