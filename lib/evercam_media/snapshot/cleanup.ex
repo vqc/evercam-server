@@ -16,9 +16,9 @@ defmodule EvercamMedia.Snapshot.Cleanup do
   end
 
   def delete(snapshot, camera_exid) do
-    Logger.info "snapshot #{snapshot.snapshot_id} would be deleted"
+    Logger.info "snapshot #{snapshot.snapshot_id} was deleted"
 
-    # S3.delete snapshot, camera_exid
-    # SnapshotRepo.delete snapshot
+    S3.delete(snapshot, camera_exid)
+    SnapshotRepo.delete(snapshot)
   end
 end
