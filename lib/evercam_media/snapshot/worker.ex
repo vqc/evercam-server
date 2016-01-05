@@ -146,6 +146,13 @@ defmodule EvercamMedia.Snapshot.Worker do
   end
 
   @doc """
+  Take care of unknown messages which otherwise would trigger function clause mismatch error.
+  """
+  def handle_info(_msg, state) do
+    {:noreply, state}
+  end
+
+  @doc """
   Server callback for updating camera config
   """
   def handle_cast({:update_camera_config, config}, state) do
