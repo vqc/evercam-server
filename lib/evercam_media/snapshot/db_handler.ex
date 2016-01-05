@@ -115,26 +115,26 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.info "[#{camera_exid}] [snapshot_error] [econnrefused]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Connection refused."}]
-      "Not Found" ->
+      :not_found ->
         Logger.info "[#{camera_exid}] [snapshot_error] [not_found]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Camera url is not found.", response: error[:response]}]
-      "Forbidden" ->
+      :forbidden ->
         Logger.info "[#{camera_exid}] [snapshot_error] [forbidden]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Camera responded with a Forbidden message.", response: error[:response]}]
-      "Unauthorized" ->
+      :unauthorized ->
         Logger.info "[#{camera_exid}] [snapshot_error] [unauthorized]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Camera responded with a Unauthorized message.", response: error[:response]}]
-      "Device Error" ->
+      :device_error ->
         Logger.info "[#{camera_exid}] [snapshot_error] [device_error]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Camera responded with a Device Error message.", response: error[:response]}]
-      "Device Busy" ->
+      :device_busy ->
         Logger.info "[#{camera_exid}] [snapshot_error] [device_busy]"
         [502, %{message: "Camera responded with a Device Busy message.", response: error[:response]}]
-      "Response not a jpeg image" ->
+      :not_a_jpeg ->
         Logger.info "[#{camera_exid}] [snapshot_error] [not_a_jpeg]"
         [504, %{message: "Camera didn't respond with an image.", response: error[:response]}]
       _reason ->

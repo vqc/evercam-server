@@ -152,13 +152,13 @@ defmodule EvercamMedia.SnapshotController do
     case response = CamClient.fetch_snapshot(args) do
       {:ok, data} ->
         [200, %{image: data}]
-      {:error, %{reason: "Not Found", response: response}} ->
+      {:error, %{reason: :not_found, response: response}} ->
         [504, %{message: "Camera url is not found.", response: response}]
-      {:error, %{reason: "Device Error", response: response}} ->
+      {:error, %{reason: :device_error, response: response}} ->
         [504, %{message: "Camera responded with a Device Error message.", response: response}]
-      {:error, %{reason: "Device busy", response: response}} ->
+      {:error, %{reason: :device_busy, response: response}} ->
         [502, %{message: "Camera responded with a Device Busy message.", response: response}]
-      {:error, %{reason: "Response not a jpeg image", response: response}} ->
+      {:error, %{reason: :not_a_jpeg, response: response}} ->
         [504, %{message: "Camera didn't respond with an image.", response: response}]
       {:error, %HTTPoison.Response{}} ->
         [504, %{message: response.body}]

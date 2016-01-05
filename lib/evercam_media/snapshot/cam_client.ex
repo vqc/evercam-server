@@ -44,17 +44,17 @@ defmodule EvercamMedia.Snapshot.CamClient do
   defp parse_text_response(response_text) do
     cond do
       String.contains?(response_text, "Not Found") ->
-        "Not Found"
+        :not_found
       String.contains?(response_text, "Forbidden") ->
-        "Forbidden"
+        :forbidden
       String.contains?(response_text, "Unauthorized") ->
-        "Unauthorized"
+        :unauthorized
       String.contains?(response_text, "Device Busy") ->
-        "Device Busy"
+        :device_busy
       String.contains?(response_text, "Device Error") ->
-        "Device Error"
+        :device_error
       true ->
-        "Response not a jpeg image"
+        :not_a_jpeg
     end
   end
 
