@@ -34,7 +34,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
       Task.start_link(&EvercamMedia.Snapshot.WorkerSupervisor.initiate_workers/0)
     end
     children = [worker(EvercamMedia.Snapshot.Worker, [], restart: :transient)]
-    supervise(children, strategy: :simple_one_for_one)
+    supervise(children, strategy: :simple_one_for_one, max_restarts: 1_000_000)
   end
 
   @doc """
