@@ -7,8 +7,6 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.S3
   require Logger
-  # TODO: refactor the functions in this module, there's
-  # a lot of duplication with db_handler functions
 
   def show(conn, params) do
     timestamp = DateTime.now_utc |> DateTime.Format.unix
