@@ -60,10 +60,13 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def parse_snapshot_error(camera_exid, timestamp, error) do
-    if is_map(error) do
-      reason = Map.get(error, :reason)
-    else
-      reason = error
+    case error do
+      %CaseClauseError{} ->
+        reason = :bad_request
+      error when is_map(error) ->
+        reason = Map.get(error, :reason)
+      _ ->
+        reason = error
     end
     handle_snapshot_error(camera_exid, timestamp, error, reason)
   end
@@ -74,6 +77,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.error "[#{camera_exid}] [snapshot_error] [system_limit] Traceback."
         Util.error_handler(error)
         [500, %{message: "Sorry, we dropped the ball."}]
+      :bad_request ->
+        Logger.error "[#{camera_exid}] [snapshot_error] [bad_request] Traceback."
+        Logger.error inspect(error)
+        [504, %{message: "Bad request."}]
       :closed ->
         Logger.error "[#{camera_exid}] [snapshot_error] [closed] Traceback."
         Logger.error inspect(error)
