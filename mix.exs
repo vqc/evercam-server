@@ -68,7 +68,7 @@ defmodule EvercamMedia.Mixfile do
      {:con_cache, "~> 0.9.0"},
      {:httpotion, "~> 2.0"},
      {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.2", override: true},
-     {:httpoison, "~> 0.7.2"},
+     {:httpoison, "~> 0.8.0"},
      {:calendar, "~> 0.10.1"},
      {:calecto, "~> 0.4.0"},
      {:dotenv, "~> 2.0.0", only: :dev},
