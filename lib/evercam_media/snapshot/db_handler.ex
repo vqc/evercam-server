@@ -63,6 +63,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     case error do
       %CaseClauseError{} ->
         reason = :bad_request
+      %HTTPotion.HTTPError{} ->
+        reason = Map.get(error, :message) |> String.to_atom
       error when is_map(error) ->
         reason = Map.get(error, :reason)
       _ ->
