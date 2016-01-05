@@ -59,6 +59,8 @@ config :evercam_media, EvercamMedia.Repo,
   adapter: Ecto.Adapters.Postgres,
   extensions: [{EvercamMedia.Types.JSON.Extension, library: Poison}],
   url: System.get_env("DATABASE_URL"),
+  pool_timeout: 15_000,
+  timeout: 60_000,
   size: 50,
   ssl: true
 
@@ -66,6 +68,8 @@ config :evercam_media, EvercamMedia.SnapshotRepo,
   adapter: Ecto.Adapters.Postgres,
   extensions: [{EvercamMedia.Types.JSON.Extension, library: Poison}],
   url: System.get_env("SNAPSHOT_DATABASE_URL"),
+  pool_timeout: 15_000,
+  timeout: 60_000,
   size: 50,
   ssl: true
 
