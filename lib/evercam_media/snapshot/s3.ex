@@ -28,7 +28,10 @@ defmodule EvercamMedia.Snapshot.S3 do
   end
 
   def delete(snapshot, camera_exid) do
-    timestamp = DateTime.Format.unix(snapshot.created_at)
+    # NOTE: simplify timestamp conversion
+    timestamp = Ecto.DateTime.to_erl(snapshot.created_at)
+    {:ok, timestamp} = Calendar.DateTime.from_erl(timestamp, "UTC")
+    timestamp = Calendar.DateTime.Format.unix(timestamp)
     file_path = "#{camera_exid}/snapshots/#{timestamp}.jpg"
     s3_bucket = "#{System.get_env("AWS_BUCKET")}"
 
