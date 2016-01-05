@@ -3,7 +3,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   This supervisor creates EvercamMedia.Snapshot.Worker using the strategy
   :simple_one_for_one and can only handle one child type of children.
 
-  Since we want to dynamically create/kill EvercamMedia.Snapshot.Worker for the cameras,
+  Since we want to dynamically create EvercamMedia.Snapshot.Worker for the cameras,
   other types of strategies in supervisor are not suitable.
 
   When creating a new worker, the supervisor passes on a list of @event_handlers.
@@ -33,7 +33,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
     unless Application.get_env(:evercam_media, :skip_camera_workers) do
       Task.start_link(&EvercamMedia.Snapshot.WorkerSupervisor.initiate_workers/0)
     end
-    children = [worker(EvercamMedia.Snapshot.Worker, [], restart: :transient)]
+    children = [worker(EvercamMedia.Snapshot.Worker, [], restart: :permanent)]
     supervise(children, strategy: :simple_one_for_one, max_restarts: 1_000_000)
   end
 
