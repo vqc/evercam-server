@@ -70,7 +70,7 @@ config :evercam_media, EvercamMedia.SnapshotRepo,
   url: System.get_env("SNAPSHOT_DATABASE_URL"),
   pool_timeout: 15_000,
   timeout: 60_000,
-  size: 50,
+  size: 100,
   ssl: true
 
 # Finally import the config/prod.secret.exs
