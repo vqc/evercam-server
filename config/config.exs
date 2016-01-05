@@ -46,7 +46,7 @@ config :ex_aws, :s3,
   region: "eu-west-1"
 
 config :quantum, cron: [
-  "0 0 * * * EvercamMedia.Snapshot.Cleanup.init"
+  "0 * * * * EvercamMedia.Snapshot.Cleanup.init"
 ]
 
 # Import environment specific config. This must remain at the bottom
