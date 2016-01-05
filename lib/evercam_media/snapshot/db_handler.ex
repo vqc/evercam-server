@@ -119,6 +119,14 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.info "[#{camera_exid}] [snapshot_error] [not_found]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Camera url is not found.", response: error[:response]}]
+      "Forbidden" ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [forbidden]"
+        update_camera_status("#{camera_exid}", timestamp, false)
+        [504, %{message: "Camera responded with a Forbidden message.", response: error[:response]}]
+      "Unauthorized" ->
+        Logger.info "[#{camera_exid}] [snapshot_error] [unauthorized]"
+        update_camera_status("#{camera_exid}", timestamp, false)
+        [504, %{message: "Camera responded with a Unauthorized message.", response: error[:response]}]
       "Device Error" ->
         Logger.info "[#{camera_exid}] [snapshot_error] [device_error]"
         update_camera_status("#{camera_exid}", timestamp, false)

@@ -45,6 +45,10 @@ defmodule EvercamMedia.Snapshot.CamClient do
     cond do
       String.contains?(response_text, "Not Found") ->
         "Not Found"
+      String.contains?(response_text, "Forbidden") ->
+        "Forbidden"
+      String.contains?(response_text, "Unauthorized") ->
+        "Unauthorized"
       String.contains?(response_text, "Device Busy") ->
         "Device Busy"
       String.contains?(response_text, "Device Error") ->
