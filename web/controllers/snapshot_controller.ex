@@ -158,6 +158,10 @@ defmodule EvercamMedia.SnapshotController do
         [504, %{message: "Camera responded with a Device Error message.", response: response}]
       {:error, %{reason: :device_busy, response: response}} ->
         [502, %{message: "Camera responded with a Device Busy message.", response: response}]
+      {:error, %{reason: :unauthorized, response: response}} ->
+        [502, %{message: "Camera responded with a Unauthorized message.", response: response}]
+      {:error, %{reason: :forbidden, response: response}} ->
+        [502, %{message: "Camera responded with a Forbidden message.", response: response}]
       {:error, %{reason: :not_a_jpeg, response: response}} ->
         [504, %{message: "Camera didn't respond with an image.", response: response}]
       {:error, %HTTPoison.Response{}} ->
