@@ -76,7 +76,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         [500, %{message: "Sorry, we dropped the ball."}]
       :closed ->
         Logger.error "[#{camera_exid}] [snapshot_error] [closed] Traceback."
-        Util.error_handler(error)
+        Logger.error inspect(error)
         [504, %{message: "Connection closed."}]
       :emfile ->
         Logger.error "[#{camera_exid}] [snapshot_error] [emfile] Traceback."
