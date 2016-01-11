@@ -42,7 +42,6 @@
   "porcelain": {:hex, :porcelain, "2.0.0"},
   "postgrex": {:hex, :postgrex, "0.9.1"},
   "providers": {:hex, :providers, "1.4.1"},
-  "quantum": {:hex, :quantum, "1.6.1"},
   "ranch": {:hex, :ranch, "1.1.0"},
   "relx": {:hex, :relx, "3.5.0"},
   "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.5"},
