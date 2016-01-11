@@ -161,14 +161,18 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
     unless camera_is_online == status do
       log_camera_status(camera.id, status, datetime)
-      Exq.Enqueuer.enqueue(
-        :exq_enqueuer,
-        "cache",
-        "Evercam::CacheInvalidationWorker",
-        camera_exid
-      )
+      invalidate_camera_cache(camera_exid)
     end
     camera
+  end
+
+  def invalidate_camera_cache(camera_exid) do
+    Exq.Enqueuer.enqueue(
+      :exq_enqueuer,
+      "cache",
+      "Evercam::CacheInvalidationWorker",
+      camera_exid
+    )
   end
 
   def log_camera_status(camera_id, true, datetime) do
