@@ -144,26 +144,22 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def update_camera_status(camera_exid, timestamp, status, update_thumbnail? \\ false) do
-    #TODO Improve the db queries here
-    ConCache.put(:camera_status, camera_exid, status)
-    {:ok, datetime} =
-      Calendar.DateTime.Parse.unix!(timestamp)
-      |> Calendar.DateTime.to_erl
-      |> Ecto.DateTime.cast
-    camera = Repo.one! Camera.by_exid(camera_exid)
-    camera_is_online = camera.is_online
-    camera = construct_camera(camera, datetime, status, camera_is_online == status)
-    if status == true && update_thumbnail? do
-      file_path = "/#{camera.exid}/snapshots/#{timestamp}.jpg"
-      camera = %{camera | thumbnail_url: Util.s3_file_url(file_path)}
-    end
-    Repo.update camera
+    camera_is_online = ConCache.get(:camera_status, camera_exid)
 
-    unless camera_is_online == status do
+    if camera_is_online != status do
+      {:ok, datetime} =
+        Calendar.DateTime.Parse.unix!(timestamp)
+        |> Calendar.DateTime.to_erl
+        |> Ecto.DateTime.cast
+      camera = Repo.one! Camera.by_exid(camera_exid)
+      camera = construct_camera(camera, datetime, status, camera_is_online == status)
+      Repo.update camera
+      ConCache.put(:camera_status, camera_exid, status)
       log_camera_status(camera.id, status, datetime)
       invalidate_camera_cache(camera_exid)
     end
-    camera
+
+    camera_exid
   end
 
   def invalidate_camera_cache(camera_exid) do
@@ -191,7 +187,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
   end
 
-  def save_snapshot_record(camera, timestamp, motion_level, notes) do
+  def save_snapshot_record(camera_exid, timestamp, motion_level, notes) do
     {:ok, datetime} =
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.DateTime.to_erl
@@ -199,6 +195,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     {:ok, snapshot_timestamp} =
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.Strftime.strftime "%Y%m%d%H%M%S%f"
+
+    camera = Repo.one! Camera.by_exid(camera_exid)
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
     SnapshotRepo.insert(%Snapshot{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
   end
