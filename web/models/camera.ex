@@ -23,14 +23,6 @@ defmodule Camera do
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
 
-  def get_vendor_exid_by_camera_exid(camera_id) do
-    EvercamMedia.Repo.one from c in Camera,
-    join: vm in assoc(c, :vendor_model),
-    join: v in assoc(vm, :vendor),
-    where: c.exid == ^camera_id,
-    select: v.exid
-  end
-
   def get_all do
     EvercamMedia.Repo.all from c in Camera,
     full_join: vm in assoc(c, :vendor_model),
