@@ -16,7 +16,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   require Logger
 
   @event_handlers [
-    EvercamMedia.Snapshot.BroadcastHandler,
+    # EvercamMedia.Snapshot.BroadcastHandler,
     # EvercamMedia.Snapshot.CacheHandler,
     EvercamMedia.Snapshot.DBHandler,
     EvercamMedia.Snapshot.PollHandler,
