@@ -27,6 +27,7 @@ defmodule EvercamMedia.Mixfile do
   defp app_list, do: [
     :calecto,
     :con_cache,
+    :connection,
     :cowboy,
     :ecto,
     :erlcloud,
