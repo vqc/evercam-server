@@ -36,8 +36,8 @@ defmodule Snapshot do
 
     snapshots =
       from(snap in Snapshot,
-        where: snap.snapshot_id > "#{camera_id}_#{begin_timestamp}",
-        where: snap.snapshot_id < "#{camera_id}_#{end_timestamp}",
+        where: snap.snapshot_id > ^"#{camera_id}_#{begin_timestamp}",
+        where: snap.snapshot_id < ^"#{camera_id}_#{end_timestamp}",
         where: snap.notes == "Evercam Proxy")
 
     SnapshotRepo.all(snapshots)
