@@ -45,6 +45,7 @@
   "providers": {:hex, :providers, "1.4.1"},
   "ranch": {:hex, :ranch, "1.2.0"},
   "relx": {:hex, :relx, "3.5.0"},
+  "sbroker": {:hex, :sbroker, "0.7.0"},
   "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.5"},
   "timex": {:hex, :timex, "0.19.5"},
   "timex_ecto": {:hex, :timex_ecto, "0.5.0"},
