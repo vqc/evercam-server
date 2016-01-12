@@ -62,6 +62,7 @@ config :evercam_media, EvercamMedia.Repo,
   timeout: 60_000,
   pool_timeout: 15_000,
   pool_size: 50,
+  lazy: false,
   ssl: true
 
 config :evercam_media, EvercamMedia.SnapshotRepo,
@@ -71,6 +72,7 @@ config :evercam_media, EvercamMedia.SnapshotRepo,
   timeout: 60_000,
   pool_timeout: 15_000,
   pool_size: 100,
+  lazy: false,
   ssl: true
 
 # Finally import the config/prod.secret.exs
