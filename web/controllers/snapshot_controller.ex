@@ -175,11 +175,6 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  defp get_snapshot(args, _) do
-    response = CamClient.fetch_snapshot(args)
-    parse_camera_response(args, response, args[:store_snapshot])
-  end
-
   defp get_snapshot(args, 3) do
     response = CamClient.fetch_snapshot(args)
     parse_camera_response(args, response, args[:store_snapshot])
