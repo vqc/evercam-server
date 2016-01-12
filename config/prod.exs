@@ -66,7 +66,6 @@ config :evercam_media, EvercamMedia.Repo,
   pool_timeout: 15_000,
   pool_size: 50,
   lazy: false,
-  log_level: :info,
   ssl: true
 
 config :evercam_media, EvercamMedia.SnapshotRepo,
