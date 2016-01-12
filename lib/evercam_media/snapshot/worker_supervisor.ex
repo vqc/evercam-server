@@ -69,6 +69,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   """
   def get_config(camera) do
     ConCache.put(:camera_status, camera.exid, camera.is_online)
+    ConCache.put(:camera_status, "#{camera.exid}_id", camera.id)
     url = "#{Camera.external_url(camera)}#{Camera.res_url(camera, "jpg")}"
     parsed_uri = URI.parse url
     if camera.vendor_model do

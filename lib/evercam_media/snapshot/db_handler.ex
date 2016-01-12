@@ -196,9 +196,9 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.Strftime.strftime "%Y%m%d%H%M%S%f"
 
-    camera = Repo.one! Camera.by_exid(camera_exid)
-    snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
-    SnapshotRepo.insert(%Snapshot{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
+    camera_id = ConCache.get(:camera_status, "#{camera_exid}_id")
+    snapshot_id = Util.format_snapshot_id(camera_id, snapshot_timestamp)
+    SnapshotRepo.insert(%Snapshot{camera_id: camera_id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
   end
 
   defp construct_camera(camera, datetime, _, true) do
