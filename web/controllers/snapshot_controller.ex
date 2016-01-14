@@ -50,7 +50,7 @@ defmodule EvercamMedia.SnapshotController do
 
   def test(conn, params) do
     [code, response] =
-      get_snapshot_response(
+      test_snapshot_response(
         params["cam_username"],
         params["cam_password"],
         "#{params["external_url"]}/#{params["jpg_url"]}",
@@ -141,7 +141,7 @@ defmodule EvercamMedia.SnapshotController do
     get_snapshot(args)
   end
 
-  defp get_snapshot_response(username, password, url, vendor_exid) do
+  defp test_snapshot_response(username, password, url, vendor_exid) do
     args = %{
       vendor_exid: vendor_exid,
       url: url,
