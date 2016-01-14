@@ -7,6 +7,12 @@ defmodule EvercamMedia.HTTPClient do
     HTTPoison.get url, [], hackney: hackney
   end
 
+  def get(:digest_auth, response, url, username, password) do
+    digest_token =  DigestAuth.get_digest_token(response, url, username, password)
+    hackney = [pool: :snapshot_pool]
+    HTTPoison.get url, ["Authorization": "Digest #{digest_token}"], hackney: hackney
+  end
+
   def get(:basic_auth, url, "", "") do
     get(url)
   end
@@ -28,12 +34,6 @@ defmodule EvercamMedia.HTTPClient do
       response ->
         response
     end
-  end
-
-  def get(:digest_auth, response, url, username, password) do
-    digest_token =  DigestAuth.get_digest_token(response, url, username, password)
-    hackney = [pool: :snapshot_pool]
-    HTTPoison.get url, ["Authorization": "Digest #{digest_token}"], hackney: hackney
   end
 
   def get(:cookie_auth, snapshot_url, username, password) do

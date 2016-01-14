@@ -1,5 +1,4 @@
 defmodule EvercamMedia.Snapshot.Cleanup do
-  alias EvercamMedia.Repo
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Snapshot.S3
   require Logger

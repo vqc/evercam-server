@@ -22,7 +22,7 @@ defmodule EvercamMedia.StreamController do
     |> redirect external: "#{Application.get_env(:evercam_media, :hls_url)}/hls/#{params["camera_id"]}/index.m3u8"
   end
 
-  defp hls_response(status, conn, params) do
+  defp hls_response(status, conn, _params) do
     conn
     |> put_status status
     |> text ""

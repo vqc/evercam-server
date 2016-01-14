@@ -4,8 +4,6 @@ defmodule EvercamMedia.Snapshot.S3 do
   """
 
   alias Calendar.DateTime
-  alias EvercamMedia.Repo
-  alias EvercamMedia.SnapshotRepo
 
   def upload(camera_exid, timestamp, image) do
     file_path = "/#{camera_exid}/snapshots/#{timestamp}.jpg"

@@ -58,12 +58,12 @@ defmodule EvercamMedia.Snapshot.Worker do
   @doc """
   Get a snapshot from the camera server
   """
+  def get_snapshot(cam_server, {:poll, timestamp}) do
+    GenServer.cast(cam_server, {:get_camera_snapshot, timestamp})
+  end
   def get_snapshot(cam_server, reply_to) do
     timestamp = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.unix
     GenServer.cast(cam_server, {:get_camera_snapshot, timestamp, reply_to})
-  end
-  def get_snapshot(cam_server, {:poll, timestamp}) do
-    GenServer.cast(cam_server, {:get_camera_snapshot, timestamp})
   end
 
   ######################
@@ -102,7 +102,7 @@ defmodule EvercamMedia.Snapshot.Worker do
   Server callback for getting camera config
   """
   def handle_call(:get_camera_config, _from, state) do
-    {:reply, get_from_state(:config, state), state}
+    {:reply, get_config_from_state(:config, state), state}
   end
 
   @doc """
@@ -125,6 +125,15 @@ defmodule EvercamMedia.Snapshot.Worker do
   def handle_cast({:get_camera_snapshot, timestamp}, state) do
     _get_snapshot(state, timestamp)
     {:noreply, state}
+  end
+
+  @doc """
+  Server callback for updating camera config
+  """
+  def handle_cast({:update_camera_config, config}, state) do
+    updated_config = Map.merge state, config
+    GenEvent.sync_notify(state.event_manager, {:update_camera_config, updated_config})
+    {:noreply, updated_config}
   end
 
   @doc """
@@ -152,35 +161,20 @@ defmodule EvercamMedia.Snapshot.Worker do
     {:noreply, state}
   end
 
-  @doc """
-  Server callback for updating camera config
-  """
-  def handle_cast({:update_camera_config, config}, state) do
-    updated_config = Map.merge state, config
-    GenEvent.sync_notify(state.event_manager, {:update_camera_config, updated_config})
-    {:noreply, updated_config}
-  end
-
   #####################
   # Private functions #
   #####################
 
-  @doc """
-  Add all the event managers
-  """
   defp add_handlers(event_manager, event_handlers) do
     Enum.each(event_handlers, &GenEvent.add_mon_handler(event_manager, &1,[]))
   end
 
-  @doc """
-  Gets camera config from the server state
-  """
-  defp get_from_state(:config, state) do
+  defp get_config_from_state(:config, state) do
     Map.get(state, :config)
   end
 
   defp _get_snapshot(state, timestamp, reply_to \\ nil) do
-    config = get_from_state(:config, state)
+    config = get_config_from_state(:config, state)
     camera_exid = config.camera_exid
     worker = self
     try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, 1)
