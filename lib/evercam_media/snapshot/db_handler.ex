@@ -108,7 +108,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.info "[#{camera_exid}] [snapshot_error] [timeout]"
         [504, %{message: "Camera response timed out."}]
       :connect_timeout ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [connect_timeout]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [connect_timeout]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Connection to the camera timed out."}]
       :econnrefused ->
