@@ -57,15 +57,9 @@ defmodule EvercamMedia.Snapshot.Streamer do
   def stream(camera) do
     timestamp = DateTime.now_utc |> DateTime.Format.unix
 
-    if camera.vendor_model do
-      vendor_exid = camera.vendor_model.vendor.exid
-    else
-      vendor_exid = ""
-    end
-
     args = %{
       url: Camera.snapshot_url(camera),
-      vendor_exid: vendor_exid,
+      vendor_exid: Camera.vendor_exid(camera),
       username: Camera.username(camera),
       password: Camera.password(camera)
     }

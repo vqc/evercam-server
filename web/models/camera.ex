@@ -109,6 +109,14 @@ defmodule Camera do
     "#{external_url(camera)}#{res_url(camera)}"
   end
 
+  def vendor_exid(camera) do
+    if camera.vendor_model do
+      vendor_exid = camera.vendor_model.vendor.exid
+    else
+      vendor_exid = ""
+    end
+  end
+
   def get_camera_info(camera_id) do
     camera = EvercamMedia.Repo.one! by_exid(camera_id)
     %{

@@ -121,16 +121,11 @@ defmodule EvercamMedia.SnapshotController do
     unless notes do
       notes = "Evercam Proxy"
     end
-    if camera.vendor_model do
-      vendor_exid = camera.vendor_model.vendor.exid
-    else
-      vendor_exid = ""
-    end
 
     args = %{
       camera_exid: camera.exid,
       is_online: camera.is_online,
-      vendor_exid: vendor_exid,
+      vendor_exid: Camera.vendor_exid(camera),
       url: Camera.snapshot_url(camera),
       username: Camera.username(camera),
       password: Camera.password(camera),
