@@ -11,6 +11,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
   alias EvercamMedia.Snapshot.StreamerSupervisor
   import EvercamMedia.Schedule
   import Camera
+  require Logger
 
   ################
   ## Client API ##
@@ -44,10 +45,13 @@ defmodule EvercamMedia.Snapshot.Streamer do
   def loop(camera) do
     cond do
       length(subscribers(camera.exid)) == 0 ->
+        Logger.debug "[#{camera.exid}] Shutting down streamer, no subscribers"
         StreamerSupervisor.stop_streamer(camera.exid)
       scheduled_now?(camera) && sleep(camera.cloud_recordings) == 1000 ->
+        Logger.debug "[#{camera.exid}] Shutting down streamer, already streaming"
         StreamerSupervisor.stop_streamer(camera.exid)
       true ->
+        Logger.debug "[#{camera.exid}] Streaming ..."
         spawn fn -> stream(camera) end
     end
 
