@@ -45,9 +45,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
     cond do
       length(subscribers(camera.exid)) == 0 ->
         StreamerSupervisor.stop_streamer(camera.exid)
-      camera.cloud_recordings == nil ->
-        spawn fn -> stream(camera) end
-      scheduled_now?(camera.cloud_recordings.schedule, camera.timezone) && sleep(camera.cloud_recordings) == 1000 ->
+      scheduled_now?(camera) && sleep(camera.cloud_recordings) == 1000 ->
         StreamerSupervisor.stop_streamer(camera.exid)
       true ->
         spawn fn -> stream(camera) end

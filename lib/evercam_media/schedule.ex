@@ -1,4 +1,12 @@
 defmodule EvercamMedia.Schedule do
+  def scheduled_now?(camera) do
+    if camera.cloud_recordings == nil do
+      scheduled_now?(nil, camera.timezone)
+    else
+      scheduled_now?(camera.cloud_recordings.schedule, camera.timezone)
+    end
+  end
+
   def scheduled_now?(schedule, timezone) do
     if(timezone == nil) do
       timezone = "UTC"
