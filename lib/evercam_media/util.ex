@@ -12,7 +12,6 @@ defmodule EvercamMedia.Util do
       iex> EvercamMedia.Util.is_jpeg("binaryimage")
       true
   """
-
   def is_jpeg(data) do
     case data do
       <<0xFF,0xD8, _data :: binary>> -> true

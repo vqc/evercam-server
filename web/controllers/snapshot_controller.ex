@@ -50,7 +50,7 @@ defmodule EvercamMedia.SnapshotController do
 
   def test(conn, params) do
     [code, response] =
-      get_snapshot_response(
+      test_snapshot_response(
         params["cam_username"],
         params["cam_password"],
         "#{params["external_url"]}/#{params["jpg_url"]}",
@@ -121,16 +121,11 @@ defmodule EvercamMedia.SnapshotController do
     unless notes do
       notes = "Evercam Proxy"
     end
-    if camera.vendor_model do
-      vendor_exid = camera.vendor_model.vendor.exid
-    else
-      vendor_exid = ""
-    end
 
     args = %{
       camera_exid: camera.exid,
       is_online: camera.is_online,
-      vendor_exid: vendor_exid,
+      vendor_exid: Camera.vendor_exid(camera),
       url: Camera.snapshot_url(camera),
       username: Camera.username(camera),
       password: Camera.password(camera),
@@ -141,7 +136,7 @@ defmodule EvercamMedia.SnapshotController do
     get_snapshot(args)
   end
 
-  defp get_snapshot_response(username, password, url, vendor_exid) do
+  defp test_snapshot_response(username, password, url, vendor_exid) do
     args = %{
       vendor_exid: vendor_exid,
       url: url,
@@ -175,12 +170,16 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  defp get_snapshot(args, 3) do
+  defp get_snapshot(args, retry \\ 1) do
+    get_snapshot_response(args, retry)
+  end
+
+  defp get_snapshot_response(args, 3) do
     response = CamClient.fetch_snapshot(args)
     parse_camera_response(args, response, args[:store_snapshot])
   end
 
-  defp get_snapshot(args, retry \\ 1) do
+  defp get_snapshot_response(args, retry) do
     response = CamClient.fetch_snapshot(args)
 
     case {response, args[:is_online]} do

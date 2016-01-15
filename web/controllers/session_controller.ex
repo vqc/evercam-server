@@ -3,9 +3,9 @@ defmodule EvercamMedia.SessionController do
 
   plug :action
 
-  def create(conn, %{ "user" => %{ "email" => email, "password" => password }}) do
+  def create(_conn, %{ "user" => %{ "email" => _email, "password" => _password }}) do
   end
 
-  def delete(conn, %{ "token" => token }) do
+  def delete(_conn, %{ "token" => _token }) do
   end
 end

@@ -16,7 +16,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   require Logger
 
   @event_handlers [
-    # EvercamMedia.Snapshot.BroadcastHandler,
+    EvercamMedia.Snapshot.BroadcastHandler,
     # EvercamMedia.Snapshot.CacheHandler,
     EvercamMedia.Snapshot.DBHandler,
     EvercamMedia.Snapshot.PollHandler,
@@ -71,12 +71,6 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
     ConCache.put(:camera_status, camera.exid, camera.is_online)
     ConCache.put(:camera_status, "#{camera.exid}_id", camera.id)
     url = "#{Camera.external_url(camera)}#{Camera.res_url(camera, "jpg")}"
-    parsed_uri = URI.parse url
-    if camera.vendor_model do
-      vendor_exid = camera.vendor_model.vendor.exid
-    else
-      vendor_exid = ""
-    end
 
     {
       :ok,
@@ -86,7 +80,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
         config: %{
           camera_id: camera.id,
           camera_exid: camera.exid,
-          vendor_exid: vendor_exid,
+          vendor_exid: Camera.vendor_exid(camera),
           schedule: Camera.schedule(camera.cloud_recordings),
           timezone: camera.timezone,
           url: url,
