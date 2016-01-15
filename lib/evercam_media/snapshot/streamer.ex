@@ -70,6 +70,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
     case response do
       {:ok, data} ->
         Util.broadcast_snapshot(camera.exid, data, timestamp)
+        DBHandler.update_camera_status(camera.exid, timestamp, true)
       {:error, error} ->
         DBHandler.parse_snapshot_error(camera.exid, timestamp, error)
     end
