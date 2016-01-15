@@ -8,6 +8,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
+  alias EvercamMedia.Snapshot.StreamerSupervisor
   import EvercamMedia.Schedule
   import Camera
 
@@ -41,11 +42,11 @@ defmodule EvercamMedia.Snapshot.Streamer do
 
     cond do
       length(subscribers) == 0 ->
-        Supervisor.terminate_child(EvercamMedia.Snapshot.StreamerSupervisor, Process.whereis(streamer_id))
+        StreamerSupervisor.stop_streamer(camera.exid)
       camera.cloud_recordings == nil ->
         spawn fn -> stream(camera) end
       scheduled_now?(camera.cloud_recordings.schedule, camera.timezone) && sleep(camera.cloud_recordings) == 1000 ->
-        Supervisor.terminate_child(EvercamMedia.Snapshot.StreamerSupervisor, Process.whereis(streamer_id))
+        StreamerSupervisor.stop_streamer(camera.exid)
       true ->
         spawn fn -> stream(camera) end
     end

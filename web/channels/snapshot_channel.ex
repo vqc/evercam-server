@@ -8,7 +8,7 @@ defmodule EvercamMedia.SnapshotChannel do
   end
 
   def handle_info({:after_join, camera_exid}, socket) do
-    StreamerSupervisor.start_worker(camera_exid)
+    StreamerSupervisor.start_streamer(camera_exid)
     {:noreply, socket}
   end
 end
