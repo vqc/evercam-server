@@ -19,9 +19,9 @@ defmodule EvercamMedia.Snapshot.Streamer do
   @doc """
   Start the Snapshot streamer for a given camera.
   """
-  def start_link(camera) do
-    streamer_id = String.to_atom("#{camera.exid}_streamer")
-    GenServer.start_link(__MODULE__, camera, name: streamer_id)
+  def start_link(camera_exid) do
+    streamer_id = String.to_atom("#{camera_exid}_streamer")
+    GenServer.start_link(__MODULE__, camera_exid, name: streamer_id)
   end
 
   ######################
@@ -31,17 +31,19 @@ defmodule EvercamMedia.Snapshot.Streamer do
   @doc """
   Initialize the camera streamer
   """
-  def init(args) do
-    Task.start_link(fn -> loop(args) end)
-    {:ok, args}
+  def init(camera_exid) do
+    camera =
+      camera_exid
+      |> Camera.by_exid_with_vendor
+      |> EvercamMedia.Repo.one!
+
+    Task.start_link(fn -> loop(camera) end)
+    {:ok, camera_exid}
   end
 
   def loop(camera) do
-    streamer_id = String.to_atom("#{camera.exid}_streamer")
-    subscribers = Phoenix.PubSub.Local.subscribers(EvercamMedia.PubSub, "cameras:#{camera.exid}", 0)
-
     cond do
-      length(subscribers) == 0 ->
+      length(subscribers(camera.exid)) == 0 ->
         StreamerSupervisor.stop_streamer(camera.exid)
       camera.cloud_recordings == nil ->
         spawn fn -> stream(camera) end
@@ -73,5 +75,9 @@ defmodule EvercamMedia.Snapshot.Streamer do
       {:error, error} ->
         DBHandler.parse_snapshot_error(camera.exid, timestamp, error)
     end
+  end
+
+  def subscribers(camera_exid) do
+    Phoenix.PubSub.Local.subscribers(EvercamMedia.PubSub, "cameras:#{camera_exid}", 0)
   end
 end
