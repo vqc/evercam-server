@@ -144,17 +144,17 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def update_camera_status(camera_exid, timestamp, status, update_thumbnail? \\ false) do
-    camera_is_online = ConCache.get(:camera_status, camera_exid)
+    camera = ConCache.get(:camera, camera_exid)
 
-    if camera_is_online != status do
+    if camera.is_online != status do
       {:ok, datetime} =
         Calendar.DateTime.Parse.unix!(timestamp)
         |> Calendar.DateTime.to_erl
         |> Ecto.DateTime.cast
       camera = Repo.one! Camera.by_exid(camera_exid)
-      camera = construct_camera(camera, datetime, status, camera_is_online == status)
+      camera = construct_camera(camera, datetime, status, camera.is_online == status)
       Repo.update camera
-      ConCache.put(:camera_status, camera_exid, status)
+      ConCache.put(:camera, camera_exid, camera)
       invalidate_camera_cache(camera_exid)
       log_camera_status(camera.id, status, datetime)
     end
@@ -196,13 +196,9 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.Strftime.strftime "%Y%m%d%H%M%S%f"
 
-    camera_id = ConCache.get(:camera_status, "#{camera_exid}_id")
-    if camera_id == nil do
-      camera = Repo.one! Camera.by_exid(camera_exid)
-      camera_id = camera.id
-    end
-    snapshot_id = Util.format_snapshot_id(camera_id, snapshot_timestamp)
-    SnapshotRepo.insert(%Snapshot{camera_id: camera_id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
+    camera = ConCache.get(:camera, camera_exid)
+    snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
+    SnapshotRepo.insert(%Snapshot{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
   end
 
   defp construct_camera(camera, datetime, _, true) do

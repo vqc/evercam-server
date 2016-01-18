@@ -22,11 +22,11 @@ defmodule EvercamMedia do
           ], id: :camera_lock),
       worker(ConCache, [
             [
-              ttl_check: :timer.seconds(60*60),
-              ttl: :timer.seconds(3*24*60*60)
+              ttl_check: :timer.seconds(60),
+              ttl: :timer.seconds(60*60)
             ],
-            [name: :camera_status]
-          ], id: :camera_status),
+            [name: :camera]
+          ], id: :camera),
       worker(ConCache, [
         [
           ttl_check: :timer.seconds(60*60),

@@ -11,7 +11,7 @@ defmodule EvercamMedia.CameraController do
       [_, _, _, _, _] = Util.decode_request_token(token)
       Logger.info "Camera update for #{exid}"
       camera = Camera.by_exid_with_vendor(exid) |> Repo.one
-      ConCache.put(:camera_status, camera.exid, camera.is_online)
+      ConCache.put(:camera, camera.exid)
       worker = exid |> String.to_atom |> Process.whereis
 
       case worker do
