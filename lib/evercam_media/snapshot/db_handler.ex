@@ -144,7 +144,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def update_camera_status(camera_exid, timestamp, status, update_thumbnail? \\ false) do
-    camera = ConCache.get(:camera, camera_exid)
+    camera = Camera.get_cam(camera_exid)
 
     if camera.is_online != status do
       {:ok, datetime} =
@@ -196,7 +196,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.Strftime.strftime "%Y%m%d%H%M%S%f"
 
-    camera = ConCache.get(:camera, camera_exid)
+    camera = Camera.get_cam(camera_exid)
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
     SnapshotRepo.insert(%Snapshot{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
   end

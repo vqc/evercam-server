@@ -32,6 +32,18 @@ defmodule Camera do
     preload: [vendor_model: :vendor]
   end
 
+  def get_cam(camera_exid) do
+    camera = ConCache.get(:camera, camera_exid)
+    if camera == nil do
+      camera =
+        camera_exid
+        |> Camera.by_exid
+        |> EvercamMedia.Repo.one!
+      ConCache.put(:camera, camera_exid, camera)
+    end
+    camera
+  end
+
   def by_exid(camera_id) do
     from cam in Camera,
     where: cam.exid == ^camera_id,
