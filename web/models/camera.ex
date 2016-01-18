@@ -33,15 +33,11 @@ defmodule Camera do
   end
 
   def get_cam(camera_exid) do
-    camera = ConCache.get(:camera, camera_exid)
-    if camera == nil do
-      camera =
-        camera_exid
-        |> Camera.by_exid
-        |> EvercamMedia.Repo.one!
-      ConCache.put(:camera, camera_exid, camera)
-    end
-    camera
+    ConCache.get_or_store(:camera, camera_exid, fn() ->
+      camera_exid
+      |> Camera.by_exid
+      |> EvercamMedia.Repo.one!
+    end)
   end
 
   def by_exid(camera_id) do
