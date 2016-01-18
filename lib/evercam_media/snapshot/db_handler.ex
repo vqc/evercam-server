@@ -154,12 +154,35 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       camera = Repo.one! Camera.by_exid(camera_exid)
       camera = construct_camera(camera, datetime, status, camera.is_online == status)
       Repo.update camera
-      ConCache.put(:camera, camera_exid, camera)
+      ConCache.put(:camera, camera.exid, camera)
       invalidate_camera_cache(camera_exid)
       log_camera_status(camera.id, status, datetime)
     end
 
+    if update_thumbnail? && stale_thumbnail?(camera.thumbnail_url, timestamp) do
+      update_thumbnail(camera, timestamp)
+    end
+
     camera_exid
+  end
+
+
+  def update_thumbnail(camera, timestamp) do
+    file_path = "/#{camera.exid}/snapshots/#{timestamp}.jpg"
+    camera = %{camera | thumbnail_url: Util.s3_file_url(file_path)}
+    Repo.update camera
+    ConCache.put(:camera, camera.exid, camera)
+  end
+
+  def stale_thumbnail?(thumbnail_url, timestamp) do
+    thumbnail_timestamp = parse_thumbnail_url(thumbnail_url)
+    (timestamp - thumbnail_timestamp) > 300
+  end
+
+  def parse_thumbnail_url(thumbnail_url) do
+    Regex.run(~r/snapshots\/(.+)\.jpg/, to_string(thumbnail_url))
+    |> List.last
+    |> String.to_integer
   end
 
   def invalidate_camera_cache(camera_exid) do
