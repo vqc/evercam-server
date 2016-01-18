@@ -7,40 +7,16 @@ defmodule EvercamMedia do
     import Supervisor.Spec, warn: false
 
     children = [
+      worker(ConCache, [[ttl_check: 100, ttl: 1300], [name: :cache]]),
+      worker(ConCache, [[ttl_check: 100, ttl: 1500], [name: :snapshot_schedule]], id: :snapshot_schedule),
+      worker(ConCache, [[ttl_check: 100, ttl: :timer.seconds(60)], [name: :camera_lock]], id: :camera_lock),
+      worker(ConCache, [[ttl_check: :timer.seconds(60), ttl: :timer.seconds(60*60)], [name: :camera]], id: :camera),
+      worker(ConCache, [[ttl_check: :timer.seconds(60*60), ttl: :timer.seconds(3*24*60*60)], [name: :snapshot_error]], id: :snapshot_error),
       supervisor(EvercamMedia.Endpoint, []),
       supervisor(EvercamMedia.Repo, []),
       supervisor(EvercamMedia.SnapshotRepo, []),
       supervisor(EvercamMedia.Snapshot.StreamerSupervisor, []),
       supervisor(EvercamMedia.Snapshot.WorkerSupervisor, []),
-      worker(ConCache, [[ttl_check: 100, ttl: 1300], [name: :cache]]),
-      worker(ConCache, [
-            [
-              ttl_check: 100,
-              ttl: :timer.seconds(60)
-            ],
-            [name: :camera_lock]
-          ], id: :camera_lock),
-      worker(ConCache, [
-            [
-              ttl_check: :timer.seconds(60),
-              ttl: :timer.seconds(60*60)
-            ],
-            [name: :camera]
-          ], id: :camera),
-      worker(ConCache, [
-        [
-          ttl_check: :timer.seconds(60*60),
-          ttl: :timer.seconds(3*24*60*60)
-        ],
-        [name: :snapshot_error]
-      ], id: :snapshot_error),
-      worker(ConCache, [
-        [
-          ttl_check: 100,
-          ttl: 1500
-        ],
-        [name: :snapshot_schedule]
-      ], id: :snapshot_schedule),
       :hackney_pool.child_spec(:snapshot_pool,  [timeout: 5000, max_connections: 1000])
     ]
 
