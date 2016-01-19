@@ -154,7 +154,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       Repo.update(changeset)
       ConCache.put(:camera, camera.exid, camera)
       invalidate_camera_cache(camera_exid)
-      log_camera_status(camera.id, status, datetime)
+      log_camera_status(camera, status, datetime)
     end
 
     if update_thumbnail? && stale_thumbnail?(camera.thumbnail_url, timestamp) do
@@ -193,17 +193,17 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     )
   end
 
-  def log_camera_status(camera_id, true, datetime) do
-    SnapshotRepo.insert %CameraActivity{camera_id: camera_id, action: "online", done_at: datetime}
-    camera = Repo.one! Camera.by_id_with_owner(camera_id)
+  def log_camera_status(camera, true, datetime) do
+    SnapshotRepo.insert %CameraActivity{camera_id: camera.id, action: "online", done_at: datetime}
+    camera = Repo.preload(camera, :owner)
     if camera.is_online_email_owner_notification do
       EvercamMedia.UserMailer.camera_online(camera.owner, camera)
     end
   end
 
-  def log_camera_status(camera_id, false, datetime) do
-    SnapshotRepo.insert %CameraActivity{camera_id: camera_id, action: "offline", done_at: datetime}
-    camera = Repo.one! Camera.by_id_with_owner(camera_id)
+  def log_camera_status(camera, false, datetime) do
+    SnapshotRepo.insert %CameraActivity{camera_id: camera.id, action: "offline", done_at: datetime}
+    camera = Repo.preload(camera, :owner)
     if camera.is_online_email_owner_notification do
       EvercamMedia.UserMailer.camera_offline(camera.owner, camera)
     end
