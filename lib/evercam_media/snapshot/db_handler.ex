@@ -153,7 +153,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       changeset = Camera.changeset(camera, camera_params)
       Repo.update(changeset)
       ConCache.put(:camera, camera.exid, camera)
-      invalidate_camera_cache(camera_exid)
+      invalidate_camera_cache(camera)
       log_camera_status(camera, status, datetime)
     end
 
@@ -161,7 +161,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       update_thumbnail(camera, timestamp)
     end
 
-    camera_exid
+    camera
   end
 
   def update_thumbnail(camera, timestamp) do
@@ -184,12 +184,12 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     |> String.to_integer
   end
 
-  def invalidate_camera_cache(camera_exid) do
+  def invalidate_camera_cache(camera) do
     Exq.Enqueuer.enqueue(
       :exq_enqueuer,
       "cache",
       "Evercam::CacheInvalidationWorker",
-      camera_exid
+      camera.exid
     )
   end
 
@@ -209,7 +209,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
   end
 
-  def save_snapshot_record(camera_exid, timestamp, motion_level, notes) do
+  def save_snapshot_record(camera, timestamp, motion_level, notes) do
     {:ok, datetime} =
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.DateTime.to_erl
@@ -218,7 +218,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.Strftime.strftime "%Y%m%d%H%M%S%f"
 
-    camera = Camera.get_cam(camera_exid)
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
     SnapshotRepo.insert(%Snapshot{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
   end
