@@ -149,8 +149,9 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Calendar.DateTime.Parse.unix!(timestamp)
         |> Calendar.DateTime.to_erl
         |> Ecto.DateTime.cast
-      camera = construct_camera(camera, datetime, status, camera.is_online == status)
-      Repo.update camera
+      camera_params = construct_camera(datetime, status, camera.is_online == status)
+      changeset = Camera.changeset(camera, camera_params)
+      Repo.update(changeset)
       ConCache.put(:camera, camera.exid, camera)
       invalidate_camera_cache(camera_exid)
       log_camera_status(camera.id, status, datetime)
@@ -163,11 +164,11 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     camera_exid
   end
 
-
   def update_thumbnail(camera, timestamp) do
     file_path = "/#{camera.exid}/snapshots/#{timestamp}.jpg"
-    camera = %{camera | thumbnail_url: Util.s3_file_url(file_path)}
-    Repo.update camera
+    camera_params = %{thumbnail_url: Util.s3_file_url(file_path)}
+    changeset = Camera.changeset(camera, camera_params)
+    Repo.update(changeset)
     ConCache.put(:camera, camera.exid, camera)
   end
 
@@ -222,15 +223,19 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     SnapshotRepo.insert(%Snapshot{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
   end
 
-  defp construct_camera(camera, datetime, _, true) do
-    %{camera | last_polled_at: datetime}
+  defp construct_camera(datetime, online_status, online_status_unchanged) do
+    camera_params(datetime, online_status, online_status_unchanged)
   end
 
-  defp construct_camera(camera, datetime, false, false) do
-    %{camera | last_polled_at: datetime, is_online: false}
+  defp camera_params(datetime, _, true) do
+    %{updated_at: datetime, last_polled_at: datetime}
   end
 
-  defp construct_camera(camera, datetime, true, false) do
-    %{camera | last_polled_at: datetime, is_online: true, last_online_at: datetime}
+  defp camera_params(datetime, false, false) do
+    %{updated_at: datetime, last_polled_at: datetime, is_online: false}
+  end
+
+  defp camera_params(datetime, true, false) do
+    %{updated_at: datetime, last_polled_at: datetime, is_online: true, last_online_at: datetime}
   end
 end

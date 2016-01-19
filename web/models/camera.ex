@@ -1,5 +1,9 @@
 defmodule Camera do
   use Ecto.Model
+  import Ecto.Changeset
+
+  @required_fields ~w(exid name owner_id config is_public is_online_email_owner_notification)
+  @optional_fields ~w(timezone thumbnail_url is_online last_polled_at last_online_at updated_at created_at)
 
   schema "cameras" do
     belongs_to :owner, User, foreign_key: :owner_id
@@ -155,5 +159,10 @@ defmodule Camera do
     else
       div(60_000, cloud_recording.frequency)
     end
+  end
+
+  def changeset(camera, params \\ :empty) do
+    camera
+    |> cast(params, @required_fields, @optional_fields)
   end
 end
