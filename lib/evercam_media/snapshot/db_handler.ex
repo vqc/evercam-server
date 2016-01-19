@@ -79,63 +79,61 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.error "[#{camera_exid}] [snapshot_error] [system_limit] Traceback."
         Util.error_handler(error)
         [500, %{message: "Sorry, we dropped the ball."}]
-      :bad_request ->
-        Logger.error "[#{camera_exid}] [snapshot_error] [bad_request] Traceback."
-        Logger.error inspect(error)
-        update_camera_status("#{camera_exid}", timestamp, false)
-        [504, %{message: "Bad request."}]
-      :closed ->
-        Logger.error "[#{camera_exid}] [snapshot_error] [closed] Traceback."
-        Logger.error inspect(error)
-        [504, %{message: "Connection closed."}]
       :emfile ->
         Logger.error "[#{camera_exid}] [snapshot_error] [emfile] Traceback."
         Util.error_handler(error)
         [500, %{message: "Sorry, we dropped the ball."}]
+      :bad_request ->
+        Logger.error "[#{camera_exid}] [snapshot_error] [bad_request] Traceback."
+        update_camera_status("#{camera_exid}", timestamp, false)
+        [504, %{message: "Bad request."}]
+      :closed ->
+        Logger.debug "[#{camera_exid}] [snapshot_error] [closed]"
+        [504, %{message: "Connection closed."}]
       :nxdomain ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [nxdomain]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [nxdomain]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Non-existant domain."}]
       :ehostunreach ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [ehostunreach]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [ehostunreach]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "No route to host."}]
       :enetunreach ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [enetunreach]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [enetunreach]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Network unreachable."}]
       :timeout ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [timeout]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [timeout]"
         [504, %{message: "Camera response timed out."}]
       :connect_timeout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [connect_timeout]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Connection to the camera timed out."}]
       :econnrefused ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [econnrefused]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [econnrefused]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Connection refused."}]
       :not_found ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [not_found]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [not_found]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Camera url is not found.", response: error[:response]}]
       :forbidden ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [forbidden]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [forbidden]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Camera responded with a Forbidden message.", response: error[:response]}]
       :unauthorized ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [unauthorized]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [unauthorized]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Camera responded with a Unauthorized message.", response: error[:response]}]
       :device_error ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [device_error]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [device_error]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Camera responded with a Device Error message.", response: error[:response]}]
       :device_busy ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [device_busy]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [device_busy]"
         [502, %{message: "Camera responded with a Device Busy message.", response: error[:response]}]
       :not_a_jpeg ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [not_a_jpeg]"
+        Logger.debug "[#{camera_exid}] [snapshot_error] [not_a_jpeg]"
         [504, %{message: "Camera didn't respond with an image.", response: error[:response]}]
       _reason ->
         Logger.info "[#{camera_exid}] [snapshot_error] [unhandled] #{inspect error}"
