@@ -219,7 +219,9 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       |> Calendar.Strftime.strftime "%Y%m%d%H%M%S%f"
 
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
-    SnapshotRepo.insert(%Snapshot{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id})
+    parameters = %{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id}
+    changeset = Snapshot.changeset(%Snapshot{}, parameters)
+    SnapshotRepo.insert(changeset)
   end
 
   defp construct_camera(datetime, online_status, online_status_unchanged) do

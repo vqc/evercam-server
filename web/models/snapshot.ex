@@ -5,11 +5,16 @@ defmodule Snapshot do
   alias EvercamMedia.SnapshotRepo
   use Ecto.Model
 
+  @required_fields ~w(snapshot_id camera_id)
+  @optional_fields ~w(notes motionlevel created_at is_public)
+
   @primary_key {:snapshot_id, :string, autogenerate: false}
+
   schema "snapshots" do
     belongs_to :camera, Camera, references: :snapshot_id
 
     field :notes, :string
+    field :is_public, :boolean
     field :motionlevel, :integer
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
@@ -41,5 +46,11 @@ defmodule Snapshot do
         where: snap.notes == "Evercam Proxy")
 
     SnapshotRepo.all(snapshots)
+  end
+
+  def changeset(snapshot, params \\ :empty) do
+    snapshot
+    |> cast(params, @required_fields, @optional_fields)
+    |> unique_constraint(:snapshot_id, name: :snapshots_pkey)
   end
 end
