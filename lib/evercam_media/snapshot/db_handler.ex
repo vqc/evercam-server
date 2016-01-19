@@ -194,16 +194,20 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def log_camera_status(camera, true, datetime) do
-    SnapshotRepo.insert %CameraActivity{camera_id: camera.id, action: "online", done_at: datetime}
     camera = Repo.preload(camera, :owner)
+    parameters = %{camera_id: camera.id, action: "online", done_at: datetime}
+    changeset = CameraActivity.changeset(%CameraActivity{}, parameters)
+    SnapshotRepo.insert(changeset)
     if camera.is_online_email_owner_notification do
       EvercamMedia.UserMailer.camera_online(camera.owner, camera)
     end
   end
 
   def log_camera_status(camera, false, datetime) do
-    SnapshotRepo.insert %CameraActivity{camera_id: camera.id, action: "offline", done_at: datetime}
     camera = Repo.preload(camera, :owner)
+    parameters = %{camera_id: camera.id, action: "offline", done_at: datetime}
+    changeset = CameraActivity.changeset(%CameraActivity{}, parameters)
+    SnapshotRepo.insert(changeset)
     if camera.is_online_email_owner_notification do
       EvercamMedia.UserMailer.camera_offline(camera.owner, camera)
     end
