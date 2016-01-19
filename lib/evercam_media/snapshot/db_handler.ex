@@ -73,7 +73,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     handle_snapshot_error(camera_exid, timestamp, error, reason)
   end
 
-  def handle_snapshot_error(camera_exid, timestamp, error, reason) do
+  defp handle_snapshot_error(camera_exid, timestamp, error, reason) do
     case reason do
       :system_limit ->
         Logger.error "[#{camera_exid}] [snapshot_error] [system_limit] Traceback."
