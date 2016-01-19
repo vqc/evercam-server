@@ -177,8 +177,9 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     (timestamp - thumbnail_timestamp) > 300
   end
 
+  def parse_thumbnail_url(nil), do: 0
   def parse_thumbnail_url(thumbnail_url) do
-    Regex.run(~r/snapshots\/(.+)\.jpg/, to_string(thumbnail_url))
+    Regex.run(~r/snapshots\/(.+)\.jpg/, thumbnail_url)
     |> List.last
     |> String.to_integer
   end
