@@ -149,7 +149,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Calendar.DateTime.Parse.unix!(timestamp)
         |> Calendar.DateTime.to_erl
         |> Ecto.DateTime.cast
-      camera = Repo.one! Camera.by_exid(camera_exid)
       camera = construct_camera(camera, datetime, status, camera.is_online == status)
       Repo.update camera
       ConCache.put(:camera, camera.exid, camera)
