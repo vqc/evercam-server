@@ -2,11 +2,11 @@ defmodule EvercamMedia.ONVIFPTZ do
   alias EvercamMedia.ONVIFClient
 
   def get_nodes(access_info) do
-    access_info |> ptz_request "GetNodes"
+    access_info |> ptz_request("GetNodes")
   end
 
   def get_configurations(access_info) do
-    access_info |> ptz_request "GetConfigurations"
+    access_info |> ptz_request("GetConfigurations")
   end
 
   def get_presets(access_info, profile_token) do

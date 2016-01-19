@@ -133,16 +133,4 @@ defmodule EvercamMedia.Snapshot.Poller do
   defp start_timer(sleep, message) do
     :erlang.send_after(sleep, self(), message)
   end
-
-  defp update_scheduler_log(cam_id, {is_scheduled, timestamp, message}) do
-    ConCache.update(:snapshot_schedule, cam_id, fn(old_value) ->
-      old_value = Enum.slice List.wrap(old_value), 0, 360000
-      new_value = [
-        is_scheduled: is_scheduled,
-        timestamp: timestamp,
-        message: message
-      ]
-      [new_value | old_value]
-    end)
-  end
 end

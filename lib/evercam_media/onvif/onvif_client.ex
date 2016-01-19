@@ -25,7 +25,7 @@ defmodule EvercamMedia.ONVIFClient do
                    "Network" -> "dn"
                   end
 
-    [username, password] = auth |> String.split ":"
+    [username, password] = auth |> String.split(":")
     request = gen_onvif_request(namespace, operation, username, password, parameters)
     try do
       response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
@@ -120,7 +120,7 @@ defmodule EvercamMedia.ONVIFClient do
   defp parse(node) do
     cond do
       Record.is_record(node, :xmlElement) ->
-        name = case xmlElement(node, :name) |> to_string |> String.split ":" do
+        name = case xmlElement(node, :name) |> to_string |> String.split(":") do
                  [_ns,name] -> name
                  [name] -> name
                end

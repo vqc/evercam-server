@@ -26,15 +26,17 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     notes = "Evercam Proxy"
     Logger.debug "[#{camera_exid}] [snapshot_success]"
 
-    case previous_image = ConCache.get(:cache, camera_exid) do
-      %{} ->
-        Logger.debug "Going to calculate MD"
-        motion_level = EvercamMedia.MotionDetection.Lib.compare(image,previous_image[:image])
-        Logger.debug "calculated motion level is #{motion_level}"
-      _ ->
-        Logger.debug "No previous image found in the cache"
-        motion_level = nil
-    end
+    motion_level = 
+      case previous_image = ConCache.get(:cache, camera_exid) do
+        %{} ->
+          Logger.debug "Going to calculate MD"
+          ml = EvercamMedia.MotionDetection.Lib.compare(image,previous_image[:image])
+          Logger.debug "calculated motion level is #{ml}"
+          ml
+        _ ->
+          Logger.debug "No previous image found in the cache"
+          nil
+      end
 
     spawn fn ->
       try do
@@ -60,16 +62,17 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def parse_snapshot_error(camera_exid, timestamp, error) do
-    case error do
-      %CaseClauseError{} ->
-        reason = :bad_request
-      %HTTPotion.HTTPError{} ->
-        reason = Map.get(error, :message) |> String.to_atom
-      error when is_map(error) ->
-        reason = Map.get(error, :reason)
-      _ ->
-        reason = error
-    end
+    reason =
+      case error do
+        %CaseClauseError{} ->
+          :bad_request
+        %HTTPotion.HTTPError{} ->
+          Map.get(error, :message) |> String.to_atom
+        error when is_map(error) ->
+          Map.get(error, :reason)
+        _ ->
+          error
+      end
     handle_snapshot_error(camera_exid, timestamp, error, reason)
   end
 
@@ -215,7 +218,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       |> Ecto.DateTime.cast
     {:ok, snapshot_timestamp} =
       Calendar.DateTime.Parse.unix!(timestamp)
-      |> Calendar.Strftime.strftime "%Y%m%d%H%M%S%f"
+      |> Calendar.Strftime.strftime("%Y%m%d%H%M%S%f")
 
     camera = Camera.get_cam(camera_exid)
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)

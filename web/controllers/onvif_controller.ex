@@ -1,7 +1,6 @@
 defmodule EvercamMedia.ONVIFController do
-  use Phoenix.Controller
+  use EvercamMedia.Web, :controller
   alias EvercamMedia.ONVIFClient
-  require Logger
 
   def invoke(conn, %{"service" => service, "operation" => operation}) do
     case ONVIFClient.request(conn.assigns.onvif_access_info, service, operation, conn.assigns.onvif_parameters) do
@@ -14,6 +13,6 @@ defmodule EvercamMedia.ONVIFController do
     conn
     |> put_status(code)
     |> put_resp_header("access-control-allow-origin", "*")
-    |> json response
+    |> json(response)
   end
 end

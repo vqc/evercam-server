@@ -1,37 +1,34 @@
 defmodule EvercamMedia.StreamController do
-  use Phoenix.Controller
+  use EvercamMedia.Web, :controller
   use Timex
-  alias EvercamMedia.Util
-  alias EvercamMedia.Repo
-  require Logger
 
   def rtmp(conn, params) do
     conn
     |> put_status(request_stream(params["name"], params["token"], :kill))
-    |> text ""
+    |> text("")
   end
 
   def hls(conn, params) do
     request_stream(params["camera_id"], params["token"], :check)
-    |> hls_response conn, params
+    |> hls_response(conn, params)
   end
 
   defp hls_response(200, conn, params) do
     conn
     |> put_resp_header("access-control-allow-origin", "*")
-    |> redirect external: "#{Application.get_env(:evercam_media, :hls_url)}/hls/#{params["camera_id"]}/index.m3u8"
+    |> redirect(external: "#{Application.get_env(:evercam_media, :hls_url)}/hls/#{params["camera_id"]}/index.m3u8")
   end
 
   defp hls_response(status, conn, _params) do
     conn
-    |> put_status status
-    |> text ""
+    |> put_status(status)
+    |> text("")
   end
 
   def ts(conn, params) do
     conn
     |> put_resp_header("access-control-allow-origin", "*")
-    |> redirect external: "#{Application.get_env(:evercam_media, :hls_url)}/hls/#{params["camera_id"]}/#{params["filename"]}"
+    |> redirect(external: "#{Application.get_env(:evercam_media, :hls_url)}/hls/#{params["camera_id"]}/#{params["filename"]}")
   end
 
   defp request_stream(camera_id, token, command) do

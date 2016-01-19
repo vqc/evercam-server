@@ -31,8 +31,8 @@ defmodule Snapshot do
   defp expired(camera_id, storage_duration) do
     seconds_to_expired_day = (storage_duration + 1) * (24 * 60 * 60) * (-1)
     expired_day = DateTime.now_utc |> DateTime.advance!(seconds_to_expired_day)
-    begin_timestamp = expired_day |> Strftime.strftime! "%Y%m%d"
-    end_timestamp = expired_day |> Date.next_day! |> Strftime.strftime! "%Y%m%d"
+    begin_timestamp = expired_day |> Strftime.strftime!("%Y%m%d")
+    end_timestamp = expired_day |> Date.next_day! |> Strftime.strftime!("%Y%m%d")
 
     snapshots =
       from(snap in Snapshot,
