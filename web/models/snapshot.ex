@@ -29,10 +29,7 @@ defmodule Snapshot do
     expired(cloud_recording.camera_id, cloud_recording.storage_duration)
   end
 
-  defp expired(_camera_id, -1) do
-    []
-  end
-
+  defp expired(_camera_id, -1), do: []
   defp expired(camera_id, storage_duration) do
     seconds_to_expired_day = (storage_duration + 1) * (24 * 60 * 60) * (-1)
     expired_day = DateTime.now_utc |> DateTime.advance!(seconds_to_expired_day)
