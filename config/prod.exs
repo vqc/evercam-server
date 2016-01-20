@@ -49,9 +49,9 @@ config :evercam_media,
   hls_url: "https://media.evercam.io"
 
 config :exq,
-  host: System.get_env("REDIS_HOST") |> String.to_char_list,
   port: System.get_env("REDIS_PORT") |> String.to_integer,
-  password: System.get_env("REDIS_PASS") |> String.to_char_list,
+  host: System.get_env("REDIS_HOST"),
+  password: System.get_env("REDIS_PASS"),
   namespace: "sidekiq",
   queues: ["to_elixir"]
 
