@@ -75,11 +75,11 @@ defmodule EvercamMedia.Mixfile do
      {:dotenv, "~> 2.0.0", only: :dev},
      {:poison, "~> 1.5"},
      {:porcelain, "~> 2.0"},
-     {:erlcloud, github: 'gleber/erlcloud'},
+     {:erlcloud, github: "gleber/erlcloud"},
      {:exq, "~> 0.6.2"},
-     {:uuid, github: 'zyro/elixir-uuid', override: true},
-     {:exrm, github: 'bitwalker/exrm'},
-     {:credo, "~> 0.1.0", only: :dev},
+     {:uuid, github: "zyro/elixir-uuid", override: true},
+     {:exrm, github: "bitwalker/exrm"},
+     {:credo, github: "rrrene/credo", only: :dev},
      {:mailgun, github: "phanimahesh/mailgun"}]
   end
 end
