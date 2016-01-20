@@ -1,10 +1,9 @@
 defmodule EvercamMedia.ONVIFPTZController do
-  use Phoenix.Controller
+  use EvercamMedia.Web, :controller
   alias EvercamMedia.ONVIFPTZ
-  require Logger
 
   def status(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.get_status "Profile_1"
+    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.get_status("Profile_1")
     default_respond(conn, 200, response)
   end
 
@@ -19,22 +18,22 @@ defmodule EvercamMedia.ONVIFPTZController do
   end
 
   def presets(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.get_presets "Profile_1"
+    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.get_presets("Profile_1")
     default_respond(conn, 200, response)
   end
 
   def stop(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.stop "Profile_1"
+    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.stop("Profile_1")
     default_respond(conn, 200, response)
   end
 
   def home(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.goto_home_position "Profile_1"
+    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.goto_home_position("Profile_1")
     default_respond(conn, 200, response)
   end
 
   def sethome(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.set_home_position "Profile_1"
+    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.set_home_position("Profile_1")
     default_respond(conn, 200, response)
   end
 
@@ -101,6 +100,6 @@ defmodule EvercamMedia.ONVIFPTZController do
     conn
     |> put_status(code)
     |> put_resp_header("access-control-allow-origin", "*")
-    |> json response
+    |> json(response)
   end
 end

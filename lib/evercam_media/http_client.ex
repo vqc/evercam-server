@@ -70,7 +70,7 @@ defmodule EvercamMedia.HTTPClient do
           [h|_] -> h
           _ -> nil
         end
-      _ ->
+      _ -> nil
     end
     # session_header = Dict.get(response.headers, :"Set-Cookie")
     # session_string =

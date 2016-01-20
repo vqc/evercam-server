@@ -32,10 +32,14 @@ defmodule EvercamMedia.Web do
       use Phoenix.Controller
 
       alias EvercamMedia.Repo
+      alias EvercamMedia.Util
+      
       import Ecto.Model
       import Ecto.Query, only: [from: 1, from: 2]
 
       import EvercamMedia.Router.Helpers
+      require Logger
+
     end
   end
 

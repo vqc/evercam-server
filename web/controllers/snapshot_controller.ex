@@ -1,12 +1,10 @@
 defmodule EvercamMedia.SnapshotController do
-  use Phoenix.Controller
+  use EvercamMedia.Web, :controller
   use Timex
   use Calendar
-  alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.S3
-  require Logger
 
   def show(conn, params) do
     timestamp = DateTime.now_utc |> DateTime.Format.unix
@@ -67,14 +65,14 @@ defmodule EvercamMedia.SnapshotController do
     |> put_status(200)
     |> put_resp_header("content-type", "image/jpg")
     |> put_resp_header("access-control-allow-origin", "*")
-    |> text response[:image]
+    |> text(response[:image])
   end
 
   defp show_respond(conn, code, response, _, _) do
     conn
     |> put_status(code)
     |> put_resp_header("access-control-allow-origin", "*")
-    |> json response
+    |> json(response)
   end
 
   defp create_respond(conn, 200, response, "true") do
@@ -83,21 +81,21 @@ defmodule EvercamMedia.SnapshotController do
     conn
     |> put_status(200)
     |> put_resp_header("access-control-allow-origin", "*")
-    |> json %{created_at: response[:timestamp], notes: response[:notes], data: data}
+    |> json(%{created_at: response[:timestamp], notes: response[:notes], data: data})
   end
 
   defp create_respond(conn, 200, response, _) do
     conn
     |> put_status(200)
     |> put_resp_header("access-control-allow-origin", "*")
-    |> json %{created_at: response[:timestamp], notes: response[:notes]}
+    |> json(%{created_at: response[:timestamp], notes: response[:notes]})
   end
 
   defp create_respond(conn, code, response, _) do
     conn
     |> put_status(code)
     |> put_resp_header("access-control-allow-origin", "*")
-    |> json response
+    |> json(response)
   end
 
   defp test_respond(conn, 200, response) do
@@ -106,14 +104,14 @@ defmodule EvercamMedia.SnapshotController do
     conn
     |> put_status(200)
     |> put_resp_header("access-control-allow-origin", "*")
-    |> json %{data: data, status: "ok"}
+    |> json(%{data: data, status: "ok"})
   end
 
   defp test_respond(conn, code, response) do
     conn
     |> put_status(code)
     |> put_resp_header("access-control-allow-origin", "*")
-    |> json response
+    |> json(response)
   end
 
   defp snapshot(camera_id, _token, timestamp, store_snapshot, notes \\ "Evercam Proxy") do
@@ -223,14 +221,5 @@ defmodule EvercamMedia.SnapshotController do
     camera_exid = args[:camera_exid]
     timestamp = args[:timestamp]
     DBHandler.parse_snapshot_error(camera_exid, timestamp, error)
-  end
-
-  defp check_token_expiry(time) do
-    token_time = DateFormat.parse! time, "{ISOz}"
-    token_time = Date.shift token_time, mins: 5
-
-    if Date.now > token_time do
-      raise FunctionClauseError
-    end
   end
 end

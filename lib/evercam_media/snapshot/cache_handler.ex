@@ -42,8 +42,9 @@ defmodule EvercamMedia.Snapshot.CacheHandler do
         ConCache.put(:cache, camera_exid_last, %ConCache.Item{value: value, ttl: ttl})
     end
 
-    last = ConCache.get(:cache, camera_exid_last)
-    previous = ConCache.get(:cache, camera_exid_previous)
+    # Do we really need this code?
+    _last = ConCache.get(:cache, camera_exid_last)
+    _previous = ConCache.get(:cache, camera_exid_previous)
 
     {:ok, state}
   end

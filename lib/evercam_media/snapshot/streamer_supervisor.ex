@@ -23,7 +23,7 @@ defmodule EvercamMedia.Snapshot.StreamerSupervisor do
       nil ->
         Logger.debug "[#{camera_exid}] Starting streamer"
         Supervisor.start_child(__MODULE__, [camera_exid])
-      is_pid ->
+      _is_pid ->
         Logger.debug "[#{camera_exid}] Skipping streamer ..."
     end
   end

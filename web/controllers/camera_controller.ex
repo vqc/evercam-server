@@ -1,10 +1,7 @@
 defmodule EvercamMedia.CameraController do
-  use Phoenix.Controller
-  alias EvercamMedia.Util
+  use EvercamMedia.Web, :controller
   alias EvercamMedia.Snapshot.WorkerSupervisor
   alias EvercamMedia.Snapshot.Worker
-  alias EvercamMedia.Repo
-  require Logger
 
   def update(conn, %{"id" => exid, "token" => token}) do
     try do
