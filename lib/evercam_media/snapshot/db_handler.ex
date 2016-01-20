@@ -188,12 +188,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def invalidate_camera_cache(camera) do
-    Exq.Enqueuer.enqueue(
-      :exq_enqueuer,
-      "cache",
-      "Evercam::CacheInvalidationWorker",
-      camera.exid
-    )
+    Exq.enqueue(Exq, "cache", "Evercam::CacheInvalidationWorker", camera.exid)
   end
 
   def log_camera_status(camera, true, datetime) do
