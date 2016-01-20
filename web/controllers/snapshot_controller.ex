@@ -14,28 +14,6 @@ defmodule EvercamMedia.SnapshotController do
     show_respond(conn, code, response, params["id"], timestamp)
   end
 
-  def show_last(conn, params) do
-    timestamp = DateTime.now_utc |> DateTime.Format.unix
-    camera_exid = params["id"]
-    camera_exid_last = "#{camera_exid}_last"
-    [code, response] = [200, ConCache.get(:cache, camera_exid_last)]
-    unless response do
-      [code, response] = snapshot(params["id"], params["token"], timestamp, false)
-    end
-    show_respond(conn, code, response, params["id"], timestamp)
-  end
-
-  def show_previous(conn, params) do
-    timestamp = DateTime.now_utc |> DateTime.Format.unix
-    camera_exid = params["id"]
-    camera_exid_previous = "#{camera_exid}_previous"
-    [code, response] = [200, ConCache.get(:cache, camera_exid_previous)]
-    unless response do
-      [code, response] = snapshot(params["id"], params["token"], timestamp, false)
-    end
-    show_respond(conn, code, response, params["id"], timestamp)
-  end
-
   def create(conn, params) do
     timestamp = DateTime.now_utc |> DateTime.Format.unix
     [code, response] = [200, ConCache.get(:cache, params["id"])]
