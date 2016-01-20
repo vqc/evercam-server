@@ -1,6 +1,5 @@
 defmodule EvercamMedia.StreamController do
   use EvercamMedia.Web, :controller
-  use Timex
 
   def rtmp(conn, params) do
     conn

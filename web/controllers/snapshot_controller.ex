@@ -1,6 +1,5 @@
 defmodule EvercamMedia.SnapshotController do
   use EvercamMedia.Web, :controller
-  use Timex
   use Calendar
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
