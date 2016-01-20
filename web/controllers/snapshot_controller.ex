@@ -141,17 +141,19 @@ defmodule EvercamMedia.SnapshotController do
 
   defp parse_camera_response(args, {:ok, data}, true) do
     spawn fn ->
+      Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
       S3.upload(args[:camera_exid], args[:timestamp], data)
+      DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true, true)
+      |> DBHandler.save_snapshot_record(args[:timestamp], nil, args[:notes])
     end
-    DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true, true)
-    |> DBHandler.save_snapshot_record(args[:timestamp], nil, args[:notes])
-    Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
     [200, %{image: data, timestamp: args[:timestamp], notes: args[:notes]}]
   end
 
   defp parse_camera_response(args, {:ok, data}, false) do
-    DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true)
-    Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
+    spawn fn ->
+      Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
+      DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true)
+    end
     [200, %{image: data}]
   end
 
