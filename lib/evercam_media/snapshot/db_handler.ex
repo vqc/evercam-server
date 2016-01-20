@@ -87,7 +87,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Util.error_handler(error)
         [500, %{message: "Sorry, we dropped the ball."}]
       :bad_request ->
-        Logger.error "[#{camera_exid}] [snapshot_error] [bad_request] Traceback."
+        Logger.debug "[#{camera_exid}] [snapshot_error] [bad_request]"
         update_camera_status("#{camera_exid}", timestamp, false)
         [504, %{message: "Bad request."}]
       :closed ->
