@@ -10,7 +10,6 @@ defmodule EvercamMedia.Snapshot.S3UploadHandler do
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
     spawn fn ->
-      Logger.debug "Uploading snapshot to S3 for camera #{camera_exid} taken at #{timestamp}"
       S3.upload(camera_exid, timestamp, image)
     end
     {:ok, state}

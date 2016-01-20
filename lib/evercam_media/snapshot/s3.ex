@@ -4,8 +4,10 @@ defmodule EvercamMedia.Snapshot.S3 do
   """
 
   alias Calendar.DateTime
+  require Logger
 
   def upload(camera_exid, timestamp, image) do
+    Logger.debug "[#{camera_exid}] [snapshot_upload] [#{timestamp}]"
     file_path = "/#{camera_exid}/snapshots/#{timestamp}.jpg"
     date = DateTime.now!("UTC") |> DateTime.Format.httpdate
     host = "#{System.get_env("AWS_BUCKET")}.s3.amazonaws.com"
