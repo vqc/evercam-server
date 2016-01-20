@@ -22,7 +22,7 @@
   "fs": {:hex, :fs, "0.9.2"},
   "getopt": {:hex, :getopt, "0.8.2"},
   "hackney": {:hex, :hackney, "1.4.8"},
-  "httpoison": {:hex, :httpoison, "0.8.0"},
+  "httpoison": {:hex, :httpoison, "0.8.1"},
   "httpotion": {:hex, :httpotion, "2.1.0"},
   "ibrowse": {:git, "https://github.com/cmullaparthi/ibrowse.git", "fd81d44182507c23445ed720df8c30e2e8da9d9b", [tag: "v4.2"]},
   "idna": {:hex, :idna, "1.0.3"},

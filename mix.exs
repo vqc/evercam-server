@@ -69,7 +69,7 @@ defmodule EvercamMedia.Mixfile do
      {:httpotion, "~> 2.0"},
      {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.2", override: true},
      {:sbroker, "~> 0.7", [optional: true, hex: :sbroker]},
-     {:httpoison, "~> 0.8.0"},
+     {:httpoison, "~> 0.8.1"},
      {:calendar, "~> 0.12.3"},
      {:calecto, "~> 0.4.4"},
      {:dotenv, "~> 2.0.0", only: :dev},
