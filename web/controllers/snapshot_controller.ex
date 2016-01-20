@@ -162,6 +162,8 @@ defmodule EvercamMedia.SnapshotController do
         [504, %{message: "Camera response timed out."}]
       {:error, %HTTPoison.Error{}} ->
         [504, %{message: "Camera seems to be offline."}]
+      {:error, %CaseClauseError{term: {:error, :bad_request}}} ->
+        [504, %{message: "Bad request."}]
       _error ->
         [500, %{message: "Sorry, we dropped the ball."}]
     end
