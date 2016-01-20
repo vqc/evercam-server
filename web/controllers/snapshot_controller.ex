@@ -5,39 +5,26 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.S3
 
-  def show(conn, params) do
-    timestamp = DateTime.now_utc |> DateTime.Format.unix
-    [code, response] = [200, ConCache.get(:cache, params["id"])]
-    unless response do
-      [code, response] = snapshot(params["id"], params["token"], timestamp, false)
-    end
-    show_respond(conn, code, response, params["id"], timestamp)
+  def show(conn, %{"id" => camera_exid, "token" => token}) do
+    [code, response] = snapshot(camera_exid, token, false)
+    show_render(conn, code, response)
   end
 
   def create(conn, params) do
-    timestamp = DateTime.now_utc |> DateTime.Format.unix
-    [code, response] = [200, ConCache.get(:cache, params["id"])]
-    unless response do
-      [code, response] = snapshot(params["id"], params["token"], timestamp, true, params["notes"])
-    end
-    create_respond(conn, code, response, params["with_data"])
+    [code, response] = snapshot(params["id"], params["token"], true, params["notes"])
+    create_render(conn, code, response, params["with_data"])
   end
 
   def test(conn, params) do
-    [code, response] =
-      test_snapshot_response(
-        params["cam_username"],
-        params["cam_password"],
-        "#{params["external_url"]}/#{params["jpg_url"]}",
-        params["vendor_id"]
-      )
-
-    test_respond(conn, code, response)
+    [code, response] = test_snapshot(params)
+    test_render(conn, code, response)
   end
 
-  defp show_respond(conn, 200, response, camera_id, timestamp) do
-    Util.broadcast_snapshot(camera_id, response[:image], timestamp)
+  ######################
+  ## Render functions ##
+  ######################
 
+  defp show_render(conn, 200, response) do
     conn
     |> put_status(200)
     |> put_resp_header("content-type", "image/jpg")
@@ -45,14 +32,14 @@ defmodule EvercamMedia.SnapshotController do
     |> text(response[:image])
   end
 
-  defp show_respond(conn, code, response, _, _) do
+  defp show_render(conn, code, response) do
     conn
     |> put_status(code)
     |> put_resp_header("access-control-allow-origin", "*")
     |> json(response)
   end
 
-  defp create_respond(conn, 200, response, "true") do
+  defp create_render(conn, 200, response, "true") do
     data = "data:image/jpeg;base64,#{Base.encode64(response[:image])}"
 
     conn
@@ -61,21 +48,21 @@ defmodule EvercamMedia.SnapshotController do
     |> json(%{created_at: response[:timestamp], notes: response[:notes], data: data})
   end
 
-  defp create_respond(conn, 200, response, _) do
+  defp create_render(conn, 200, response, _) do
     conn
     |> put_status(200)
     |> put_resp_header("access-control-allow-origin", "*")
     |> json(%{created_at: response[:timestamp], notes: response[:notes]})
   end
 
-  defp create_respond(conn, code, response, _) do
+  defp create_render(conn, code, response, _) do
     conn
     |> put_status(code)
     |> put_resp_header("access-control-allow-origin", "*")
     |> json(response)
   end
 
-  defp test_respond(conn, 200, response) do
+  defp test_render(conn, 200, response) do
     data = "data:image/jpeg;base64,#{Base.encode64(response[:image])}"
 
     conn
@@ -84,20 +71,49 @@ defmodule EvercamMedia.SnapshotController do
     |> json(%{data: data, status: "ok"})
   end
 
-  defp test_respond(conn, code, response) do
+  defp test_render(conn, code, response) do
     conn
     |> put_status(code)
     |> put_resp_header("access-control-allow-origin", "*")
     |> json(response)
   end
 
-  defp snapshot(camera_id, _token, timestamp, store_snapshot, notes \\ "Evercam Proxy") do
-    camera = EvercamMedia.Repo.one! Camera.by_exid_with_vendor(camera_id)
-    unless notes do
-      notes = "Evercam Proxy"
-    end
+  ######################
+  ## Fetch functions ##
+  ######################
 
-    args = %{
+  defp snapshot(camera_exid, _token, store_snapshot, notes \\ "Evercam Proxy") do
+    construct_args(camera_exid, store_snapshot, notes)
+    |> fetch_snapshot
+  end
+
+  defp fetch_snapshot(args, retry \\ 0) do
+    response = CamClient.fetch_snapshot(args)
+
+    case {response, args[:is_online], retry} do
+      {{:error, _error}, true, retry} when retry < 3 ->
+        fetch_snapshot(args, retry + 1)
+      _ ->
+        parse_camera_response(args, response, args[:store_snapshot])
+    end
+  end
+
+  defp test_snapshot(params) do
+    construct_args(params)
+    |> CamClient.fetch_snapshot
+    |> parse_test_response
+  end
+
+  ####################
+  ## Args functions ##
+  ####################
+
+  defp construct_args(camera_exid, store_snapshot, notes) do
+    camera = Camera.get_cam(camera_exid)
+    camera = Repo.preload(camera, [vendor_model: :vendor])
+    timestamp = DateTime.Format.unix(DateTime.now_utc)
+
+    %{
       camera_exid: camera.exid,
       is_online: camera.is_online,
       vendor_exid: Camera.vendor_exid(camera),
@@ -108,18 +124,43 @@ defmodule EvercamMedia.SnapshotController do
       timestamp: timestamp,
       notes: notes
     }
-    get_snapshot(args)
   end
 
-  defp test_snapshot_response(username, password, url, vendor_exid) do
-    args = %{
-      vendor_exid: vendor_exid,
-      url: url,
-      username: username,
-      password: password
+  defp construct_args(params) do
+    %{
+      vendor_exid: params["vendor_id"],
+      url: "#{params["external_url"]}/#{params["jpg_url"]}",
+      username: params["cam_username"],
+      password: params["cam_password"]
     }
+  end
 
-    case response = CamClient.fetch_snapshot(args) do
+  #####################
+  ## Parse functions ##
+  #####################
+
+  defp parse_camera_response(args, {:ok, data}, true) do
+    spawn fn ->
+      S3.upload(args[:camera_exid], args[:timestamp], data)
+    end
+    DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true, true)
+    |> DBHandler.save_snapshot_record(args[:timestamp], nil, args[:notes])
+    Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
+    [200, %{image: data, timestamp: args[:timestamp], notes: args[:notes]}]
+  end
+
+  defp parse_camera_response(args, {:ok, data}, false) do
+    DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true)
+    Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
+    [200, %{image: data}]
+  end
+
+  defp parse_camera_response(args, {:error, error}, _store_snapshot) do
+    DBHandler.parse_snapshot_error(args[:camera_exid], args[:timestamp], error)
+  end
+
+  defp parse_test_response(response) do
+    case response do
       {:ok, data} ->
         [200, %{image: data}]
       {:error, %{reason: :not_found, response: response}} ->
@@ -145,60 +186,5 @@ defmodule EvercamMedia.SnapshotController do
       _error ->
         [500, %{message: "Sorry, we dropped the ball."}]
     end
-  end
-
-  defp get_snapshot(args, retry \\ 1) do
-    get_snapshot_response(args, retry)
-  end
-
-  defp get_snapshot_response(args, 3) do
-    response = CamClient.fetch_snapshot(args)
-    parse_camera_response(args, response, args[:store_snapshot])
-  end
-
-  defp get_snapshot_response(args, retry) do
-    response = CamClient.fetch_snapshot(args)
-
-    case {response, args[:is_online]} do
-      {{:error, _error}, true} ->
-        get_snapshot(args, retry+1)
-      _ ->
-        parse_camera_response(args, response, args[:store_snapshot])
-    end
-  end
-
-  defp parse_camera_response(args, {:ok, data}, true) do
-    spawn fn ->
-      Logger.debug "Uploading snapshot to S3 for camera #{args[:camera_exid]} taken at #{args[:timestamp]}"
-      S3.upload(args[:camera_exid], args[:timestamp], data)
-    end
-    spawn fn ->
-      try do
-        DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true, true)
-        |> DBHandler.save_snapshot_record(args[:timestamp], nil, args[:notes])
-      rescue
-        error ->
-          Util.error_handler(error)
-      end
-    end
-    [200, %{image: data, timestamp: args[:timestamp], notes: args[:notes]}]
-  end
-
-  defp parse_camera_response(args, {:ok, data}, false) do
-    spawn fn ->
-      try do
-        DBHandler.update_camera_status("#{args[:camera_exid]}", args[:timestamp], true)
-      rescue
-        error ->
-          Util.error_handler(error)
-      end
-    end
-    [200, %{image: data}]
-  end
-
-  defp parse_camera_response(args, {:error, error}, _store_snapshot) do
-    camera_exid = args[:camera_exid]
-    timestamp = args[:timestamp]
-    DBHandler.parse_snapshot_error(camera_exid, timestamp, error)
   end
 end
