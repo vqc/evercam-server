@@ -151,7 +151,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         |> Ecto.DateTime.cast
       camera_params = construct_camera(datetime, status, camera.is_online == status)
       changeset = Camera.changeset(camera, camera_params)
-      {:ok, camera} = Repo.update(changeset)
+      camera = Repo.update!(changeset)
       ConCache.put(:camera, camera.exid, camera)
       invalidate_camera_cache(camera)
       log_camera_status(camera, status, datetime)
