@@ -26,7 +26,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     notes = "Evercam Proxy"
     Logger.debug "[#{camera_exid}] [snapshot_success]"
 
-    motion_level = 
+    motion_level =
       case previous_image = ConCache.get(:cache, camera_exid) do
         %{} ->
           Logger.debug "Going to calculate MD"
