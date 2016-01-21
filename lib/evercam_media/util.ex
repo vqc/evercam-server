@@ -19,6 +19,22 @@ defmodule EvercamMedia.Util do
     end
   end
 
+  def is_jpeg_strict(data) do
+    try do
+      size_without_magic = byte_size(data) - 5
+      <<0xFF,0xD8, _data :: binary-size(size_without_magic), ending :: binary-size(3)>> = data
+
+      case ending do
+        <<217, 0, 0>> -> true
+        <<255, 217, 0>> -> true
+        <<_, 255, 217>> -> true
+        _ -> false
+      end
+    rescue
+      _ -> false
+    end
+  end
+
   def decode_request_token(token) do
     {_, encrypted_message} = Base.url_decode64(token)
     message = :crypto.block_decrypt(
