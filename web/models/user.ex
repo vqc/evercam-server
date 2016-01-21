@@ -1,5 +1,9 @@
 defmodule User do
   use EvercamMedia.Web, :model
+  import Ecto.Query
+
+  @required_fields ~w(username password firstname lastname email country_id)
+  @optional_fields ~w(api_id api_key confirmed_at)
 
   schema "users" do
     belongs_to :country, Country, foreign_key: :country_id
@@ -20,8 +24,11 @@ defmodule User do
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
 
-  @required_fields ~w(username password firstname lastname email country_id)
-  @optional_fields ~w(api_id api_key confirmed_at)
+  def find_by_api_keys(api_id, api_key) do
+    User
+    |> where([u], u.api_id == ^api_id)
+    |> where([u], u.api_key == ^api_key)
+  end
 
   def changeset(model, params \\ :empty) do
     model
@@ -29,12 +36,5 @@ defmodule User do
     |> unique_constraint(:email, [name: "ux_users_email"])
     |> unique_constraint(:username, [name: "ux_users_username"])
     |> validate_format(:email, ~r/^.+@.+\..+$/)
-  end
-
-  def find_by_api_keys(api_id, api_key) do
-    from(u in User,
-         where: u.api_id == ^api_id,
-         where: u.api_key == ^api_key,
-         select: u)
   end
 end
