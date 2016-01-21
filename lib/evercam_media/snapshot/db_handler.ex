@@ -19,24 +19,29 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   alias EvercamMedia.Repo
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Util
-
+  alias EvercamMedia.MotionDetection
 
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
     notes = "Evercam Proxy"
+    motion_level = nil
     Logger.debug "[#{camera_exid}] [snapshot_success]"
 
-    motion_level =
-      case previous_image = ConCache.get(:cache, camera_exid) do
-        %{} ->
-          Logger.debug "Going to calculate MD"
-          ml = EvercamMedia.MotionDetection.Lib.compare(image,previous_image[:image])
-          Logger.debug "calculated motion level is #{ml}"
-          ml
-        _ ->
-          Logger.debug "No previous image found in the cache"
-          nil
-      end
+    case Util.is_jpeg_strict(image) do
+      true ->
+        case previous_image = ConCache.get(:cache, camera_exid) do
+          %{} ->
+            Logger.debug "[#{camera_exid}] [motion_detection] [calculating]"
+            ml = MotionDetection.Lib.compare(image, previous_image[:image])
+            Logger.debug "[#{camera_exid}] [motion_detection] [calculated] [#{ml}]"
+            ml
+          _ ->
+            Logger.debug "[#{camera_exid}] [motion_detection] [skipped] [no_image]"
+            nil
+        end
+      _ ->
+        Logger.info "[#{camera_exid}] [motion_detection] [skipped] [invalid_image]"
+    end
 
     spawn fn ->
       try do
