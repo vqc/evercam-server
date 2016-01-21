@@ -162,6 +162,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
     if update_thumbnail? && stale_thumbnail?(camera.thumbnail_url, timestamp) do
       update_thumbnail(camera, timestamp)
+      invalidate_camera_cache(camera)
     end
 
     camera
