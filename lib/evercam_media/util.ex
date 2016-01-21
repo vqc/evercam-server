@@ -30,9 +30,9 @@ defmodule EvercamMedia.Util do
     String.split(message, "|")
   end
 
-  def broadcast_snapshot(camera_id, image, timestamp) do
+  def broadcast_snapshot(camera_exid, image, timestamp) do
     EvercamMedia.Endpoint.broadcast(
-      "cameras:#{camera_id}",
+      "cameras:#{camera_exid}",
       "snapshot-taken",
       %{image: Base.encode64(image), timestamp: timestamp}
     )

@@ -30,12 +30,12 @@ defmodule EvercamMedia.StreamController do
     |> redirect(external: "#{Application.get_env(:evercam_media, :hls_url)}/hls/#{params["camera_id"]}/#{params["filename"]}")
   end
 
-  defp request_stream(camera_id, token, command) do
+  defp request_stream(camera_exid, token, command) do
     try do
       [username, password, rtsp_url, _] = Util.decode_request_token(token)
-      camera = Repo.one! Camera.by_exid(camera_id)
+      camera = Camera.get(camera_exid)
       check_auth(camera, username, password)
-      stream(camera_id, rtsp_url, token, command)
+      stream(camera_exid, rtsp_url, token, command)
       200
     rescue
       error ->
@@ -51,18 +51,18 @@ defmodule EvercamMedia.StreamController do
     end
   end
 
-  defp stream(camera_id, rtsp_url, token, :check) do
+  defp stream(camera_exid, rtsp_url, token, :check) do
     cmd = Porcelain.shell("ps -ef | grep ffmpeg | grep #{rtsp_url} | grep -v grep | awk '{print $2}'")
     pids = String.split cmd.out
     if length(pids) == 0 do
-      Porcelain.spawn_shell("ffmpeg -rtsp_transport tcp -i #{rtsp_url} -c copy -an -f flv rtmp://localhost:1935/live/#{camera_id}?token=#{token} &")
+      Porcelain.spawn_shell("ffmpeg -rtsp_transport tcp -i #{rtsp_url} -c copy -an -f flv rtmp://localhost:1935/live/#{camera_exid}?token=#{token} &")
     end
   end
 
-  defp stream(camera_id, rtsp_url, token, :kill) do
+  defp stream(camera_exid, rtsp_url, token, :kill) do
     cmd = Porcelain.shell("ps -ef | grep ffmpeg | grep #{rtsp_url} | grep -v grep | awk '{print $2}'")
     pids = String.split cmd.out
     Enum.each pids, &Porcelain.shell("kill -9 #{&1}")
-    Porcelain.spawn_shell("ffmpeg -rtsp_transport tcp -i #{rtsp_url} -c copy -an -f flv rtmp://localhost:1935/live/#{camera_id}?token=#{token} &")
+    Porcelain.spawn_shell("ffmpeg -rtsp_transport tcp -i #{rtsp_url} -c copy -an -f flv rtmp://localhost:1935/live/#{camera_exid}?token=#{token} &")
   end
 end
