@@ -11,7 +11,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.StreamerSupervisor
   import EvercamMedia.Schedule
-  import Camera
+  import CloudRecording
   require Logger
 
   ################

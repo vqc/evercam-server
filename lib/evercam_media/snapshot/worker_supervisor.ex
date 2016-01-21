@@ -80,12 +80,12 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
           camera_id: camera.id,
           camera_exid: camera.exid,
           vendor_exid: Camera.vendor_exid(camera),
-          schedule: Camera.schedule(camera.cloud_recordings),
+          schedule: CloudRecording.schedule(camera.cloud_recordings),
           timezone: camera.timezone,
           url: url,
           auth: Camera.auth(camera),
-          sleep: Camera.sleep(camera.cloud_recordings),
-          initial_sleep: Camera.initial_sleep(camera.cloud_recordings)
+          sleep: CloudRecording.sleep(camera.cloud_recordings),
+          initial_sleep: CloudRecording.initial_sleep(camera.cloud_recordings)
         }
       }
     }
