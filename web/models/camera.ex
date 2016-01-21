@@ -1,6 +1,8 @@
 defmodule Camera do
   use Ecto.Model
   import Ecto.Changeset
+  import Ecto.Query
+  alias EvercamMedia.Repo
 
   @required_fields ~w(exid name owner_id config is_public is_online_email_owner_notification)
   @optional_fields ~w(timezone thumbnail_url is_online last_polled_at last_online_at updated_at created_at)
@@ -8,7 +10,7 @@ defmodule Camera do
   schema "cameras" do
     belongs_to :owner, User, foreign_key: :owner_id
     belongs_to :vendor_model, VendorModel, foreign_key: :model_id
-    has_many :camera_shares, CameraShare
+    has_many :shares, CameraShare
     has_many :snapshots, Snapshot
     has_many :apps, App
     has_one :cloud_recordings, CloudRecording
@@ -28,54 +30,35 @@ defmodule Camera do
   end
 
   def get_all do
-    EvercamMedia.Repo.all from c in Camera,
-    full_join: vm in assoc(c, :vendor_model),
-    full_join: v in assoc(vm, :vendor),
-    preload: :cloud_recordings,
-    preload: :vendor_model,
-    preload: [vendor_model: :vendor]
+    Camera
+    |> join(:full, [c], vm in assoc(c, :vendor_model))
+    |> join(:full, [c, vm], v in assoc(vm, :vendor))
+    |> preload(:cloud_recordings)
+    |> preload(:vendor_model)
+    |> preload([vendor_model: :vendor])
+    |> Repo.all
   end
 
-  def get_cam(camera_exid) do
-    ConCache.get_or_store(:camera, camera_exid, fn() ->
-      camera_exid
-      |> Camera.by_exid
-      |> EvercamMedia.Repo.one!
+  def get_cam(exid) do
+    ConCache.get_or_store(:camera, exid, fn() ->
+      Camera.by_exid(exid)
+      |> Repo.one
     end)
   end
 
-  def by_exid(camera_id) do
-    from cam in Camera,
-    where: cam.exid == ^camera_id,
-    select: cam
+  def by_exid(exid) do
+    Camera
+    |> where([cam], cam.exid == ^exid)
+    |> select([cam], cam)
   end
 
-  def by_exid_with_vendor(camera_id) do
-    from cam in Camera,
-    where: cam.exid == ^camera_id,
-    select: cam,
-    preload: :cloud_recordings,
-    preload: :vendor_model,
-    preload: [vendor_model: :vendor]
-  end
-
-  def by_exid_with_owner(camera_id) do
-    from cam in Camera,
-    where: cam.exid == ^camera_id,
-    select: cam,
-    preload: :owner
-  end
-
-  def by_id_with_owner(camera_id) do
-    from cam in Camera,
-    where: cam.id == ^camera_id,
-    select: cam,
-    preload: :owner
-  end
-
-  def limit(count) do
-    from cam in Camera,
-    limit: ^count
+  def by_exid_with_vendor(exid) do
+    Camera
+    |> where([cam], cam.exid == ^exid)
+    |> select([cam], cam)
+    |> preload(:cloud_recordings)
+    |> preload(:vendor_model)
+    |> preload([vendor_model: :vendor])
   end
 
   def external_url(camera, type \\ "http") do
@@ -129,8 +112,8 @@ defmodule Camera do
     end
   end
 
-  def get_camera_info(camera_id) do
-    camera = EvercamMedia.Repo.one! by_exid(camera_id)
+  def get_camera_info(exid) do
+    camera = Camera.get(exid)
     %{
       "url" => external_url(camera),
       "auth" => auth(camera)
