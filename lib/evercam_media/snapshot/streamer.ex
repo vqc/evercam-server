@@ -6,6 +6,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
   use Calendar
   use GenServer
   alias EvercamMedia.Util
+  alias EvercamMedia.Repo
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.StreamerSupervisor
@@ -33,10 +34,12 @@ defmodule EvercamMedia.Snapshot.Streamer do
   Initialize the camera streamer
   """
   def init(camera_exid) do
+  alias EvercamMedia.Repo
     camera =
       camera_exid
-      |> Camera.by_exid_with_vendor
-      |> EvercamMedia.Repo.one!
+      |> Camera.get
+      |> Repo.preload(:cloud_recordings)
+      |> Repo.preload([vendor_model: :vendor])
 
     Task.start_link(fn -> loop(camera) end)
     {:ok, camera_exid}

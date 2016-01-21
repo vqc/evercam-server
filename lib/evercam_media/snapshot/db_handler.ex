@@ -145,7 +145,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def update_camera_status(camera_exid, timestamp, status, update_thumbnail? \\ false) do
-    camera = Camera.get_cam(camera_exid)
+    camera = Camera.get(camera_exid)
 
     if camera.is_online != status do
       {:ok, datetime} =

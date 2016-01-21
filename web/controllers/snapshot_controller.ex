@@ -109,7 +109,7 @@ defmodule EvercamMedia.SnapshotController do
   ####################
 
   defp construct_args(camera_exid, store_snapshot, notes) do
-    camera = Camera.get_cam(camera_exid)
+    camera = Camera.get(camera_exid)
     camera = Repo.preload(camera, [vendor_model: :vendor])
     timestamp = DateTime.Format.unix(DateTime.now_utc)
 

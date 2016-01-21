@@ -7,9 +7,15 @@ defmodule EvercamMedia.CameraController do
     try do
       [_, _, _, _, _] = Util.decode_request_token(token)
       Logger.info "Camera update for #{exid}"
-      camera = Camera.by_exid_with_vendor(exid) |> Repo.one
-      ConCache.put(:camera, camera.exid)
-      worker = exid |> String.to_atom |> Process.whereis
+      camera =
+        exid
+        |> Camera.get
+        |> Repo.preload(:cloud_recordings)
+        |> Repo.preload([vendor_model: :vendor])
+      worker =
+        exid
+        |> String.to_atom
+        |> Process.whereis
 
       case worker do
         nil ->
@@ -17,13 +23,11 @@ defmodule EvercamMedia.CameraController do
         _ ->
           update_worker(worker, camera)
       end
-      conn
-      |> send_resp(200, "Camera update request received.")
+      send_resp(conn, 200, "Camera update request received.")
     rescue
       _error ->
         Logger.info "Camera update for #{exid} requested with invalid token."
-        conn
-        |> send_resp(500, "Error updating camera #{exid}")
+        send_resp(conn, 500, "Error updating camera #{exid}")
     end
   end
 

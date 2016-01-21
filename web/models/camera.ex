@@ -39,26 +39,16 @@ defmodule Camera do
     |> Repo.all
   end
 
-  def get_cam(exid) do
+  def get(exid) do
     ConCache.get_or_store(:camera, exid, fn() ->
       Camera.by_exid(exid)
-      |> Repo.one
     end)
   end
 
   def by_exid(exid) do
     Camera
     |> where([cam], cam.exid == ^exid)
-    |> select([cam], cam)
-  end
-
-  def by_exid_with_vendor(exid) do
-    Camera
-    |> where([cam], cam.exid == ^exid)
-    |> select([cam], cam)
-    |> preload(:cloud_recordings)
-    |> preload(:vendor_model)
-    |> preload([vendor_model: :vendor])
+    |> Repo.one
   end
 
   def external_url(camera, type \\ "http") do
