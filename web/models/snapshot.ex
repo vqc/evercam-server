@@ -1,9 +1,9 @@
 defmodule Snapshot do
+  use EvercamMedia.Web, :model
   alias Calendar.Date
   alias Calendar.DateTime
   alias Calendar.Strftime
   alias EvercamMedia.SnapshotRepo
-  use Ecto.Model
 
   @required_fields ~w(snapshot_id camera_id)
   @optional_fields ~w(notes motionlevel created_at is_public)

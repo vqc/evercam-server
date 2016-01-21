@@ -1,5 +1,5 @@
 defmodule VendorModel do
-  use Ecto.Model
+  use EvercamMedia.Web, :model
 
   schema "vendor_models" do
     belongs_to :vendor, Vendor

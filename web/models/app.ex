@@ -1,5 +1,5 @@
 defmodule App do
-  use Ecto.Model
+  use EvercamMedia.Web, :model
 
   schema "apps" do
     belongs_to :camera, Camera, foreign_key: :camera_id

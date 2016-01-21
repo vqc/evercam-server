@@ -1,5 +1,5 @@
 defmodule CameraShare do
-  use Ecto.Model
+  use EvercamMedia.Web, :model
 
   schema "camera_shares" do
     belongs_to :camera, Camera

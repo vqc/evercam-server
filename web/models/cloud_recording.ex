@@ -1,5 +1,5 @@
 defmodule CloudRecording do
-  use Ecto.Model
+  use EvercamMedia.Web, :model
   import Ecto.Query
   alias EvercamMedia.Repo
 

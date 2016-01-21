@@ -1,5 +1,5 @@
 defmodule Camera do
-  use Ecto.Model
+  use EvercamMedia.Web, :model
   import Ecto.Changeset
   import Ecto.Query
   alias EvercamMedia.Repo

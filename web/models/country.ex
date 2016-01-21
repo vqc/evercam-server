@@ -1,15 +1,15 @@
 defmodule Country do
   use EvercamMedia.Web, :model
 
+  @required_fields ~w(name iso3166_a2)
+  @optional_fields ~w()
+
   schema "countries" do
     has_many :users, User
 
     field :iso3166_a2, :string
     field :name, :string
   end
-
-  @required_fields ~w(name iso3166_a2)
-  @optional_fields ~w()
 
   def changeset(model, params \\ :empty) do
     model

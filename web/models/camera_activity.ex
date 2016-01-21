@@ -1,5 +1,5 @@
 defmodule CameraActivity do
-  use Ecto.Model
+  use EvercamMedia.Web, :model
 
   @required_fields ~w(camera_id)
   @optional_fields ~w(action done_at)
