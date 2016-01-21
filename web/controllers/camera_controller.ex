@@ -7,6 +7,7 @@ defmodule EvercamMedia.CameraController do
     try do
       [_, _, _, _, _] = Util.decode_request_token(token)
       Logger.info "Camera update for #{exid}"
+      ConCache.delete(:camera, exid)
       camera =
         exid
         |> Camera.get
