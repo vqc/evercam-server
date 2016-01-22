@@ -1,3 +1,4 @@
+#include <setjmp.h>
 #include <stdio.h>
 #include <strings.h>
 #include <unistd.h>
@@ -8,6 +9,20 @@
 #define MAXBUFLEN 1024
 #define UNUSED(x) (void)(x)
 #define error(msg) enif_make_tuple2(env,enif_make_atom(env,"error"),enif_make_string(env,msg,ERL_NIF_LATIN1))
+
+struct error_mgr {
+	struct jpeg_error_mgr pub;
+	jmp_buf setjmp_buffer;
+};
+
+typedef struct error_mgr * error_ptr;
+
+void error_exit (j_common_ptr cinfo)
+{
+	error_ptr err = (error_ptr) cinfo->err;
+	(*cinfo->err->output_message) (cinfo);
+	longjmp(err->setjmp_buffer, 1);
+}
 
 static ERL_NIF_TERM _test(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
@@ -25,12 +40,18 @@ static ERL_NIF_TERM _load(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]){
 
 	ErlNifBinary in,out;
 	struct jpeg_decompress_struct cinfo;
-	struct jpeg_error_mgr jerr;
+	struct error_mgr jerr;
 	unsigned int width, height;
 
 	enif_inspect_binary(env,argv[0],&in);
 
-	cinfo.err = jpeg_std_error(&jerr);
+	cinfo.err = jpeg_std_error(&jerr.pub);
+	jerr.pub.error_exit = error_exit;
+	if (setjmp(jerr.setjmp_buffer)) {
+		jpeg_destroy_decompress(&cinfo);
+		return -1;
+	}
+
 	jpeg_create_decompress(&cinfo);
 
 	jpeg_mem_src(&cinfo, in.data, in.size);
