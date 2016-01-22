@@ -27,7 +27,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     motion_level = nil
     Logger.debug "[#{camera_exid}] [snapshot_success]"
 
-    case Util.is_jpeg_strict(camera_exid, image) do
+    case Util.is_jpeg_strict(camera_exid, timestamp, image) do
       true ->
         case previous_image = ConCache.get(:cache, camera_exid) do
           %{} ->

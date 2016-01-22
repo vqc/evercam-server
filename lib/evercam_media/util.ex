@@ -19,11 +19,11 @@ defmodule EvercamMedia.Util do
     end
   end
 
-  def is_jpeg_strict(camera_exid, data) do
+  def is_jpeg_strict(camera_exid, timestamp, data) do
     try do
       size_without_magic = byte_size(data) - 5
       <<0xFF, 0xD8, _data :: binary-size(size_without_magic), ending :: binary-size(3)>> = data
-      Logger.info "[#{camera_exid}] [jpeg_check] [#{inspect ending}]"
+      Logger.info "[#{camera_exid}] [jpeg_check] [#{inspect ending}] [#{timestamp}]"
       true
     rescue
       _ -> false
