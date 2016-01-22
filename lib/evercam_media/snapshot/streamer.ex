@@ -41,11 +41,11 @@ defmodule EvercamMedia.Snapshot.Streamer do
       |> Repo.preload(:cloud_recordings)
       |> Repo.preload([vendor_model: :vendor])
 
-    Task.start_link(fn -> loop(camera) end)
-    {:ok, camera_exid}
+    :erlang.send_after(1000, self, :tick)
+    {:ok, camera}
   end
 
-  def loop(camera) do
+  def handle_info(_msg, camera) do
     cond do
       length(subscribers(camera.exid)) == 0 ->
         Logger.debug "[#{camera.exid}] Shutting down streamer, no subscribers"
@@ -57,9 +57,8 @@ defmodule EvercamMedia.Snapshot.Streamer do
         Logger.debug "[#{camera.exid}] Streaming ..."
         spawn fn -> stream(camera) end
     end
-
-    :timer.sleep 1000
-    loop(camera)
+    :erlang.send_after(1000, self, :tick)
+    {:noreply, camera}
   end
 
   def stream(camera) do
