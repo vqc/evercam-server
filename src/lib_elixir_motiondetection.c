@@ -17,10 +17,6 @@ static ERL_NIF_TERM _test(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	char path[MAXBUFLEN];
 
 	enif_get_string(env, argv[0], path, 1024, ERL_NIF_LATIN1);
-/*
-	strcpy(result, "Hello World! ");
-	strcat(result, path);
-*/
 	return enif_make_string(env, result, ERL_NIF_LATIN1);
 }
 
