@@ -26,17 +26,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     Logger.debug "[#{camera_exid}] [snapshot_success]"
 
     notes = "Evercam Proxy"
-    motion_level =
-      case previous_image = ConCache.get(:cache, camera_exid) do
-        %{} ->
-          Logger.debug "[#{camera_exid}] [motion_detection] [calculating]"
-          ml = MotionDetection.Lib.compare(image, previous_image[:image])
-          Logger.debug "[#{camera_exid}] [motion_detection] [calculated] [#{ml}]"
-          ml
-        _ ->
-          Logger.debug "[#{camera_exid}] [motion_detection] [skipped] [no_image]"
-          nil
-      end
+    cached_response = ConCache.get(:cache, camera_exid)
+    motion_level = calculate_motion_level(camera_exid, image, cached_response)
 
     spawn fn ->
       try do
@@ -59,6 +50,20 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def handle_event(_, state) do
     {:ok, state}
+  end
+
+  def calculate_motion_level(camera_exid, image_1, nil), do: nil
+  def calculate_motion_level(camera_exid, image_1, %{image: image_2}) do
+    try do
+      Logger.debug "[#{camera_exid}] [motion_detection] [calculating]"
+      level = MotionDetection.Lib.compare(image_1, image_2)
+      Logger.debug "[#{camera_exid}] [motion_detection] [calculated] [#{level}]"
+      level
+    rescue
+      error ->
+        Util.error_handler(error)
+        nil
+    end
   end
 
   def parse_snapshot_error(camera_exid, timestamp, error) do
