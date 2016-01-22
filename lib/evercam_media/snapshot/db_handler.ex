@@ -52,7 +52,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     {:ok, state}
   end
 
-  def calculate_motion_level(camera_exid, image_1, nil), do: nil
+  def calculate_motion_level(_camera_exid, _image_1, nil), do: nil
   def calculate_motion_level(camera_exid, image_1, %{image: image_2}) do
     try do
       Logger.debug "[#{camera_exid}] [motion_detection] [calculating]"
