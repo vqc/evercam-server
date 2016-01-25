@@ -1,5 +1,6 @@
 defmodule EvercamMedia.CameraController do
   use EvercamMedia.Web, :controller
+  alias EvercamMedia.Snapshot.StreamerSupervisor
   alias EvercamMedia.Snapshot.WorkerSupervisor
   alias EvercamMedia.Snapshot.Worker
 
@@ -34,6 +35,7 @@ defmodule EvercamMedia.CameraController do
     case WorkerSupervisor.get_config(camera) do
       {:ok, settings} ->
         Logger.info "Updating worker for #{settings.config.camera_exid}"
+        StreamerSupervisor.restart_streamer(camera.exid)
         Worker.update_config(worker, settings)
       {:error, _message} ->
         Logger.info "Skipping camera worker update as the host is invalid"

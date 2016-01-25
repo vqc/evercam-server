@@ -37,6 +37,14 @@ defmodule EvercamMedia.Snapshot.StreamerSupervisor do
   end
 
   @doc """
+  Restart streamer process
+  """
+  def restart_streamer(camera_exid) do
+    stop_streamer(camera_exid)
+    start_streamer(camera_exid)
+  end
+
+  @doc """
   Find streamer process
   """
   def find_streamer(camera_exid) do
