@@ -13,15 +13,15 @@ defmodule EvercamMedia.AccessTokenTest do
 
     token = AccessToken.active_token_for(user.id)
 
-    assert token.request == active_token.request 
+    assert token.request == active_token.request
   end
 
   defp date_in_future do
-    {:ok, future_date_time } = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.advance(3600) 
+    {:ok, future_date_time } = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.advance(3600)
     {:ok, ecto_date } = Calendar.DateTime.to_erl(future_date_time) |> Ecto.DateTime.cast
     ecto_date
   end
-  
+
   def date_in_past do
     past_date_time = Calendar.DateTime.from_erl!({{2014,10,4}, {23,44,32}}, "UTC")
     {:ok, ecto_date } = Calendar.DateTime.to_erl(past_date_time) |> Ecto.DateTime.cast

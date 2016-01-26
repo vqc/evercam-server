@@ -59,4 +59,3 @@ defmodule EvercamMedia.ModelCase do
     model.__struct__.changeset(model, data).errors
   end
 end
-
