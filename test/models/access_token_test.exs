@@ -1,4 +1,4 @@
-defmodule EvercamMedia.AccessTokenTest do
+defmodule AccessTokenTest do
   use EvercamMedia.ModelCase
 
   test "active_token_for returns only the active token for a user" do
