@@ -55,10 +55,6 @@ config :exq,
   namespace: "sidekiq",
   queues: ["to_elixir"]
 
-config :quantum, cron: [
-  "* * * * * EvercamMedia.Snapshot.Cleanup.init"
-]
-
 config :evercam_media, EvercamMedia.Repo,
   adapter: Ecto.Adapters.Postgres,
   extensions: [{EvercamMedia.Types.JSON.Extension, library: Poison}],
