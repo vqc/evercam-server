@@ -31,7 +31,7 @@ defmodule EvercamMedia.Snapshot.S3 do
   def delete(camera_exid, prefix_list) do
     Enum.each(prefix_list, fn(prefix) ->
       Logger.info "[#{camera_exid}] [snapshot_delete_s3] [#{prefix}]"
-      Porcelain.shell("mc rm -r --fake --force s3://#{System.get_env("AWS_BUCKET")}/#{camera_exid}/snapshots/#{prefix}")
+      Porcelain.shell("mc rm -r --force s3://#{System.get_env("AWS_BUCKET")}/#{camera_exid}/snapshots/#{prefix}")
     end)
   end
 
