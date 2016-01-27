@@ -28,14 +28,12 @@ defmodule EvercamMedia.Snapshot.S3 do
     HTTPoison.put(url, image, headers)
   end
 
-  def delete(snapshot, camera_exid) do
-    timestamp =
-      snapshot.created_at
-      |> Ecto.DateTime.to_erl
-      |> Calendar.DateTime.from_erl!("UTC")
-      |> Calendar.DateTime.Format.unix
-    file_path = "#{camera_exid}/snapshots/#{timestamp}.jpg"
-    s3_bucket = "#{System.get_env("AWS_BUCKET")}"
+  def delete(camera_exid, prefix_list) do
+    Enum.each(prefix_list, fn(prefix) ->
+      Logger.info "[#{camera_exid}] [snapshot_delete_s3] [#{prefix}]"
+      Porcelain.shell("s4cmd del s3://#{System.get_env("AWS_BUCKET")}/#{camera_exid}/snapshots/#{prefix}* --dry-run")
+    end)
+  end
 
   def list_prefixes(first, last) do
     build_prefix_list(first, first, last)
