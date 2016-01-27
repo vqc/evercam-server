@@ -39,7 +39,7 @@
   "plug": {:hex, :plug, "1.1.0"},
   "poison": {:hex, :poison, "1.5.2"},
   "poolboy": {:hex, :poolboy, "1.5.1"},
-  "porcelain": {:hex, :porcelain, "2.0.0"},
+  "porcelain": {:hex, :porcelain, "2.0.1"},
   "postgrex": {:hex, :postgrex, "0.10.0"},
   "providers": {:hex, :providers, "1.4.1"},
   "quantum": {:hex, :quantum, "1.6.1"},
