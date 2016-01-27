@@ -27,10 +27,10 @@ config :evercam_media, EvercamMedia.SnapshotRepo,
   extensions: [{EvercamMedia.Types.JSON.Extension, library: Poison}],
   username: "postgres",
   password: "postgres",
-  database: System.get_env["db"] || "evercam_tst",
+  database: "evercam_tst",
   pool: Ecto.Adapters.SQL.Sandbox
 
-config :evercam_media, mailgun_config: [ 
+config :evercam_media, mailgun_config: [
     domain: "some_domain",
     key: "some_key",
     mode: :test,
