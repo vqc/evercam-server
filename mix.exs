@@ -63,7 +63,7 @@ defmodule EvercamMedia.Mixfile do
      {:phoenix_html, "~> 2.3"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:cowboy, "~> 1.0"},
-     {:ex_aws, "~> 0.4.10"},
+     {:ex_aws, github: "CargoSense/ex_aws"},
      {:quantum, ">= 1.6.1"},
      {:con_cache, "~> 0.9.0"},
      {:httpotion, "~> 2.0"},
