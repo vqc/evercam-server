@@ -50,6 +50,7 @@ defmodule Snapshot do
       Snapshot
       |> where([snap], snap.snapshot_id > ^"#{camera_id}_#{begin_timestamp}")
       |> where([snap], snap.snapshot_id < ^"#{camera_id}_#{end_timestamp}")
+      |> where([snap], snap.notes == "Evercam Proxy")
       |> limit(1)
       |> SnapshotRepo.one
     kept_snapshots =
