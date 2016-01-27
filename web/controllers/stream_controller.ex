@@ -55,7 +55,7 @@ defmodule EvercamMedia.StreamController do
     cmd = Porcelain.shell("ps -ef | grep ffmpeg | grep #{rtsp_url} | grep -v grep | awk '{print $2}'")
     pids = String.split cmd.out
     if length(pids) == 0 do
-      Porcelain.spawn_shell("ffmpeg -rtsp_transport tcp -i #{rtsp_url} -c copy -an -f flv rtmp://localhost:1935/live/#{camera_exid}?token=#{token} &")
+      construct_ffmpeg_command(camera_exid, rtsp_url, token) |> Porcelain.spawn_shell
     end
   end
 
@@ -63,6 +63,10 @@ defmodule EvercamMedia.StreamController do
     cmd = Porcelain.shell("ps -ef | grep ffmpeg | grep #{rtsp_url} | grep -v grep | awk '{print $2}'")
     pids = String.split cmd.out
     Enum.each pids, &Porcelain.shell("kill -9 #{&1}")
-    Porcelain.spawn_shell("ffmpeg -rtsp_transport tcp -i #{rtsp_url} -c copy -an -f flv rtmp://localhost:1935/live/#{camera_exid}?token=#{token} &")
+    construct_ffmpeg_command(camera_exid, rtsp_url, token) |> Porcelain.spawn_shell
+  end
+
+  defp construct_ffmpeg_command(camera_exid, rtsp_url, token) do
+    "ffmpeg -rtsp_transport tcp -i #{rtsp_url} -f lavfi -i aevalsrc=0 -vcodec copy -acodec aac -map 0:0 -map 1:0 -shortest -strict experimental -f flv rtmp://localhost:1935/live/#{camera_exid}?token=#{token} &"
   end
 end
