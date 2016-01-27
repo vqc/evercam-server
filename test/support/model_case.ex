@@ -17,6 +17,7 @@ defmodule EvercamMedia.ModelCase do
   using do
     quote do
       alias EvercamMedia.Repo
+      alias EvercamMedia.SnapshotRepo
       import Ecto.Model
       import Ecto.Query, only: [from: 2]
     end
@@ -25,9 +26,11 @@ defmodule EvercamMedia.ModelCase do
   setup do
     # Wrap this case in a transaction
     Ecto.Adapters.SQL.begin_test_transaction(EvercamMedia.Repo)
+    Ecto.Adapters.SQL.begin_test_transaction(EvercamMedia.SnapshotRepo)
 
     on_exit fn ->
       Ecto.Adapters.SQL.rollback_test_transaction(EvercamMedia.Repo)
+      Ecto.Adapters.SQL.rollback_test_transaction(EvercamMedia.SnapshotRepo)
     end
 
     :ok
@@ -59,4 +62,3 @@ defmodule EvercamMedia.ModelCase do
     model.__struct__.changeset(model, data).errors
   end
 end
-

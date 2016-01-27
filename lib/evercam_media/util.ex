@@ -1,4 +1,7 @@
 defmodule EvercamMedia.Util do
+  use Calendar
+  alias Calendar.DateTime
+  alias Calendar.NaiveDateTime
   require Logger
 
   @doc ~S"""
@@ -67,7 +70,12 @@ defmodule EvercamMedia.Util do
     "#{snapshot_timestamp}000"
   end
 
-  def format_snapshot_timestamp(<<snapshot_timestamp::bytes-size(17)>>) do
+  def format_snapshot_timestamp(<<snapshot_timestamp::bytes-size(17), rest :: binary>>) do
     snapshot_timestamp
+  end
+
+  def snapshot_timestamp_to_unix(timestamp) do
+    {:ok, timestamp, _} = NaiveDateTime.Parse.asn1_generalized timestamp
+    timestamp |> NaiveDateTime.to_date_time_utc |> DateTime.Format.unix
   end
 end

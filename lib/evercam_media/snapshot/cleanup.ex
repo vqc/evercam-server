@@ -1,6 +1,7 @@
 defmodule EvercamMedia.Snapshot.Cleanup do
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Snapshot.S3
+  alias EvercamMedia.Util
   require Logger
 
   def init do
@@ -11,13 +12,39 @@ defmodule EvercamMedia.Snapshot.Cleanup do
   def run(cloud_recording) do
     cloud_recording
     |> Snapshot.expired
-    |> Enum.map(&delete(&1, cloud_recording.camera.exid))
+    |> prepare_lists(cloud_recording)
+    |> cleanup(cloud_recording.camera)
   end
 
-  def delete(snapshot, camera_exid) do
-    Logger.info "snapshot #{snapshot.snapshot_id} was deleted"
+  def cleanup(list, camera) do
+    Enum.each(list, fn(pair) ->
+      delete(camera, pair)
+    end)
+  end
 
-    S3.delete(snapshot, camera_exid)
-    SnapshotRepo.delete(snapshot)
+  def delete(camera, {range, prefix_list}) do
+    Logger.info "[#{camera.exid}] [snapshot_delete_db] [#{inspect range}]"
+    S3.delete(camera.exid, prefix_list)
+    Snapshot.delete_by_range(camera.id, range)
+  end
+
+  defp prepare_lists([[], []], cloud_recording), do: []
+  defp prepare_lists(ranges, cloud_recording) do
+    s3_prefixes = ranges |> convert_timestamps |> construct_prefix_lists
+    Enum.zip(ranges, s3_prefixes)
+  end
+
+  defp convert_timestamps(ranges) do
+    Enum.map(ranges, fn(chunk) ->
+      Enum.map(chunk, fn(timestamp) ->
+        Util.snapshot_timestamp_to_unix(timestamp)
+      end)
+    end)
+  end
+
+  defp construct_prefix_lists(ranges) do
+    Enum.map(ranges, fn([first, last]) ->
+      S3.list_prefixes(first, last)
+    end)
   end
 end
