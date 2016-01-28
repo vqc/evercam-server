@@ -1,6 +1,7 @@
 defmodule User do
   use EvercamMedia.Web, :model
   import Ecto.Query
+  alias EvercamMedia.Repo
 
   @required_fields ~w(username password firstname lastname email country_id)
   @optional_fields ~w(api_id api_key confirmed_at)
@@ -18,6 +19,8 @@ defmodule User do
     field :email, :string
     field :api_id, :string
     field :api_key, :string
+    field :billing_id, :string
+    field :token_expires_at, Ecto.DateTime
 
     field :confirmed_at, Ecto.DateTime
     field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
@@ -28,6 +31,7 @@ defmodule User do
     User
     |> where([u], u.api_id == ^api_id)
     |> where([u], u.api_key == ^api_key)
+    |> Repo.one
   end
 
   def changeset(model, params \\ :empty) do
