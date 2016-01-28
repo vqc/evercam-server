@@ -8,6 +8,7 @@ defmodule AccessToken do
     belongs_to :user, User, foreign_key: :user_id
     belongs_to :client, Client, foreign_key: :client_id
     belongs_to :grantor, User, foreign_key: :grantor_id
+    has_many :rights, AccessRight
 
     field :is_revoked, :boolean, null: false
     field :expires_at, Ecto.DateTime
