@@ -8,7 +8,7 @@ defmodule EvercamMedia.Auth do
           {:valid, user}
       end
     else
-      :invalid
+      :valid
     end
   end
 
