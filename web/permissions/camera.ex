@@ -31,6 +31,7 @@ defmodule Permissions.Camera do
     is_public?(camera) or is_owner?(user, camera) or has_right?(right, user, camera)
   end
 
+  defp has_right?(_right, nil, _camera), do: false
   defp has_right?(right, user, camera) do
     token = AccessToken.active_token_for(user.id)
     rights =
@@ -45,6 +46,7 @@ defmodule Permissions.Camera do
     is_list(rights) and length(rights) > 0
   end
 
+  defp is_owner?(nil, _camera), do: false
   defp is_owner?(user, camera) do
     user.id == camera.owner_id
   end
