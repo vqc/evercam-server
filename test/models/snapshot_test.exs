@@ -5,6 +5,7 @@ defmodule SnapshotTest do
   alias Calendar.DateTime
   alias Calendar.Strftime
   alias Calendar.NaiveDateTime
+
   setup do
     seconds_to_8_days_ago = (8) * (24 * 60 * 60) * (-1)
     expiry_day =

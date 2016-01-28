@@ -10,7 +10,6 @@ defmodule EvercamMedia.ONVIFControllerAnalyticsTest do
     assert analytics_module_support == "true"
   end
 
-
   test "GET /v1/onvif/v20/Analytics/GetAnalyticsModules" do
     conn = get conn(), "/v1/onvif/v20/Analytics/GetAnalyticsModules?#{@access_params}&ConfigurationToken=VideoAnalyticsToken"
     [cell_motion_engine | _] = json_response(conn, 200) |> Map.get("AnalyticsModule")
