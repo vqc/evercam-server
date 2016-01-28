@@ -6,9 +6,13 @@ defmodule CameraActivity do
 
   schema "camera_activities" do
     belongs_to :camera, Camera
+    belongs_to :access_token, AccessToken
 
     field :action, :string
     field :done_at, Ecto.DateTime, default: Ecto.DateTime.utc
+    field :extra, EvercamMedia.Types.JSON
+    field :camera_exid, :string
+    field :name, :string
   end
 
   def changeset(camera_activity, params \\ :empty) do
