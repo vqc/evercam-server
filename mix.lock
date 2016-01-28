@@ -42,7 +42,7 @@
   "porcelain": {:hex, :porcelain, "2.0.1"},
   "postgrex": {:hex, :postgrex, "0.10.0"},
   "providers": {:hex, :providers, "1.4.1"},
-  "quantum": {:hex, :quantum, "1.6.1"},
+  "quantum": {:git, "https://github.com/c-rack/quantum-elixir.git", "3be8a1577daa1b2b8884df41b9307c6b12653e53", [branch: "issue-71"]},
   "ranch": {:hex, :ranch, "1.2.0"},
   "redix": {:hex, :redix, "0.3.4"},
   "relx": {:hex, :relx, "3.5.0"},
