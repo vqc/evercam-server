@@ -5,13 +5,18 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.S3
 
+  def show(conn, %{"id" => camera_exid, "api_id" => api_id, "api_key" => api_key}) do
+    [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], false)
+    show_render(conn, code, response)
+  end
+
   def show(conn, %{"id" => camera_exid, "token" => token}) do
-    [code, response] = snapshot(camera_exid, token, false)
+    [code, response] = snapshot_with_token(camera_exid, token, false)
     show_render(conn, code, response)
   end
 
   def create(conn, params) do
-    [code, response] = snapshot(params["id"], params["token"], true, params["notes"])
+    [code, response] = snapshot_with_token(params["id"], params["token"], true, params["notes"])
     create_render(conn, code, response, params["with_data"])
   end
 
@@ -82,9 +87,16 @@ defmodule EvercamMedia.SnapshotController do
   ## Fetch functions ##
   ######################
 
-  defp snapshot(camera_exid, _token, store_snapshot, notes \\ "Evercam Proxy") do
-    construct_args(camera_exid, store_snapshot, notes)
-    |> fetch_snapshot
+  defp snapshot_with_user(camera_exid, user, store_snapshot, notes \\ "") do
+    if Permissions.Camera.can_snapshot?(user, camera_exid) do
+      construct_args(camera_exid, store_snapshot, notes) |> fetch_snapshot
+    else
+      [403, %{message: "Forbidden"}]
+    end
+  end
+
+  defp snapshot_with_token(camera_exid, _token, store_snapshot, notes \\ "") do
+    construct_args(camera_exid, store_snapshot, notes) |> fetch_snapshot
   end
 
   defp fetch_snapshot(args, retry \\ 0) do
