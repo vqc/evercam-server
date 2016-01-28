@@ -1,4 +1,4 @@
-defmodule EvercamMedia.Snapshot.SchedulerTest do
+defmodule EvercamMedia.Snapshot.S3Test do
   use ExUnit.Case, async: true
   alias EvercamMedia.Snapshot.S3
 
