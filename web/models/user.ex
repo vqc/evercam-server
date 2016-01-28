@@ -27,7 +27,7 @@ defmodule User do
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
 
-  def find_by_api_keys(api_id, api_key) do
+  def get_by_api_keys(api_id, api_key) do
     User
     |> where([u], u.api_id == ^api_id)
     |> where([u], u.api_key == ^api_key)

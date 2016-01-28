@@ -7,7 +7,7 @@ defmodule EvercamMedia.AuthenticationPlugTest do
 
     assert conn.state == :sent
     assert conn.status == 401
-    assert Poison.decode!(conn.resp_body) == %{"error" => %{"message" => "Invalid API keys"}}
+    assert Poison.decode!(conn.resp_body) == %{"message" => "Invalid API keys"}
   end
 
   test "returns HTTP 200 if api_id and api_key query strings are valid" do

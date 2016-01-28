@@ -1,8 +1,6 @@
 defmodule EvercamMedia.AuthTest do
   use EvercamMedia.ModelCase
 
-  # EvercamMedia.Auth.validate/2
-
   setup do
     {:ok, country } = Repo.insert(%Country{name: "Whatever", iso3166_a2: "WHTEVR"})
     {:ok, user} = Repo.insert(%User{firstname: "Jake", lastname: "Doe",
@@ -12,8 +10,8 @@ defmodule EvercamMedia.AuthTest do
     { :ok, country: country, user: user }
   end
 
-  test "returns :valid if api_id and api_key are valid", context do
-    assert EvercamMedia.Auth.validate(context[:user].api_id, context[:user].api_key) == :valid
+  test "returns :valid & user if api_id and api_key are valid", context do
+    assert EvercamMedia.Auth.validate(context[:user].api_id, context[:user].api_key) == {:valid, context[:user]}
   end
 
   test "returns :invalid if api_id and api_key are invalid" do
