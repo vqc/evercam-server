@@ -57,7 +57,8 @@ config :exq,
 
 config :quantum, cron: [
   "* * * * * EvercamMedia.Snapshot.Cleanup.init"
-]
+  ],
+  default_overlap: false
 
 config :evercam_media, EvercamMedia.Repo,
   adapter: Ecto.Adapters.Postgres,
