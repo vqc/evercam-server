@@ -30,8 +30,7 @@ defmodule SnapshotTest do
         name: "My Camera",
         owner_id: user.id,
         is_public: false,
-        config: %{},
-        is_online_email_owner_notification: false})
+        config: %{}})
     cloud_recording = Repo.insert!(
       %CloudRecording{
         camera_id: camera.id,
