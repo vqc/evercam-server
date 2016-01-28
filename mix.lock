@@ -9,7 +9,7 @@
   "connection": {:hex, :connection, "1.0.2"},
   "cowboy": {:hex, :cowboy, "1.0.4"},
   "cowlib": {:hex, :cowlib, "1.0.2"},
-  "credo": {:git, "https://github.com/rrrene/credo.git", "20b09a80564c622d6abd0b5b3638d7d6212a5298", []},
+  "credo": {:git, "https://github.com/rrrene/credo.git", "4d1eec8d7a1242c5d16796e75b304ecca5c77199", []},
   "decimal": {:hex, :decimal, "1.1.1"},
   "dotenv": {:hex, :dotenv, "2.0.0"},
   "ecto": {:hex, :ecto, "1.1.1"},
