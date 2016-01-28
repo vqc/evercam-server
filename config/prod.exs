@@ -64,6 +64,11 @@ config :quantum,
     ]
   ]
 
+config :evercam_media, :mailgun,
+  domain: System.get_env("MAILGUN_DOMAIN"),
+  key: System.get_env("MAILGUN_KEY"),
+  mode: :prod
+
 config :evercam_media, EvercamMedia.Repo,
   adapter: Ecto.Adapters.Postgres,
   extensions: [{EvercamMedia.Types.JSON.Extension, library: Poison}],

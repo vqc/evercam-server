@@ -45,6 +45,12 @@ config :ex_aws, :s3,
   host: "s3-eu-west-1.amazonaws.com",
   region: "eu-west-1"
 
+config :evercam_media, :mailgun,
+  domain: "sandbox",
+  key: "sandbox",
+  mode: :test,
+  test_file_path: "tmp/mailgun.json"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"

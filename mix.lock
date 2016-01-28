@@ -28,7 +28,7 @@
   "idna": {:hex, :idna, "1.0.3"},
   "jsx": {:git, "git://github.com/talentdeficit/jsx.git", "3074d4865b3385a050badf7828ad31490d860df5", [ref: "master"]},
   "lhttpc": {:git, "git://github.com/talko/lhttpc", "2d01a5f9c7543b77bdd57f44c92e72801f46e423", [ref: "master"]},
-  "mailgun": {:git, "https://github.com/phanimahesh/mailgun.git", "92e699890feffa7c2f9dd2bf398042ea161bb72e", []},
+  "mailgun": {:git, "https://github.com/chrismccord/mailgun.git", "300fa086c69933d76d12c09d534ce73e5f98e2e9", []},
   "meck": {:git, "https://github.com/eproxus/meck.git", "796964c6e5578af27a4457f7ac56abcaebe200fe", [ref: "master"]},
   "mimerl": {:hex, :mimerl, "1.0.2"},
   "neotoma": {:hex, :neotoma, "1.7.3"},

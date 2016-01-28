@@ -80,7 +80,7 @@ defmodule EvercamMedia.Mixfile do
      {:uuid, github: "zyro/elixir-uuid", override: true},
      {:exrm, github: "bitwalker/exrm"},
      {:credo, github: "rrrene/credo", only: :dev},
-     {:mailgun, github: "phanimahesh/mailgun"}]
+     {:mailgun, github: "chrismccord/mailgun"}]
   end
 end
 
