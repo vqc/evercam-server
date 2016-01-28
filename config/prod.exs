@@ -56,9 +56,12 @@ config :exq,
   queues: ["to_elixir"]
 
 config :quantum, cron: [
-  "* * * * * EvercamMedia.Snapshot.Cleanup.init"
-  ],
-  default_overlap: false
+    snapshot_cleanup: [
+      task: {"EvercamMedia.Snapshot.Cleanup", "init"},
+      schedule: "* * * * *",
+      overlap: false
+    ]
+  ]
 
 config :evercam_media, EvercamMedia.Repo,
   adapter: Ecto.Adapters.Postgres,
