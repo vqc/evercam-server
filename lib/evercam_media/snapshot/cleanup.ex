@@ -1,5 +1,4 @@
 defmodule EvercamMedia.Snapshot.Cleanup do
-  alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Snapshot.S3
   alias EvercamMedia.Util
   require Logger
@@ -12,7 +11,7 @@ defmodule EvercamMedia.Snapshot.Cleanup do
   def run(cloud_recording) do
     cloud_recording
     |> Snapshot.expired
-    |> prepare_lists(cloud_recording)
+    |> prepare_lists
     |> cleanup(cloud_recording.camera)
   end
 
@@ -28,8 +27,8 @@ defmodule EvercamMedia.Snapshot.Cleanup do
     Snapshot.delete_by_range(camera.id, range)
   end
 
-  defp prepare_lists([[], []], cloud_recording), do: []
-  defp prepare_lists(ranges, cloud_recording) do
+  defp prepare_lists([[], []]), do: []
+  defp prepare_lists(ranges) do
     s3_prefixes = ranges |> convert_timestamps |> construct_prefix_lists
     Enum.zip(ranges, s3_prefixes)
   end

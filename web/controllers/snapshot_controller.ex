@@ -5,7 +5,7 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.S3
 
-  def show(conn, %{"id" => camera_exid, "api_id" => api_id, "api_key" => api_key}) do
+  def show(conn, %{"id" => camera_exid, "api_id" => _api_id, "api_key" => _api_key}) do
     [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], false)
     show_render(conn, code, response)
   end
