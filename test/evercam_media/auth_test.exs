@@ -18,7 +18,7 @@ defmodule EvercamMedia.AuthTest do
     assert EvercamMedia.Auth.validate("some_invalid_api_id", "some_invalid_api_key") == :invalid
   end
 
-  test "returns :invalid if api_id and api_key are missing" do
-    assert EvercamMedia.Auth.validate("", "") == :invalid
+  test "returns :valid if api_id and api_key are missing" do
+    assert EvercamMedia.Auth.validate("", "") == :valid
   end
 end

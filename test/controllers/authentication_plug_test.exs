@@ -3,8 +3,13 @@ defmodule EvercamMedia.AuthenticationPlugTest do
   alias EvercamMedia.Repo
 
   test "returns HTTP 401 with error message if api_id and api_key are invalid" do
-    conn = conn(:put, "/v1/users/1")
-    conn = EvercamMedia.Router.call(conn, @opts)
+    country = Repo.insert!(%Country{name: "Whatever", iso3166_a2: "WHT"})
+    user = Repo.insert!(%User{firstname: "Paul", lastname: "McCartney",
+      username: "paulm", password: "whatever", email: "paul@mccartney.com",
+      api_id: "some_api_id", api_key: "some_api_key", country_id: country.id})
+    conn =
+      conn(:put, "/v1/users/#{user.id}?api_id=invalid_api_id&api_key=invalid_api_key", %{ "user" => %{ firstname: "whatever" }} )
+      |> EvercamMedia.Router.call(@opts)
 
     assert conn.state == :sent
     assert conn.status == 401
