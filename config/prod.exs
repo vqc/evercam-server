@@ -56,7 +56,7 @@ config :exq,
   queues: ["to_elixir"]
 
 config :quantum,
-  cron:
+  cron: [
     snapshot_cleanup: [
       task: {"EvercamMedia.Snapshot.Cleanup", "init"},
       schedule: "* * * * *",
