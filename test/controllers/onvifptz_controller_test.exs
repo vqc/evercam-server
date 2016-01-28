@@ -1,6 +1,8 @@
 defmodule EvercamMedia.ONVIFPTZControllerTest do
   use EvercamMedia.ConnCase
 
+  @moduletag :external
+
   test "GET /v1/cameras/:id/ptz/presets, gives something" do
     conn = get conn(), "/v1/cameras/mobile-mast-test/ptz/presets"
     presets = conn |> json_response(200) |> Map.get("Presets")

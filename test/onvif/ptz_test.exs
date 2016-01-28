@@ -2,6 +2,7 @@ defmodule PTZTest do
   use ExUnit.Case
   alias EvercamMedia.ONVIFPTZ
 
+  @moduletag :external
   @access_info %{"url" => "http://149.13.244.32:8100", "auth" => "admin:mehcam"}
 
   test "get_nodes method on hikvision camera" do

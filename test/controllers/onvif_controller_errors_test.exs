@@ -1,6 +1,7 @@
 defmodule EvercamMedia.ONVIFControllerErrorsTest do
   use EvercamMedia.ConnCase
 
+  @moduletag :external
   @access_params "url=http://149.13.244.32:8100&auth=admin:mehcam"
 
   test "GET /v1/onvif/v20/DeviceIO/GetUnknownActiopn" do
