@@ -37,13 +37,9 @@ defmodule EvercamMedia.Router do
   scope "/v1", EvercamMedia do
     pipe_through :api
 
-    post "/users", UserController, :create
-
     scope "/" do
       pipe_through :auth
 
-      get "/users/:id", UserController, :show
-      put "/users/:id", UserController, :update
       get "/cameras/:id/live/snapshot", SnapshotController, :show
       get "/cameras/:id/live/snapshot.jpg", SnapshotController, :show
     end
