@@ -30,7 +30,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   end
 
   def init(:ok) do
-    unless Application.get_env(:evercam_media, :skip_camera_workers) do
+    if Application.get_env(:evercam_media, :start_camera_workers) do
       Task.start_link(&EvercamMedia.Snapshot.WorkerSupervisor.initiate_workers/0)
     end
     children = [worker(EvercamMedia.Snapshot.Worker, [], restart: :permanent)]

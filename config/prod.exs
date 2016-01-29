@@ -48,6 +48,9 @@ config :phoenix, :filter_parameters, ["password", "api_key"]
 config :evercam_media,
   hls_url: "https://media.evercam.io"
 
+config :evercam_media,
+  start_camera_workers: true
+
 config :exq,
   port: System.get_env("REDIS_PORT") |> String.to_integer,
   host: System.get_env("REDIS_HOST"),

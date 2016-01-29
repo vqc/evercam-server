@@ -1,7 +1,7 @@
 use Mix.Config
 
 config :evercam_media,
-  skip_camera_workers: true
+  start_camera_workers: false
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
