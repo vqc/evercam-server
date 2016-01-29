@@ -94,7 +94,3 @@ config :evercam_media, EvercamMedia.SnapshotRepo,
   pool_size: 100,
   lazy: false,
   ssl: true
-
-# Finally import the config/prod.secret.exs
-# which should be versioned separately.
-import_config "prod.secret.exs"
