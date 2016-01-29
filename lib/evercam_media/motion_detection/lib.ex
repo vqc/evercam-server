@@ -1,10 +1,9 @@
 defmodule EvercamMedia.MotionDetection.Lib do
-  require Logger
   @on_load :init
 
   def init() do
     :erlang.load_nif("./priv_dir/lib_elixir_motiondetection", 0)
-    # TODO: Uncomment this, if you have deployment problems with the Makefile
+    # NOTE: Uncomment this, if you have deployment problems with the Makefile
     # :ok
   end
 
@@ -16,23 +15,20 @@ defmodule EvercamMedia.MotionDetection.Lib do
     position = width1*height1*3 # end position for a process
     min_position = 0 # start position for a process in a binary list of pixesl {R,G,B}
     step = 2 # check each 2nd pixel
-    min = 30 # change between previous and current image should be at least
+    minimum = 30 # change between previous and current image should be at least
 
-    result = compare(bytes1, bytes2, position, min_position, step, min)
+    result = compare(bytes1, bytes2, position, min_position, step, minimum)
     motion_level = round(result * 100)
-    # Logger.info "EvercamMedia.MotionDetection.Lib Comparison result is #{result} and motion_level = #{motion_level}"
 
     motion_level
   end
-
-  # rest of the routine
 
   def load(image) do
     _load(image)
   end
 
-  def compare(bytes1, bytes2, position, min_position, step, min) do
-    _compare(bytes1, bytes2, position, min_position, step, min)
+  def compare(bytes1, bytes2, position, min_position, step, minimum) do
+    _compare(bytes1, bytes2, position, min_position, step, minimum)
   end
 
   def _test(images_path) do

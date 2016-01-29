@@ -81,7 +81,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
   defp construct_args(camera) do
     %{
       url: Camera.snapshot_url(camera),
-      vendor_exid: Camera.vendor_exid(camera),
+      vendor_exid: Camera.get_vendor_exid(camera),
       username: Camera.username(camera),
       password: Camera.password(camera)
     }

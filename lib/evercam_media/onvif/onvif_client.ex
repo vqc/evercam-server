@@ -26,14 +26,14 @@ defmodule EvercamMedia.ONVIFClient do
                   end
 
     [username, password] = auth |> String.split(":")
-    request = gen_onvif_request(namespace, operation, username, password, parameters)
+    onvif_request = gen_onvif_request(namespace, operation, username, password, parameters)
     try do
-      response = HTTPotion.post url, [body: request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
+      response = HTTPotion.post url, [body: onvif_request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
       {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
       if HTTPotion.Response.success?(response) do
         {:ok, "/env:Envelope/env:Body/#{namespace}:#{operation}Response" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
       else
-        Logger.error "Error invoking #{operation}. URL: #{url} auth: #{auth}. Request: #{inspect request}. Response #{inspect response}."
+        Logger.error "Error invoking #{operation}. URL: #{url} auth: #{auth}. Request: #{inspect onvif_request}. Response #{inspect response}."
         xpath_contents = case contents = "/env:Envelope/env:Body" |> to_char_list |> :xmerl_xpath.string(xml) do
                            [] -> "/html" |> to_char_list |> :xmerl_xpath.string(xml)
                            _ -> contents
@@ -86,7 +86,7 @@ defmodule EvercamMedia.ONVIFClient do
   defp get_wsse_header_data(user, password) do
     {a, b, c} = :os.timestamp
     :random.seed(a, b, c)
-    nonce = nonce(20, []) |> to_string
+    nonce = generate_nonce(20, []) |> to_string
     created = format_date_time(:erlang.localtime)
     digest = :crypto.hash(:sha, nonce <> created <> password) |> to_string
     {user, Base.encode64(digest), Base.encode64(nonce), created}
@@ -96,12 +96,12 @@ defmodule EvercamMedia.ONVIFClient do
     :io_lib.format("~4..0B-~2..0B-~2..0BT~2..0B:~2..0B:~2..0BZ", [year, month, day, hour, minute, second]) |> List.flatten |> to_string
   end
 
-  defp nonce(0,l) do
+  defp generate_nonce(0,l) do
     l ++ [:random.uniform(255)]
   end
 
-  defp nonce(n,l) do
-    nonce(n - 1, l ++ [:random.uniform(255)])
+  defp generate_nonce(n,l) do
+    generate_nonce(n - 1, l ++ [:random.uniform(255)])
   end
 
   #### XML Parsing
@@ -117,34 +117,34 @@ defmodule EvercamMedia.ONVIFClient do
     end
   end
 
-  defp parse(node) do
+  defp parse(element) do
     cond do
-      Record.is_record(node, :xmlElement) ->
-        name = case xmlElement(node, :name) |> to_string |> String.split(":") do
+      Record.is_record(element, :xmlElement) ->
+        name = case xmlElement(element, :name) |> to_string |> String.split(":") do
                  [_ns,name] -> name
                  [name] -> name
                end
-        content = xmlElement(node, :content)
-        case xmlElement(node, :attributes) do
+        content = xmlElement(element, :content)
+        case xmlElement(element, :attributes) do
           [] -> Map.put(%{}, name, parse(content))
           attributes ->  case parse(content) do
                            value when is_map(value) -> Map.put(%{}, name, value |> Map.merge(parse(attributes)))
                            value -> Map.put(%{}, name, value)
                          end
         end
-      Record.is_record(node, :xmlAttribute) ->
-        name = xmlAttribute(node, :name) |> to_string
-        value = xmlAttribute(node, :value) |> to_string
+      Record.is_record(element, :xmlAttribute) ->
+        name = xmlAttribute(element, :name) |> to_string
+        value = xmlAttribute(element, :value) |> to_string
         Map.put(%{}, name, value)
 
-      Record.is_record(node, :xmlText) ->
-        case xmlText(node, :value) |> to_string do
+      Record.is_record(element, :xmlText) ->
+        case xmlText(element, :value) |> to_string do
           "\n" -> %{}
           value -> Map.put(%{}, "#text", value)
         end
 
-      is_list(node) ->
-        case Enum.map(node, &(parse(&1))) do
+      is_list(element) ->
+        case Enum.map(element, &(parse(&1))) do
           [text_content] when is_map(text_content) ->
             Map.get(text_content, "#text", text_content)
 
@@ -163,7 +163,7 @@ defmodule EvercamMedia.ONVIFClient do
               end
             end)
         end
-      true -> "Not supported to parse #{inspect node}"
+      true -> "Not supported to parse #{inspect element}"
     end
   end
 end

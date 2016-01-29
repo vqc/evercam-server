@@ -158,8 +158,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Calendar.DateTime.Parse.unix!(timestamp)
         |> Calendar.DateTime.to_erl
         |> Ecto.DateTime.cast
-      camera_params = construct_camera(datetime, status, camera.is_online == status)
-      changeset = Camera.changeset(camera, camera_params)
+      params = construct_camera(datetime, status, camera.is_online == status)
+      changeset = Camera.changeset(camera, params)
       camera = Repo.update!(changeset)
       ConCache.put(:camera, camera.exid, camera)
       invalidate_camera_cache(camera)
@@ -175,8 +175,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def update_thumbnail(camera, timestamp) do
     file_path = "/#{camera.exid}/snapshots/#{timestamp}.jpg"
-    camera_params = %{thumbnail_url: S3.generate_file_url(file_path)}
-    changeset = Camera.changeset(camera, camera_params)
+    params = %{thumbnail_url: S3.generate_file_url(file_path)}
+    changeset = Camera.changeset(camera, params)
     Repo.update(changeset)
     ConCache.put(:camera, camera.exid, camera)
   end

@@ -94,7 +94,7 @@ defmodule Camera do
     "#{external_url(camera)}#{res_url(camera)}"
   end
 
-  def vendor_exid(camera) do
+  def get_vendor_exid(camera) do
     if camera.vendor_model do
       vendor_exid = camera.vendor_model.vendor.exid
     else
