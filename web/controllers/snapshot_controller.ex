@@ -5,8 +5,8 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.S3
 
-  def show(conn, %{"id" => camera_exid}) do
-    [code, response] = snapshot_with_user(camera_exid, nil, false)
+  def show(conn, %{"id" => camera_exid, "token" => token}) do
+    [code, response] = snapshot_with_token(camera_exid, token, false)
     show_render(conn, code, response)
   end
 
@@ -15,8 +15,8 @@ defmodule EvercamMedia.SnapshotController do
     show_render(conn, code, response)
   end
 
-  def show(conn, %{"id" => camera_exid, "token" => token}) do
-    [code, response] = snapshot_with_token(camera_exid, token, false)
+  def show(conn, %{"id" => camera_exid}) do
+    [code, response] = snapshot_with_user(camera_exid, nil, false)
     show_render(conn, code, response)
   end
 
