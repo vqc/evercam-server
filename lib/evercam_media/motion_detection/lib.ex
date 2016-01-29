@@ -3,8 +3,6 @@ defmodule EvercamMedia.MotionDetection.Lib do
 
   def init() do
     :erlang.load_nif("./priv_dir/lib_elixir_motiondetection", 0)
-    # NOTE: Uncomment this, if you have deployment problems with the Makefile
-    # :ok
   end
 
   def compare(image1, image2) do

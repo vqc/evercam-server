@@ -17,15 +17,13 @@ struct error_mgr {
 
 typedef struct error_mgr * error_ptr;
 
-void error_exit (j_common_ptr cinfo)
-{
+void error_exit (j_common_ptr cinfo) {
 	error_ptr err = (error_ptr) cinfo->err;
 	(*cinfo->err->output_message) (cinfo);
 	longjmp(err->setjmp_buffer, 1);
 }
 
-static ERL_NIF_TERM _test(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
+static ERL_NIF_TERM _test(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
 	UNUSED(argc);
 
 	char result[MAXBUFLEN];
@@ -126,12 +124,31 @@ static ERL_NIF_TERM _compare(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]
 	return enif_make_double(env,result/((startpos-minpos)/step));
 }
 
+static int load(ErlNifEnv* env, void** priv, ERL_NIF_TERM load_info) {
+	UNUSED(env);
+	UNUSED(priv);
+	UNUSED(load_info);
+	return 0;
+}
 
-static ErlNifFunc nif_funcs[] =
-{
+static void unload(ErlNifEnv* env, void* priv) {
+	UNUSED(env);
+	UNUSED(priv);
+	return;
+}
+
+static int upgrade(ErlNifEnv* env, void** priv, void** old_priv, ERL_NIF_TERM load_info) {
+	UNUSED(env);
+	UNUSED(priv);
+	UNUSED(old_priv);
+	UNUSED(load_info);
+	return 0;
+}
+
+static ErlNifFunc nif_funcs[] = {
 	{"_test", 1, _test},
 	{"_load", 1, _load},
 	{"_compare", 6, _compare},
 };
 
-ERL_NIF_INIT(Elixir.EvercamMedia.MotionDetection.Lib,nif_funcs,NULL,NULL,NULL,NULL)
+ERL_NIF_INIT(Elixir.EvercamMedia.MotionDetection.Lib,nif_funcs, &load, NULL, &upgrade, &unload);
