@@ -22,7 +22,7 @@ defmodule EvercamMedia.Util do
     end
   end
 
-  def decode_request_token(token) do
+  def decode_token(token) do
     {_, encrypted_message} = Base.url_decode64(token)
     message = :crypto.block_decrypt(
       :aes_cbc256,

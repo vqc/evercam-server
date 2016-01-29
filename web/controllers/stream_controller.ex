@@ -32,7 +32,7 @@ defmodule EvercamMedia.StreamController do
 
   defp request_stream(camera_exid, token, command) do
     try do
-      [username, password, rtsp_url, _] = Util.decode_request_token(token)
+      [username, password, rtsp_url, _] = Util.decode_token(token)
       camera = Camera.get(camera_exid)
       check_auth(camera, username, password)
       stream(camera_exid, rtsp_url, token, command)
