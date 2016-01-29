@@ -20,6 +20,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Util
   alias EvercamMedia.MotionDetection
+  alias EvercamMedia.Snapshot.S3
 
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
@@ -174,7 +175,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def update_thumbnail(camera, timestamp) do
     file_path = "/#{camera.exid}/snapshots/#{timestamp}.jpg"
-    camera_params = %{thumbnail_url: Util.s3_file_url(file_path)}
+    camera_params = %{thumbnail_url: S3.generate_file_url(file_path)}
     changeset = Camera.changeset(camera, camera_params)
     Repo.update(changeset)
     ConCache.put(:camera, camera.exid, camera)

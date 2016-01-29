@@ -39,24 +39,9 @@ defmodule EvercamMedia.Util do
       %{image: Base.encode64(image), timestamp: timestamp})
   end
 
-  def s3_file_url(file_name) do
-    configure_erlcloud
-    "/" <> name = file_name
-    name   = String.to_char_list(name)
-    bucket = System.get_env("AWS_BUCKET") |> String.to_char_list
-    {_expires, host, uri} = :erlcloud_s3.make_link(100000000, bucket, name)
-    "#{to_string(host)}#{to_string(uri)}"
-  end
-
   def error_handler(error) do
     Logger.error inspect(error)
     Logger.error Exception.format_stacktrace System.stacktrace
-  end
-
-  defp configure_erlcloud do
-    :erlcloud_s3.configure(
-      to_char_list(System.get_env["AWS_ACCESS_KEY"]),
-      to_char_list(System.get_env["AWS_SECRET_KEY"]))
   end
 
   def format_snapshot_id(camera_id, snapshot_timestamp) do

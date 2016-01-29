@@ -28,6 +28,21 @@ defmodule EvercamMedia.Snapshot.S3 do
     HTTPoison.put(url, image, headers)
   end
 
+  def generate_file_url(file_name) do
+    configure_erlcloud
+    "/" <> name = file_name
+    name   = String.to_char_list(name)
+    bucket = System.get_env("AWS_BUCKET") |> String.to_char_list
+    {_expires, host, uri} = :erlcloud_s3.make_link(100000000, bucket, name)
+    "#{to_string(host)}#{to_string(uri)}"
+  end
+
+  defp configure_erlcloud do
+    :erlcloud_s3.configure(
+      to_char_list(System.get_env["AWS_ACCESS_KEY"]),
+      to_char_list(System.get_env["AWS_SECRET_KEY"]))
+  end
+
   def delete(camera_exid, prefix_list) do
     Enum.each(prefix_list, fn(prefix) ->
       Logger.info "[#{camera_exid}] [snapshot_delete_s3] [#{prefix}]"
