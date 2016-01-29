@@ -17,6 +17,9 @@ erl_crash.dump
 # Ignore compiled code for motion detection
 /priv_dir/lib_elixir_motiondetection.so
 
+# Ignore mailgun emails made in dev/test environment
+/priv_dir/mailgun_test.json
+
 # Evercam specific files
 .env
 rel

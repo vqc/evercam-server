@@ -29,10 +29,3 @@ config :evercam_media, EvercamMedia.SnapshotRepo,
   password: "postgres",
   database: "evercam_tst",
   pool: Ecto.Adapters.SQL.Sandbox
-
-config :evercam_media, mailgun_config: [
-    domain: "some_domain",
-    key: "some_key",
-    mode: :test,
-    test_file_path: "/tmp/mailgun_test.json"
-  ]
