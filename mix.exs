@@ -22,7 +22,7 @@ defmodule EvercamMedia.Mixfile do
      applications: app_list(Mix.env)]
   end
 
-  defp app_list(:dev), do: [:dotenv, :credo, :phoenix_live_reload | app_list]
+  defp app_list(:dev), do: [:dotenv, :credo | app_list]
   defp app_list(_), do: app_list
   defp app_list, do: [
     :calecto,
@@ -61,7 +61,6 @@ defmodule EvercamMedia.Mixfile do
      {:phoenix_ecto, "~> 2.0"},
      {:postgrex, ">= 0.9.1"},
      {:phoenix_html, "~> 2.3"},
-     {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:cowboy, "~> 1.0"},
      {:ex_aws, github: "CargoSense/ex_aws"},
      {:quantum, github: "c-rack/quantum-elixir"},
