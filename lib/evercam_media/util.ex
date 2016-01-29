@@ -28,8 +28,7 @@ defmodule EvercamMedia.Util do
       :aes_cbc256,
       System.get_env["SNAP_KEY"],
       System.get_env["SNAP_IV"],
-      encrypted_message
-    )
+      encrypted_message)
     String.split(message, "|")
   end
 
@@ -37,8 +36,7 @@ defmodule EvercamMedia.Util do
     EvercamMedia.Endpoint.broadcast(
       "cameras:#{camera_exid}",
       "snapshot-taken",
-      %{image: Base.encode64(image), timestamp: timestamp}
-    )
+      %{image: Base.encode64(image), timestamp: timestamp})
   end
 
   def s3_file_url(file_name) do
@@ -58,8 +56,7 @@ defmodule EvercamMedia.Util do
   defp configure_erlcloud do
     :erlcloud_s3.configure(
       to_char_list(System.get_env["AWS_ACCESS_KEY"]),
-      to_char_list(System.get_env["AWS_SECRET_KEY"])
-    )
+      to_char_list(System.get_env["AWS_SECRET_KEY"]))
   end
 
   def format_snapshot_id(camera_id, snapshot_timestamp) do
