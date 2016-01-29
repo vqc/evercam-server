@@ -20,6 +20,11 @@ defmodule EvercamMedia.SnapshotController do
     show_render(conn, code, response)
   end
 
+  def create(conn, %{"id" => camera_exid, "api_id" => _api_id, "api_key" => _api_key, "notes" => notes, "with_data" => with_data}) do
+    [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], true, notes)
+    create_render(conn, code, response, with_data)
+  end
+
   def create(conn, params) do
     [code, response] = snapshot_with_token(params["id"], params["token"], true, params["notes"])
     create_render(conn, code, response, params["with_data"])
