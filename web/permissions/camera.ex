@@ -40,7 +40,6 @@ defmodule Permissions.Camera do
       |> where([ar], ar.camera_id == ^camera.id)
       |> where([ar], ar.status == 1)
       |> where([ar], ar.right == ^right)
-      |> where([ar], ar.scope == ^"cameras")
       |> Repo.all
 
     is_list(rights) and length(rights) > 0
