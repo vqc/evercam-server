@@ -198,7 +198,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def log_camera_status(camera, true, datetime) do
-    camera = Repo.preload(camera, :owner)
     parameters = %{camera_id: camera.id, action: "online", done_at: datetime}
     changeset = CameraActivity.changeset(%CameraActivity{}, parameters)
     SnapshotRepo.insert(changeset)
@@ -208,7 +207,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def log_camera_status(camera, false, datetime) do
-    camera = Repo.preload(camera, :owner)
     parameters = %{camera_id: camera.id, action: "offline", done_at: datetime}
     changeset = CameraActivity.changeset(%CameraActivity{}, parameters)
     SnapshotRepo.insert(changeset)

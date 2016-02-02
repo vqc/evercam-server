@@ -35,11 +35,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
   """
   def init(camera_exid) do
   alias EvercamMedia.Repo
-    camera =
-      camera_exid
-      |> Camera.get
-      |> Repo.preload(:cloud_recordings)
-      |> Repo.preload([vendor_model: :vendor])
+    camera = Camera.get(camera_exid)
 
     :erlang.send_after(1000, self, :tick)
     {:ok, camera}

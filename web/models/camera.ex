@@ -14,6 +14,7 @@ defmodule Camera do
     has_many :snapshots, Snapshot
     has_many :apps, App
     has_one :cloud_recordings, CloudRecording
+    has_one :motion_detections, MotionDetection
 
     field :exid, :string
     field :name, :string
@@ -34,6 +35,7 @@ defmodule Camera do
     |> join(:full, [c], vm in assoc(c, :vendor_model))
     |> join(:full, [c, vm], v in assoc(vm, :vendor))
     |> preload(:cloud_recordings)
+    |> preload(:motion_detections)
     |> preload(:vendor_model)
     |> preload([vendor_model: :vendor])
     |> Repo.all
@@ -41,13 +43,24 @@ defmodule Camera do
 
   def get(exid) do
     ConCache.get_or_store(:camera, exid, fn() ->
-      Camera.by_exid(exid)
+      Camera.by_exid_with_associations(exid)
     end)
   end
 
   def by_exid(exid) do
     Camera
     |> where([cam], cam.exid == ^exid)
+    |> Repo.one
+  end
+
+  def by_exid_with_associations(exid) do
+    Camera
+    |> where([cam], cam.exid == ^exid)
+    |> preload(:cloud_recordings)
+    |> preload(:motion_detections)
+    |> preload(:owner)
+    |> preload(:vendor_model)
+    |> preload([vendor_model: :vendor])
     |> Repo.one
   end
 

@@ -11,15 +11,8 @@ defmodule EvercamMedia.CameraController do
 
       Logger.info "Camera update for #{exid}"
       ConCache.delete(:camera, exid)
-      camera =
-        exid
-        |> Camera.get
-        |> Repo.preload(:cloud_recordings)
-        |> Repo.preload([vendor_model: :vendor])
-      worker =
-        exid
-        |> String.to_atom
-        |> Process.whereis
+      camera = exid |> Camera.get
+      worker = exid |> String.to_atom |> Process.whereis
 
       case worker do
         nil ->
