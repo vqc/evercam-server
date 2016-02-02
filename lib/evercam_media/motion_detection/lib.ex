@@ -1,24 +1,31 @@
 defmodule EvercamMedia.MotionDetection.Lib do
   @on_load :init
+  require Logger
 
   def init() do
     :erlang.load_nif("./priv_dir/lib_elixir_motiondetection", 0)
   end
 
-  def compare(image1, image2) do
-    {:ok, {width1, height1, bytes1}} = load(image1)
-    {:ok, {_width2, _height2, bytes2}} = load(image2)
+  def compare(camera_exid, image1, image2) do
+    loaded_image1 = load(image1)
+    loaded_image2 = load(image2)
+    if loaded_image1 == -1 or loaded_image2 == -1 do
+      Logger.debug "[#{camera_exid}] [motion_detection] [error]"
+      nil
+    else
+      {:ok, {width1, height1, bytes1}} = loaded_image1
+      {:ok, {_width2, _height2, bytes2}} = loaded_image2
 
-    # use this to parallel the process, and play with the quality and performance
-    position = width1*height1*3 # end position for a process
-    min_position = 0 # start position for a process in a binary list of pixesl {R,G,B}
-    step = 2 # check each 2nd pixel
-    minimum = 30 # change between previous and current image should be at least
+      position = width1*height1*3 # end position for a process
+      min_position = 0 # start position for a process in a binary list of pixesl {R,G,B}
+      step = 2 # check each 2nd pixel
+      minimum = 30 # change between previous and current image should be at least
 
-    result = compare(bytes1, bytes2, position, min_position, step, minimum)
-    motion_level = round(result * 100)
+      result = compare(bytes1, bytes2, position, min_position, step, minimum)
+      motion_level = round(result * 100)
 
-    motion_level
+      motion_level
+    end
   end
 
   def load(image) do
