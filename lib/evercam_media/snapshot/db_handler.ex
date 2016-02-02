@@ -19,7 +19,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   alias EvercamMedia.Repo
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Util
-  alias EvercamMedia.MotionDetection
   alias EvercamMedia.Snapshot.S3
 
   def handle_event({:got_snapshot, data}, state) do
@@ -27,8 +26,13 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     Logger.debug "[#{camera_exid}] [snapshot_success]"
 
     notes = "Evercam Proxy"
+    camera = Camera.get(to_string(camera_exid))
     cached_response = ConCache.get(:cache, camera_exid)
-    motion_level = nil
+    motion_level =
+      case MotionDetection.enabled?(camera) do
+        true -> calculate_motion_level(camera_exid, image, cached_response)
+        false -> nil
+      end
 
     spawn fn ->
       try do
@@ -57,7 +61,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def calculate_motion_level(camera_exid, image_1, %{image: image_2}) do
     try do
       Logger.debug "[#{camera_exid}] [motion_detection] [calculating]"
-      level = MotionDetection.Lib.compare(image_1, image_2)
+      level = EvercamMedia.MotionDetection.Lib.compare(image_1, image_2)
       Logger.debug "[#{camera_exid}] [motion_detection] [calculated] [#{level}]"
       level
     rescue
