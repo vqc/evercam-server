@@ -25,7 +25,6 @@ defmodule EvercamMedia.Router do
     get "/", PageController, :index
 
     post "/v1/cameras/test", SnapshotController, :test
-    post "/v1/cameras/:id/recordings/snapshots", SnapshotController, :create
 
     get "/v1/cameras/:id/touch", CameraController, :update
 
@@ -42,6 +41,7 @@ defmodule EvercamMedia.Router do
 
       get "/cameras/:id/live/snapshot", SnapshotController, :show
       get "/cameras/:id/live/snapshot.jpg", SnapshotController, :show
+      post "/cameras/:id/recordings/snapshots", SnapshotController, :create
     end
 
     scope "/" do
