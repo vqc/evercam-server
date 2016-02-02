@@ -29,7 +29,7 @@ defmodule EvercamMedia.CameraController do
       end
       send_resp(conn, 200, "Camera update request received.")
     rescue
-      error ->
+      _error ->
         send_resp(conn, 500, "Invalid token.")
     end
   end
