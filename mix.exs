@@ -60,7 +60,7 @@ defmodule EvercamMedia.Mixfile do
     [{:phoenix, "~> 1.1"},
      {:phoenix_html, "~> 2.5"},
      {:phoenix_ecto, "~> 2.0"},
-     {:postgrex, ">= 0.9.1"},
+     {:postgrex, ">= 0.11.0"},
      {:cowboy, "~> 1.0"},
      {:ex_aws, github: "CargoSense/ex_aws"},
      {:quantum, github: "c-rack/quantum-elixir"},
