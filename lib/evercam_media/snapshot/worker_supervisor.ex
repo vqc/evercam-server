@@ -68,7 +68,6 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   Given a camera, it returns a map of values required for starting a camera worker.
   """
   def get_config(camera) do
-    ConCache.put(:camera, camera.exid, camera)
     url = "#{Camera.external_url(camera)}#{Camera.res_url(camera, "jpg")}"
 
     {

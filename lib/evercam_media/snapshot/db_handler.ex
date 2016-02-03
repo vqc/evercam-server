@@ -164,8 +164,9 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         |> Ecto.DateTime.cast
       params = construct_camera(datetime, status, camera.is_online == status)
       changeset = Camera.changeset(camera, params)
-      camera = Repo.update!(changeset)
-      ConCache.put(:camera, camera.exid, camera)
+      Repo.update!(changeset)
+      ConCache.delete(:camera, camera_exid)
+      camera = Camera.get(camera_exid)
       invalidate_camera_cache(camera)
       log_camera_status(camera, status, datetime)
     end
@@ -182,7 +183,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     params = %{thumbnail_url: S3.generate_file_url(file_path)}
     changeset = Camera.changeset(camera, params)
     Repo.update(changeset)
-    ConCache.put(:camera, camera.exid, camera)
+    ConCache.delete(:camera, camera.exid)
   end
 
   def stale_thumbnail?(thumbnail_url, timestamp) do
