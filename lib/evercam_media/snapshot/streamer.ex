@@ -36,7 +36,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
   def init(camera_exid) do
     camera = Camera.get(camera_exid)
 
-    :erlang.send_after(1000, self, :tick)
+    :erlang.send_after(0, self, :tick)
     {:ok, camera}
   end
 
