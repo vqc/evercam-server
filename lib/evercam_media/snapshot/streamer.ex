@@ -41,7 +41,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
     {:ok, camera}
   end
 
-  def handle_info(_msg, camera) do
+  def handle_info(:tick, camera) do
     cond do
       length(subscribers(camera.exid)) == 0 ->
         Logger.debug "[#{camera.exid}] Shutting down streamer, no subscribers"
@@ -55,6 +55,13 @@ defmodule EvercamMedia.Snapshot.Streamer do
     end
     :erlang.send_after(1000, self, :tick)
     {:noreply, camera}
+  end
+
+  @doc """
+  Take care of unknown messages which otherwise would trigger function clause mismatch error.
+  """
+  def handle_info(_msg, state) do
+    {:noreply, state}
   end
 
   def stream(camera) do
