@@ -131,6 +131,6 @@ defmodule EvercamMedia.Snapshot.Poller do
   #######################
 
   defp start_timer(sleep, message) do
-    :erlang.send_after(sleep, self(), message)
+    Process.send_after(self, message, sleep)
   end
 end
