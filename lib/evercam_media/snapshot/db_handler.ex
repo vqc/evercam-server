@@ -31,7 +31,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     motion_level =
       case MotionDetection.enabled?(camera) do
         true -> calculate_motion_level(camera_exid, image, cached_response)
-        false -> nil
+        _ -> nil
       end
 
     spawn fn ->
