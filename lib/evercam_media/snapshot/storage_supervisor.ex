@@ -10,7 +10,7 @@ defmodule EvercamMedia.Snapshot.StorageSupervisor do
     pool_opts = [
       name: {:local, StoragePool},
       worker_module: Storage,
-      size: 5,
+      size: 9,
       max_overflow: 0
     ]
 
