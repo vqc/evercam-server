@@ -25,7 +25,7 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def handle_connect({:ok, pid}, _state) do
-    Logger.debug "Connected to the ftp server succesfully."
+    Logger.info "Connected to the ftp server succesfully."
     :ftp.user(pid, to_char_list(System.get_env("FTP_USERNAME")),
               to_char_list(System.get_env("FTP_PASSWORD")))
     {:noreply, pid}
@@ -48,12 +48,12 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def handle_upload(:ok, camera_exid, timestamp, _data, state) do
-    Logger.debug "[#{camera_exid}] [snapshot_upload_ftp] [#{timestamp}]"
+    Logger.info "[#{camera_exid}] [snapshot_upload_ftp] [#{timestamp}]"
     {:reply, state, state}
   end
 
   def handle_upload({:error, _error}, camera_exid, timestamp, _data, state) do
-    Logger.debug "[#{camera_exid}] [snapshot_upload_ftp_error] [#{timestamp}]"
+    Logger.error "[#{camera_exid}] [snapshot_upload_ftp_error] [#{timestamp}]"
     {:reply, state, state}
   end
 
