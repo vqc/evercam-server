@@ -23,6 +23,11 @@ config :evercam_media,
   mailgun_domain: System.get_env("MAILGUN_DOMAIN"),
   mailgun_key: System.get_env("MAILGUN_KEY")
 
+config :evercam_media,
+  ftp_domain: System.get_env("FTP_DOMAIN") |> to_char_list,
+  ftp_username: System.get_env("FTP_USERNAME") |> to_char_list,
+  ftp_password: System.get_env("FTP_PASSWORD") |> to_char_list
+
 config :logger, :console,
   format: "$date $time $metadata[$level] $message\n",
   metadata: [:request_id]
