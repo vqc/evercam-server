@@ -4,16 +4,19 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.S3
+  require Logger
   @optional_params %{"notes" => "notes", "with_data" => "with_data"}
 
-  def show(conn, %{"id" => camera_exid}) do
+  def show(conn, %{"id" => camera_exid} = params) do
     [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], false)
+    Logger.info "[#{camera_exid}] [get_snapshot] [#{inspect code}] [#{inspect params}]"
     show_render(conn, code, response)
   end
 
   def create(conn, %{"id" => camera_exid} = params) do
     params = Map.merge(@optional_params, params)
     [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], true, params["notes"])
+    Logger.info "[#{camera_exid}] [post_snapshot] [#{inspect code}] [#{inspect params}]"
     create_render(conn, code, response, params["with_data"])
   end
 
