@@ -4,29 +4,16 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.S3
+  @optional_params %{"notes" => "notes", "with_data" => "with_data"}
 
-  def show(conn, %{"id" => camera_exid, "token" => token}) do
-    [code, response] = snapshot_with_token(camera_exid, token, false)
-    show_render(conn, code, response)
-  end
-
-  def show(conn, %{"id" => camera_exid, "api_id" => _api_id, "api_key" => _api_key}) do
+  def show(conn, %{"id" => camera_exid}) do
     [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], false)
     show_render(conn, code, response)
   end
 
-  def show(conn, %{"id" => camera_exid}) do
-    [code, response] = snapshot_with_user(camera_exid, nil, false)
-    show_render(conn, code, response)
-  end
-
-  def create(conn, %{"id" => camera_exid, "api_id" => _api_id, "api_key" => _api_key, "notes" => notes, "with_data" => with_data}) do
-    [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], true, notes)
-    create_render(conn, code, response, with_data)
-  end
-
-  def create(conn, params) do
-    [code, response] = snapshot_with_token(params["id"], params["token"], true, params["notes"])
+  def create(conn, %{"id" => camera_exid} = params) do
+    params = Map.merge(@optional_params, params)
+    [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], true, params["notes"])
     create_render(conn, code, response, params["with_data"])
   end
 
@@ -103,10 +90,6 @@ defmodule EvercamMedia.SnapshotController do
     else
       [403, %{message: "Forbidden"}]
     end
-  end
-
-  defp snapshot_with_token(camera_exid, _token, store_snapshot, notes \\ "") do
-    construct_args(camera_exid, store_snapshot, notes) |> fetch_snapshot
   end
 
   defp fetch_snapshot(args, retry \\ 0) do

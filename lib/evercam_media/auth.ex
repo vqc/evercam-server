@@ -1,4 +1,5 @@
 defmodule EvercamMedia.Auth do
+  def validate(nil, nil), do: :valid
   def validate("", ""), do: :valid
   def validate(api_id, api_key) do
     cond do
