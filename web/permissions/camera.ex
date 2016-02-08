@@ -33,10 +33,8 @@ defmodule Permissions.Camera do
 
   defp has_right?(_right, nil, _camera), do: false
   defp has_right?(right, user, camera) do
-    token = AccessToken.active_token_for(user.id)
     rights =
       AccessRight
-      |> where([ar], ar.token_id == ^token.id)
       |> where([ar], ar.camera_id == ^camera.id)
       |> where([ar], ar.status == 1)
       |> where([ar], ar.right == ^right)

@@ -12,8 +12,6 @@ defmodule EvercamMedia.AuthenticationPlug do
       :valid ->
         conn
       {:valid, user} ->
-        access_token = AccessToken.active_token_for(user.id)
-        conn = assign(conn, :access_token, access_token)
         assign(conn, :current_user, user)
       :invalid ->
         conn
