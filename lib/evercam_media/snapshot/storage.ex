@@ -26,6 +26,7 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   def handle_connect({:ok, pid}, _state) do
     Logger.info "Connected to the ftp server succesfully."
+    :ftp.type(pid, :binary)
     :ftp.user(pid, to_char_list(System.get_env("FTP_USERNAME")),
               to_char_list(System.get_env("FTP_PASSWORD")))
     {:noreply, pid}
