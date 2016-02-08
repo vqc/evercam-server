@@ -19,12 +19,12 @@ defmodule Client do
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
 
-  def get_by_api_keys(nil, _api_key), do: nil
-  def get_by_api_keys(_api_id, nil), do: nil
-  def get_by_api_keys(api_id, api_key) do
+  def get_by_bearer(token) do
     Client
-    |> where([u], u.api_id == ^api_id)
-    |> where([u], u.api_key == ^api_key)
+    |> join(:left, [cl], t in assoc(cl, :access_tokens))
+    |> where([_, t], t.request == ^token)
+    |> where([_, t], t.is_revoked == false)
+    |> where([_, t], t.expires_at > ^Ecto.DateTime.utc)
     |> Repo.one
   end
 
