@@ -64,7 +64,7 @@ defmodule EvercamMedia.Mixfile do
      {:cowboy, "~> 1.0"},
      {:ex_aws, github: "CargoSense/ex_aws"},
      {:quantum, github: "c-rack/quantum-elixir"},
-     {:con_cache, "~> 0.9.0"},
+     {:con_cache, "~> 0.10.0"},
      {:httpotion, "~> 2.0"},
      {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.2", override: true},
      {:sbroker, "~> 0.7", [optional: true, hex: :sbroker]},

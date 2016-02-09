@@ -4,7 +4,7 @@
   "calendar": {:hex, :calendar, "0.12.4"},
   "certifi": {:hex, :certifi, "0.3.0"},
   "combine": {:hex, :combine, "0.7.0"},
-  "con_cache": {:hex, :con_cache, "0.9.0"},
+  "con_cache": {:hex, :con_cache, "0.10.0"},
   "conform": {:hex, :conform, "0.16.0"},
   "connection": {:hex, :connection, "1.0.2"},
   "cowboy": {:hex, :cowboy, "1.0.4"},
