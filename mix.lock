@@ -1,6 +1,6 @@
 %{"bbmustache": {:hex, :bbmustache, "1.0.3"},
   "bunt": {:hex, :bunt, "0.1.4"},
-  "calecto": {:hex, :calecto, "0.4.5"},
+  "calecto": {:hex, :calecto, "0.5.0"},
   "calendar": {:hex, :calendar, "0.12.4"},
   "certifi": {:hex, :certifi, "0.3.0"},
   "combine": {:hex, :combine, "0.7.0"},

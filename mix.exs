@@ -70,7 +70,7 @@ defmodule EvercamMedia.Mixfile do
      {:sbroker, "~> 0.7", [optional: true, hex: :sbroker]},
      {:httpoison, "~> 0.8.1"},
      {:calendar, "~> 0.12.3"},
-     {:calecto, "~> 0.4.4"},
+     {:calecto, "~> 0.5.0"},
      {:dotenv, "~> 2.0.0", only: :dev},
      {:poison, "~> 1.5"},
      {:porcelain, "~> 2.0.1"},

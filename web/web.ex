@@ -23,7 +23,7 @@ defmodule EvercamMedia.Web do
       import Ecto.Changeset
       import Ecto.Query, only: [from: 1, from: 2]
 
-      use Calecto.Model
+      use Calecto.Schema
     end
   end
 
