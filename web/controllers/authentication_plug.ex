@@ -5,9 +5,11 @@ defmodule EvercamMedia.AuthenticationPlug do
   end
 
   def call(conn, _) do
-    api_id = extract_api_credential(conn, %{header: "x-api-id", query: "api_id"})
-    api_key = extract_api_credential(conn, %{header: "x-api-key", query: "api_key"})
-    token = extract_bearer_token(conn, %{header: "authorization"})
+    api_id = extract_credential(conn, %{header: "x-api-id", query: "api_id"})
+    api_key = extract_credential(conn, %{header: "x-api-key", query: "api_key"})
+    token =
+      extract_credential(conn, %{header: "authorization", query: "authorization"})
+      |> String.replace_leading("bearer ", "")
 
     case EvercamMedia.Auth.validate(api_id, api_key, token) do
       :valid ->
@@ -22,7 +24,7 @@ defmodule EvercamMedia.AuthenticationPlug do
     end
   end
 
-  defp extract_api_credential(conn, %{ header: header_name, query: query_string_name }) do
+  defp extract_credential(conn, %{ header: header_name, query: query_string_name }) do
     extract_credential_from_query_string(conn, query_string_name) || extract_credential_from_header(conn, header_name)
   end
 
@@ -36,13 +38,5 @@ defmodule EvercamMedia.AuthenticationPlug do
     |> Plug.Conn.get_req_header(header_name)
     |> List.first
     |> to_string
-  end
-
-  defp extract_bearer_token(conn, %{header: header_name}) do
-    conn
-    |> Plug.Conn.get_req_header(header_name)
-    |> List.first
-    |> to_string
-    |> String.replace_leading("bearer ", "")
   end
 end
