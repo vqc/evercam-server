@@ -25,7 +25,7 @@
   "hackney": {:hex, :hackney, "1.4.8"},
   "httpoison": {:hex, :httpoison, "0.8.1"},
   "httpotion": {:hex, :httpotion, "2.1.0"},
-  "ibrowse": {:git, "https://github.com/cmullaparthi/ibrowse.git", "fd81d44182507c23445ed720df8c30e2e8da9d9b", [tag: "v4.2"]},
+  "ibrowse": {:hex, :ibrowse, "4.2.2"},
   "idna": {:hex, :idna, "1.0.3"},
   "jsx": {:git, "git://github.com/talentdeficit/jsx.git", "3074d4865b3385a050badf7828ad31490d860df5", [tag: "2.8.0"]},
   "lhttpc": {:git, "git://github.com/talko/lhttpc", "2d01a5f9c7543b77bdd57f44c92e72801f46e423", [tag: "1.4.0"]},
@@ -51,4 +51,4 @@
   "timex": {:hex, :timex, "1.0.1"},
   "timex_ecto": {:hex, :timex_ecto, "0.5.0"},
   "tzdata": {:hex, :tzdata, "0.5.6"},
-  "uuid": {:git, "https://github.com/zyro/elixir-uuid.git", "ffd01cdbca95eb8edf5502b80c91be1deb7ab0cb", []}}
+  "uuid": {:hex, :uuid, "1.1.3"}}
