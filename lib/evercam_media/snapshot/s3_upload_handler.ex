@@ -13,6 +13,9 @@ defmodule EvercamMedia.Snapshot.S3UploadHandler do
     spawn fn ->
       S3.upload(camera_exid, timestamp, image)
     end
+    spawn fn ->
+      Storage.save(camera_exid, timestamp, image)
+    end
     {:ok, state}
   end
 
