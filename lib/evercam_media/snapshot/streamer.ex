@@ -6,7 +6,6 @@ defmodule EvercamMedia.Snapshot.Streamer do
   use Calendar
   use GenServer
   alias EvercamMedia.Util
-  alias EvercamMedia.Repo
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.StreamerSupervisor
