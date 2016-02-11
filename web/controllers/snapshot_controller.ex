@@ -4,6 +4,7 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.S3
+  alias EvercamMedia.Snapshot.Storage
   require Logger
   @optional_params %{"notes" => "notes", "with_data" => "with_data"}
 
@@ -150,6 +151,7 @@ defmodule EvercamMedia.SnapshotController do
     spawn fn ->
       Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
       S3.upload(args[:camera_exid], args[:timestamp], data)
+      Storage.save(args[:camera_exid], args[:timestamp], data)
       DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true, true)
       |> DBHandler.save_snapshot_record(args[:timestamp], nil, args[:notes])
     end
