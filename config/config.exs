@@ -35,6 +35,9 @@ config :logger, :console,
 config :evercam_media,
   hls_url: "http://localhost:8080"
 
+config :evercam_media,
+  storage_dir: "storage"
+
 config :exq,
   host: '127.0.0.1',
   port: 6379,

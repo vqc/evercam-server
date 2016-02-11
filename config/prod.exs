@@ -51,6 +51,9 @@ config :evercam_media,
 config :evercam_media,
   start_camera_workers: true
 
+config :evercam_media,
+  storage_dir: "/home/evercam/storage"
+
 config :exq,
   port: System.get_env("REDIS_PORT") |> String.to_integer,
   host: System.get_env("REDIS_HOST"),
