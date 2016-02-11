@@ -22,8 +22,18 @@ defmodule EvercamMedia.Util do
     end
   end
 
+  def encode_token(args) do
+    message = format_token_message(args)
+    encrypted_message = :crypto.block_encrypt(
+      :aes_cbc256,
+      System.get_env["SNAP_KEY"],
+      System.get_env["SNAP_IV"],
+      message)
+    Base.url_encode64(encrypted_message)
+  end
+
   def decode_token(token) do
-    {_, encrypted_message} = Base.url_decode64(token)
+   encrypted_message = Base.url_decode64!(token)
     message = :crypto.block_decrypt(
       :aes_cbc256,
       System.get_env["SNAP_KEY"],
@@ -42,6 +52,20 @@ defmodule EvercamMedia.Util do
   def error_handler(error) do
     Logger.error inspect(error)
     Logger.error Exception.format_stacktrace System.stacktrace
+  end
+
+  defp format_token_message(args) do
+    [""]
+    |> Enum.into(args)
+    |> Enum.join("|")
+    |> pad_token_message
+  end
+
+  defp pad_token_message(message) do
+    case rem(String.length(message), 16) do
+      0 -> message
+      _ -> pad_token_message("#{message} ")
+    end
   end
 
   def format_snapshot_id(camera_id, snapshot_timestamp) do
