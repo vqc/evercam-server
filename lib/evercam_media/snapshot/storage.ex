@@ -2,12 +2,24 @@ defmodule EvercamMedia.Snapshot.Storage do
   require Logger
   alias Calendar.DateTime
   alias Calendar.Strftime
+  alias EvercamMedia.Util
 
   def save(camera_exid, timestamp, image) do
     directory_path = construct_directory_path(camera_exid, timestamp)
     file_name = construct_file_name(timestamp)
     File.mkdir_p!(directory_path)
     File.write!("#{directory_path}#{file_name}", image)
+  end
+
+  def load(camera_exid, snapshot_id) do
+    timestamp =
+      snapshot_id
+      |> String.split("_")
+      |> List.last
+      |> Util.snapshot_timestamp_to_unix
+    directory_path = construct_directory_path(camera_exid, timestamp)
+    file_name = construct_file_name(timestamp)
+    File.read!("#{directory_path}#{file_name}")
   end
 
   def construct_directory_path(camera_exid, timestamp) do
