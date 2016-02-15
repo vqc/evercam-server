@@ -21,6 +21,7 @@ defmodule EvercamMedia.CameraController do
       |> NaiveDateTime.Parse.iso8601
       |> elem(1)
       |> Strftime.strftime!("%Y%m%d%H%M%S%f")
+      |> String.ljust(17, ?0)
       |> Util.format_snapshot_timestamp
 
     image = Storage.load(camera.exid, "#{camera.id}_#{snapshot_timestamp}")
