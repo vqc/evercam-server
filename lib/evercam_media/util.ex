@@ -22,7 +22,7 @@ defmodule EvercamMedia.Util do
     end
   end
 
-  def encode_token(args) do
+  def encode(args) do
     message = format_token_message(args)
     encrypted_message = :crypto.block_encrypt(
       :aes_cbc256,
@@ -32,14 +32,14 @@ defmodule EvercamMedia.Util do
     Base.url_encode64(encrypted_message)
   end
 
-  def decode_token(token) do
-   encrypted_message = Base.url_decode64!(token)
+  def decode(token) do
+    encrypted_message = Base.url_decode64!(token)
     message = :crypto.block_decrypt(
       :aes_cbc256,
       System.get_env["SNAP_KEY"],
       System.get_env["SNAP_IV"],
       encrypted_message)
-    String.split(message, "|")
+    message |> String.split("|") |> List.delete_at(-1)
   end
 
   def broadcast_snapshot(camera_exid, image, timestamp) do

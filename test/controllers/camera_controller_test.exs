@@ -34,7 +34,7 @@ defmodule EvercamMedia.CameraControllerTest do
       |> Strftime.strftime!("%Y-%m-%dT%H:%M:%S.%f")
       |> String.slice(0, 23)
       |> String.ljust(24, ?Z)
-    token = Util.encode_token([camera_exid, iso_timestamp])
+    token = Util.encode([camera_exid, iso_timestamp])
 
     response =
       conn()

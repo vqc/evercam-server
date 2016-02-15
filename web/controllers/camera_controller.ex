@@ -11,7 +11,7 @@ defmodule EvercamMedia.CameraController do
   def thumbnail(conn, %{"id" => exid, "timestamp" => iso_timestamp, "token" => token}) do
     # TODO: handle failed requests
 
-    [token_exid, token_timestamp, _] = Util.decode_token(token)
+    [token_exid, token_timestamp] = Util.decode(token)
     if exid != token_exid, do: raise "Invalid token."
     if iso_timestamp != token_timestamp, do: raise "Invalid token."
 
@@ -34,7 +34,7 @@ defmodule EvercamMedia.CameraController do
 
   def update(conn, %{"id" => exid, "token" => token}) do
     try do
-      [token_exid, _timestamp, _] = Util.decode_token(token)
+      [token_exid, _timestamp] = Util.decode(token)
       if exid != token_exid, do: raise "Invalid token."
 
       Logger.info "Camera update for #{exid}"
