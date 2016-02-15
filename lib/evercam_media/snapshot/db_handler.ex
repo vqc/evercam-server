@@ -20,6 +20,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.S3
+  alias Calendar.DateTime
+  alias Calendar.Strftime
 
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
@@ -179,14 +181,14 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def update_thumbnail(camera, timestamp) do
-    file_path = "/#{camera.exid}/snapshots/#{timestamp}.jpg"
-    params = %{thumbnail_url: S3.generate_file_url(file_path)}
+    params = %{thumbnail_url: generate_thumbnail_url(camera.exid, timestamp)}
     changeset = Camera.changeset(camera, params)
     Repo.update(changeset)
     ConCache.delete(:camera, camera.exid)
   end
 
   def stale_thumbnail?(thumbnail_url, timestamp) do
+    # TODO: Update to work with iso8601 timestamps
     thumbnail_timestamp = parse_thumbnail_url(thumbnail_url)
     (timestamp - thumbnail_timestamp) > 300
   end
@@ -233,6 +235,18 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     parameters = %{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id}
     changeset = Snapshot.changeset(%Snapshot{}, parameters)
     SnapshotRepo.insert(changeset)
+  end
+
+  def generate_thumbnail_url(camera_exid, timestamp) do
+    iso_timestamp =
+      timestamp
+      |> DateTime.Parse.unix!
+      |> Strftime.strftime!("%Y-%m-%dT%H:%M:%S.%f")
+      |> String.slice(0, 23)
+      |> String.ljust(23, ?0)
+      |> String.ljust(24, ?Z)
+    token = Util.encode([camera_exid, iso_timestamp])
+    EvercamMedia.Endpoint.static_url <> "/v1/cameras/#{camera_exid}/thumbnail/#{iso_timestamp}?token=#{token}"
   end
 
   defp construct_camera(datetime, online_status, online_status_unchanged) do
