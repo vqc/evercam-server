@@ -13,6 +13,9 @@ config :evercam_media, EvercamMedia.Endpoint,
 # Print only warnings and errors during test
 config :logger, level: :warn
 
+config :evercam_media,
+  storage_dir: "tmp/storage"
+
 # Configure your database
 config :evercam_media, EvercamMedia.Repo,
   adapter: Ecto.Adapters.Postgres,

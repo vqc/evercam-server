@@ -6,7 +6,8 @@ defmodule EvercamMedia.Snapshot.StorageTest do
     camera_exid = "austin"
     timestamp = 1454715880
 
-    directory_path = "storage/austin/snapshots/recordings/2016/02/05/23/"
+    root_dir = Application.get_env(:evercam_media, :storage_dir)
+    directory_path = "#{root_dir}/austin/snapshots/recordings/2016/02/05/23/"
     file_name = "44_40_000.jpg"
 
     assert Storage.construct_directory_path(camera_exid, timestamp) == directory_path
