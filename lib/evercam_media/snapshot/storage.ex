@@ -4,6 +4,8 @@ defmodule EvercamMedia.Snapshot.Storage do
   alias Calendar.Strftime
   alias EvercamMedia.Util
 
+  @root_dir Application.get_env(:evercam_media, :storage_dir)
+
   def save(camera_exid, timestamp, image) do
     directory_path = construct_directory_path(camera_exid, timestamp)
     file_name = construct_file_name(timestamp)
@@ -23,10 +25,9 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def construct_directory_path(camera_exid, timestamp) do
-    root_dir = Application.get_env(:evercam_media, :storage_dir)
     timestamp
     |> DateTime.Parse.unix!
-    |> Strftime.strftime!("#{root_dir}/#{camera_exid}/snapshots/recordings/%Y/%m/%d/%H/")
+    |> Strftime.strftime!("#{@root_dir}/#{camera_exid}/snapshots/recordings/%Y/%m/%d/%H/")
   end
 
   def construct_file_name(timestamp) do
