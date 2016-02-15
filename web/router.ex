@@ -27,6 +27,7 @@ defmodule EvercamMedia.Router do
     post "/v1/cameras/test", SnapshotController, :test
 
     get "/v1/cameras/:id/touch", CameraController, :update
+    get "/v1/cameras/:id/thumbnail/:timestamp", CameraController, :thumbnail
 
     get "/live/:camera_id/index.m3u8", StreamController, :hls
     get "/live/:camera_id/:filename", StreamController, :ts
