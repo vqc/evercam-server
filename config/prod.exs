@@ -9,7 +9,8 @@ use Mix.Config
 config :evercam_media, EvercamMedia.Endpoint,
   check_origin: false,
   http: [port: 4000],
-  url: [host: "evercam.io"],
+  url: [host: "media.evercam.io"],
+  static_url: [host: "media.evercam.io", port: 443, scheme: "https"],
   email: "evercam.io <support@evercam.io>"
 
 # ## SSL Support
