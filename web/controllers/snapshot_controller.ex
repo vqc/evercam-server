@@ -26,6 +26,11 @@ defmodule EvercamMedia.SnapshotController do
     test_render(conn, code, response)
   end
 
+  def data(conn, %{"id" => camera_exid, "snapshot_id" => snapshot_id} = params) do
+    [code, response] = snapshot_data(camera_exid, snapshot_id)
+    data_render(conn, code, response)
+  end
+
   ######################
   ## Render functions ##
   ######################
@@ -84,6 +89,21 @@ defmodule EvercamMedia.SnapshotController do
     |> json(response)
   end
 
+  defp data_render(conn, 200, response) do
+    data = "data:image/jpeg;base64,#{Base.encode64(response)}"
+
+    conn
+    |> put_status(200)
+    |> put_resp_header("access-control-allow-origin", "*")
+    |> text(data)
+  end
+
+  defp data_render(conn, code, response) do
+    conn
+    |> put_status(code)
+    |> put_resp_header("access-control-allow-origin", "*")
+    |> json(response)
+  end
   ######################
   ## Fetch functions ##
   ######################
@@ -111,6 +131,16 @@ defmodule EvercamMedia.SnapshotController do
     construct_args(params)
     |> CamClient.fetch_snapshot
     |> parse_test_response
+  end
+
+  defp snapshot_data(camera_exid, snapshot_id) do
+    snapshot = Snapshot.by_id(snapshot_id)
+    case snapshot do
+      nil ->
+        [404, %{message: "Snapshot not found"}]
+      _ ->
+        [200, Storage.load(camera_exid, snapshot_id)]
+    end
   end
 
   ####################

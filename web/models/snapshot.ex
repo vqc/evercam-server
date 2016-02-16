@@ -20,6 +20,12 @@ defmodule Snapshot do
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
 
+  def by_id(snapshot_id) do
+    Snapshot
+    |> where([snap], snap.snapshot_id == ^snapshot_id)
+    |> SnapshotRepo.one
+  end
+
   def delete_by_range(camera_id, [start, finish]) do
     Snapshot
     |> where([snap], snap.snapshot_id > ^"#{camera_id}_#{start}")
