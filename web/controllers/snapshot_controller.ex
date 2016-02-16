@@ -90,12 +90,11 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp data_render(conn, 200, response) do
-    data = "data:image/jpeg;base64,#{Base.encode64(response)}"
-
     conn
     |> put_status(200)
+    |> put_resp_header("content-type", "image/jpg")
     |> put_resp_header("access-control-allow-origin", "*")
-    |> text(data)
+    |> text(response)
   end
 
   defp data_render(conn, code, response) do

@@ -25,7 +25,7 @@ defmodule EvercamMedia.Router do
     get "/", PageController, :index
 
     post "/v1/cameras/test", SnapshotController, :test
-    get "/v1/cameras/:id/recordings/snapshots/:snapshot_id/data", SnapshotController, :data
+    get "/v1/cameras/:id/recordings/snapshots/:snapshot_id", SnapshotController, :data
 
     get "/v1/cameras/:id/touch", CameraController, :update
     get "/v1/cameras/:id/thumbnail/:timestamp", CameraController, :thumbnail
