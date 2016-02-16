@@ -6,6 +6,7 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.S3
   alias EvercamMedia.Snapshot.Storage
   require Logger
+
   @optional_params %{"notes" => "notes", "with_data" => "with_data"}
 
   def show(conn, %{"id" => camera_exid} = params) do
