@@ -26,7 +26,7 @@ defmodule EvercamMedia.SnapshotController do
     test_render(conn, code, response)
   end
 
-  def data(conn, %{"id" => camera_exid, "snapshot_id" => snapshot_id} = params) do
+  def data(conn, %{"id" => camera_exid, "snapshot_id" => snapshot_id}) do
     [code, response] = snapshot_data(camera_exid, snapshot_id)
     data_render(conn, code, response)
   end

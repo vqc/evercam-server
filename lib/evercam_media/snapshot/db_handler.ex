@@ -19,7 +19,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   alias EvercamMedia.Repo
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Util
-  alias EvercamMedia.Snapshot.S3
   alias Calendar.DateTime
   alias Calendar.Strftime
 
