@@ -65,7 +65,7 @@ defmodule SnapshotTest do
   end
 
   test "lists ranges of expired snapshots", %{cloud_recording: cloud_recording, expiry_day: expiry_day} do
-    {:ok, timestamp, _} = NaiveDateTime.Parse.asn1_generalized("#{expiry_day}000000")
+    timestamp = NaiveDateTime.Parse.asn1_generalized("#{expiry_day}000000") |> elem(1)
     end_day = timestamp |> Date.next_day! |> Strftime.strftime!("%Y%m%d")
     ranges = [["#{expiry_day}000000", "#{expiry_day}034746622"], ["#{expiry_day}034746622", "#{end_day}000000"]]
     assert Snapshot.expired(cloud_recording) == ranges

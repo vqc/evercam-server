@@ -163,10 +163,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
 
     if camera.is_online != status do
-      {:ok, datetime} =
+      datetime =
         Calendar.DateTime.Parse.unix!(timestamp)
         |> Calendar.DateTime.to_erl
-        |> Ecto.DateTime.cast
+        |> Ecto.DateTime.cast!
       params = construct_camera(datetime, status, camera.is_online == status)
       changeset = Camera.changeset(camera, params)
       Repo.update!(changeset)
@@ -231,13 +231,13 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def save_snapshot_record(camera, timestamp, motion_level, notes) do
-    {:ok, datetime} =
+    datetime =
       Calendar.DateTime.Parse.unix!(timestamp)
       |> Calendar.DateTime.to_erl
-      |> Ecto.DateTime.cast
-    {:ok, snapshot_timestamp} =
+      |> Ecto.DateTime.cast!
+    snapshot_timestamp =
       Calendar.DateTime.Parse.unix!(timestamp)
-      |> Calendar.Strftime.strftime("%Y%m%d%H%M%S%f")
+      |> Calendar.Strftime.strftime!("%Y%m%d%H%M%S%f")
 
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
     parameters = %{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id}

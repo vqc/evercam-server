@@ -81,7 +81,10 @@ defmodule EvercamMedia.Util do
   end
 
   def snapshot_timestamp_to_unix(timestamp) do
-    {:ok, timestamp, _} = NaiveDateTime.Parse.asn1_generalized timestamp
-    timestamp |> NaiveDateTime.to_date_time_utc |> DateTime.Format.unix
+    timestamp
+    |> NaiveDateTime.Parse.asn1_generalized
+    |> elem(1)
+    |> NaiveDateTime.to_date_time_utc
+    |> DateTime.Format.unix
   end
 end
