@@ -24,7 +24,8 @@ defmodule EvercamMedia.CameraController do
       |> String.ljust(17, ?0)
       |> Util.format_snapshot_timestamp
 
-    image = Storage.load(camera.exid, "#{camera.id}_#{snapshot_timestamp}")
+    snapshot = Snapshot.by_id("#{camera.id}_#{snapshot_timestamp}")
+    image = Storage.load(camera.exid, snapshot.snapshot_id, snapshot.notes)
 
     conn
     |> put_status(200)

@@ -139,7 +139,7 @@ defmodule EvercamMedia.SnapshotController do
       nil ->
         [404, %{message: "Snapshot not found"}]
       _ ->
-        [200, Storage.load(camera_exid, snapshot_id)]
+        [200, Storage.load(camera_exid, snapshot_id, snapshot.notes)]
     end
   end
 
@@ -181,7 +181,7 @@ defmodule EvercamMedia.SnapshotController do
     spawn fn ->
       Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
       S3.upload(args[:camera_exid], args[:timestamp], data)
-      Storage.save(args[:camera_exid], args[:timestamp], data)
+      Storage.save(args[:camera_exid], args[:timestamp], data, args[:notes])
       DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true, true)
       |> DBHandler.save_snapshot_record(args[:timestamp], nil, args[:notes])
     end
