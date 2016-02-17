@@ -187,16 +187,25 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def stale_thumbnail?(thumbnail_url, timestamp) do
-    # TODO: Update to work with iso8601 timestamps
-    thumbnail_timestamp = parse_thumbnail_url(thumbnail_url)
+    on_s3? = String.match?(thumbnail_url, ~r/AWSAccessKeyId/)
+    thumbnail_timestamp = parse_thumbnail_url(thumbnail_url, on_s3?)
     (timestamp - thumbnail_timestamp) > 300
   end
 
-  def parse_thumbnail_url(nil), do: 0
-  def parse_thumbnail_url(thumbnail_url) do
-    Regex.run(~r/snapshots\/(.+)\.jpg/, thumbnail_url)
+  def parse_thumbnail_url(nil, _), do: 0
+  def parse_thumbnail_url(url, true) do
+    Regex.run(~r/snapshots\/(.+)\.jpg/, url)
     |> List.last
     |> String.to_integer
+  end
+  def parse_thumbnail_url(url, false) do
+    Regex.run(~r/thumbnail\/(.+)\?token/, url)
+    |> List.last
+    |> Calendar.NaiveDateTime.Parse.iso8601
+    |> elem(1)
+    |> Calendar.DateTime.from_naive("Etc/UTC")
+    |> elem(1)
+    |> Calendar.DateTime.Format.unix
   end
 
   def invalidate_camera_cache(camera) do
