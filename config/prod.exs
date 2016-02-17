@@ -50,7 +50,7 @@ config :evercam_media,
   hls_url: "https://media.evercam.io"
 
 config :evercam_media,
-  start_camera_workers: true
+  start_camera_workers: System.get_env["START_CAMERA_WORKERS"] == "true"
 
 config :evercam_media,
   storage_dir: "/home/evercam/storage"
