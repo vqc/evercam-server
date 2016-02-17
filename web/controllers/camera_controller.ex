@@ -9,29 +9,32 @@ defmodule EvercamMedia.CameraController do
   alias EvercamMedia.Util
 
   def thumbnail(conn, %{"id" => exid, "timestamp" => iso_timestamp, "token" => token}) do
-    # TODO: handle failed requests
+    try do
+      [token_exid, token_timestamp] = Util.decode(token)
+      if exid != token_exid, do: raise "Invalid token."
+      if iso_timestamp != token_timestamp, do: raise "Invalid token."
 
-    [token_exid, token_timestamp] = Util.decode(token)
-    if exid != token_exid, do: raise "Invalid token."
-    if iso_timestamp != token_timestamp, do: raise "Invalid token."
+      camera = Camera.get(exid)
+      snapshot_timestamp =
+        iso_timestamp
+        |> NaiveDateTime.Parse.iso8601
+        |> elem(1)
+        |> Strftime.strftime!("%Y%m%d%H%M%S%f")
+        |> String.ljust(17, ?0)
+        |> Util.format_snapshot_timestamp
 
-    camera = Camera.get(exid)
-    snapshot_timestamp =
-      iso_timestamp
-      |> NaiveDateTime.Parse.iso8601
-      |> elem(1)
-      |> Strftime.strftime!("%Y%m%d%H%M%S%f")
-      |> String.ljust(17, ?0)
-      |> Util.format_snapshot_timestamp
+      snapshot = Snapshot.by_id("#{camera.id}_#{snapshot_timestamp}")
+      image = Storage.load(camera.exid, snapshot.snapshot_id, snapshot.notes)
 
-    snapshot = Snapshot.by_id("#{camera.id}_#{snapshot_timestamp}")
-    image = Storage.load(camera.exid, snapshot.snapshot_id, snapshot.notes)
-
-    conn
-    |> put_status(200)
-    |> put_resp_header("content-type", "image/jpg")
-    |> put_resp_header("access-control-allow-origin", "*")
-    |> text(image)
+      conn
+      |> put_status(200)
+      |> put_resp_header("content-type", "image/jpg")
+      |> put_resp_header("access-control-allow-origin", "*")
+      |> text(image)
+    rescue
+      _error ->
+        send_resp(conn, 500, "Invalid token.")
+    end
   end
 
   def update(conn, %{"id" => exid, "token" => token}) do
