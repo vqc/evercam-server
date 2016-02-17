@@ -7,7 +7,7 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.Storage
   require Logger
 
-  @optional_params %{"notes" => "notes", "with_data" => "with_data"}
+  @optional_params %{"notes" => nil, "with_data" => false}
 
   def show(conn, %{"id" => camera_exid} = params) do
     [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], false)
