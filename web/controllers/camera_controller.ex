@@ -7,6 +7,7 @@ defmodule EvercamMedia.CameraController do
   alias EvercamMedia.Snapshot.WorkerSupervisor
   alias EvercamMedia.Snapshot.Worker
   alias EvercamMedia.Util
+  require Logger
 
   def thumbnail(conn, %{"id" => exid, "timestamp" => iso_timestamp, "token" => token}) do
     try do
@@ -24,6 +25,7 @@ defmodule EvercamMedia.CameraController do
         |> Util.format_snapshot_timestamp
 
       snapshot = Snapshot.by_id("#{camera.id}_#{snapshot_timestamp}")
+      if snapshot == nil, do: snapshot = Snapshot.latest(camera.id)
       image = Storage.load(camera.exid, snapshot.snapshot_id, snapshot.notes)
 
       conn
@@ -32,7 +34,8 @@ defmodule EvercamMedia.CameraController do
       |> put_resp_header("access-control-allow-origin", "*")
       |> text(image)
     rescue
-      _error ->
+      error ->
+        Logger.error "[#{exid}] [thumbnail] [error] [inspect #{error}]"
         send_resp(conn, 500, "Invalid token.")
     end
   end

@@ -26,6 +26,15 @@ defmodule Snapshot do
     |> SnapshotRepo.one
   end
 
+  def latest(camera_id) do
+    Snapshot
+    |> where([snap], snap.snapshot_id > ^"#{camera_id - 1}_")
+    |> where([snap], snap.snapshot_id < ^"#{camera_id + 1}_")
+    |> order_by(desc: :created_at)
+    |> limit(1)
+    |> SnapshotRepo.one
+  end
+
   def delete_by_range(camera_id, [start, finish]) do
     Snapshot
     |> where([snap], snap.snapshot_id > ^"#{camera_id}_#{start}")
