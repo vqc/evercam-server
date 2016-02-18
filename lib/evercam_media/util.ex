@@ -4,17 +4,12 @@ defmodule EvercamMedia.Util do
   alias Calendar.NaiveDateTime
   require Logger
 
-  @doc ~S"""
-  Checks if a given binary data is a valid jpeg or not
+  def unavailable do
+    Application.app_dir(:evercam_media)
+    |> Path.join("priv/static/images/unavailable.jpg")
+    |> File.read!
+  end
 
-  ## Examples
-
-      iex> EvercamMedia.Util.is_jpeg("string")
-      false
-
-      iex> EvercamMedia.Util.is_jpeg("binaryimage")
-      true
-  """
   def is_jpeg(data) do
     case data do
       <<0xFF,0xD8, _data :: binary>> -> true
