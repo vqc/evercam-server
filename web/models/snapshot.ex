@@ -30,9 +30,7 @@ defmodule Snapshot do
     Snapshot
     |> where([snap], snap.snapshot_id > ^"#{camera_id - 1}_")
     |> where([snap], snap.snapshot_id < ^"#{camera_id + 1}_")
-    |> order_by(desc: :created_at)
-    |> limit(1)
-    |> SnapshotRepo.first
+    |> SnapshotRepo.last
   end
 
   def delete_by_range(camera_id, [start, finish]) do
