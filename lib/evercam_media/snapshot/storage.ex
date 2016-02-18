@@ -26,6 +26,18 @@ defmodule EvercamMedia.Snapshot.Storage do
     File.read!("#{directory_path}#{file_name}")
   end
 
+  def exists?(camera_exid, snapshot_id, notes) do
+    app_name = parse_note(notes)
+    timestamp =
+      snapshot_id
+      |> String.split("_")
+      |> List.last
+      |> Util.snapshot_timestamp_to_unix
+    directory_path = construct_directory_path(camera_exid, timestamp, app_name)
+    file_name = construct_file_name(timestamp)
+    File.exists?("#{directory_path}#{file_name}")
+  end
+
   def construct_directory_path(camera_exid, timestamp, app_dir) do
     timestamp
     |> DateTime.Parse.unix!
@@ -50,6 +62,7 @@ defmodule EvercamMedia.Snapshot.Storage do
   def parse_note(notes) do
     case notes do
       "Evercam Proxy" -> "recordings"
+      "Evercam Thumbnail" -> "thumbnail"
       "Evercam Timelapse" -> "timelapse"
       "Evercam SnapMail" -> "snapmail"
       _ -> "archives"

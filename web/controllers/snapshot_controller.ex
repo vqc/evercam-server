@@ -32,6 +32,11 @@ defmodule EvercamMedia.SnapshotController do
     data_render(conn, code, response)
   end
 
+  def thumbnail(conn, %{"id" => camera_exid}) do
+    [code, response] = snapshot_thumbnail(camera_exid, conn.assigns[:current_user])
+    thumbnail_render(conn, code, response)
+  end
+
   ######################
   ## Render functions ##
   ######################
@@ -104,6 +109,24 @@ defmodule EvercamMedia.SnapshotController do
     |> put_resp_header("access-control-allow-origin", "*")
     |> json(response)
   end
+
+  defp thumbnail_render(conn, 200, response) do
+    conn
+    |> put_status(200)
+    |> put_resp_header("content-type", "image/jpg")
+    |> put_resp_header("access-control-allow-origin", "*")
+    |> text(response[:image])
+  end
+
+  defp thumbnail_render(conn, code, _response) do
+    image = Util.unavailable
+    conn
+    |> put_status(code)
+    |> put_resp_header("content-type", "image/jpg")
+    |> put_resp_header("access-control-allow-origin", "*")
+    |> text(image)
+  end
+
   ######################
   ## Fetch functions ##
   ######################
@@ -140,6 +163,27 @@ defmodule EvercamMedia.SnapshotController do
         [404, %{message: "Snapshot not found"}]
       _ ->
         [200, Storage.load(camera_exid, snapshot_id, snapshot.notes)]
+    end
+  end
+
+  defp snapshot_thumbnail(camera_exid, user) do
+    if Permissions.Camera.can_snapshot?(user, camera_exid) do
+      fetch_thumbnail(camera_exid)
+    else
+      [403, %{message: "Forbidden"}]
+    end
+  end
+
+  def fetch_thumbnail(camera_exid) do
+    camera = Camera.by_exid(camera_exid)
+    snapshot = Snapshot.latest(camera.id)
+    cond do
+      snapshot == nil && camera.is_online == true ->
+        construct_args(camera_exid, true, "Evercam Thumbnail") |> fetch_snapshot
+      snapshot != nil && Storage.exists?(camera_exid, snapshot.snapshot_id, snapshot.notes) ->
+        [200, %{image: Storage.load(camera_exid, snapshot.snapshot_id, snapshot.notes)}]
+      true ->
+        [404, %{message: "Snapshot not found"}]
     end
   end
 

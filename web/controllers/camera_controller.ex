@@ -40,22 +40,6 @@ defmodule EvercamMedia.CameraController do
     end
   end
 
-  def thumbnail(conn, %{"id" => exid}) do
-    camera = Camera.get(exid)
-    snapshot = Snapshot.latest(camera.id)
-    image =
-      case snapshot do
-        nil -> Util.unavailable
-        snapshot -> Storage.load(camera.exid, snapshot.snapshot_id, snapshot.notes)
-      end
-
-    conn
-    |> put_status(200)
-    |> put_resp_header("content-type", "image/jpg")
-    |> put_resp_header("access-control-allow-origin", "*")
-    |> text(image)
-  end
-
   def update(conn, %{"id" => exid, "token" => token}) do
     try do
       [token_exid, _timestamp] = Util.decode(token)
