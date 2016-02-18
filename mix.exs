@@ -58,7 +58,7 @@ defmodule EvercamMedia.Mixfile do
   defp deps do
     [{:phoenix, "~> 1.1"},
      {:phoenix_html, "~> 2.5"},
-     {:phoenix_ecto, "~> 2.0"},
+     {:phoenix_ecto, "~> 3.0.0-beta"},
      {:postgrex, ">= 0.11.0"},
      {:ecto, "~> 2.0.0-beta", override: true},
      {:cowboy, "~> 1.0"},
