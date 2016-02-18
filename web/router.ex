@@ -41,6 +41,7 @@ defmodule EvercamMedia.Router do
     scope "/" do
       pipe_through :auth
 
+      get "/cameras/:id/thumbnail", CameraController, :thumbnail
       get "/cameras/:id/live/snapshot", SnapshotController, :show
       get "/cameras/:id/live/snapshot.jpg", SnapshotController, :show
       post "/cameras/:id/recordings/snapshots", SnapshotController, :create
