@@ -5,8 +5,8 @@ defmodule AccessTokenTest do
     { :ok, country } = Repo.insert(%Country{ name: "Aruba", iso3166_a2: "whatever" })
     { :ok, user } = Repo.insert(%User{ firstname: "John", lastname: "Doe", email: "johndoe@example.com", password: "something", username: "jdoe123", country_id: country.id })
 
-    active_token = Ecto.Model.build(user, :access_tokens, is_revoked: false, request: UUID.uuid4(:hex), expires_at: date_in_future)
-    inactive_token = Ecto.Model.build(user, :access_tokens, is_revoked: true, request: UUID.uuid4(:hex), expires_at: date_in_past)
+    active_token = Ecto.build_assoc(user, :access_tokens, is_revoked: false, request: UUID.uuid4(:hex), expires_at: date_in_future)
+    inactive_token = Ecto.build_assoc(user, :access_tokens, is_revoked: true, request: UUID.uuid4(:hex), expires_at: date_in_past)
 
     Repo.insert(active_token)
     Repo.insert(inactive_token)

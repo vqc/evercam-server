@@ -37,18 +37,14 @@ defmodule EvercamMedia.ConnCase do
 
   setup do
     # Wrap this case in a transaction
-    Ecto.Adapters.SQL.begin_test_transaction(EvercamMedia.Repo)
+    Ecto.Adapters.SQL.Sandbox.checkout(EvercamMedia.Repo)
+    Ecto.Adapters.SQL.Sandbox.checkout(EvercamMedia.SnapshotRepo)
 
     {:ok, country} = EvercamMedia.Repo.insert %Country{iso3166_a2: "ad", name: "Andorra"}
 
     {:ok, user} = EvercamMedia.Repo.insert %User{username: "dev", password: "dev", firstname: "Awesome", lastname: "Dev", email: "dev@localhost", country_id: country.id}
 
     {:ok, _camera} = EvercamMedia.Repo.insert %Camera{name: "Test Mobile Mast", exid: "mobile-mast-test", owner_id: user.id, is_online_email_owner_notification: false, is_public: false, config: %{"snapshots": %{"jpg": "/Streaming/Channels/1/picture"}, "internal_rtsp_port": "", "internal_http_port": "", "internal_host": "", "external_rtsp_port": 9100, "external_http_port": 8100, "external_host": "149.13.244.32", "auth": %{"basic": %{"username": "admin","password": "mehcam"}}}}
-
-    # Roll it back once we are done
-    on_exit fn ->
-      Ecto.Adapters.SQL.rollback_test_transaction(EvercamMedia.Repo)
-    end
 
     :ok
   end

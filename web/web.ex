@@ -18,7 +18,7 @@ defmodule EvercamMedia.Web do
 
   def model do
     quote do
-      use Ecto.Model
+      use Ecto.Schema
 
       import Ecto.Changeset
       import Ecto.Query, only: [from: 1, from: 2]
@@ -34,7 +34,7 @@ defmodule EvercamMedia.Web do
       alias EvercamMedia.Repo
       alias EvercamMedia.Util
 
-      import Ecto.Model
+      import Ecto.Schema
       import Ecto.Query, only: [from: 1, from: 2]
       import EvercamMedia.Router.Helpers
 
@@ -67,7 +67,7 @@ defmodule EvercamMedia.Web do
       use Phoenix.Channel
 
       alias EvercamMedia.Repo
-      import Ecto.Model
+      import Ecto.Schema
       import Ecto.Query, only: [from: 1, from: 2]
     end
   end

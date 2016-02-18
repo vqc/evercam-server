@@ -19,11 +19,11 @@ defmodule AccessToken do
   end
 
   def active_token_for(user_id) do
-    EvercamMedia.Repo.one from t in AccessToken,
+    EvercamMedia.Repo.first from t in AccessToken,
     where: t.user_id == ^user_id and t.is_revoked == false and t.expires_at > ^Ecto.DateTime.utc
   end
 
-  def changeset(model, params \\ :empty) do
+  def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:request, on: EvercamMedia.Repo)

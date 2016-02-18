@@ -11,7 +11,7 @@ defmodule Country do
     field :name, :string
   end
 
-  def changeset(model, params \\ :empty) do
+  def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:iso3166_a2, [name: "ux_countries_iso3166_a2"])

@@ -50,7 +50,7 @@ defmodule Camera do
   def by_exid(exid) do
     Camera
     |> where([cam], cam.exid == ^exid)
-    |> Repo.one
+    |> Repo.first
   end
 
   def by_exid_with_associations(exid) do
@@ -61,7 +61,7 @@ defmodule Camera do
     |> preload(:owner)
     |> preload(:vendor_model)
     |> preload([vendor_model: :vendor])
-    |> Repo.one
+    |> Repo.first
   end
 
   def external_url(camera, type \\ "http") do
@@ -123,7 +123,7 @@ defmodule Camera do
     }
   end
 
-  def changeset(camera, params \\ :empty) do
+  def changeset(camera, params \\ :invalid) do
     camera
     |> cast(params, @required_fields, @optional_fields)
   end

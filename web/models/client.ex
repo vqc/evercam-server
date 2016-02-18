@@ -25,10 +25,10 @@ defmodule Client do
     |> where([_, t], t.request == ^token)
     |> where([_, t], t.is_revoked == false)
     |> where([_, t], t.expires_at > ^Ecto.DateTime.utc)
-    |> Repo.one
+    |> Repo.first
   end
 
-  def changeset(model, params \\ :empty) do
+  def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:api_id, [name: "ux_clients_exid"])

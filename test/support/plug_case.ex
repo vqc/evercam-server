@@ -26,12 +26,7 @@ defmodule EvercamMedia.PlugCase do
 
   setup do
     # Wrap this case in a transaction
-    Ecto.Adapters.SQL.begin_test_transaction(EvercamMedia.Repo)
-
-    # Roll it back once we are done
-    on_exit fn ->
-      Ecto.Adapters.SQL.rollback_test_transaction(EvercamMedia.Repo)
-    end
+    Ecto.Adapters.SQL.Sandbox.checkout(EvercamMedia.Repo)
 
     :ok
   end

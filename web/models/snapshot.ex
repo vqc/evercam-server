@@ -23,7 +23,7 @@ defmodule Snapshot do
   def by_id(snapshot_id) do
     Snapshot
     |> where([snap], snap.snapshot_id == ^snapshot_id)
-    |> SnapshotRepo.one
+    |> SnapshotRepo.first
   end
 
   def latest(camera_id) do
@@ -32,7 +32,7 @@ defmodule Snapshot do
     |> where([snap], snap.snapshot_id < ^"#{camera_id + 1}_")
     |> order_by(desc: :created_at)
     |> limit(1)
-    |> SnapshotRepo.one
+    |> SnapshotRepo.first
   end
 
   def delete_by_range(camera_id, [start, finish]) do
@@ -67,7 +67,7 @@ defmodule Snapshot do
       |> where([snap], snap.snapshot_id < ^"#{camera_id}_#{end_timestamp}")
       |> where([snap], snap.notes == "Evercam Proxy")
       |> limit(1)
-      |> SnapshotRepo.one
+      |> SnapshotRepo.first
     kept_snapshots =
       Snapshot
       |> where([snap], snap.snapshot_id > ^"#{camera_id}_#{begin_timestamp}")
@@ -94,7 +94,7 @@ defmodule Snapshot do
     |> Enum.chunk(2, 1)
   end
 
-  def changeset(snapshot, params \\ :empty) do
+  def changeset(snapshot, params \\ :invalid) do
     snapshot
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:snapshot_id, name: :snapshots_pkey)

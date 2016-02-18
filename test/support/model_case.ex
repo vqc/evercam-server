@@ -25,13 +25,8 @@ defmodule EvercamMedia.ModelCase do
 
   setup do
     # Wrap this case in a transaction
-    Ecto.Adapters.SQL.begin_test_transaction(EvercamMedia.Repo)
-    Ecto.Adapters.SQL.begin_test_transaction(EvercamMedia.SnapshotRepo)
-
-    on_exit fn ->
-      Ecto.Adapters.SQL.rollback_test_transaction(EvercamMedia.Repo)
-      Ecto.Adapters.SQL.rollback_test_transaction(EvercamMedia.SnapshotRepo)
-    end
+    Ecto.Adapters.SQL.Sandbox.checkout(EvercamMedia.Repo)
+    Ecto.Adapters.SQL.Sandbox.checkout(EvercamMedia.SnapshotRepo)
 
     :ok
   end

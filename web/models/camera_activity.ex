@@ -15,7 +15,7 @@ defmodule CameraActivity do
     field :name, :string
   end
 
-  def changeset(camera_activity, params \\ :empty) do
+  def changeset(camera_activity, params \\ :invalid) do
     camera_activity
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:camera_id, name: :camera_activities_camera_id_done_at_index)

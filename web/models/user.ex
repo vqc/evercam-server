@@ -33,10 +33,10 @@ defmodule User do
     User
     |> where([u], u.api_id == ^api_id)
     |> where([u], u.api_key == ^api_key)
-    |> Repo.one
+    |> Repo.first
   end
 
-  def changeset(model, params \\ :empty) do
+  def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:email, [name: "ux_users_email"])
