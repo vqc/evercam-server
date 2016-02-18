@@ -14,7 +14,7 @@ defmodule EvercamMedia.Snapshot.S3UploadHandler do
       S3.upload(camera_exid, timestamp, image)
     end
     spawn fn ->
-      Storage.save(camera_exid, timestamp, image)
+      Storage.save(camera_exid, timestamp, image, "Evercam Proxy")
     end
     {:ok, state}
   end
