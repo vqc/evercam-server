@@ -186,18 +186,19 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     ConCache.delete(:camera, camera.exid)
   end
 
+  def stale_thumbnail?(nil, _), do: true
   def stale_thumbnail?(thumbnail_url, timestamp) do
     on_s3? = String.match?(thumbnail_url, ~r/AWSAccessKeyId/)
     thumbnail_timestamp = parse_thumbnail_url(thumbnail_url, on_s3?)
     (timestamp - thumbnail_timestamp) > 300
   end
 
-  def parse_thumbnail_url(nil, _), do: 0
   def parse_thumbnail_url(url, true) do
     Regex.run(~r/snapshots\/(.+)\.jpg/, url)
     |> List.last
     |> String.to_integer
   end
+
   def parse_thumbnail_url(url, false) do
     Regex.run(~r/thumbnail\/(.+)\?token/, url)
     |> List.last
