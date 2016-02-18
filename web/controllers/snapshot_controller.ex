@@ -166,18 +166,12 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  defp snapshot_thumbnail(camera_exid, user) do
-    if Permissions.Camera.can_snapshot?(user, camera_exid) do
-      fetch_thumbnail(camera_exid)
-    else
-      [403, %{message: "Forbidden"}]
-    end
-  end
-
-  def fetch_thumbnail(camera_exid) do
+  def snapshot_thumbnail(camera_exid, user) do
     camera = Camera.by_exid(camera_exid)
     snapshot = Snapshot.latest(camera.id)
     cond do
+      Permissions.Camera.can_snapshot?(user, camera_exid) == false ->
+        [403, %{message: "Forbidden"}]
       snapshot == nil && camera.is_online == true ->
         construct_args(camera_exid, true, "Evercam Thumbnail") |> fetch_snapshot
       snapshot != nil && Storage.exists?(camera_exid, snapshot.snapshot_id, snapshot.notes) ->
