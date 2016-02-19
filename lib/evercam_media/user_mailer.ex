@@ -1,4 +1,5 @@
 defmodule EvercamMedia.UserMailer do
+  alias EvercamMedia.Snapshot.Storage
   @config Application.get_env(:evercam_media, :mailgun)
   @from Application.get_env(:evercam_media, EvercamMedia.Endpoint)[:email]
 
@@ -16,8 +17,8 @@ defmodule EvercamMedia.UserMailer do
       to: user.email,
       subject: "Evercam Camera Online",
       from: @from,
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.html", user: user, camera: camera),
-      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.txt", user: user, camera: camera)
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.html", user: user, camera: camera, thumbnail: thumbnail(camera)),
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.txt", user: user, camera: camera, thumbnail: thumbnail(camera))
   end
 
   def camera_offline(user, camera) do
@@ -25,7 +26,18 @@ defmodule EvercamMedia.UserMailer do
       to: user.email,
       subject: "Evercam Camera Offline",
       from: @from,
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.html", user: user, camera: camera),
-      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.txt", user: user, camera: camera)
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.html", user: user, camera: camera, thumbnail: thumbnail(camera)),
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.txt", user: user, camera: camera, thumbnail: thumbnail(camera))
+  end
+
+  defp thumbnail(camera) do
+    snapshot = Snapshot.latest(camera.id)
+    cond do
+      snapshot && Storage.exists?(camera.exid, snapshot.snapshot_id, snapshot.notes) ->
+        image = Storage.load(camera.exid, snapshot.snapshot_id, snapshot.notes)
+        data = "data:image/jpeg;base64,#{Base.encode64(image)}"
+      true ->
+        nil
+    end
   end
 end
