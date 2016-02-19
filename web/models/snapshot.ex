@@ -28,8 +28,8 @@ defmodule Snapshot do
 
   def latest(camera_id) do
     Snapshot
-    |> where([snap], snap.snapshot_id > ^"#{camera_id - 1}_")
-    |> where([snap], snap.snapshot_id < ^"#{camera_id + 1}_")
+    |> where([snap], snap.snapshot_id > ^"#{camera_id}_2000")
+    |> where([snap], snap.snapshot_id < ^"#{camera_id}_2099")
     |> SnapshotRepo.last
   end
 
