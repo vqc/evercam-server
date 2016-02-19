@@ -1,7 +1,5 @@
 defmodule EvercamMedia.CameraController do
   use EvercamMedia.Web, :controller
-  alias Calendar.NaiveDateTime
-  alias Calendar.Strftime
   alias EvercamMedia.Snapshot.Storage
   alias EvercamMedia.Snapshot.StreamerSupervisor
   alias EvercamMedia.Snapshot.WorkerSupervisor
@@ -16,16 +14,7 @@ defmodule EvercamMedia.CameraController do
       if iso_timestamp != token_timestamp, do: raise "Invalid token."
 
       camera = Camera.get(exid)
-      snapshot_timestamp =
-        iso_timestamp
-        |> NaiveDateTime.Parse.iso8601
-        |> elem(1)
-        |> Strftime.strftime!("%Y%m%d%H%M%S%f")
-        |> String.ljust(17, ?0)
-        |> Util.format_snapshot_timestamp
-
-      snapshot = Snapshot.by_id("#{camera.id}_#{snapshot_timestamp}")
-      if snapshot == nil, do: snapshot = Snapshot.latest(camera.id)
+      snapshot = Snapshot.latest(camera.id)
       image = Storage.load(camera.exid, snapshot.snapshot_id, snapshot.notes)
 
       conn
