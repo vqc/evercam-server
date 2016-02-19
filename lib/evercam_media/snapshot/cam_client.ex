@@ -33,7 +33,7 @@ defmodule EvercamMedia.Snapshot.CamClient do
   defp parse_snapshot_response({:ok, response}) do
     case Util.is_jpeg(response.body) do
       true -> {:ok, response.body}
-      _ -> {:error, %{reason: parse_text_response(response.body), response: response.body}}
+      _ -> {:error, %{reason: parse_reason(response.body), response: parse_response(response.body)}}
     end
   end
 
@@ -41,7 +41,7 @@ defmodule EvercamMedia.Snapshot.CamClient do
     response
   end
 
-  defp parse_text_response(response_text) do
+  defp parse_reason(response_text) do
     cond do
       String.contains?(response_text, "Not Found") ->
         :not_found
@@ -55,6 +55,13 @@ defmodule EvercamMedia.Snapshot.CamClient do
         :device_error
       true ->
         :not_a_jpeg
+    end
+  end
+
+  defp parse_response(response_text) do
+    case String.valid?(response_text) do
+      true -> response_text
+      false -> Base.encode64(response_text)
     end
   end
 
