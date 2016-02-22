@@ -13,7 +13,7 @@
   "db_connection": {:hex, :db_connection, "0.2.3"},
   "decimal": {:hex, :decimal, "1.1.1"},
   "dotenv": {:hex, :dotenv, "2.0.0"},
-  "ecto": {:hex, :ecto, "2.0.0-beta.0"},
+  "ecto": {:hex, :ecto, "2.0.0-beta.1"},
   "erlcloud": {:git, "https://github.com/gleber/erlcloud.git", "c18f1be8925ee0e94e373dbcde6a2dfa6a6aa91a", []},
   "erlware_commons": {:hex, :erlware_commons, "0.15.0"},
   "ex_aws": {:git, "https://github.com/CargoSense/ex_aws.git", "c8d62612a427ef5cf6cfd74b772dcf82e90ab567", []},
