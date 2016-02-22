@@ -1,5 +1,8 @@
 defmodule AccessToken do
   use EvercamMedia.Web, :model
+  import Ecto.Changeset
+  import Ecto.Query
+  alias EvercamMedia.Repo
 
   @required_fields ~w(grantor_id is_revoked expires_at request)
   @optional_fields ~w(grantee_id refresh)
@@ -19,8 +22,11 @@ defmodule AccessToken do
   end
 
   def active_token_for(user_id) do
-    EvercamMedia.Repo.first from t in AccessToken,
-    where: t.user_id == ^user_id and t.is_revoked == false and t.expires_at > ^Ecto.DateTime.utc
+    AccessToken
+    |> where([t], t.user_id == ^user_id)
+    |> where([t], t.is_revoked == false)
+    |> where([t], t.expires_at > ^Ecto.DateTime.utc)
+    |> Repo.first
   end
 
   def changeset(model, params \\ :invalid) do
