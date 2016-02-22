@@ -44,6 +44,19 @@ defmodule Permissions.Camera do
   end
 
   defp has_right?(right, %AccessToken{} = token, camera) do
+    has_camera_right?(right, token, camera) || has_account_right?(right, token)
+  end
+
+  defp has_camera_right?(right, token, camera) do
+    AccessRight
+    |> where([ar], ar.token_id == ^token.id)
+    |> where([ar], ar.status == 1)
+    |> where([ar], ar.right == ^right)
+    |> where([ar], ar.camera_id == ^camera.id)
+    |> Repo.first
+  end
+
+  defp has_account_right?(right, token) do
     AccessRight
     |> where([ar], ar.token_id == ^token.id)
     |> where([ar], ar.account_id == ^token.grantor_id)
