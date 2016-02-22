@@ -27,7 +27,7 @@ defmodule Permissions.Camera do
   end
 
   defp can_access?(right, requester, camera_exid) do
-    camera = Camera.get(camera_exid)
+    camera = Camera.by_exid(camera_exid)
     is_public?(camera) or is_owner?(requester, camera) or has_right?(right, requester, camera)
   end
 
