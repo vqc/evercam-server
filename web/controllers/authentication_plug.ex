@@ -9,6 +9,7 @@ defmodule EvercamMedia.AuthenticationPlug do
     api_key = extract_credential(conn, %{header: "x-api-key", query: "api_key"})
     token =
       extract_credential(conn, %{header: "authorization", query: "authorization"})
+      |> String.downcase
       |> String.replace_leading("bearer ", "")
 
     case EvercamMedia.Auth.validate(api_id, api_key, token) do

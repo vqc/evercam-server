@@ -3,7 +3,7 @@ defmodule EvercamMedia.Auth do
   def validate(api_id, api_key, token) do
     cond do
       user = User.get_by_api_keys(api_id, api_key) -> {:valid, user}
-      client = Client.get_by_bearer(token) -> {:valid, client}
+      token = AccessToken.by_request_token(token) -> {:valid, token}
       true -> :invalid
     end
   end

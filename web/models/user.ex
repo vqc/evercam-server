@@ -27,6 +27,7 @@ defmodule User do
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
 
+  def get_by_api_keys("", ""), do: nil
   def get_by_api_keys(nil, _api_key), do: nil
   def get_by_api_keys(_api_id, nil), do: nil
   def get_by_api_keys(api_id, api_key) do

@@ -29,6 +29,12 @@ defmodule AccessToken do
     |> Repo.first
   end
 
+  def by_request_token(token) do
+    AccessToken
+    |> where([at], at.request == ^token)
+    |> Repo.first
+  end
+
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
