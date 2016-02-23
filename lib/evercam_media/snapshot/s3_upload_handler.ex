@@ -1,18 +1,14 @@
-defmodule EvercamMedia.Snapshot.S3UploadHandler do
+defmodule EvercamMedia.Snapshot.StorageHandler do
   @moduledoc """
   TODO
   """
 
   use GenEvent
-  alias EvercamMedia.Snapshot.S3
   alias EvercamMedia.Snapshot.Storage
   require Logger
 
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
-    spawn fn ->
-      S3.upload(camera_exid, timestamp, image)
-    end
     spawn fn ->
       Storage.save(camera_exid, timestamp, image, "Evercam Proxy")
     end

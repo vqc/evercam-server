@@ -20,7 +20,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
     # EvercamMedia.Snapshot.CacheHandler,
     EvercamMedia.Snapshot.DBHandler,
     EvercamMedia.Snapshot.PollHandler,
-    EvercamMedia.Snapshot.S3UploadHandler,
+    EvercamMedia.Snapshot.StorageHandler,
     # EvercamMedia.Snapshot.StatsHandler
     # EvercamMedia.MotionDetection.ComparatorHandler
   ]
