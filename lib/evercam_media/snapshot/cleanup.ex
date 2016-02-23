@@ -5,7 +5,7 @@ defmodule EvercamMedia.Snapshot.Cleanup do
   require Logger
 
   def init do
-    CloudRecording.get_all
+    CloudRecording.get_all_ephemeral
     |> Enum.map(&run(&1))
   end
 

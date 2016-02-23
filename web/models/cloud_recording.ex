@@ -12,8 +12,9 @@ defmodule CloudRecording do
     field :schedule, EvercamMedia.Types.JSON
   end
 
-  def get_all do
+  def get_all_ephemeral do
     CloudRecording
+    |> where([cl], cl.storage_duration != -1)
     |> preload(:camera)
     |> Repo.all
   end
