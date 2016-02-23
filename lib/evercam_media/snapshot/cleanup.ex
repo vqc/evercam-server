@@ -1,5 +1,6 @@
 defmodule EvercamMedia.Snapshot.Cleanup do
   alias EvercamMedia.Snapshot.S3
+  alias EvercamMedia.Snapshot.Storage
   alias EvercamMedia.Util
   require Logger
 
@@ -9,6 +10,9 @@ defmodule EvercamMedia.Snapshot.Cleanup do
   end
 
   def run(cloud_recording) do
+    cloud_recording
+    |> Storage.cleanup
+
     cloud_recording
     |> Snapshot.expired
     |> prepare_lists

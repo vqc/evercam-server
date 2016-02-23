@@ -38,6 +38,19 @@ defmodule EvercamMedia.Snapshot.Storage do
     File.exists?("#{directory_path}#{file_name}")
   end
 
+  def cleanup(cloud_recording) do
+    unless cloud_recording.storage_duration == -1 do
+      camera_exid = cloud_recording.camera.exid
+      seconds_to_expired_day = (cloud_recording.storage_duration + 1) * (24 * 60 * 60) * (-1)
+      Logger.info "[#{camera_exid}] [snapshot_delete_disk]"
+
+      DateTime.now_utc
+      |> DateTime.advance!(seconds_to_expired_day)
+      |> Strftime.strftime!("#{@root_dir}/#{camera_exid}/snapshots/recordings/%Y/%m/%d")
+      |> File.rmdir
+    end
+  end
+
   def construct_directory_path(camera_exid, timestamp, app_dir) do
     timestamp
     |> DateTime.Parse.unix!
