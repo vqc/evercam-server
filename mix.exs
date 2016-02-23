@@ -68,7 +68,7 @@ defmodule EvercamMedia.Mixfile do
      {:httpotion, "~> 2.0"},
      {:ibrowse, "~> 4.2", override: true},
      {:httpoison, "~> 0.8.1"},
-     {:calendar, "~> 0.12.3"},
+     {:calendar, "~> 0.12.4"},
      {:calecto, "~> 0.5.0"},
      {:dotenv, "~> 2.0.0", only: :dev},
      {:poison, "~> 1.5"},
