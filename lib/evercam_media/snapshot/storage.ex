@@ -48,6 +48,7 @@ defmodule EvercamMedia.Snapshot.Storage do
         |> DateTime.advance!(seconds_to_day_before_expiry)
         |> DateTime.to_date
 
+      Logger.info "[#{camera_exid}] [snapshot_delete_disk]"
       Path.wildcard("#{@root_dir}/#{camera_exid}/snapshots/recordings/????/??/??/")
       |> Enum.each(fn(path) -> delete_if_expired(camera_exid, path, day_before_expiry) end)
     end
