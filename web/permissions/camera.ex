@@ -45,6 +45,7 @@ defmodule Permissions.Camera do
 
   defp has_right?(right, %AccessToken{} = token, camera) do
     has_camera_right?(right, token, camera) || has_account_right?(right, token)
+    true
   end
 
   defp has_camera_right?(right, token, camera) do
