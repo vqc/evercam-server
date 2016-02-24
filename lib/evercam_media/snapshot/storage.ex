@@ -1,5 +1,6 @@
 defmodule EvercamMedia.Snapshot.Storage do
   require Logger
+  alias Calendar.Date
   alias Calendar.DateTime
   alias Calendar.Strftime
   alias EvercamMedia.Util
@@ -41,13 +42,29 @@ defmodule EvercamMedia.Snapshot.Storage do
   def cleanup(cloud_recording) do
     unless cloud_recording.storage_duration == -1 do
       camera_exid = cloud_recording.camera.exid
-      seconds_to_expired_day = (cloud_recording.storage_duration + 1) * (24 * 60 * 60) * (-1)
-      Logger.info "[#{camera_exid}] [snapshot_delete_disk]"
+      seconds_to_day_before_expiry = (cloud_recording.storage_duration) * (24 * 60 * 60) * (-1)
+      day_before_expiry =
+        DateTime.now_utc
+        |> DateTime.advance!(seconds_to_day_before_expiry)
+        |> DateTime.to_date
 
-      DateTime.now_utc
-      |> DateTime.advance!(seconds_to_expired_day)
+      Path.wildcard("#{@root_dir}/#{camera_exid}/snapshots/recordings/????/??/??/")
+      |> Enum.each(fn(path) -> delete_if_expired(camera_exid, path, day_before_expiry) end)
+    end
+  end
+
+  defp delete_if_expired(camera_exid, path, day_before_expiry) do
+    date =
+      path
+      |> String.replace_leading("#{@root_dir}/#{camera_exid}/snapshots/recordings/", "")
+      |> String.replace("/", "-")
+      |> Date.Parse.iso8601!
+
+    if Calendar.Date.before?(date, day_before_expiry) do
+      date
       |> Strftime.strftime!("#{@root_dir}/#{camera_exid}/snapshots/recordings/%Y/%m/%d")
-      |> File.rmdir
+      |> File.rm_rf!
+      Logger.info "[#{camera_exid}] [snapshot_delete_disk] [#{Date.Format.iso8601(date)}]"
     end
   end
 
