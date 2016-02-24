@@ -189,7 +189,7 @@ defmodule EvercamMedia.Snapshot.Worker do
   end
 
   defp try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, attempt) do
-    camera = Camera.get(camera_exid)
+    camera = Camera.by_exid(camera_exid)
     spawn fn ->
       if ConCache.get(:camera_lock, state.config.camera_exid) && attempt == 1 do
         Process.exit self, :shutdown
