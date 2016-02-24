@@ -24,12 +24,6 @@ defmodule EvercamMedia.Router do
 
     get "/", PageController, :index
 
-    post "/v1/cameras/test", SnapshotController, :test
-    get "/v1/cameras/:id/recordings/snapshots/:snapshot_id", SnapshotController, :data
-
-    get "/v1/cameras/:id/touch", CameraController, :update
-    get "/v1/cameras/:id/thumbnail/:timestamp", CameraController, :thumbnail
-
     get "/live/:camera_id/index.m3u8", StreamController, :hls
     get "/live/:camera_id/:filename", StreamController, :ts
     get "/on_play", StreamController, :rtmp
@@ -37,6 +31,12 @@ defmodule EvercamMedia.Router do
 
   scope "/v1", EvercamMedia do
     pipe_through :api
+
+    post "/cameras/test", SnapshotController, :test
+    get "/cameras/:id/recordings/snapshots/:snapshot_id", SnapshotController, :data
+
+    get "/cameras/:id/touch", CameraController, :update
+    get "/cameras/:id/thumbnail/:timestamp", CameraController, :thumbnail
 
     scope "/" do
       pipe_through :auth
