@@ -72,6 +72,7 @@ defmodule EvercamMedia.Mixfile do
      {:calecto, "~> 0.5.0"},
      {:dotenv, "~> 2.0.0", only: :dev},
      {:poison, "~> 1.5"},
+     {:jsx, "~> 2.8.0", override: true},
      {:porcelain, "~> 2.0.1"},
      {:erlcloud, github: "gleber/erlcloud"},
      {:exq, "~> 0.6.2"},

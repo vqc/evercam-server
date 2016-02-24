@@ -27,7 +27,7 @@
   "httpotion": {:hex, :httpotion, "2.1.0"},
   "ibrowse": {:hex, :ibrowse, "4.2.2"},
   "idna": {:hex, :idna, "1.0.3"},
-  "jsx": {:git, "git://github.com/talentdeficit/jsx.git", "3074d4865b3385a050badf7828ad31490d860df5", [tag: "2.8.0"]},
+  "jsx": {:hex, :jsx, "2.8.0"},
   "lhttpc": {:git, "git://github.com/talko/lhttpc", "2d01a5f9c7543b77bdd57f44c92e72801f46e423", [tag: "1.4.0"]},
   "mailgun": {:git, "https://github.com/chrismccord/mailgun.git", "300fa086c69933d76d12c09d534ce73e5f98e2e9", []},
   "meck": {:git, "https://github.com/eproxus/meck.git", "17b0ea5b7d9c93af3a52b5152c6bee14302b3885", [tag: "0.8.3"]},
