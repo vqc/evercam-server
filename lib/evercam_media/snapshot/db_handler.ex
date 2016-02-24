@@ -27,7 +27,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     Logger.debug "[#{camera_exid}] [snapshot_success]"
 
     notes = "Evercam Proxy"
-    camera = Camera.get(to_string(camera_exid))
+    camera = Camera.get_full(to_string(camera_exid))
     cached_response = ConCache.get(:cache, camera_exid)
     motion_level = calculate_motion_level(camera_exid, image, cached_response)
 
@@ -152,7 +152,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def update_camera_status(camera_exid, timestamp, status, update_thumbnail? \\ false) do
-    camera = Camera.get(camera_exid)
+    camera = Camera.get_full(camera_exid)
 
     if update_thumbnail? && stale_thumbnail?(camera.thumbnail_url, timestamp) do
       update_thumbnail(camera, timestamp)
@@ -167,7 +167,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       changeset = Camera.changeset(camera, params)
       Repo.update!(changeset)
       ConCache.delete(:camera, camera_exid)
-      camera = Camera.get(camera_exid)
+      camera = Camera.get_full(camera_exid)
       invalidate_camera_cache(camera)
       log_camera_status(camera, status, datetime)
     end

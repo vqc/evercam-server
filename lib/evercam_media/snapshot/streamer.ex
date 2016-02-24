@@ -33,7 +33,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
   Initialize the camera streamer
   """
   def init(camera_exid) do
-    camera = Camera.get(camera_exid)
+    camera = Camera.get_full(camera_exid)
 
     Process.send_after(self, :tick, 0)
     {:ok, camera}

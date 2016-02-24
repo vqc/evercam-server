@@ -43,6 +43,12 @@ defmodule Camera do
 
   def get(exid) do
     ConCache.get_or_store(:camera, exid, fn() ->
+      Camera.by_exid(exid)
+    end)
+  end
+
+  def get_full(exid) do
+    ConCache.get_or_store(:camera, exid, fn() ->
       Camera.by_exid_with_associations(exid)
     end)
   end
@@ -116,7 +122,7 @@ defmodule Camera do
   end
 
   def get_camera_info(exid) do
-    camera = Camera.get(exid)
+    camera = Camera.get_full(exid)
     %{
       "url" => external_url(camera),
       "auth" => auth(camera)

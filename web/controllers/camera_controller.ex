@@ -13,7 +13,7 @@ defmodule EvercamMedia.CameraController do
       if exid != token_exid, do: raise "Invalid token."
       if iso_timestamp != token_timestamp, do: raise "Invalid token."
 
-      camera = Camera.get(exid)
+      camera = Camera.get_full(exid)
       snapshot = Snapshot.latest(camera.id)
       image = Storage.load(camera.exid, snapshot.snapshot_id, snapshot.notes)
 
@@ -36,7 +36,7 @@ defmodule EvercamMedia.CameraController do
 
       Logger.info "Camera update for #{exid}"
       ConCache.delete(:camera, exid)
-      camera = exid |> Camera.get
+      camera = exid |> Camera.get_full
       worker = exid |> String.to_atom |> Process.whereis
 
       case worker do
