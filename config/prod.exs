@@ -66,7 +66,7 @@ config :quantum,
   cron: [
     snapshot_cleanup: [
       task: {"EvercamMedia.Snapshot.Cleanup", "init"},
-      schedule: "* * * * *",
+      schedule: "0 * * * *",
       overlap: false
     ]
   ]
