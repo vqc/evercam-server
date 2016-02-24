@@ -11,6 +11,7 @@ defmodule EvercamMedia.Snapshot.StorageHandler do
     {camera_exid, timestamp, image} = data
     spawn fn ->
       Storage.save(camera_exid, timestamp, image, "Evercam Proxy")
+      Storage.thumbnail_save(camera_exid, image)
     end
     {:ok, state}
   end

@@ -7,6 +7,18 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   @root_dir Application.get_env(:evercam_media, :storage_dir)
 
+  def thumbnail_save(camera_exid, image) do
+    File.write!("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg", image)
+  end
+
+  def thumbnail_load(camera_exid) do
+    File.read!("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg")
+  end
+
+  def thumbnail_exists?(camera_exid) do
+    File.exists?("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg")
+  end
+
   def save(camera_exid, timestamp, image, notes) do
     app_name = parse_note(notes)
     directory_path = construct_directory_path(camera_exid, timestamp, app_name)

@@ -166,14 +166,14 @@ defmodule EvercamMedia.SnapshotController do
 
   def snapshot_thumbnail(camera_exid, user) do
     camera = Camera.by_exid(camera_exid)
-    snapshot = Snapshot.latest(camera.id)
+    thumbnail_exists? = Storage.thumbnail_exists?(camera_exid)
     cond do
       Permissions.Camera.can_snapshot?(user, camera_exid) == false ->
         [403, %{message: "Forbidden"}]
-      snapshot == nil && camera.is_online == true ->
+      thumbnail_exists? == false && camera.is_online == true ->
         construct_args(camera_exid, true, "Evercam Thumbnail") |> fetch_snapshot(3)
-      snapshot != nil && Storage.exists?(camera_exid, snapshot.snapshot_id, snapshot.notes) ->
-        [200, %{image: Storage.load(camera_exid, snapshot.snapshot_id, snapshot.notes)}]
+      thumbnail_exists? ->
+        [200, %{image: Storage.thumbnail_load(camera_exid)}]
       true ->
         [404, %{message: "Snapshot not found"}]
     end
@@ -217,6 +217,7 @@ defmodule EvercamMedia.SnapshotController do
     spawn fn ->
       Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
       Storage.save(args[:camera_exid], args[:timestamp], data, args[:notes])
+      Storage.thumbnail_save(args[:camera_exid], data)
       DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true, true)
       |> DBHandler.save_snapshot_record(args[:timestamp], nil, args[:notes])
     end
