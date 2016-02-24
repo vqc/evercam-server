@@ -26,8 +26,8 @@ defmodule EvercamMedia.SnapshotController do
     test_render(conn, code, response)
   end
 
-  def data(conn, %{"id" => camera_exid, "snapshot_id" => snapshot_id}) do
-    [code, response] = snapshot_data(camera_exid, snapshot_id)
+  def data(conn, %{"id" => camera_exid, "snapshot_id" => snapshot_id, "notes" => notes}) do
+    [code, response] = snapshot_data(camera_exid, snapshot_id, notes)
     data_render(conn, code, response)
   end
 
@@ -155,13 +155,12 @@ defmodule EvercamMedia.SnapshotController do
     |> parse_test_response
   end
 
-  defp snapshot_data(camera_exid, snapshot_id) do
-    snapshot = Snapshot.by_id(snapshot_id)
-    case snapshot do
+  defp snapshot_data(camera_exid, snapshot_id, notes) do
+    case Storage.exists?(camera_exid, snapshot_id, notes) do
       nil ->
         [404, %{message: "Snapshot not found"}]
       _ ->
-        [200, Storage.load(camera_exid, snapshot_id, snapshot.notes)]
+        [200, Storage.load(camera_exid, snapshot_id, notes)]
     end
   end
 
