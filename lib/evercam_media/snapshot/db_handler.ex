@@ -29,11 +29,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     notes = "Evercam Proxy"
     camera = Camera.get(to_string(camera_exid))
     cached_response = ConCache.get(:cache, camera_exid)
-    motion_level =
-      case MotionDetection.enabled?(camera) do
-        true -> calculate_motion_level(camera_exid, image, cached_response)
-        _ -> nil
-      end
+    motion_level = calculate_motion_level(camera_exid, image, cached_response)
 
     spawn fn ->
       try do
