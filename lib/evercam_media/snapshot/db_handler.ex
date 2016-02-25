@@ -153,10 +153,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def update_camera_status(camera_exid, timestamp, status, update_thumbnail? \\ false) do
     camera = Camera.get_full(camera_exid)
 
-    if update_thumbnail? && stale_thumbnail?(camera.thumbnail_url, timestamp) do
-      update_thumbnail(camera, timestamp)
-    end
-
     if camera.is_online != status do
       datetime =
         Calendar.DateTime.Parse.unix!(timestamp)
