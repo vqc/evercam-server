@@ -84,7 +84,7 @@ config :evercam_media, EvercamMedia.Repo,
   loggers: [{Ecto.LogEntry, :log, [:info]}],
   timeout: 60_000,
   pool_timeout: 60_000,
-  pool_size: 50,
+  pool_size: 200,
   lazy: false,
   ssl: true
 
@@ -95,6 +95,6 @@ config :evercam_media, EvercamMedia.SnapshotRepo,
   socket_options: [keepalive: true],
   timeout: 60_000,
   pool_timeout: 60_000,
-  pool_size: 150,
+  pool_size: 200,
   lazy: false,
   ssl: true
