@@ -42,13 +42,13 @@ defmodule Camera do
   end
 
   def get(exid) do
-    ConCache.get_or_store(:camera, exid, fn() ->
+    ConCache.dirty_get_or_store(:camera, exid, fn() ->
       Camera.by_exid(exid)
     end)
   end
 
   def get_full(exid) do
-    ConCache.get_or_store(:camera_full, exid, fn() ->
+    ConCache.dirty_get_or_store(:camera_full, exid, fn() ->
       Camera.by_exid_with_associations(exid)
     end)
   end
