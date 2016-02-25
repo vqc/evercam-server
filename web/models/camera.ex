@@ -122,7 +122,7 @@ defmodule Camera do
   end
 
   def get_camera_info(exid) do
-    camera = Camera.get_full(exid)
+    camera = Camera.get(exid)
     %{
       "url" => external_url(camera),
       "auth" => auth(camera)
