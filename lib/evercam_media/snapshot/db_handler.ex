@@ -27,7 +27,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     Logger.debug "[#{camera_exid}] [snapshot_success]"
 
     notes = "Evercam Proxy"
-    camera = Camera.get_full(to_string(camera_exid))
     cached_response = ConCache.get(:cache, camera_exid)
     motion_level = calculate_motion_level(camera_exid, image, cached_response)
 
