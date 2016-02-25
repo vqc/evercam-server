@@ -161,7 +161,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       params = construct_camera(datetime, status, camera.is_online == status)
       changeset = Camera.changeset(camera, params)
       Repo.update!(changeset)
-      ConCache.delete(:camera, camera_exid)
+      ConCache.delete(:camera_full, camera_exid)
       camera = Camera.get_full(camera_exid)
       invalidate_camera_cache(camera)
       log_camera_status(camera, status, datetime)
@@ -174,7 +174,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     params = %{thumbnail_url: generate_thumbnail_url(camera.exid, timestamp)}
     changeset = Camera.changeset(camera, params)
     Repo.update(changeset)
-    ConCache.delete(:camera, camera.exid)
+    ConCache.delete(:camera_full, camera.exid)
   end
 
   def stale_thumbnail?(nil, _), do: true
