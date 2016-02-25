@@ -11,6 +11,7 @@ defmodule EvercamMedia do
       worker(ConCache, [[ttl_check: 100, ttl: 1500], [name: :snapshot_schedule]], id: :snapshot_schedule),
       worker(ConCache, [[ttl_check: 100, ttl: :timer.seconds(60)], [name: :camera_lock]], id: :camera_lock),
       worker(ConCache, [[ttl_check: :timer.seconds(1), ttl: :timer.seconds(5*60)], [name: :camera]], id: :camera),
+      worker(ConCache, [[ttl_check: :timer.seconds(1), ttl: :timer.seconds(5*60)], [name: :camera_full]], id: :camera_full),
       worker(ConCache, [[ttl_check: :timer.seconds(60*60), ttl: :timer.seconds(3*24*60*60)], [name: :snapshot_error]], id: :snapshot_error),
       supervisor(EvercamMedia.Endpoint, []),
       supervisor(EvercamMedia.Repo, []),
