@@ -165,7 +165,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   def snapshot_thumbnail(camera_exid, user) do
-    camera = Camera.by_exid(camera_exid)
+    camera = Camera.get(camera_exid)
     thumbnail_exists? = Storage.thumbnail_exists?(camera_exid)
     cond do
       Permissions.Camera.can_snapshot?(user, camera_exid) == false ->
