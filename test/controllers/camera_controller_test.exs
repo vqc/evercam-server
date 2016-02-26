@@ -25,6 +25,7 @@ defmodule EvercamMedia.CameraControllerTest do
     |> SnapshotRepo.insert
 
     Storage.save(camera.exid, timestamp, "test_content", "Test Note")
+    Storage.thumbnail_save(camera.exid, "test_content")
 
     {:ok, datetime: now}
   end

@@ -31,10 +31,10 @@ defmodule EvercamMedia.UserMailer do
   end
 
   defp thumbnail(camera) do
-    snapshot = Snapshot.latest(camera.id)
+    thumbnail_exists? = Storage.thumbnail_exists?(camera.exid)
     cond do
-      snapshot && Storage.exists?(camera.exid, snapshot.snapshot_id, snapshot.notes) ->
-        image = Storage.load(camera.exid, snapshot.snapshot_id, snapshot.notes)
+      thumbnail_exists? ->
+        image = Storage.thumbnail_load(camera.exid)
         data = "data:image/jpeg;base64,#{Base.encode64(image)}"
       true ->
         nil

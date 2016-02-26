@@ -13,9 +13,7 @@ defmodule EvercamMedia.CameraController do
       if exid != token_exid, do: raise "Invalid token."
       if iso_timestamp != token_timestamp, do: raise "Invalid token."
 
-      camera = Camera.get(exid)
-      snapshot = Snapshot.latest(camera.id)
-      image = Storage.load(camera.exid, snapshot.snapshot_id, snapshot.notes)
+      image = Storage.thumbnail_load(exid)
 
       conn
       |> put_status(200)
