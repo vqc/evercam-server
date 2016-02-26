@@ -29,7 +29,7 @@ defmodule EvercamMedia.Web do
 
   def controller do
     quote do
-      use Phoenix.Controller
+      use Phoenix.Controller, log: :info
 
       alias EvercamMedia.Repo
       alias EvercamMedia.Util

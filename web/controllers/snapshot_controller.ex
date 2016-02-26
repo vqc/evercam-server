@@ -10,7 +10,6 @@ defmodule EvercamMedia.SnapshotController do
 
   def show(conn, %{"id" => camera_exid} = params) do
     [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], false)
-    Logger.info "[#{camera_exid}] [get_snapshot] [#{inspect code}] [#{inspect params}] [#{inspect conn.req_headers}]"
     show_render(conn, code, response)
   end
 
