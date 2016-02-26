@@ -31,6 +31,12 @@ defmodule User do
   def get_by_api_keys(nil, _api_key), do: nil
   def get_by_api_keys(_api_id, nil), do: nil
   def get_by_api_keys(api_id, api_key) do
+    ConCache.dirty_get_or_store(:users, "#{api_id}_#{api_key}", fn() ->
+      by_api_keys(api_id, api_key)
+    end)
+  end
+
+  def by_api_keys(api_id, api_key) do
     User
     |> where([u], u.api_id == ^api_id)
     |> where([u], u.api_key == ^api_key)
