@@ -102,11 +102,13 @@ defmodule EvercamMedia.SnapshotController do
     |> text(response)
   end
 
-  defp data_render(conn, code, response) do
+  defp data_render(conn, code, _response) do
+    image = Util.unavailable
     conn
     |> put_status(code)
+    |> put_resp_header("content-type", "image/jpg")
     |> put_resp_header("access-control-allow-origin", "*")
-    |> json(response)
+    |> text(image)
   end
 
   defp thumbnail_render(conn, 200, response) do
@@ -157,7 +159,7 @@ defmodule EvercamMedia.SnapshotController do
 
   defp snapshot_data(camera_exid, snapshot_id, notes) do
     case Storage.exists?(camera_exid, snapshot_id, notes) do
-      nil ->
+      false ->
         [404, %{message: "Snapshot not found"}]
       _ ->
         [200, Storage.load(camera_exid, snapshot_id, notes)]
