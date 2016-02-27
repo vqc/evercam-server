@@ -4,34 +4,40 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.Storage
+  alias EvercamMedia.Util
   require Logger
 
   @optional_params %{"notes" => nil, "with_data" => false}
 
   def show(conn, %{"id" => camera_exid} = params) do
-    [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], false)
+    function = fn -> snapshot_with_user(camera_exid, conn.assigns[:current_user], false) end
+    [code, response] = Util.exec_with_timeout(function, 15)
     show_render(conn, code, response)
   end
 
   def create(conn, %{"id" => camera_exid} = params) do
     params = Map.merge(@optional_params, params)
-    [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], true, params["notes"])
+    function = fn -> snapshot_with_user(camera_exid, conn.assigns[:current_user], true, params["notes"]) end
+    [code, response] = Util.exec_with_timeout(function, 15)
     Logger.info "[#{camera_exid}] [post_snapshot] [#{inspect code}] [#{inspect params}] [#{inspect conn.req_headers}]"
     create_render(conn, code, response, params["with_data"])
   end
 
   def test(conn, params) do
-    [code, response] = test_snapshot(params)
+    function = fn -> test_snapshot(params) end
+    [code, response] = Util.exec_with_timeout(function, 15)
     test_render(conn, code, response)
   end
 
   def data(conn, %{"id" => camera_exid, "snapshot_id" => snapshot_id, "notes" => notes}) do
-    [code, response] = snapshot_data(camera_exid, snapshot_id, notes)
+    function = fn -> snapshot_data(camera_exid, snapshot_id, notes) end
+    [code, response] = Util.exec_with_timeout(function)
     data_render(conn, code, response)
   end
 
   def thumbnail(conn, %{"id" => camera_exid}) do
-    [code, response] = snapshot_thumbnail(camera_exid, conn.assigns[:current_user])
+    function = fn -> snapshot_thumbnail(camera_exid, conn.assigns[:current_user]) end
+    [code, response] = Util.exec_with_timeout(function)
     thumbnail_render(conn, code, response)
   end
 
