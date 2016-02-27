@@ -12,7 +12,7 @@ defmodule EvercamMedia.Snapshot.Storage do
       task = Task.async(fn() ->
         File.write!("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg", image)
       end)
-      Task.await(task, :timer.seconds(1))
+      Task.await(task, :timer.seconds(2))
     catch _type, error ->
       Util.error_handler(error)
     end
@@ -51,7 +51,7 @@ defmodule EvercamMedia.Snapshot.Storage do
         File.mkdir_p!(directory_path)
         File.write!("#{directory_path}#{file_name}", image)
       end)
-      Task.await(task, :timer.seconds(1))
+      Task.await(task, :timer.seconds(2))
     catch _type, error ->
       Util.error_handler(error)
     end
