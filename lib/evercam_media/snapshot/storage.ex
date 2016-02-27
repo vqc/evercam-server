@@ -84,7 +84,7 @@ defmodule EvercamMedia.Snapshot.Storage do
         |> Enum.each(fn(path) -> delete_if_expired(camera_exid, path, day_before_expiry) end)
       end
     end)
-    Task.await(task, :timer.seconds(15))
+    Task.await(task, :timer.seconds(25))
   end
 
   defp delete_if_expired(camera_exid, path, day_before_expiry) do
@@ -101,7 +101,7 @@ defmodule EvercamMedia.Snapshot.Storage do
         Porcelain.shell("find '#{dir_path}' -delete")
       end
     end)
-    Task.await(task, :timer.seconds(1))
+    Task.await(task, :timer.seconds(5))
   end
 
   def construct_directory_path(camera_exid, timestamp, app_dir) do

@@ -18,7 +18,7 @@ defmodule EvercamMedia.SnapshotController do
   def create(conn, %{"id" => camera_exid} = params) do
     params = Map.merge(@optional_params, params)
     function = fn -> snapshot_with_user(camera_exid, conn.assigns[:current_user], true, params["notes"]) end
-    [code, response] = Util.exec_with_timeout(function, 15)
+    [code, response] = Util.exec_with_timeout(function, 25)
     Logger.info "[#{camera_exid}] [post_snapshot] [#{inspect code}] [#{inspect params}] [#{inspect conn.req_headers}]"
     create_render(conn, code, response, params["with_data"])
   end
