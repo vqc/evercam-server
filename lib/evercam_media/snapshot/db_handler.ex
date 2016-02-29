@@ -28,11 +28,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
     notes = "Evercam Proxy"
     cached_response = ConCache.get(:cache, camera_exid)
-    motion_level = calculate_motion_level(camera_exid, image, cached_response)
 
     spawn fn ->
       update_camera_status("#{camera_exid}", timestamp, true, true)
-      |> save_snapshot_record(timestamp, motion_level, notes)
+      |> save_snapshot_record(timestamp, nil, notes)
     end
     ConCache.put(:cache, camera_exid, %{image: image, timestamp: timestamp, notes: notes})
     {:ok, state}
