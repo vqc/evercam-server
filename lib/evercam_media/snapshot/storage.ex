@@ -10,7 +10,9 @@ defmodule EvercamMedia.Snapshot.Storage do
   def thumbnail_save(camera_exid, image) do
     try do
       task = Task.async(fn() ->
-        File.write!("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg", image)
+        File.open("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg", [:write, :binary, :raw], fn(file) ->
+          IO.binwrite(file, image)
+        end)
       end)
       Task.await(task, :timer.seconds(2))
     catch _type, error ->
@@ -21,7 +23,10 @@ defmodule EvercamMedia.Snapshot.Storage do
   def thumbnail_load(camera_exid) do
     try do
       task = Task.async(fn() ->
-        File.read!("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg")
+        {:ok, content} = File.open("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg", [:read, :binary, :raw], fn(file) ->
+          IO.binread(file, :all)
+        end)
+        content
       end)
       Task.await(task, :timer.seconds(1))
     catch _type, error ->
@@ -43,15 +48,24 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def save(camera_exid, timestamp, image, notes) do
+    app_name = parse_note(notes)
+    directory_path = construct_directory_path(camera_exid, timestamp, app_name)
+    file_name = construct_file_name(timestamp)
     try do
       task = Task.async(fn() ->
-        app_name = parse_note(notes)
-        directory_path = construct_directory_path(camera_exid, timestamp, app_name)
-        file_name = construct_file_name(timestamp)
-        File.mkdir_p!(directory_path)
-        File.write!("#{directory_path}#{file_name}", image)
+        :filelib.ensure_dir(to_char_list(directory_path))
       end)
       Task.await(task, :timer.seconds(2))
+    catch _type, error ->
+      Util.error_handler(error)
+    end
+    try do
+      task = Task.async(fn() ->
+        File.open("#{directory_path}#{file_name}", [:write, :binary, :raw], fn(file) ->
+          IO.binwrite(file, image)
+        end)
+      end)
+      Task.await(task, :timer.seconds(1))
     catch _type, error ->
       Util.error_handler(error)
     end
@@ -68,7 +82,10 @@ defmodule EvercamMedia.Snapshot.Storage do
           |> Util.snapshot_timestamp_to_unix
         directory_path = construct_directory_path(camera_exid, timestamp, app_name)
         file_name = construct_file_name(timestamp)
-        File.read!("#{directory_path}#{file_name}")
+        {:ok, content} = File.open("#{directory_path}#{file_name}", [:read, :binary, :raw], fn(file) ->
+          IO.binread(file, :all)
+        end)
+        content
       end)
       Task.await(task, :timer.seconds(1))
     catch _type, error ->
