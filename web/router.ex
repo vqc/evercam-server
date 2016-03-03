@@ -24,8 +24,8 @@ defmodule EvercamMedia.Router do
 
     get "/", PageController, :index
 
-    get "/live/:camera_id/index.m3u8", StreamController, :hls
-    get "/live/:camera_id/:filename", StreamController, :ts
+    get "/live/:token/index.m3u8", StreamController, :hls
+    get "/live/:token/:filename", StreamController, :ts
     get "/on_play", StreamController, :rtmp
   end
 

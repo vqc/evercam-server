@@ -6,7 +6,7 @@ defmodule EvercamMedia.StreamController do
 
   def rtmp(conn, params) do
     conn
-    |> put_status(request_stream(params["name"], params["token"], :kill))
+    |> put_status(request_stream(params["camera_id"], params["name"], :kill))
     |> text("")
   end
 
@@ -18,7 +18,7 @@ defmodule EvercamMedia.StreamController do
   defp hls_response(200, conn, params) do
     conn
     |> put_resp_header("access-control-allow-origin", "*")
-    |> redirect(external: "#{@hls_url}/#{params["camera_id"]}/index.m3u8")
+    |> redirect(external: "#{@hls_url}/#{params["token"]}/index.m3u8")
   end
 
   defp hls_response(status, conn, _params) do
@@ -30,7 +30,7 @@ defmodule EvercamMedia.StreamController do
   def ts(conn, params) do
     conn
     |> put_resp_header("access-control-allow-origin", "*")
-    |> redirect(external: "#{@hls_url}/#{params["camera_id"]}/#{params["filename"]}")
+    |> redirect(external: "#{@hls_url}/#{params["token"]}/#{params["filename"]}")
   end
 
   defp request_stream(camera_exid, token, command) do
@@ -38,7 +38,7 @@ defmodule EvercamMedia.StreamController do
       [username, password, rtsp_url] = Util.decode(token)
       camera = Camera.get(camera_exid)
       check_auth(camera, username, password)
-      stream(camera_exid, rtsp_url, token, command)
+      stream(rtsp_url, token, command)
       200
     rescue
       error ->
@@ -54,31 +54,33 @@ defmodule EvercamMedia.StreamController do
     end
   end
 
-  defp stream(camera_exid, rtsp_url, token, :check) do
+  defp stream(rtsp_url, token, :check) do
     cmd = Porcelain.shell("ps -ef | grep ffmpeg | grep #{rtsp_url} | grep -v grep | awk '{print $2}'")
     pids = String.split cmd.out
     if length(pids) == 0 do
-      construct_ffmpeg_command(camera_exid, rtsp_url, token) |> Porcelain.spawn_shell
+      construct_ffmpeg_command(rtsp_url, token) |> Porcelain.spawn_shell
     end
-    sleep_until_hls_playlist_exists(camera_exid)
+    sleep_until_hls_playlist_exists(token)
   end
 
-  defp stream(camera_exid, rtsp_url, token, :kill) do
+  defp stream(rtsp_url, token, :kill) do
     cmd = Porcelain.shell("ps -ef | grep ffmpeg | grep #{rtsp_url} | grep -v grep | awk '{print $2}'")
     pids = String.split cmd.out
     Enum.each pids, &Porcelain.shell("kill -9 #{&1}")
-    construct_ffmpeg_command(camera_exid, rtsp_url, token) |> Porcelain.spawn_shell
+    construct_ffmpeg_command(rtsp_url, token) |> Porcelain.spawn_shell
   end
 
-  defp sleep_until_hls_playlist_exists(camera_exid, retry) when retry > 30, do: :noop
-  defp sleep_until_hls_playlist_exists(camera_exid, retry \\ 0) do
-    unless File.exists?("#{@hls_dir}/#{camera_exid}/index.m3u8") do
+  defp sleep_until_hls_playlist_exists(token), do: do_sleep_until_hls_playlist_exists(token, 0)
+
+  defp do_sleep_until_hls_playlist_exists(_token, retry) when retry > 30, do: :noop
+  defp do_sleep_until_hls_playlist_exists(token, retry) do
+    unless File.exists?("#{@hls_dir}/#{token}/index.m3u8") do
       :timer.sleep(500)
-      sleep_until_hls_playlist_exists(camera_exid, retry + 1)
+      do_sleep_until_hls_playlist_exists(token, retry + 1)
     end
   end
 
-  defp construct_ffmpeg_command(camera_exid, rtsp_url, token) do
-    "ffmpeg -rtsp_transport tcp -i #{rtsp_url} -f lavfi -i aevalsrc=0 -vcodec copy -acodec aac -map 0:0 -map 1:0 -shortest -strict experimental -f flv rtmp://localhost:1935/live/#{camera_exid}?token=#{token} &"
+  defp construct_ffmpeg_command(rtsp_url, token) do
+    "ffmpeg -rtsp_transport tcp -i #{rtsp_url} -f lavfi -i aevalsrc=0 -vcodec copy -acodec aac -map 0:0 -map 1:0 -shortest -strict experimental -f flv rtmp://localhost:1935/live/#{token} &"
   end
 end
