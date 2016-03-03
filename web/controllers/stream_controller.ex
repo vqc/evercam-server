@@ -1,6 +1,7 @@
 defmodule EvercamMedia.StreamController do
   use EvercamMedia.Web, :controller
 
+  @hls_dir "/tmp/hls"
   @hls_url Application.get_env(:evercam_media, :hls_url)
 
   def rtmp(conn, params) do
@@ -59,6 +60,7 @@ defmodule EvercamMedia.StreamController do
     if length(pids) == 0 do
       construct_ffmpeg_command(camera_exid, rtsp_url, token) |> Porcelain.spawn_shell
     end
+    sleep_until_hls_playlist_exists(camera_exid)
   end
 
   defp stream(camera_exid, rtsp_url, token, :kill) do
@@ -66,6 +68,14 @@ defmodule EvercamMedia.StreamController do
     pids = String.split cmd.out
     Enum.each pids, &Porcelain.shell("kill -9 #{&1}")
     construct_ffmpeg_command(camera_exid, rtsp_url, token) |> Porcelain.spawn_shell
+  end
+
+  defp sleep_until_hls_playlist_exists(camera_exid, retry) when retry > 30, do: :noop
+  defp sleep_until_hls_playlist_exists(camera_exid, retry \\ 0) do
+    unless File.exists?("#{@hls_dir}/#{camera_exid}/index.m3u8") do
+      :timer.sleep(500)
+      sleep_until_hls_playlist_exists(camera_exid, retry + 1)
+    end
   end
 
   defp construct_ffmpeg_command(camera_exid, rtsp_url, token) do
