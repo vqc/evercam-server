@@ -1,6 +1,8 @@
 defmodule EvercamMedia.StreamController do
   use EvercamMedia.Web, :controller
 
+  @hls_url Application.get_env(:evercam_media, :hls_url)
+
   def rtmp(conn, params) do
     conn
     |> put_status(request_stream(params["name"], params["token"], :kill))
@@ -15,7 +17,7 @@ defmodule EvercamMedia.StreamController do
   defp hls_response(200, conn, params) do
     conn
     |> put_resp_header("access-control-allow-origin", "*")
-    |> redirect(external: "#{Application.get_env(:evercam_media, :hls_url)}/hls/#{params["camera_id"]}/index.m3u8")
+    |> redirect(external: "#{@hls_url}/#{params["camera_id"]}/index.m3u8")
   end
 
   defp hls_response(status, conn, _params) do
@@ -27,7 +29,7 @@ defmodule EvercamMedia.StreamController do
   def ts(conn, params) do
     conn
     |> put_resp_header("access-control-allow-origin", "*")
-    |> redirect(external: "#{Application.get_env(:evercam_media, :hls_url)}/hls/#{params["camera_id"]}/#{params["filename"]}")
+    |> redirect(external: "#{@hls_url}/#{params["camera_id"]}/#{params["filename"]}")
   end
 
   defp request_stream(camera_exid, token, command) do

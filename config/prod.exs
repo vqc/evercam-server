@@ -47,7 +47,7 @@ config :phoenix, :filter_parameters, ["password", "api_key"]
 #
 
 config :evercam_media,
-  hls_url: "https://media.evercam.io"
+  hls_url: "https://media.evercam.io/hls"
 
 config :evercam_media,
   start_camera_workers: System.get_env["START_CAMERA_WORKERS"]

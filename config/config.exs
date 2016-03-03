@@ -33,7 +33,7 @@ config :logger, :console,
   metadata: [:request_id]
 
 config :evercam_media,
-  hls_url: "http://localhost:8080"
+  hls_url: "http://localhost:8080/hls"
 
 config :evercam_media,
   storage_dir: "storage"
