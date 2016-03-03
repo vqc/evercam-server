@@ -48,25 +48,20 @@ defmodule EvercamMedia.StreamController do
   end
 
   defp check_auth(camera, username, password) do
-    if camera.config["auth"]["basic"]["username"] != username ||
-      camera.config["auth"]["basic"]["password"] != password do
-      raise FunctionClauseError
+    if Camera.username(camera) != username || Camera.password(camera) != password do
+      raise "Invalid credentials used to request the video stream"
     end
   end
 
   defp stream(rtsp_url, token, :check) do
-    cmd = Porcelain.shell("ps -ef | grep ffmpeg | grep #{rtsp_url} | grep -v grep | awk '{print $2}'")
-    pids = String.split cmd.out
-    if length(pids) == 0 do
+    if length(ffmpeg_pids(rtsp_url)) == 0 do
       construct_ffmpeg_command(rtsp_url, token) |> Porcelain.spawn_shell
     end
     sleep_until_hls_playlist_exists(token)
   end
 
   defp stream(rtsp_url, token, :kill) do
-    cmd = Porcelain.shell("ps -ef | grep ffmpeg | grep #{rtsp_url} | grep -v grep | awk '{print $2}'")
-    pids = String.split cmd.out
-    Enum.each pids, &Porcelain.shell("kill -9 #{&1}")
+    Enum.each(ffmpeg_pids(rtsp_url), &Porcelain.shell("kill -9 #{&1}"))
     construct_ffmpeg_command(rtsp_url, token) |> Porcelain.spawn_shell
   end
 
@@ -78,6 +73,11 @@ defmodule EvercamMedia.StreamController do
       :timer.sleep(500)
       do_sleep_until_hls_playlist_exists(token, retry + 1)
     end
+  end
+
+  defp ffmpeg_pids(rtsp_url) do
+    Porcelain.shell("ps -ef | grep ffmpeg | grep #{rtsp_url} | grep -v grep | awk '{print $2}'").out
+    |> String.split
   end
 
   defp construct_ffmpeg_command(rtsp_url, token) do
