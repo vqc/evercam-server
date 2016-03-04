@@ -7,14 +7,14 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   @root_dir Application.get_env(:evercam_media, :storage_dir)
 
-  def thumbnail_save(camera_exid, image) do
+  def thumbnail_link(camera_exid, snapshot_path) do
+    thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
     try do
       task = Task.async(fn() ->
-        File.open("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg", [:write, :binary, :raw], fn(file) ->
-          IO.binwrite(file, image)
-        end)
+        File.rm!(thumbnail_path)
+        File.ln_s(snapshot_path, thumbnail_path)
       end)
-      Task.await(task, :timer.seconds(2))
+      Task.await(task, :timer.seconds(1))
     catch _type, error ->
       Util.error_handler(error)
     end
@@ -23,9 +23,9 @@ defmodule EvercamMedia.Snapshot.Storage do
   def thumbnail_load(camera_exid) do
     try do
       task = Task.async(fn() ->
-        {:ok, content} = File.open("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg", [:read, :binary, :raw], fn(file) ->
-          IO.binread(file, :all)
-        end)
+        {file_path, _status} = System.cmd("readlink", ["#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"])
+        file_path = String.replace_trailing(file_path, "\n", "")
+        {:ok, content} = File.open(file_path, [:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
         content
       end)
       Task.await(task, :timer.seconds(1))
@@ -54,18 +54,10 @@ defmodule EvercamMedia.Snapshot.Storage do
     try do
       task = Task.async(fn() ->
         :filelib.ensure_dir(to_char_list(directory_path))
+        File.open("#{directory_path}#{file_name}", [:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
+        thumbnail_link(camera_exid, "#{directory_path}#{file_name}")
       end)
       Task.await(task, :timer.seconds(2))
-    catch _type, error ->
-      Util.error_handler(error)
-    end
-    try do
-      task = Task.async(fn() ->
-        File.open("#{directory_path}#{file_name}", [:write, :binary, :raw], fn(file) ->
-          IO.binwrite(file, image)
-        end)
-      end)
-      Task.await(task, :timer.seconds(1))
     catch _type, error ->
       Util.error_handler(error)
     end
