@@ -11,7 +11,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
     try do
       task = Task.async(fn() ->
-        File.rm!(thumbnail_path)
+        File.rm(thumbnail_path)
         File.ln_s(snapshot_path, thumbnail_path)
       end)
       Task.await(task, :timer.seconds(1))
