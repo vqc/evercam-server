@@ -21,14 +21,23 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def thumbnail_load(camera_exid) do
+    thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
     try do
       task = Task.async(fn() ->
-        {file_path, _status} = System.cmd("readlink", ["#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"])
+        case File.lstat(thumbnail_path) do
+          {:error, :enoent} ->
+            File.ln_s(latest(camera_exid), thumbnail_path)
+          {:ok, %File.Stat{type: :regular}} ->
+            File.rm(thumbnail_path)
+            File.ln_s(latest(camera_exid), thumbnail_path)
+          _ -> :noop
+        end
+        {file_path, _status} = System.cmd("readlink", [thumbnail_path])
         file_path = String.replace_trailing(file_path, "\n", "")
         {:ok, content} = File.open(file_path, [:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
         content
       end)
-      Task.await(task, :timer.seconds(1))
+      Task.await(task, :timer.seconds(2))
     catch _type, error ->
       Util.error_handler(error)
       Util.unavailable
@@ -45,6 +54,19 @@ defmodule EvercamMedia.Snapshot.Storage do
       Util.error_handler(error)
       false
     end
+  end
+
+  def latest(camera_exid) do
+    Path.wildcard("#{@root_dir}/#{camera_exid}/snapshots/*")
+    |> Enum.reject(fn(x) -> String.match?(x, ~r/thumbnail.jpg/) end)
+    |> Enum.reduce("", fn(type, acc) ->
+      year = Path.wildcard("#{type}/????/") |> List.last
+      month = Path.wildcard("#{year}/??/") |> List.last
+      day = Path.wildcard("#{month}/??/") |> List.last
+      hour = Path.wildcard("#{day}/??/") |> List.last
+      last = Path.wildcard("#{hour}/??_??_???.jpg") |> List.last
+      Enum.max_by([acc, last], fn(x) -> String.slice(x, -27, 27) end)
+    end)
   end
 
   def save(camera_exid, timestamp, image, notes) do
