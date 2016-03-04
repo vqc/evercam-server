@@ -5,6 +5,8 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.Storage
   alias EvercamMedia.Util
+  import EvercamMedia.Schedule
+  import CloudRecording
 
   @optional_params %{"notes" => nil, "with_data" => false}
 
@@ -169,18 +171,23 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  def snapshot_thumbnail(camera_exid, user) do
-    camera = Camera.get(camera_exid)
+  defp snapshot_thumbnail(camera_exid, user) do
+    spawn fn -> update_thumbnail(camera_exid) end
     thumbnail_exists? = Storage.thumbnail_exists?(camera_exid)
     cond do
       Permissions.Camera.can_snapshot?(user, camera_exid) == false ->
         [403, %{message: "Forbidden"}]
-      thumbnail_exists? == false && camera.is_online == true ->
-        construct_args(camera_exid, true, "Evercam Thumbnail") |> fetch_snapshot(3)
       thumbnail_exists? ->
         [200, %{image: Storage.thumbnail_load(camera_exid)}]
       true ->
         [404, %{message: "Snapshot not found"}]
+    end
+  end
+
+  defp update_thumbnail(camera_exid) do
+    camera = Camera.get_full(camera_exid)
+    if camera.is_online && !scheduled_now?(camera) && sleep(camera.cloud_recordings) != 1000 do
+      construct_args(camera_exid, true, "Evercam Thumbnail") |> fetch_snapshot(3)
     end
   end
 

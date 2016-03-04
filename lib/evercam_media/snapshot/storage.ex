@@ -47,7 +47,10 @@ defmodule EvercamMedia.Snapshot.Storage do
   def thumbnail_exists?(camera_exid) do
     try do
       task = Task.async(fn() ->
-        File.exists?("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg")
+        case File.lstat("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg") do
+          {:error, _error} -> false
+          {:ok, %File.Stat{}} -> true
+        end
       end)
       Task.await(task, :timer.seconds(1))
     catch _type, error ->
