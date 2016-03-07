@@ -5,8 +5,6 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.Storage
   alias EvercamMedia.Util
-  import EvercamMedia.Schedule
-  import CloudRecording
 
   @optional_params %{"notes" => nil, "with_data" => false}
 
@@ -186,7 +184,7 @@ defmodule EvercamMedia.SnapshotController do
 
   defp update_thumbnail(camera_exid) do
     camera = Camera.get_full(camera_exid)
-    if camera.is_online && scheduled_now?(camera) != {:ok, true} && sleep(camera.cloud_recordings) != 1000 do
+    if camera.is_online && !Camera.recording?(camera) do
       construct_args(camera_exid, true, "Evercam Thumbnail") |> fetch_snapshot(3)
     end
   end

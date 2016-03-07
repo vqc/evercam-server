@@ -3,6 +3,7 @@ defmodule Camera do
   import Ecto.Changeset
   import Ecto.Query
   alias EvercamMedia.Repo
+  alias EvercamMedia.Schedule
 
   @required_fields ~w(exid name owner_id config is_public is_online_email_owner_notification)
   @optional_fields ~w(timezone thumbnail_url is_online last_polled_at last_online_at updated_at created_at)
@@ -104,8 +105,8 @@ defmodule Camera do
     end
   end
 
-  def get_vendor_exid(camera) do
-    case camera.vendor_model do
+  def get_vendor_exid(camera_full) do
+    case camera_full.vendor_model do
       nil -> ""
       vendor_model -> vendor_model.vendor.exid
     end
@@ -117,6 +118,12 @@ defmodule Camera do
       "url" => external_url(camera),
       "auth" => auth(camera)
     }
+  end
+
+  def recording?(camera_full) do
+    !!Application.get_env(:evercam_media, :start_camera_workers)
+    && CloudRecording.sleep(camera_full.cloud_recordings) == 1000
+    && Schedule.scheduled_now?(camera_full) == {:ok, true}
   end
 
   def changeset(camera, params \\ :invalid) do
