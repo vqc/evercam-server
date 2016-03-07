@@ -73,19 +73,11 @@ defmodule Camera do
   def external_url(camera, type \\ "http") do
     host = camera.config["external_host"] |> to_string
     port = camera.config["external_#{type}_port"] |> to_string
-    camera_url(host, port, type)
-  end
-
-  defp camera_url("", _port, _type) do
-    nil
-  end
-
-  defp camera_url(host, "", type) do
-    "#{type}://#{host}"
-  end
-
-  defp camera_url(host, port, type) do
-    "#{type}://#{host}:#{port}"
+    case {host, port} do
+      {"", _} -> nil
+      {host, ""} -> "#{type}://#{host}"
+      {host, port} -> "#{type}://#{host}:#{port}"
+    end
   end
 
   def auth(camera) do
