@@ -68,8 +68,6 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   Given a camera, it returns a map of values required for starting a camera worker.
   """
   def get_config(camera) do
-    url = "#{Camera.external_url(camera)}#{Camera.res_url(camera, "jpg")}"
-
     {
       :ok,
       %{
@@ -81,7 +79,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
           vendor_exid: Camera.get_vendor_exid(camera),
           schedule: CloudRecording.schedule(camera.cloud_recordings),
           timezone: camera.timezone,
-          url: url,
+          url: Camera.snapshot_url(camera),
           auth: Camera.auth(camera),
           sleep: CloudRecording.sleep(camera.cloud_recordings),
           initial_sleep: CloudRecording.initial_sleep(camera.cloud_recordings)

@@ -70,16 +70,6 @@ defmodule Camera do
     |> Repo.first
   end
 
-  def external_url(camera, type \\ "http") do
-    host = camera.config["external_host"] |> to_string
-    port = camera.config["external_#{type}_port"] |> to_string
-    case {host, port} do
-      {"", _} -> nil
-      {host, ""} -> "#{type}://#{host}"
-      {host, port} -> "#{type}://#{host}:#{port}"
-    end
-  end
-
   def auth(camera) do
     username(camera) <> ":" <> password(camera)
   end
@@ -92,16 +82,26 @@ defmodule Camera do
     "#{camera.config["auth"]["basic"]["password"]}"
   end
 
-  def res_url(camera, type \\ "jpg") do
+  def snapshot_url(camera) do
+    external_url(camera) <> res_url(camera)
+  end
+
+  defp external_url(camera, type \\ "http") do
+    host = camera.config["external_host"] |> to_string
+    port = camera.config["external_#{type}_port"] |> to_string
+    case {host, port} do
+      {"", _} -> nil
+      {host, ""} -> "#{type}://#{host}"
+      {host, port} -> "#{type}://#{host}:#{port}"
+    end
+  end
+
+  defp res_url(camera, type \\ "jpg") do
     url = "#{camera.config["snapshots"][type]}"
     case String.starts_with?(url, "/") || String.length(url) == 0 do
       true -> "#{url}"
       false -> "/#{url}"
     end
-  end
-
-  def snapshot_url(camera) do
-    "#{external_url(camera)}#{res_url(camera)}"
   end
 
   def get_vendor_exid(camera) do
