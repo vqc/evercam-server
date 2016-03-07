@@ -81,7 +81,7 @@ defmodule Camera do
   end
 
   def auth(camera) do
-    "#{camera.config["auth"]["basic"]["username"]}:#{camera.config["auth"]["basic"]["password"]}"
+    username(camera) <> ":" <> password(camera)
   end
 
   def username(camera) do
