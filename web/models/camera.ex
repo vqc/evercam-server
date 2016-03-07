@@ -106,10 +106,9 @@ defmodule Camera do
   end
 
   def get_vendor_exid(camera) do
-    if camera.vendor_model do
-      vendor_exid = camera.vendor_model.vendor.exid
-    else
-      vendor_exid = ""
+    case camera.vendor_model do
+      nil -> ""
+      vendor_model -> vendor_model.vendor.exid
     end
   end
 
