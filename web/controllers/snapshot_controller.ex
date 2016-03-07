@@ -186,7 +186,7 @@ defmodule EvercamMedia.SnapshotController do
 
   defp update_thumbnail(camera_exid) do
     camera = Camera.get_full(camera_exid)
-    if camera.is_online && !scheduled_now?(camera) && sleep(camera.cloud_recordings) != 1000 do
+    if camera.is_online && scheduled_now?(camera) != {:ok, true} && sleep(camera.cloud_recordings) != 1000 do
       construct_args(camera_exid, true, "Evercam Thumbnail") |> fetch_snapshot(3)
     end
   end
