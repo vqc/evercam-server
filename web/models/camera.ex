@@ -94,10 +94,9 @@ defmodule Camera do
 
   def res_url(camera, type \\ "jpg") do
     url = "#{camera.config["snapshots"][type]}"
-    if String.starts_with?(url, "/") || String.length(url) == 0 do
-      "#{url}"
-    else
-      "/#{url}"
+    case String.starts_with?(url, "/") || String.length(url) == 0 do
+      true -> "#{url}"
+      false -> "/#{url}"
     end
   end
 
