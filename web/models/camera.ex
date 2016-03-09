@@ -91,7 +91,7 @@ defmodule Camera do
     host = camera.config["external_host"] |> to_string
     port = camera.config["external_#{type}_port"] |> to_string
     case {host, port} do
-      {"", _} -> nil
+      {"", _} -> ""
       {host, ""} -> "#{type}://#{host}"
       {host, port} -> "#{type}://#{host}:#{port}"
     end
