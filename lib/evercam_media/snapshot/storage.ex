@@ -174,10 +174,10 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
-  def construct_directory_path(camera_exid, timestamp, app_dir) do
+  def construct_directory_path(camera_exid, timestamp, app_dir, root_dir \\ @root_dir) do
     timestamp
     |> DateTime.Parse.unix!
-    |> Strftime.strftime!("#{@root_dir}/#{camera_exid}/snapshots/#{app_dir}/%Y/%m/%d/%H/")
+    |> Strftime.strftime!("#{root_dir}/#{camera_exid}/snapshots/#{app_dir}/%Y/%m/%d/%H/")
   end
 
   def construct_file_name(timestamp) do
