@@ -3,45 +3,8 @@ defmodule EvercamMedia.Snapshot.S3 do
   TODO
   """
 
-  alias Calendar.DateTime
   import String, only: [contains?: 2, replace_trailing: 3]
   require Logger
-
-  def upload(camera_exid, timestamp, image) do
-    Logger.debug "[#{camera_exid}] [snapshot_upload] [#{timestamp}]"
-    file_path = "/#{camera_exid}/snapshots/#{timestamp}.jpg"
-    date = DateTime.now!("UTC") |> DateTime.Format.httpdate
-    host = "#{System.get_env("AWS_BUCKET")}.s3.amazonaws.com"
-    url = "#{host}#{file_path}"
-    content_type = "image/jpeg"
-    string = "PUT\n\n#{content_type}\n#{date}\n/#{System.get_env("AWS_BUCKET")}#{file_path}"
-    signature = :crypto.hmac(:sha, "#{System.get_env("AWS_SECRET_KEY")}", string) |> Base.encode64
-    authorization = "AWS #{System.get_env("AWS_ACCESS_KEY")}:#{signature}"
-
-    headers = [
-      "Host": host,
-      "Date": date,
-      "Content-Type": content_type,
-      "Authorization": authorization
-    ]
-
-    HTTPoison.put(url, image, headers)
-  end
-
-  def generate_file_url(file_name) do
-    configure_erlcloud
-    "/" <> name = file_name
-    name   = String.to_char_list(name)
-    bucket = System.get_env("AWS_BUCKET") |> String.to_char_list
-    {_expires, host, uri} = :erlcloud_s3.make_link(100000000, bucket, name)
-    "#{to_string(host)}#{to_string(uri)}"
-  end
-
-  defp configure_erlcloud do
-    :erlcloud_s3.configure(
-      to_char_list(System.get_env["AWS_ACCESS_KEY"]),
-      to_char_list(System.get_env["AWS_SECRET_KEY"]))
-  end
 
   def delete(camera_exid, prefix_list) do
     Enum.each(prefix_list, fn(prefix) ->
