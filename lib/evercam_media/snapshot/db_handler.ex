@@ -158,6 +158,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Repo.update!(changeset)
         ConCache.delete(:camera_full, camera_exid)
         camera = Camera.get_full(camera_exid)
+        invalidate_camera_cache(camera)
         log_camera_status(camera, status, datetime)
       end
     end)
