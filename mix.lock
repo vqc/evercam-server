@@ -16,7 +16,7 @@
   "ecto": {:hex, :ecto, "2.0.0-beta.1"},
   "erlcloud": {:git, "https://github.com/gleber/erlcloud.git", "c18f1be8925ee0e94e373dbcde6a2dfa6a6aa91a", []},
   "erlware_commons": {:hex, :erlware_commons, "0.15.0"},
-  "ex_aws": {:git, "https://github.com/CargoSense/ex_aws.git", "c8d62612a427ef5cf6cfd74b772dcf82e90ab567", []},
+  "ex_aws": {:git, "https://github.com/CargoSense/ex_aws.git", "63f25a8960e1f70c79f8b1bf303043f24125c769", []},
   "exactor": {:hex, :exactor, "2.2.0"},
   "exq": {:hex, :exq, "0.6.4"},
   "exrm": {:git, "https://github.com/bitwalker/exrm.git", "35a7d0d9caae83efdbf1152de5145b82a07e5363", []},
