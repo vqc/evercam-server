@@ -40,6 +40,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
   @doc """
   Either stream a snapshot to subscribers or shut down streaming
   """
+  def handle_info(:tick, nil), do: :noop
   def handle_info(:tick, camera) do
     cond do
       length(subscribers(camera.exid)) == 0 ->
