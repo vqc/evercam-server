@@ -53,7 +53,7 @@ config :evercam_media,
   start_camera_workers: System.get_env["START_CAMERA_WORKERS"]
 
 config :evercam_media,
-  storage_dir: "/home/evercam/storage"
+  storage_dir: "/opt/storage"
 
 config :exq,
   port: System.get_env("REDIS_PORT") |> String.to_integer,
