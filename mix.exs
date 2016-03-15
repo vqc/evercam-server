@@ -33,6 +33,7 @@ defmodule EvercamMedia.Mixfile do
     :ex_aws,
     :exq,
     :httpotion,
+    :jsx,
     :runtime_tools,
     :tzdata,
     :httpoison,
