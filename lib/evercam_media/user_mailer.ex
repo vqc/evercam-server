@@ -34,8 +34,12 @@ defmodule EvercamMedia.UserMailer do
     thumbnail_exists? = Storage.thumbnail_exists?(camera.exid)
     cond do
       thumbnail_exists? ->
-        image = Storage.thumbnail_load(camera.exid)
-        data = "data:image/jpeg;base64,#{Base.encode64(image)}"
+        image =
+          camera.exid
+          |> Storage.thumbnail_load
+          |> Base.encode64
+          |> String.replace("\n", "")
+        data = "data:image/jpeg;base64,#{image}"
       true ->
         nil
     end
