@@ -78,7 +78,7 @@ defmodule EvercamMedia.Mixfile do
      {:uuid, "~> 1.1"},
      {:exrm, github: "bitwalker/exrm"},
      {:credo, github: "rrrene/credo", only: :dev},
-     {:mailgun, github: "chrismccord/mailgun"}]
+     {:mailgun, github: "mosic/mailgun"}]
   end
 end
 

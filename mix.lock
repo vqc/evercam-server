@@ -25,7 +25,7 @@
   "ibrowse": {:hex, :ibrowse, "4.2.2"},
   "idna": {:hex, :idna, "1.2.0"},
   "jsx": {:hex, :jsx, "2.8.0"},
-  "mailgun": {:git, "https://github.com/chrismccord/mailgun.git", "300fa086c69933d76d12c09d534ce73e5f98e2e9", []},
+  "mailgun": {:git, "https://github.com/mosic/mailgun.git", "8c73ada08137ce875b487949167d60fecb1715dc", []},
   "metrics": {:hex, :metrics, "1.0.1"},
   "mimerl": {:hex, :mimerl, "1.0.2"},
   "phoenix": {:hex, :phoenix, "1.1.4"},
