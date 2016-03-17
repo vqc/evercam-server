@@ -65,7 +65,7 @@
             <br>
             <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">This is the last image we recieved from the camera:</p><br>
 
-            <img src="<%= @thumbnail %>" alt='Last Snapshot' style="max-width: 550px; display:block; margin:0 auto;">
+            <img src="cid:snapshot.jpg" alt='Last Snapshot' style="max-width: 550px; display:block; margin:0 auto;">
             <% end %>
             <br>
             <p style="line-height: 1.6; margin: 0 0 0px; padding: 0;">The Evercam Team</p>

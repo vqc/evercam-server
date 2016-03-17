@@ -13,35 +13,28 @@ defmodule EvercamMedia.UserMailer do
   end
 
   def camera_online(user, camera) do
+    thumbnail = thumbnail(camera)
     Mailgun.Client.send_email @config,
       to: user.email,
       subject: "Evercam Camera Online",
       from: @from,
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.html", user: user, camera: camera, thumbnail: thumbnail(camera)),
+      attachments: [%{content: thumbnail, filename: "snapshot.jpg"}],
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.html", user: user, camera: camera, thumbnail: thumbnail),
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.txt", user: user, camera: camera)
   end
 
   def camera_offline(user, camera) do
+    thumbnail = thumbnail(camera)
     Mailgun.Client.send_email @config,
       to: user.email,
       subject: "Evercam Camera Offline",
       from: @from,
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.html", user: user, camera: camera, thumbnail: thumbnail(camera)),
+      attachments: [%{content: thumbnail, filename: "snapshot.jpg"}],
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.html", user: user, camera: camera, thumbnail: thumbnail),
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.txt", user: user, camera: camera)
   end
 
-  defp thumbnail(camera) do
-    thumbnail_exists? = Storage.thumbnail_exists?(camera.exid)
-    cond do
-      thumbnail_exists? ->
-        image =
-          camera.exid
-          |> Storage.thumbnail_load
-          |> Base.encode64
-          |> String.replace("\n", "")
-        data = "data:image/jpeg;base64,#{image}"
-      true ->
-        nil
-    end
+  def thumbnail(camera) do
+    if Storage.thumbnail_exists?(camera.exid), do: Storage.thumbnail_load(camera.exid), else: nil
   end
 end
