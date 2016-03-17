@@ -19,7 +19,7 @@ defmodule EvercamMedia.UserMailer do
       subject: "Evercam Camera Online",
       from: @from,
       attachments: [%{content: thumbnail, filename: "snapshot.jpg"}],
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.html", user: user, camera: camera, thumbnail: thumbnail),
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.html", user: user, camera: camera, thumbnail_available: !!thumbnail),
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.txt", user: user, camera: camera)
   end
 
@@ -30,11 +30,11 @@ defmodule EvercamMedia.UserMailer do
       subject: "Evercam Camera Offline",
       from: @from,
       attachments: [%{content: thumbnail, filename: "snapshot.jpg"}],
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.html", user: user, camera: camera, thumbnail: thumbnail),
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.html", user: user, camera: camera, thumbnail_available: !!thumbnail),
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.txt", user: user, camera: camera)
   end
 
-  def thumbnail(camera) do
+  defp thumbnail(camera) do
     if Storage.thumbnail_exists?(camera.exid), do: Storage.thumbnail_load(camera.exid), else: nil
   end
 end
