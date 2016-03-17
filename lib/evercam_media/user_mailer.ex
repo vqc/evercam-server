@@ -18,7 +18,7 @@ defmodule EvercamMedia.UserMailer do
       subject: "Evercam Camera Online",
       from: @from,
       html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.html", user: user, camera: camera, thumbnail: thumbnail(camera)),
-      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.txt", user: user, camera: camera, thumbnail: thumbnail(camera))
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.txt", user: user, camera: camera)
   end
 
   def camera_offline(user, camera) do
@@ -27,7 +27,7 @@ defmodule EvercamMedia.UserMailer do
       subject: "Evercam Camera Offline",
       from: @from,
       html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.html", user: user, camera: camera, thumbnail: thumbnail(camera)),
-      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.txt", user: user, camera: camera, thumbnail: thumbnail(camera))
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.txt", user: user, camera: camera)
   end
 
   defp thumbnail(camera) do
