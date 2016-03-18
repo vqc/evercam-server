@@ -159,6 +159,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         ConCache.delete(:camera_full, camera_exid)
         camera = Camera.get_full(camera_exid)
         invalidate_camera_cache(camera)
+        broadcast_change_to_users(camera)
         log_camera_status(camera, status, datetime)
       end
     end)
@@ -199,6 +200,11 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def invalidate_camera_cache(camera) do
     Exq.enqueue(Exq, "cache", "Evercam::CacheInvalidationWorker", camera.exid)
+  end
+
+  def broadcast_change_to_users(camera) do
+    User.with_access_to(camera)
+    |> Enum.each(fn(user) -> Util.broadcast_camera_status(camera.exid, camera.is_online, user.username) end)
   end
 
   def log_camera_status(camera, true, datetime) do

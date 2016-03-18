@@ -44,6 +44,13 @@ defmodule EvercamMedia.Util do
       %{image: Base.encode64(image), timestamp: timestamp})
   end
 
+  def broadcast_camera_status(camera_exid, status, username) do
+    EvercamMedia.Endpoint.broadcast(
+      "users:#{username}",
+      "camera-status-changed",
+      %{camera_id: camera_exid, status: status})
+  end
+
   def error_handler(error) do
     Logger.error inspect(error)
     Logger.error Exception.format_stacktrace System.stacktrace
