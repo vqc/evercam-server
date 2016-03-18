@@ -2,6 +2,7 @@ defmodule EvercamMedia.UserSocket do
   use Phoenix.Socket
 
   ## Channels
+  channel "users:*", EvercamMedia.UserChannel
   channel "cameras:*", EvercamMedia.CameraChannel
 
   ## Transports
