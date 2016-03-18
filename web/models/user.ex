@@ -43,6 +43,15 @@ defmodule User do
     |> Repo.first
   end
 
+  def with_access_to(camera_full) do
+    User
+    |> join(:inner, [u], cs in CameraShare)
+    |> where([_, cs], cs.camera_id == ^camera_full.id)
+    |> where([u, cs], u.id == cs.user_id)
+    |> Repo.all
+    |> Enum.into([camera_full.owner])
+  end
+
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
