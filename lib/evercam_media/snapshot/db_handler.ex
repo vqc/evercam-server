@@ -144,7 +144,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
   end
 
-  def update_camera_status(camera_exid, timestamp, status, update_thumbnail? \\ false) do
+  def update_camera_status(camera_exid, timestamp, status, _ \\ false) do
     camera = Camera.get_full(camera_exid)
 
     task = Task.async(fn() ->
@@ -166,36 +166,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     Task.await(task, :timer.seconds(1))
 
     camera
-  end
-
-  def update_thumbnail(camera, timestamp) do
-    params = %{thumbnail_url: generate_thumbnail_url(camera.exid, timestamp)}
-    changeset = Camera.changeset(camera, params)
-    Repo.update(changeset)
-    ConCache.delete(:camera_full, camera.exid)
-  end
-
-  def stale_thumbnail?(nil, _), do: true
-  def stale_thumbnail?(thumbnail_url, timestamp) do
-    on_s3? = String.match?(thumbnail_url, ~r/AWSAccessKeyId/)
-    thumbnail_timestamp = parse_thumbnail_url(thumbnail_url, on_s3?)
-    (timestamp - thumbnail_timestamp) > 300
-  end
-
-  def parse_thumbnail_url(url, true) do
-    Regex.run(~r/snapshots\/(.+)\.jpg/, url)
-    |> List.last
-    |> String.to_integer
-  end
-
-  def parse_thumbnail_url(url, false) do
-    Regex.run(~r/thumbnail\/(.+)\?token/, url)
-    |> List.last
-    |> Calendar.NaiveDateTime.Parse.iso8601
-    |> elem(1)
-    |> Calendar.DateTime.from_naive("Etc/UTC")
-    |> elem(1)
-    |> Calendar.DateTime.Format.unix
   end
 
   def invalidate_camera_cache(camera) do
