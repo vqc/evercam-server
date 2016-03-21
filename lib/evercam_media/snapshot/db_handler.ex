@@ -25,9 +25,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
     Logger.debug "[#{camera_exid}] [snapshot_success]"
-
     notes = "Evercam Proxy"
-    cached_response = ConCache.get(:cache, camera_exid)
 
     spawn fn ->
       update_camera_status("#{camera_exid}", timestamp, true, true)
