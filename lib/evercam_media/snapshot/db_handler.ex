@@ -25,9 +25,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
     Logger.debug "[#{camera_exid}] [snapshot_success]"
-
     notes = "Evercam Proxy"
-    cached_response = ConCache.get(:cache, camera_exid)
 
     spawn fn ->
       update_camera_status("#{camera_exid}", timestamp, true, true)
@@ -144,7 +142,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
   end
 
-  def update_camera_status(camera_exid, timestamp, status, update_thumbnail? \\ false) do
+  def update_camera_status(camera_exid, timestamp, status, _ \\ false) do
     camera = Camera.get_full(camera_exid)
 
     task = Task.async(fn() ->
@@ -159,6 +157,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         ConCache.delete(:camera_full, camera_exid)
         camera = Camera.get_full(camera_exid)
         invalidate_camera_cache(camera)
+        broadcast_change_to_users(camera)
         log_camera_status(camera, status, datetime)
       end
     end)
@@ -167,38 +166,13 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     camera
   end
 
-  def update_thumbnail(camera, timestamp) do
-    params = %{thumbnail_url: generate_thumbnail_url(camera.exid, timestamp)}
-    changeset = Camera.changeset(camera, params)
-    Repo.update(changeset)
-    ConCache.delete(:camera_full, camera.exid)
-  end
-
-  def stale_thumbnail?(nil, _), do: true
-  def stale_thumbnail?(thumbnail_url, timestamp) do
-    on_s3? = String.match?(thumbnail_url, ~r/AWSAccessKeyId/)
-    thumbnail_timestamp = parse_thumbnail_url(thumbnail_url, on_s3?)
-    (timestamp - thumbnail_timestamp) > 300
-  end
-
-  def parse_thumbnail_url(url, true) do
-    Regex.run(~r/snapshots\/(.+)\.jpg/, url)
-    |> List.last
-    |> String.to_integer
-  end
-
-  def parse_thumbnail_url(url, false) do
-    Regex.run(~r/thumbnail\/(.+)\?token/, url)
-    |> List.last
-    |> Calendar.NaiveDateTime.Parse.iso8601
-    |> elem(1)
-    |> Calendar.DateTime.from_naive("Etc/UTC")
-    |> elem(1)
-    |> Calendar.DateTime.Format.unix
-  end
-
   def invalidate_camera_cache(camera) do
     Exq.enqueue(Exq, "cache", "Evercam::CacheInvalidationWorker", camera.exid)
+  end
+
+  def broadcast_change_to_users(camera) do
+    User.with_access_to(camera)
+    |> Enum.each(fn(user) -> Util.broadcast_camera_status(camera.exid, camera.is_online, user.username) end)
   end
 
   def log_camera_status(camera, true, datetime) do

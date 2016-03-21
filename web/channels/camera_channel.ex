@@ -1,4 +1,4 @@
-defmodule EvercamMedia.SnapshotChannel do
+defmodule EvercamMedia.CameraChannel do
   use Phoenix.Channel
   alias EvercamMedia.Snapshot.StreamerSupervisor
 
