@@ -144,23 +144,27 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def update_camera_status(camera_exid, timestamp, status, _ \\ false) do
     camera = Camera.get_full(camera_exid)
 
-    task = Task.async(fn() ->
-      if camera.is_online != status do
-        datetime =
-          Calendar.DateTime.Parse.unix!(timestamp)
+    try do
+      task = Task.async(fn() ->
+        if camera.is_online != status do
+          datetime =
+            Calendar.DateTime.Parse.unix!(timestamp)
           |> Calendar.DateTime.to_erl
           |> Ecto.DateTime.cast!
-        params = construct_camera(datetime, status, camera.is_online == status)
-        changeset = Camera.changeset(camera, params)
-        Repo.update!(changeset)
-        ConCache.delete(:camera_full, camera_exid)
-        camera = Camera.get_full(camera_exid)
-        invalidate_camera_cache(camera)
-        broadcast_change_to_users(camera)
-        log_camera_status(camera, status, datetime)
-      end
-    end)
-    Task.await(task, :timer.seconds(1))
+          params = construct_camera(datetime, status, camera.is_online == status)
+          changeset = Camera.changeset(camera, params)
+          Repo.update!(changeset)
+          ConCache.delete(:camera_full, camera_exid)
+          camera = Camera.get_full(camera_exid)
+          invalidate_camera_cache(camera)
+          broadcast_change_to_users(camera)
+          log_camera_status(camera, status, datetime)
+        end
+      end)
+      Task.await(task, :timer.seconds(1))
+    catch _type, error ->
+      Util.error_handler(error)
+    end
 
     camera
   end
