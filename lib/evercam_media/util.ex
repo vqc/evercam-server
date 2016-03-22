@@ -10,6 +10,12 @@ defmodule EvercamMedia.Util do
     |> File.read!
   end
 
+  def storage_unavailable do
+    Application.app_dir(:evercam_media)
+    |> Path.join("priv/static/images/storage-unavailable.jpg")
+    |> File.read!
+  end
+
   def is_jpeg(data) do
     case data do
       <<0xFF,0xD8, _data :: binary>> -> true

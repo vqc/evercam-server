@@ -106,7 +106,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp data_render(conn, code, _response) do
-    image = Util.unavailable
+    image = Util.storage_unavailable
     conn
     |> put_status(code)
     |> put_resp_header("content-type", "image/jpg")
