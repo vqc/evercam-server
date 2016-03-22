@@ -27,10 +27,9 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     Logger.debug "[#{camera_exid}] [snapshot_success]"
     notes = "Evercam Proxy"
 
-    spawn fn ->
-      update_camera_status("#{camera_exid}", timestamp, true, true)
-      |> save_snapshot_record(timestamp, nil, notes)
-    end
+    camera = Camera.get_full("#{camera_exid}")
+    spawn fn -> save_snapshot_record(camera, timestamp, nil, notes) end
+    spawn fn -> update_camera_status("#{camera_exid}", timestamp, true, true) end
     ConCache.put(:cache, camera_exid, %{image: image, timestamp: timestamp, notes: notes})
     {:ok, state}
   end
