@@ -28,7 +28,7 @@ config :evercam_media, EvercamMedia.Endpoint,
 # disk for the key and cert.
 
 # Do not print debug messages in production
-config :logger, level: :error
+config :logger, level: :warn
 
 # Filter out these fields from the logs
 config :phoenix, :filter_parameters, ["password", "api_key"]
