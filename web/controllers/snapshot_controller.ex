@@ -227,7 +227,7 @@ defmodule EvercamMedia.SnapshotController do
     spawn fn ->
       Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
       Storage.save(args[:camera_exid], args[:timestamp], data, args[:notes])
-      DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true, true)
+      DBHandler.update_camera_status(args[:camera_exid], args[:timestamp], true)
       |> DBHandler.save_snapshot_record(args[:timestamp], nil, args[:notes])
     end
     [200, %{image: data, timestamp: args[:timestamp], notes: args[:notes]}]
