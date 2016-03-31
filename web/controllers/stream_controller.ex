@@ -76,11 +76,11 @@ defmodule EvercamMedia.StreamController do
   end
 
   defp ffmpeg_pids(rtsp_url) do
-    Porcelain.shell("ps -ef | grep ffmpeg | grep #{rtsp_url} | grep -v grep | awk '{print $2}'").out
+    Porcelain.shell("ps -ef | grep ffmpeg | 'grep #{rtsp_url}' | grep -v grep | awk '{print $2}'").out
     |> String.split
   end
 
   defp construct_ffmpeg_command(rtsp_url, token) do
-    "ffmpeg -rtsp_transport tcp -i #{rtsp_url} -f lavfi -i aevalsrc=0 -vcodec copy -acodec aac -map 0:0 -map 1:0 -shortest -strict experimental -f flv rtmp://localhost:1935/live/#{token} &"
+    "ffmpeg -rtsp_transport tcp -i '#{rtsp_url}' -f lavfi -i aevalsrc=0 -vcodec copy -acodec aac -map 0:0 -map 1:0 -shortest -strict experimental -f flv rtmp://localhost:1935/live/#{token} &"
   end
 end
