@@ -141,30 +141,43 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def update_camera_status(camera_exid, timestamp, status, _ \\ false) do
     camera = Camera.get_full(camera_exid)
+    error_count = ConCache.dirty_get_or_store(:snapshot_error, camera.exid, fn() ->
+      if status, do: 0, else: 1
+    end)
+    cond do
+      status == true && camera.is_online != status ->
+        change_camera_status(camera, timestamp, true)
+        ConCache.dirty_delete(:snapshot_error, camera.exid)
+        Logger.warn "[#{camera_exid}] [update_status] [online]"
+      status == false && camera.is_online != status && error_count >= 5 ->
+        change_camera_status(camera, timestamp, false)
+        Logger.warn "[#{camera_exid}] [update_status] [offline]"
+      status == false ->
+        ConCache.dirty_put(:snapshot_error, camera.exid, error_count+1)
+      true -> :noop
+    end
+    Camera.get_full(camera_exid)
+  end
 
+  def change_camera_status(camera, timestamp, status) do
     try do
       task = Task.async(fn() ->
-        if camera.is_online != status do
-          datetime =
-            Calendar.DateTime.Parse.unix!(timestamp)
-            |> Calendar.DateTime.to_erl
-            |> Ecto.DateTime.cast!
-          params = construct_camera(datetime, status, camera.is_online == status)
-          changeset = Camera.changeset(camera, params)
-          Repo.update!(changeset)
-          ConCache.delete(:camera_full, camera_exid)
-          camera = Camera.get_full(camera_exid)
-          invalidate_camera_cache(camera)
-          broadcast_change_to_users(camera)
-          log_camera_status(camera, status, datetime)
-        end
+        datetime =
+          Calendar.DateTime.Parse.unix!(timestamp)
+          |> Calendar.DateTime.to_erl
+          |> Ecto.DateTime.cast!
+        params = construct_camera(datetime, status, camera.is_online == status)
+        changeset = Camera.changeset(camera, params)
+        Repo.update!(changeset)
+        ConCache.delete(:camera_full, camera.exid)
+        invalidate_camera_cache(camera)
+        broadcast_change_to_users(camera)
+        log_camera_status(camera, status, datetime)
       end)
       Task.await(task, :timer.seconds(1))
     catch _type, error ->
       Util.error_handler(error)
     end
-
-    camera
   end
 
   def invalidate_camera_cache(camera) do
