@@ -83,65 +83,69 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         [500, %{message: "Sorry, we dropped the ball."}]
       :bad_request ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [bad_request]"
-        update_camera_status("#{camera_exid}", timestamp, false, "bad_request")
+        update_camera_status("#{camera_exid}", timestamp, false, "bad_request", 50)
         [504, %{message: "Bad request."}]
       :closed ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [closed]"
+        update_camera_status("#{camera_exid}", timestamp, false, "closed", 5)
         [504, %{message: "Connection closed."}]
       :nxdomain ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [nxdomain]"
-        update_camera_status("#{camera_exid}", timestamp, false, "nxdomain")
+        update_camera_status("#{camera_exid}", timestamp, false, "nxdomain", 100)
         [504, %{message: "Non-existant domain."}]
       :ehostunreach ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [ehostunreach]"
-        update_camera_status("#{camera_exid}", timestamp, false, "ehostunreach")
+        update_camera_status("#{camera_exid}", timestamp, false, "ehostunreach", 20)
         [504, %{message: "No route to host."}]
       :enetunreach ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [enetunreach]"
-        update_camera_status("#{camera_exid}", timestamp, false, "enetunreach")
+        update_camera_status("#{camera_exid}", timestamp, false, "enetunreach", 20)
         [504, %{message: "Network unreachable."}]
       :timeout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [timeout]"
+        update_camera_status("#{camera_exid}", timestamp, false, "timeout", 5)
         [504, %{message: "Camera response timed out."}]
       :connect_timeout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [connect_timeout]"
-        update_camera_status("#{camera_exid}", timestamp, false, "connect_timeout")
+        update_camera_status("#{camera_exid}", timestamp, false, "connect_timeout", 5)
         [504, %{message: "Connection to the camera timed out."}]
       :econnrefused ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [econnrefused]"
-        update_camera_status("#{camera_exid}", timestamp, false, "econnrefused")
+        update_camera_status("#{camera_exid}", timestamp, false, "econnrefused", 20)
         [504, %{message: "Connection refused."}]
       :not_found ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [not_found]"
-        update_camera_status("#{camera_exid}", timestamp, false, "not_found")
+        update_camera_status("#{camera_exid}", timestamp, false, "not_found", 100)
         [504, %{message: "Camera url is not found.", response: error[:response]}]
       :forbidden ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [forbidden]"
-        update_camera_status("#{camera_exid}", timestamp, false, "forbidden")
+        update_camera_status("#{camera_exid}", timestamp, false, "forbidden", 100)
         [504, %{message: "Camera responded with a Forbidden message.", response: error[:response]}]
       :unauthorized ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [unauthorized]"
-        update_camera_status("#{camera_exid}", timestamp, false, "unauthorized")
+        update_camera_status("#{camera_exid}", timestamp, false, "unauthorized", 100)
         [504, %{message: "Camera responded with a Unauthorized message.", response: error[:response]}]
       :device_error ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [device_error]"
-        update_camera_status("#{camera_exid}", timestamp, false, "device_error")
+        update_camera_status("#{camera_exid}", timestamp, false, "device_error", 5)
         [504, %{message: "Camera responded with a Device Error message.", response: error[:response]}]
       :device_busy ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [device_busy]"
+        update_camera_status("#{camera_exid}", timestamp, false, "device_busy", 1)
         [502, %{message: "Camera responded with a Device Busy message.", response: error[:response]}]
       :not_a_jpeg ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [not_a_jpeg]"
+        update_camera_status("#{camera_exid}", timestamp, false, "device_busy", 1)
         [504, %{message: "Camera didn't respond with an image.", response: error[:response]}]
       _reason ->
-        Logger.info "[#{camera_exid}] [snapshot_error] [unhandled] #{inspect error}"
+        Logger.warn "[#{camera_exid}] [snapshot_error] [unhandled] #{inspect error}"
         [500, %{message: "Sorry, we dropped the ball."}]
     end
   end
 
-  def update_camera_status(camera_exid, timestamp, status, error_code \\ "generic") do
+  def update_camera_status(camera_exid, timestamp, status, error_code \\ "generic", error_weight \\ 1) do
     camera = Camera.get_full(camera_exid)
-    error_count = ConCache.dirty_get_or_store(:snapshot_error, camera.exid, fn() ->
+    error_total = ConCache.dirty_get_or_store(:snapshot_error, camera.exid, fn() ->
       if status, do: 0, else: 1
     end)
     cond do
@@ -151,14 +155,14 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.warn "[#{camera_exid}] [update_status] [online]"
       status == true ->
         ConCache.dirty_put(:snapshot_error, camera.exid, 0)
-      status == false && camera.is_online != status && error_count >= 5 ->
+      status == false && camera.is_online != status && error_total >= 100 ->
         change_camera_status(camera, timestamp, false)
         Logger.warn "[#{camera_exid}] [update_status] [offline]"
       status == false && camera.is_online != status ->
-        ConCache.dirty_put(:snapshot_error, camera.exid, error_count+1)
+        ConCache.dirty_put(:snapshot_error, camera.exid, error_total+error_weight)
         Logger.warn "[#{camera_exid}] [update_status] [error] [#{error_code}]"
       status == false ->
-        ConCache.dirty_put(:snapshot_error, camera.exid, error_count+1)
+        ConCache.dirty_put(:snapshot_error, camera.exid, error_total+error_weight)
       true -> :noop
     end
     Camera.get_full(camera_exid)
