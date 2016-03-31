@@ -143,12 +143,12 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  defp fetch_snapshot(args, retry \\ 0) do
+  defp fetch_snapshot(args, attempt \\ 1) do
     response = CamClient.fetch_snapshot(args)
 
-    case {response, args[:is_online], retry} do
-      {{:error, _error}, true, retry} when retry < 3 ->
-        fetch_snapshot(args, retry + 1)
+    case {response, args[:is_online], attempt} do
+      {{:error, _error}, true, attempt} when attempt <= 3 ->
+        fetch_snapshot(args, attempt + 1)
       _ ->
         parse_camera_response(args, response, args[:store_snapshot])
     end
