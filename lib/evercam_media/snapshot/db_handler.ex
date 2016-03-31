@@ -26,7 +26,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     {camera_exid, timestamp, image} = data
     Logger.debug "[#{camera_exid}] [snapshot_success]"
     notes = "Evercam Proxy"
-
     camera = Camera.get_full("#{camera_exid}")
     spawn fn -> save_snapshot_record(camera, timestamp, nil, notes) end
     spawn fn -> update_camera_status("#{camera_exid}", timestamp, true, true) end
@@ -149,8 +148,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         if camera.is_online != status do
           datetime =
             Calendar.DateTime.Parse.unix!(timestamp)
-          |> Calendar.DateTime.to_erl
-          |> Ecto.DateTime.cast!
+            |> Calendar.DateTime.to_erl
+            |> Ecto.DateTime.cast!
           params = construct_camera(datetime, status, camera.is_online == status)
           changeset = Camera.changeset(camera, params)
           Repo.update!(changeset)
