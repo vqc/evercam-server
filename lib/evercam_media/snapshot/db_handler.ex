@@ -36,6 +36,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def handle_event({:snapshot_error, data}, state) do
     {camera_exid, timestamp, error} = data
     parse_snapshot_error(camera_exid, timestamp, error)
+    |> handle_snapshot_error(camera_exid, timestamp, error)
     {:ok, state}
   end
 
@@ -58,21 +59,19 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def parse_snapshot_error(camera_exid, timestamp, error) do
-    reason =
-      case error do
-        %CaseClauseError{} ->
-          :bad_request
-        %HTTPotion.HTTPError{} ->
-          Map.get(error, :message) |> String.to_atom
-        error when is_map(error) ->
-          Map.get(error, :reason)
-        _ ->
-          error
-      end
-    handle_snapshot_error(camera_exid, timestamp, error, reason)
+    case error do
+      %CaseClauseError{} ->
+        :bad_request
+      %HTTPotion.HTTPError{} ->
+        Map.get(error, :message) |> String.to_atom
+      error when is_map(error) ->
+        Map.get(error, :reason)
+      _ ->
+        error
+    end
   end
 
-  defp handle_snapshot_error(camera_exid, timestamp, error, reason) do
+  def handle_snapshot_error(reason, camera_exid, timestamp, error) do
     case reason do
       :system_limit ->
         Logger.error "[#{camera_exid}] [snapshot_error] [system_limit] Traceback."
