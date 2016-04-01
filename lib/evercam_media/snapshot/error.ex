@@ -91,6 +91,7 @@ defmodule EvercamMedia.Snapshot.Error do
         [504, %{message: "Camera didn't respond with an image.", response: error[:response]}]
       _reason ->
         Logger.warn "[#{camera_exid}] [snapshot_error] [unhandled] #{inspect error}"
+        update_camera_status("#{camera_exid}", timestamp, false, "unhandled", 1)
         [500, %{message: "Sorry, we dropped the ball."}]
     end
   end
