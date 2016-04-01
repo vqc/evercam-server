@@ -59,11 +59,11 @@ defmodule EvercamMedia.Snapshot.Error do
         [504, %{message: "Request to the camera timed out."}]
       :timeout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [timeout]"
-        update_camera_status("#{camera_exid}", timestamp, false, "timeout", 2)
+        update_camera_status("#{camera_exid}", timestamp, false, "timeout", 1)
         [504, %{message: "Camera response timed out."}]
       :connect_timeout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [connect_timeout]"
-        update_camera_status("#{camera_exid}", timestamp, false, "connect_timeout", 2)
+        update_camera_status("#{camera_exid}", timestamp, false, "connect_timeout", 1)
         [504, %{message: "Connection to the camera timed out."}]
       :econnrefused ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [econnrefused]"
@@ -83,7 +83,7 @@ defmodule EvercamMedia.Snapshot.Error do
         [504, %{message: "Camera responded with a Unauthorized message.", response: error[:response]}]
       :device_error ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [device_error]"
-        update_camera_status("#{camera_exid}", timestamp, false, "device_error", 5)
+        update_camera_status("#{camera_exid}", timestamp, false, "device_error", 2)
         [504, %{message: "Camera responded with a Device Error message.", response: error[:response]}]
       :device_busy ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [device_busy]"
