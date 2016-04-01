@@ -143,11 +143,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
   end
 
-  def update_camera_status(camera_exid, timestamp, status, error_code \\ "generic", error_weight \\ 1) do
+  def update_camera_status(camera_exid, timestamp, status, error_code \\ "generic", error_weight \\ 0) do
     camera = Camera.get_full(camera_exid)
-    error_total = ConCache.dirty_get_or_store(:snapshot_error, camera.exid, fn() ->
-      if status, do: 0, else: 1
-    end)
+    old_error_total = ConCache.dirty_get_or_store(:snapshot_error, camera.exid, fn() -> 0 end)
+    error_total = old_error_total + error_weight
     cond do
       status == true && camera.is_online != status ->
         change_camera_status(camera, timestamp, true)
@@ -159,10 +158,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         change_camera_status(camera, timestamp, false)
         Logger.warn "[#{camera_exid}] [update_status] [offline]"
       status == false && camera.is_online != status ->
-        ConCache.dirty_put(:snapshot_error, camera.exid, error_total+error_weight)
-        Logger.warn "[#{camera_exid}] [update_status] [error] [#{error_code}]"
+        ConCache.dirty_put(:snapshot_error, camera.exid, error_total)
+        Logger.warn "[#{camera_exid}] [update_status] [error] [#{error_code}] [#{error_total}]"
       status == false ->
-        ConCache.dirty_put(:snapshot_error, camera.exid, error_total+error_weight)
+        ConCache.dirty_put(:snapshot_error, camera.exid, error_total)
       true -> :noop
     end
     Camera.get_full(camera_exid)
