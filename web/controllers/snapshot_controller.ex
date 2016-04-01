@@ -243,8 +243,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp parse_camera_response(args, {:error, error}, _store_snapshot) do
-    Error.parse(error)
-    |> Error.handle(args[:camera_exid], args[:timestamp], error)
+    Error.parse(error) |> Error.handle(args[:camera_exid], args[:timestamp], error)
   end
 
   defp parse_test_response({:ok, data}) do
@@ -252,7 +251,6 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp parse_test_response({:error, error}) do
-    Error.parse(error)
-    |> Error.handle("", nil, error)
+    Error.parse(error) |> Error.handle("", nil, error)
   end
 end
