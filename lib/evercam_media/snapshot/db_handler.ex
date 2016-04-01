@@ -101,6 +101,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Logger.debug "[#{camera_exid}] [snapshot_error] [enetunreach]"
         update_camera_status("#{camera_exid}", timestamp, false, "enetunreach", 20)
         [504, %{message: "Network unreachable."}]
+      :req_timedout ->
+        Logger.debug "[#{camera_exid}] [snapshot_error] [req_timedout]"
+        update_camera_status("#{camera_exid}", timestamp, false, "req_timedout", 5)
+        [504, %{message: "Request to the camera timed out."}]
       :timeout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [timeout]"
         update_camera_status("#{camera_exid}", timestamp, false, "timeout", 5)
