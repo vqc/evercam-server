@@ -246,32 +246,12 @@ defmodule EvercamMedia.SnapshotController do
     |> DBHandler.handle_snapshot_error(args[:camera_exid], args[:timestamp], error)
   end
 
-  defp parse_test_response(response) do
-    case response do
-      {:ok, data} ->
-        [200, %{image: data}]
-      {:error, %{reason: :not_found, response: response}} ->
-        [504, %{message: "Camera url is not found.", response: response}]
-      {:error, %{reason: :device_error, response: response}} ->
-        [504, %{message: "Camera responded with a Device Error message.", response: response}]
-      {:error, %{reason: :device_busy, response: response}} ->
-        [502, %{message: "Camera responded with a Device Busy message.", response: response}]
-      {:error, %{reason: :unauthorized, response: response}} ->
-        [502, %{message: "Camera responded with a Unauthorized message.", response: response}]
-      {:error, %{reason: :forbidden, response: response}} ->
-        [502, %{message: "Camera responded with a Forbidden message.", response: response}]
-      {:error, %{reason: :not_a_jpeg, response: response}} ->
-        [504, %{message: "Camera didn't respond with an image.", response: response}]
-      {:error, %HTTPoison.Response{}} ->
-        [504, %{message: response.body}]
-      {:error, %HTTPoison.Error{id: nil, reason: :timeout}} ->
-        [504, %{message: "Camera response timed out."}]
-      {:error, %HTTPoison.Error{}} ->
-        [504, %{message: "Camera seems to be offline."}]
-      {:error, %CaseClauseError{term: {:error, :bad_request}}} ->
-        [504, %{message: "Bad request."}]
-      _error ->
-        [500, %{message: "Sorry, we dropped the ball."}]
-    end
+  defp parse_test_response({:ok, data}) do
+    [200, %{image: data}]
+  end
+
+  defp parse_test_response({:error, error}) do
+    DBHandler.parse_snapshot_error(error)
+    |> DBHandler.handle_snapshot_error("", nil, error)
   end
 end

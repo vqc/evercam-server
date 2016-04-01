@@ -148,6 +148,11 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def update_camera_status(camera_exid, timestamp, status, error_code \\ "generic", error_weight \\ 0) do
+    do_update_camera_status(camera_exid, timestamp, status, error_code, error_weight)
+  end
+
+  defp do_update_camera_status("", _timestamp, _status, _error_code, _error_weight), do: :noop
+  defp do_update_camera_status(camera_exid, timestamp, status, error_code, error_weight) do
     camera = Camera.get_full(camera_exid)
     old_error_total = ConCache.dirty_get_or_store(:snapshot_error, camera.exid, fn() -> 0 end)
     error_total = old_error_total + error_weight
