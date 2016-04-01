@@ -47,7 +47,7 @@ defmodule EvercamMedia.Snapshot.Error do
         [504, %{message: "No route to host."}]
       :enetunreach ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [enetunreach]"
-        update_camera_status("#{camera_exid}", timestamp, false, "enetunreach", 20)
+        update_camera_status("#{camera_exid}", timestamp, false, "enetunreach", 10)
         [504, %{message: "Network unreachable."}]
       :req_timedout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [req_timedout]"
@@ -55,11 +55,11 @@ defmodule EvercamMedia.Snapshot.Error do
         [504, %{message: "Request to the camera timed out."}]
       :timeout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [timeout]"
-        update_camera_status("#{camera_exid}", timestamp, false, "timeout", 5)
+        update_camera_status("#{camera_exid}", timestamp, false, "timeout", 2)
         [504, %{message: "Camera response timed out."}]
       :connect_timeout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [connect_timeout]"
-        update_camera_status("#{camera_exid}", timestamp, false, "connect_timeout", 5)
+        update_camera_status("#{camera_exid}", timestamp, false, "connect_timeout", 2)
         [504, %{message: "Connection to the camera timed out."}]
       :econnrefused ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [econnrefused]"
