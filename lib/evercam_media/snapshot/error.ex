@@ -63,7 +63,7 @@ defmodule EvercamMedia.Snapshot.Error do
         [504, %{message: "Connection to the camera timed out."}]
       :econnrefused ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [econnrefused]"
-        update_camera_status("#{camera_exid}", timestamp, false, "econnrefused", 20)
+        update_camera_status("#{camera_exid}", timestamp, false, "econnrefused", 2)
         [504, %{message: "Connection refused."}]
       :not_found ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [not_found]"
