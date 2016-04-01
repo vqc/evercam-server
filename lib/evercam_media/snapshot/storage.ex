@@ -1,8 +1,6 @@
 defmodule EvercamMedia.Snapshot.Storage do
+  use Calendar
   require Logger
-  alias Calendar.Date
-  alias Calendar.DateTime
-  alias Calendar.Strftime
   alias EvercamMedia.Util
 
   @root_dir Application.get_env(:evercam_media, :storage_dir)

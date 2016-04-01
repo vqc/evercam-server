@@ -1,7 +1,6 @@
 defmodule EvercamMedia.CameraControllerTest do
+  use Calendar
   use EvercamMedia.ConnCase
-  alias Calendar.DateTime
-  alias Calendar.Strftime
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.Storage

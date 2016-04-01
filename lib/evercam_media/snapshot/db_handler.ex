@@ -14,14 +14,13 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     version and not now. This update can be avoided if thumbnails can be dynamically
     served.
   """
+  use Calendar
   use GenEvent
   require Logger
   alias EvercamMedia.Repo
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.Error
-  alias Calendar.DateTime
-  alias Calendar.Strftime
 
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
@@ -88,8 +87,9 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     try do
       task = Task.async(fn() ->
         datetime =
-          Calendar.DateTime.Parse.unix!(timestamp)
-          |> Calendar.DateTime.to_erl
+          timestamp
+          |> DateTime.Parse.unix!
+          |> DateTime.to_erl
           |> Ecto.DateTime.cast!
         params = construct_camera(datetime, status, camera.is_online == status)
         changeset = Camera.changeset(camera, params)
@@ -134,12 +134,14 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def save_snapshot_record(camera, timestamp, motion_level, notes) do
     datetime =
-      Calendar.DateTime.Parse.unix!(timestamp)
-      |> Calendar.DateTime.to_erl
+      timestamp
+      |> DateTime.Parse.unix!
+      |> DateTime.to_erl
       |> Ecto.DateTime.cast!
     snapshot_timestamp =
-      Calendar.DateTime.Parse.unix!(timestamp)
-      |> Calendar.Strftime.strftime!("%Y%m%d%H%M%S%f")
+      timestamp
+      |> DateTime.Parse.unix!
+      |> Strftime.strftime!("%Y%m%d%H%M%S%f")
 
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
     parameters = %{camera_id: camera.id, notes: notes, motionlevel: motion_level, created_at: datetime, snapshot_id: snapshot_id}

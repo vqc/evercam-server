@@ -1,7 +1,5 @@
 defmodule EvercamMedia.Util do
   use Calendar
-  alias Calendar.DateTime
-  alias Calendar.NaiveDateTime
   require Logger
 
   def unavailable do
