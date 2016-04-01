@@ -8,7 +8,7 @@ defmodule EvercamMedia.Snapshot.Poller do
   use GenServer
   require Logger
   alias EvercamMedia.Snapshot.Worker
-  import EvercamMedia.Schedule
+  import EvercamMedia.Schedule, only: [scheduled_now?: 2]
 
   ################
   ## Client API ##
