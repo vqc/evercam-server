@@ -76,7 +76,7 @@ defmodule EvercamMedia.StreamController do
   end
 
   defp ffmpeg_pids(rtsp_url) do
-    Porcelain.shell("ps -ef | grep ffmpeg | 'grep #{rtsp_url}' | grep -v grep | awk '{print $2}'").out
+    Porcelain.shell("ps -ef | grep ffmpeg | grep '#{rtsp_url}' | grep -v grep | awk '{print $2}'").out
     |> String.split
   end
 
