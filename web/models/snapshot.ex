@@ -20,7 +20,7 @@ defmodule Snapshot do
 
   def by_id(snapshot_id) do
     Snapshot
-    |> where([snap], snap.snapshot_id == ^snapshot_id)
+    |> where(snapshot_id: ^snapshot_id)
     |> SnapshotRepo.first
   end
 

@@ -55,7 +55,7 @@ defmodule Camera do
 
   def by_exid(exid) do
     Camera
-    |> where([cam], cam.exid == ^exid)
+    |> where(exid: ^exid)
     |> Repo.first
   end
 

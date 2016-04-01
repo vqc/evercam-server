@@ -31,7 +31,7 @@ defmodule AccessToken do
 
   def by_request_token(token) do
     AccessToken
-    |> where([at], at.request == ^token)
+    |> where(request: ^token)
     |> Repo.first
   end
 

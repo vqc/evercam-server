@@ -38,8 +38,8 @@ defmodule User do
 
   def by_api_keys(api_id, api_key) do
     User
-    |> where([u], u.api_id == ^api_id)
-    |> where([u], u.api_key == ^api_key)
+    |> where(api_id: ^api_id)
+    |> where(api_key: ^api_key)
     |> Repo.first
   end
 
