@@ -73,7 +73,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
         Util.broadcast_snapshot(camera.exid, data, timestamp)
         DBHandler.update_camera_status(camera.exid, timestamp, true)
       {:error, error} ->
-        DBHandler.parse_snapshot_error(camera.exid, timestamp, error)
+        DBHandler.parse_snapshot_error(error)
         |> DBHandler.handle_snapshot_error(camera.exid, timestamp, error)
     end
   end

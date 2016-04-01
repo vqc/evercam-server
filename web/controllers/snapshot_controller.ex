@@ -242,7 +242,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp parse_camera_response(args, {:error, error}, _store_snapshot) do
-    DBHandler.parse_snapshot_error(args[:camera_exid], args[:timestamp], error)
+    DBHandler.parse_snapshot_error(error)
     |> DBHandler.handle_snapshot_error(args[:camera_exid], args[:timestamp], error)
   end
 

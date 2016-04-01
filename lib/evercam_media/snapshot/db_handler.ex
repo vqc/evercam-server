@@ -35,7 +35,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   def handle_event({:snapshot_error, data}, state) do
     {camera_exid, timestamp, error} = data
-    parse_snapshot_error(camera_exid, timestamp, error)
+    parse_snapshot_error(error)
     |> handle_snapshot_error(camera_exid, timestamp, error)
     {:ok, state}
   end
@@ -58,7 +58,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
   end
 
-  def parse_snapshot_error(camera_exid, timestamp, error) do
+  def parse_snapshot_error(error) do
     case error do
       %CaseClauseError{} ->
         :bad_request
