@@ -3,6 +3,7 @@ defmodule EvercamMedia.SnapshotController do
   use Calendar
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
+  alias EvercamMedia.Snapshot.Error
   alias EvercamMedia.Snapshot.Storage
   alias EvercamMedia.Util
 
@@ -242,8 +243,8 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp parse_camera_response(args, {:error, error}, _store_snapshot) do
-    DBHandler.parse_snapshot_error(error)
-    |> DBHandler.handle_snapshot_error(args[:camera_exid], args[:timestamp], error)
+    Error.parse(error)
+    |> Error.handle(args[:camera_exid], args[:timestamp], error)
   end
 
   defp parse_test_response({:ok, data}) do
@@ -251,7 +252,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp parse_test_response({:error, error}) do
-    DBHandler.parse_snapshot_error(error)
-    |> DBHandler.handle_snapshot_error("", nil, error)
+    Error.parse(error)
+    |> Error.handle("", nil, error)
   end
 end
