@@ -7,6 +7,7 @@ defmodule EvercamMedia.MotionDetection.Lib do
   end
 
   def compare(camera_exid, image1, image2) do
+    Logger.debug "[#{camera_exid}] [motion_detection] [calculating]"
     loaded_image1 = load(image1)
     loaded_image2 = load(image2)
     if loaded_image1 == -1 or loaded_image2 == -1 do
@@ -23,6 +24,7 @@ defmodule EvercamMedia.MotionDetection.Lib do
 
       result = compare(bytes1, bytes2, position, min_position, step, minimum)
       motion_level = round(result * 100)
+      Logger.debug "[#{camera_exid}] [motion_detection] [calculated] [#{motion_level}]"
 
       motion_level
     end

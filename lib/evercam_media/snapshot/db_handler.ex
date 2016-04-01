@@ -48,10 +48,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def calculate_motion_level(_camera_exid, _image_1, nil), do: nil
   def calculate_motion_level(camera_exid, image_1, %{image: image_2}) do
     try do
-      Logger.debug "[#{camera_exid}] [motion_detection] [calculating]"
-      level = EvercamMedia.MotionDetection.Lib.compare(camera_exid, image_1, image_2)
-      Logger.debug "[#{camera_exid}] [motion_detection] [calculated] [#{level}]"
-      level
+      EvercamMedia.MotionDetection.Lib.compare(camera_exid, image_1, image_2)
     rescue
       error ->
         Util.error_handler(error)
