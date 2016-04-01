@@ -149,18 +149,14 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   defp construct_camera(datetime, online_status, online_status_unchanged) do
-    camera_params(datetime, online_status, online_status_unchanged)
+    do_construct_camera(datetime, online_status, online_status_unchanged)
   end
 
-  defp camera_params(datetime, _, true) do
-    %{updated_at: datetime, last_polled_at: datetime}
-  end
-
-  defp camera_params(datetime, false, false) do
-    %{updated_at: datetime, last_polled_at: datetime, is_online: false}
-  end
-
-  defp camera_params(datetime, true, false) do
+  defp do_construct_camera(datetime, false, false) do
     %{updated_at: datetime, last_polled_at: datetime, is_online: true, last_online_at: datetime}
+  end
+
+  defp do_construct_camera(datetime, status, _) do
+    %{updated_at: datetime, last_polled_at: datetime, is_online: status}
   end
 end
