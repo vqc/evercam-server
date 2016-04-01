@@ -148,18 +148,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     SnapshotRepo.insert(changeset)
   end
 
-  def generate_thumbnail_url(camera_exid, timestamp) do
-    iso_timestamp =
-      timestamp
-      |> DateTime.Parse.unix!
-      |> Strftime.strftime!("%Y-%m-%dT%H:%M:%S.%f")
-      |> String.slice(0, 23)
-      |> String.ljust(23, ?0)
-      |> String.ljust(24, ?Z)
-    token = Util.encode([camera_exid, iso_timestamp])
-    EvercamMedia.Endpoint.static_url <> "/v1/cameras/#{camera_exid}/thumbnail/#{iso_timestamp}?token=#{token}"
-  end
-
   defp construct_camera(datetime, online_status, online_status_unchanged) do
     camera_params(datetime, online_status, online_status_unchanged)
   end
