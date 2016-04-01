@@ -13,7 +13,6 @@ defmodule Camera do
     belongs_to :vendor_model, VendorModel, foreign_key: :model_id
     has_many :shares, CameraShare
     has_many :snapshots, Snapshot
-    has_many :apps, App
     has_one :cloud_recordings, CloudRecording
     has_one :motion_detections, MotionDetection
 
