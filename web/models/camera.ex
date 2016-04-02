@@ -104,10 +104,10 @@ defmodule Camera do
     end
   end
 
-  def get_vendor_exid(camera_full) do
+  def get_vendor_attr(camera_full, attr) do
     case camera_full.vendor_model do
       nil -> ""
-      vendor_model -> vendor_model.vendor.exid
+      vendor_model -> Map.get(vendor_model.vendor, attr)
     end
   end
 

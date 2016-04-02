@@ -190,7 +190,7 @@ defmodule EvercamMedia.SnapshotController do
     %{
       camera_exid: camera.exid,
       is_online: camera.is_online,
-      vendor_exid: Camera.get_vendor_exid(camera),
+      vendor_exid: Camera.get_vendor_attr(camera, :exid),
       url: Camera.snapshot_url(camera),
       username: Camera.username(camera),
       password: Camera.password(camera),
