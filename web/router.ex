@@ -5,10 +5,12 @@ defmodule EvercamMedia.Router do
     plug :accepts, ["html", "json", "jpg"]
     plug :fetch_session
     plug :fetch_flash
+    plug CORSPlug, origin: ["*"]
   end
 
   pipeline :api do
     plug :accepts, ["json", "jpg"]
+    plug CORSPlug, origin: ["*"]
   end
 
   pipeline :auth do

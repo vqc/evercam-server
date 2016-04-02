@@ -12,7 +12,6 @@ defmodule EvercamMedia.ONVIFController do
   defp default_respond(conn, code, response) do
     conn
     |> put_status(code)
-    |> put_resp_header("access-control-allow-origin", "*")
     |> json(response)
   end
 end

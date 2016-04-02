@@ -48,14 +48,12 @@ defmodule EvercamMedia.SnapshotController do
     conn
     |> put_status(200)
     |> put_resp_header("content-type", "image/jpg")
-    |> put_resp_header("access-control-allow-origin", "*")
     |> text(response[:image])
   end
 
   defp show_render(conn, code, response) do
     conn
     |> put_status(code)
-    |> put_resp_header("access-control-allow-origin", "*")
     |> json(response)
   end
 
@@ -64,21 +62,18 @@ defmodule EvercamMedia.SnapshotController do
 
     conn
     |> put_status(200)
-    |> put_resp_header("access-control-allow-origin", "*")
     |> json(%{created_at: response[:timestamp], notes: response[:notes], data: data})
   end
 
   defp create_render(conn, 200, response, _) do
     conn
     |> put_status(200)
-    |> put_resp_header("access-control-allow-origin", "*")
     |> json(%{created_at: response[:timestamp], notes: response[:notes]})
   end
 
   defp create_render(conn, code, response, _) do
     conn
     |> put_status(code)
-    |> put_resp_header("access-control-allow-origin", "*")
     |> json(response)
   end
 
@@ -87,14 +82,12 @@ defmodule EvercamMedia.SnapshotController do
 
     conn
     |> put_status(200)
-    |> put_resp_header("access-control-allow-origin", "*")
     |> json(%{data: data, status: "ok"})
   end
 
   defp test_render(conn, code, response) do
     conn
     |> put_status(code)
-    |> put_resp_header("access-control-allow-origin", "*")
     |> json(response)
   end
 
@@ -102,7 +95,6 @@ defmodule EvercamMedia.SnapshotController do
     conn
     |> put_status(200)
     |> put_resp_header("content-type", "image/jpg")
-    |> put_resp_header("access-control-allow-origin", "*")
     |> text(response)
   end
 
@@ -111,7 +103,6 @@ defmodule EvercamMedia.SnapshotController do
     conn
     |> put_status(code)
     |> put_resp_header("content-type", "image/jpg")
-    |> put_resp_header("access-control-allow-origin", "*")
     |> text(image)
   end
 
@@ -119,7 +110,6 @@ defmodule EvercamMedia.SnapshotController do
     conn
     |> put_status(200)
     |> put_resp_header("content-type", "image/jpg")
-    |> put_resp_header("access-control-allow-origin", "*")
     |> text(response[:image])
   end
 
@@ -128,7 +118,6 @@ defmodule EvercamMedia.SnapshotController do
     conn
     |> put_status(code)
     |> put_resp_header("content-type", "image/jpg")
-    |> put_resp_header("access-control-allow-origin", "*")
     |> text(image)
   end
 

@@ -6,6 +6,7 @@
   "combine": {:hex, :combine, "0.7.0"},
   "con_cache": {:hex, :con_cache, "0.10.0"},
   "connection": {:hex, :connection, "1.0.2"},
+  "cors_plug": {:hex, :cors_plug, "1.1.1"},
   "cowboy": {:hex, :cowboy, "1.0.4"},
   "cowlib": {:hex, :cowlib, "1.0.2"},
   "credo": {:git, "https://github.com/rrrene/credo.git", "d063c42e1f12669cf2405cdcd37c1ff03811cf41", []},

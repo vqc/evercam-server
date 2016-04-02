@@ -5,12 +5,10 @@ defmodule EvercamMedia.UserController do
     if user = EvercamMedia.Repo.get(User, user_id) do
       conn
       |> put_status(:ok)
-      |> put_resp_header("access-control-allow-origin", "*")
       |> render(EvercamMedia.UserView, "user.json", %{user: user})
     else
       conn
       |> put_status(:not_found)
-      |> put_resp_header("access-control-allow-origin", "*")
       |> render(EvercamMedia.ErrorView, "error.json", %{message: "User not found.", status: 404})
     end
   end
@@ -33,7 +31,6 @@ defmodule EvercamMedia.UserController do
       {:ok, user} ->
         conn
         |> put_status(:ok)
-        |> put_resp_header("access-control-allow-origin", "*")
         |> render("user.json", %{user: user})
       {:error, changeset} ->
         handle_error(conn, 400, changeset)
@@ -56,7 +53,6 @@ defmodule EvercamMedia.UserController do
         if key, do: EvercamMedia.UserMailer.confirm(user, key)
         conn
         |> put_status(:created)
-        |> put_resp_header("access-control-allow-origin", "*")
         |> render("user.json", %{user: user})
     end
   end
@@ -64,7 +60,6 @@ defmodule EvercamMedia.UserController do
   defp handle_error(conn, status, changeset) do
     conn
     |> put_status(status)
-    |> put_resp_header("access-control-allow-origin", "*")
     |> render(EvercamMedia.ChangesetView, "error.json", changeset: changeset)
   end
 end

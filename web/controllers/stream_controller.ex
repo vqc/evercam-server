@@ -17,7 +17,6 @@ defmodule EvercamMedia.StreamController do
 
   defp hls_response(200, conn, params) do
     conn
-    |> put_resp_header("access-control-allow-origin", "*")
     |> redirect(external: "#{@hls_url}/#{params["token"]}/index.m3u8")
   end
 
@@ -29,7 +28,6 @@ defmodule EvercamMedia.StreamController do
 
   def ts(conn, params) do
     conn
-    |> put_resp_header("access-control-allow-origin", "*")
     |> redirect(external: "#{@hls_url}/#{params["token"]}/#{params["filename"]}")
   end
 
