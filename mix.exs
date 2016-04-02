@@ -26,30 +26,30 @@ defmodule EvercamMedia.Mixfile do
   defp app_list(_), do: app_list
   defp app_list, do: [
     :calecto,
+    :calendar,
     :con_cache,
     :connection,
-    :cowboy,
     :cors_plug,
+    :cowboy,
     :ecto,
     :ex_aws,
     :exq,
-    :httpotion,
-    :jsx,
-    :runtime_tools,
-    :tzdata,
     :httpoison,
+    :httpotion,
     :inets,
+    :jsx,
     :mailgun,
     :phoenix,
     :phoenix_ecto,
     :phoenix_html,
     :porcelain,
     :postgrex,
-    :calendar,
-    :timex,
     :quantum,
+    :runtime_tools,
+    :timex,
+    :tzdata,
     :uuid,
-    :xmerl
+    :xmerl,
   ]
 
   # Specifies which paths to compile per environment
