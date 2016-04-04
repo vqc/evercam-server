@@ -10,37 +10,34 @@ defmodule EvercamMedia.Types.JSON do
         or is_number(term),
     do: {:ok, term}
 
-  def cast(_),
-    do: :error
+  def cast(_), do: :error
 
-  def load(term),
-    do: {:ok, term}
+  def load(term), do: {:ok, term}
 
-  def dump(term),
-    do: {:ok, term}
+  def dump(term), do: {:ok, term}
+end
 
-  defmodule Extension do
-    alias Postgrex.TypeInfo
+defmodule EvercamMedia.Types.JSON.Extension do
+  alias Postgrex.TypeInfo
 
-    @behaviour Postgrex.Extension
+  @behaviour Postgrex.Extension
 
-    def init(_parameters, opts),
-      do: Keyword.fetch!(opts, :library)
+  def init(_parameters, opts),
+    do: Keyword.fetch!(opts, :library)
 
-    def matching(_library),
-      do: [type: "json", type: "jsonb"]
+  def matching(_library),
+    do: [type: "json", type: "jsonb"]
 
-    def format(_library),
-      do: :binary
+  def format(_library),
+    do: :binary
 
-    def encode(%TypeInfo{type: "json"}, map, _state, library),
-      do: library.encode!(map)
-    def encode(%TypeInfo{type: "jsonb"}, map, _state, library),
-      do: <<1, library.encode!(map)::binary>>
+  def encode(%TypeInfo{type: "json"}, map, _state, library),
+    do: library.encode!(map)
+  def encode(%TypeInfo{type: "jsonb"}, map, _state, library),
+    do: <<1, library.encode!(map)::binary>>
 
-    def decode(%TypeInfo{type: "json"}, json, _state, library),
-      do: library.decode!(json)
-    def decode(%TypeInfo{type: "jsonb"}, <<1, json::binary>>, _state, library),
-      do: library.decode!(json)
-  end
+  def decode(%TypeInfo{type: "json"}, json, _state, library),
+    do: library.decode!(json)
+  def decode(%TypeInfo{type: "jsonb"}, <<1, json::binary>>, _state, library),
+    do: library.decode!(json)
 end
