@@ -7,6 +7,16 @@ defmodule EvercamMedia.CameraController do
   alias EvercamMedia.Util
   require Logger
 
+  def show(conn, params) do
+    camera =
+      params["id"]
+      |> String.replace_trailing(".json", "")
+      |> Camera.get_full
+
+    conn
+    |> render("show.json", %{camera: camera, user: conn.assigns[:current_user]})
+  end
+
   def thumbnail(conn, %{"id" => exid, "timestamp" => iso_timestamp, "token" => token}) do
     try do
       [token_exid, token_timestamp] = Util.decode(token)

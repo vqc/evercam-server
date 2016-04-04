@@ -112,6 +112,20 @@ defmodule Camera do
     end
   end
 
+  def get_model_attr(camera_full, attr) do
+    case camera_full.vendor_model do
+      nil -> ""
+      vendor_model -> Map.get(vendor_model, attr)
+    end
+  end
+
+  def get_timezone(camera) do
+    case camera.timezone do
+      nil -> "Etc/UTC"
+      timezone -> timezone
+    end
+  end
+
   def get_camera_info(exid) do
     camera = Camera.get(exid)
     %{
