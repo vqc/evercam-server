@@ -12,26 +12,15 @@ defmodule EvercamMedia.UserMailer do
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "confirm.txt", user: user, code: code)
   end
 
-  def camera_online(user, camera) do
+  def camera_status(status, user, camera) do
     thumbnail = thumbnail(camera)
     Mailgun.Client.send_email @config,
       to: user.email,
-      subject: "Evercam Camera Online",
+      subject: "Evercam Camera \"#{camera.name}\" is now #{status}",
       from: @from,
       attachments: attachments(thumbnail),
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.html", user: user, camera: camera, thumbnail_available: !!thumbnail),
-      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "online.txt", user: user, camera: camera)
-  end
-
-  def camera_offline(user, camera) do
-    thumbnail = thumbnail(camera)
-    Mailgun.Client.send_email @config,
-      to: user.email,
-      subject: "Evercam Camera Offline",
-      from: @from,
-      attachments: attachments(thumbnail),
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.html", user: user, camera: camera, thumbnail_available: !!thumbnail),
-      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "offline.txt", user: user, camera: camera)
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "#{status}.html", user: user, camera: camera, thumbnail_available: !!thumbnail),
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "#{status}.txt", user: user, camera: camera)
   end
 
   defp thumbnail(camera) do

@@ -114,21 +114,15 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     |> Enum.each(fn(user) -> Util.broadcast_camera_status(camera.exid, camera.is_online, user.username) end)
   end
 
-  def log_camera_status(camera, true, datetime) do
-    parameters = %{camera_id: camera.id, action: "online", done_at: datetime}
-    changeset = CameraActivity.changeset(%CameraActivity{}, parameters)
-    SnapshotRepo.insert(changeset)
-    if camera.is_online_email_owner_notification do
-      EvercamMedia.UserMailer.camera_online(camera.owner, camera)
-    end
-  end
+  def log_camera_status(camera, true, datetime), do: do_log_camera_status(camera, "online", datetime)
+  def log_camera_status(camera, false, datetime), do: do_log_camera_status(camera, "offline", datetime)
 
-  def log_camera_status(camera, false, datetime) do
-    parameters = %{camera_id: camera.id, action: "offline", done_at: datetime}
+  defp do_log_camera_status(camera, status, datetime) do
+    parameters = %{camera_id: camera.id, action: status, done_at: datetime}
     changeset = CameraActivity.changeset(%CameraActivity{}, parameters)
     SnapshotRepo.insert(changeset)
     if camera.is_online_email_owner_notification do
-      EvercamMedia.UserMailer.camera_offline(camera.owner, camera)
+      EvercamMedia.UserMailer.camera_status(status, camera.owner, camera)
     end
   end
 
