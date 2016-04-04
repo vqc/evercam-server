@@ -25,6 +25,7 @@ defmodule Camera do
     field :is_online_email_owner_notification, :boolean, default: false
     field :discoverable, :boolean, default: false
     field :config, EvercamMedia.Types.JSON
+    field :mac_address, EvercamMedia.Types.MACADDR
     field :last_polled_at, Ecto.DateTime, default: Ecto.DateTime.utc
     field :last_online_at, Ecto.DateTime, default: Ecto.DateTime.utc
     field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc

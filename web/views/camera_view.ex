@@ -27,6 +27,7 @@ defmodule EvercamMedia.CameraView do
       timezone: Camera.get_timezone(camera),
       cam_username: Camera.username(camera),
       cam_password: Camera.password(camera),
+      mac_address: camera.mac_address,
     }
   end
 
