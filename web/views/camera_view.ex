@@ -1,5 +1,6 @@
 defmodule EvercamMedia.CameraView do
   use EvercamMedia.Web, :view
+  import Permissions.Camera, only: [is_owner?: 2]
 
   def render("show.json", %{camera: camera, user: user}) do
     %{cameras: render_many([camera], __MODULE__, "camera.json", user: user)}
@@ -9,7 +10,7 @@ defmodule EvercamMedia.CameraView do
     %{
       id: camera.exid,
       name: camera.name,
-      owned: owned_by_caller?(camera, user),
+      owned: is_owner?(user, camera),
       owner: camera.owner.username,
       vendor_id: Camera.get_vendor_attr(camera, :exid),
       vendor_name: Camera.get_vendor_attr(camera, :name),
@@ -34,9 +35,5 @@ defmodule EvercamMedia.CameraView do
     |> Ecto.DateTime.to_erl
     |> Calendar.DateTime.from_erl!("Etc/UTC")
     |> Calendar.DateTime.Format.unix
-  end
-
-  defp owned_by_caller?(camera, user) do
-    camera.owner.id == user.id
   end
 end

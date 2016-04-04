@@ -67,8 +67,8 @@ defmodule Permissions.Camera do
     |> Repo.first
   end
 
-  defp is_owner?(nil, _camera), do: false
-  defp is_owner?(user, camera) do
+  def is_owner?(nil, _camera), do: false
+  def is_owner?(user, camera) do
     user.id == camera.owner_id
   end
 
