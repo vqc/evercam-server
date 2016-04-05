@@ -69,6 +69,7 @@ defmodule EvercamMedia.Mixfile do
       {:ex_aws, github: "CargoSense/ex_aws"},
       {:exq, "~> 0.6.2"},
       {:exrm, github: "bitwalker/exrm"},
+      {:geo, "~> 1.0"},
       {:httpoison, "~> 0.8.2"},
       {:httpotion, "~> 2.0"},
       {:ibrowse, "~> 4.2", override: true},

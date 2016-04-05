@@ -26,6 +26,7 @@ defmodule Camera do
     field :discoverable, :boolean, default: false
     field :config, EvercamMedia.Types.JSON
     field :mac_address, EvercamMedia.Types.MACADDR
+    field :location, Geo.Point
     field :last_polled_at, Ecto.DateTime, default: Ecto.DateTime.utc
     field :last_online_at, Ecto.DateTime, default: Ecto.DateTime.utc
     field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc

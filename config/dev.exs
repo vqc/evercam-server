@@ -26,6 +26,7 @@ config :evercam_media, EvercamMedia.Repo,
   extensions: [
     {EvercamMedia.Types.JSON.Extension, library: Poison},
     {EvercamMedia.Types.MACADDR.Extension, []},
+    {Geo.PostGIS.Extension, library: Geo},
   ],
   username: "postgres",
   password: "postgres",
