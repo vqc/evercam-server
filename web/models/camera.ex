@@ -128,6 +128,15 @@ defmodule Camera do
     end
   end
 
+  def get_location(camera) do
+    {lng, lat} =
+      case camera.location do
+        %Geo.Point{} -> camera.location.coordinates
+        _nil -> {0, 0}
+      end
+    %{lng: lng, lat: lat}
+  end
+
   def get_camera_info(exid) do
     camera = Camera.get(exid)
     %{

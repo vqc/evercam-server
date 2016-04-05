@@ -28,6 +28,7 @@ defmodule EvercamMedia.CameraView do
       cam_username: Camera.username(camera),
       cam_password: Camera.password(camera),
       mac_address: camera.mac_address,
+      location: Camera.get_location(camera),
     }
   end
 
