@@ -29,6 +29,10 @@ defmodule EvercamMedia.CameraView do
       cam_password: Camera.password(camera),
       mac_address: camera.mac_address,
       location: Camera.get_location(camera),
+      proxy_url: %{
+        hls: Camera.get_hls_url(camera),
+        rtmp: Camera.get_rtmp_url(camera),
+      },
     }
   end
 

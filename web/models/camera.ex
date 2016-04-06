@@ -4,6 +4,7 @@ defmodule Camera do
   import Ecto.Query
   alias EvercamMedia.Repo
   alias EvercamMedia.Schedule
+  alias EvercamMedia.Util
 
   @required_fields ~w(exid name owner_id config is_public is_online_email_owner_notification)
   @optional_fields ~w(timezone thumbnail_url is_online last_polled_at last_online_at updated_at created_at)
@@ -105,6 +106,51 @@ defmodule Camera do
       true -> "#{url}"
       false -> "/#{url}"
     end
+  end
+
+  defp h264_path(camera) do
+    cond do
+      res_url(camera, "h264") != "" ->
+        res_url(camera, "h264")
+      res_url(camera, "h264") == "" && get_model_attr(camera, :config) != "" ->
+        res_url(camera.vendor_model, "h264")
+      true ->
+        ""
+    end
+  end
+
+  defp rtsp_url(camera) do
+    h264_path = h264_path(camera)
+    host = camera.config["external_host"]
+    port = camera.config["external_rtsp_port"]
+
+    case h264_path != "" && host != "" && "#{port}" != "" && "#{port}" != 0 do
+      true -> "rtsp://#{auth(camera)}@#{host}:#{port}#{h264_path}"
+      false -> ""
+    end
+  end
+
+  def get_rtmp_url(camera) do
+    if rtsp_url(camera) != "" do
+      base_url = EvercamMedia.Endpoint.url |> String.replace("http", "rtmp") |> String.replace("4000", "1935")
+      base_url <> "/live/" <> streaming_token(camera) <> "?camera_id=" <> camera.exid
+    else
+      ""
+    end
+  end
+
+  def get_hls_url(camera) do
+    if rtsp_url(camera) != "" do
+      base_url = EvercamMedia.Endpoint.url
+      base_url <> "/live/" <> streaming_token(camera) <> "/index.m3u8?camera_id="<> camera.exid
+    else
+      ""
+    end
+  end
+
+  defp streaming_token(camera) do
+    token = username(camera) <> "|" <> password(camera) <> "|" <> rtsp_url(camera)
+    Util.encode([token])
   end
 
   def get_vendor_attr(camera_full, attr) do
