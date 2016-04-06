@@ -191,6 +191,10 @@ defmodule Camera do
     }
   end
 
+  def get_rights(camera, user) do
+    AccessRight.list(camera, user)
+  end
+
   def recording?(camera_full) do
     !!Application.get_env(:evercam_media, :start_camera_workers)
     && CloudRecording.sleep(camera_full.cloud_recordings) == 1000

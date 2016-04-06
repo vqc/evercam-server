@@ -33,6 +33,7 @@ defmodule EvercamMedia.CameraView do
         hls: Camera.get_hls_url(camera),
         rtmp: Camera.get_rtmp_url(camera),
       },
+      rights: Camera.get_rights(camera, user),
     }
   end
 
