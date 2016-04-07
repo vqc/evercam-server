@@ -8,7 +8,7 @@ defmodule EvercamMedia.CameraView do
 
   def render("camera.json", %{camera: camera, user: user}) do
     if Permissions.Camera.can_view?(user, camera.exid) do
-      base_camera_attributes(camera, user) |> Map.merge(privileged_camera_attributes(camera, user))
+      base_camera_attributes(camera, user) |> Map.merge(privileged_camera_attributes(camera))
     else
       base_camera_attributes(camera, user)
     end
@@ -42,7 +42,7 @@ defmodule EvercamMedia.CameraView do
     }
   end
 
-  defp privileged_camera_attributes(camera, user) do
+  defp privileged_camera_attributes(camera) do
     %{
       cam_username: Camera.username(camera),
       cam_password: Camera.password(camera),
