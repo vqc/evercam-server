@@ -35,18 +35,33 @@ defmodule EvercamMedia.CameraView do
       },
       rights: Camera.get_rights(camera, user),
       external: %{
-        host: Camera.host(camera),
+        host: Camera.host(camera, "external"),
         http: %{
-          port: Camera.port(camera, "http"),
+          port: Camera.port(camera, "external", "http"),
           camera: Camera.external_url(camera, "http"),
           jpg: Camera.snapshot_url(camera, "jpg"),
           mjpg: Camera.snapshot_url(camera, "mjpg"),
         },
         rtsp: %{
-          port: Camera.port(camera, "rtsp"),
-          mpeg: Camera.rtsp_url(camera, "mpeg", false),
-          audio: Camera.rtsp_url(camera, "audio", false),
-          h264: Camera.rtsp_url(camera, "h264", false),
+          port: Camera.port(camera, "external", "rtsp"),
+          mpeg: Camera.rtsp_url(camera, "external", "mpeg", false),
+          audio: Camera.rtsp_url(camera, "external", "audio", false),
+          h264: Camera.rtsp_url(camera, "external", "h264", false),
+        },
+        internal: %{
+          host: Camera.host(camera, "internal"),
+          http: %{
+            port: Camera.port(camera, "internal", "http"),
+            camera: Camera.external_url(camera, "http"),
+            jpg: Camera.snapshot_url(camera, "jpg"),
+            mjpg: Camera.snapshot_url(camera, "mjpg"),
+          },
+          rtsp: %{
+            port: Camera.port(camera, "internal", "rtsp"),
+            mpeg: Camera.rtsp_url(camera, "external", "mpeg", false),
+            audio: Camera.rtsp_url(camera, "external", "audio", false),
+            h264: Camera.rtsp_url(camera, "external", "h264", false),
+          }
         }
       }
     }

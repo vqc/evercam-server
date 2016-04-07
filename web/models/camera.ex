@@ -87,12 +87,15 @@ defmodule Camera do
   end
 
   def snapshot_url(camera, type \\ "jpg") do
-    external_url(camera) <> res_url(camera, type)
+    case external_url(camera) != "" && res_url(camera, type) != "" do
+      true -> external_url(camera) <> res_url(camera, type)
+      false -> ""
+    end
   end
 
   def external_url(camera, protocol \\ "http") do
     host = host(camera) |> to_string
-    port = port(camera, protocol) |> to_string
+    port = port(camera, "external", protocol) |> to_string
     case {host, port} do
       {"", _} -> ""
       {host, ""} -> "#{protocol}://#{host}"
@@ -119,19 +122,19 @@ defmodule Camera do
     end
   end
 
-  def host(camera) do
-    camera.config["external_host"]
+  def host(camera, network \\ "external") do
+    camera.config["#{network}_host"]
   end
 
-  def port(camera, protocol) do
-    camera.config["external_#{protocol}_port"]
+  def port(camera, network, protocol) do
+    camera.config["#{network}_#{protocol}_port"]
   end
 
-  def rtsp_url(camera, type \\ "h264", include_auth \\ true) do
+  def rtsp_url(camera, network \\ "external", type \\ "h264", include_auth \\ true) do
     auth = if include_auth, do: "#{auth(camera)}@", else: ""
     path = url_path(camera, type)
     host = host(camera)
-    port = port(camera, "rtsp")
+    port = port(camera, network, "rtsp")
 
     case path != "" && host != "" && "#{port}" != "" && "#{port}" != 0 do
       true -> "rtsp://#{auth}#{host}:#{port}#{path}"
