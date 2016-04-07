@@ -7,6 +7,14 @@ defmodule EvercamMedia.CameraView do
   end
 
   def render("camera.json", %{camera: camera, user: user}) do
+    if Permissions.Camera.can_view?(user, camera.exid) do
+      base_camera_attributes(camera, user) |> Map.merge(privileged_camera_attributes(camera, user))
+    else
+      base_camera_attributes(camera, user)
+    end
+  end
+
+  defp base_camera_attributes(camera, user) do
     %{
       id: camera.exid,
       name: camera.name,
@@ -25,15 +33,20 @@ defmodule EvercamMedia.CameraView do
       is_public: camera.is_public,
       discoverable: camera.discoverable,
       timezone: Camera.get_timezone(camera),
-      cam_username: Camera.username(camera),
-      cam_password: Camera.password(camera),
-      mac_address: Camera.get_mac_address(camera),
       location: Camera.get_location(camera),
+      rights: Camera.get_rights(camera, user),
       proxy_url: %{
         hls: Camera.get_hls_url(camera),
         rtmp: Camera.get_rtmp_url(camera),
       },
-      rights: Camera.get_rights(camera, user),
+    }
+  end
+
+  defp privileged_camera_attributes(camera, user) do
+    %{
+      cam_username: Camera.username(camera),
+      cam_password: Camera.password(camera),
+      mac_address: Camera.get_mac_address(camera),
       external: %{
         host: Camera.host(camera, "external"),
         http: %{
@@ -48,22 +61,22 @@ defmodule EvercamMedia.CameraView do
           audio: Camera.rtsp_url(camera, "external", "audio", false),
           h264: Camera.rtsp_url(camera, "external", "h264", false),
         },
-        internal: %{
-          host: Camera.host(camera, "internal"),
-          http: %{
-            port: Camera.port(camera, "internal", "http"),
-            camera: Camera.external_url(camera, "http"),
-            jpg: Camera.snapshot_url(camera, "jpg"),
-            mjpg: Camera.snapshot_url(camera, "mjpg"),
-          },
-          rtsp: %{
-            port: Camera.port(camera, "internal", "rtsp"),
-            mpeg: Camera.rtsp_url(camera, "external", "mpeg", false),
-            audio: Camera.rtsp_url(camera, "external", "audio", false),
-            h264: Camera.rtsp_url(camera, "external", "h264", false),
-          }
-        }
-      }
+      },
+      internal: %{
+        host: Camera.host(camera, "internal"),
+        http: %{
+          port: Camera.port(camera, "internal", "http"),
+          camera: Camera.external_url(camera, "http"),
+          jpg: Camera.snapshot_url(camera, "jpg"),
+          mjpg: Camera.snapshot_url(camera, "mjpg"),
+        },
+        rtsp: %{
+          port: Camera.port(camera, "internal", "rtsp"),
+          mpeg: Camera.rtsp_url(camera, "external", "mpeg", false),
+          audio: Camera.rtsp_url(camera, "external", "audio", false),
+          h264: Camera.rtsp_url(camera, "external", "h264", false),
+        },
+      },
     }
   end
 
