@@ -81,6 +81,7 @@ config :evercam_media, EvercamMedia.Repo,
   extensions: [
     {EvercamMedia.Types.JSON.Extension, library: Poison},
     {EvercamMedia.Types.MACADDR.Extension, []},
+    {Geo.PostGIS.Extension, library: Geo},
   ],
   url: System.get_env("DATABASE_URL"),
   socket_options: [keepalive: true],
