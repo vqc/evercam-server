@@ -54,12 +54,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
   end
 
-  def update_camera_status(camera_exid, timestamp, status, error_code \\ "generic", error_weight \\ 0) do
-    do_update_camera_status(camera_exid, timestamp, status, error_code, error_weight)
-  end
+  def update_camera_status(camera_exid, timestamp, status, error_code \\ "generic", error_weight \\ 0)
 
-  defp do_update_camera_status("", _timestamp, _status, _error_code, _error_weight), do: :noop
-  defp do_update_camera_status(camera_exid, timestamp, status, error_code, error_weight) do
+  def update_camera_status("", _timestamp, _status, _error_code, _error_weight), do: :noop
+  def update_camera_status(camera_exid, timestamp, status, error_code, error_weight) do
     camera = Camera.get_full(camera_exid)
     old_error_total = ConCache.dirty_get_or_store(:snapshot_error, camera.exid, fn() -> 0 end)
     error_total = old_error_total + error_weight
@@ -143,15 +141,13 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     SnapshotRepo.insert(changeset)
   end
 
-  defp construct_camera(datetime, online_status, online_status_unchanged) do
-    do_construct_camera(datetime, online_status, online_status_unchanged)
-  end
+  defp construct_camera(datetime, online_status, online_status_unchanged)
 
-  defp do_construct_camera(datetime, false, false) do
+  defp construct_camera(datetime, false, false) do
     %{updated_at: datetime, last_polled_at: datetime, is_online: false, last_online_at: datetime}
   end
 
-  defp do_construct_camera(datetime, status, _) do
+  defp construct_camera(datetime, status, _) do
     %{updated_at: datetime, last_polled_at: datetime, is_online: status}
   end
 end
