@@ -126,8 +126,9 @@ defmodule EvercamMedia.SnapshotController do
   ######################
 
   defp snapshot_with_user(camera_exid, user, store_snapshot, notes \\ "") do
-    if Permissions.Camera.can_snapshot?(user, camera_exid) do
-      construct_args(camera_exid, store_snapshot, notes) |> fetch_snapshot
+    camera = Camera.get_full(camera_exid)
+    if Permissions.Camera.can_snapshot?(user, camera) do
+      construct_args(camera, store_snapshot, notes) |> fetch_snapshot
     else
       [403, %{message: "Forbidden"}]
     end
@@ -160,10 +161,11 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp snapshot_thumbnail(camera_exid, user) do
-    spawn fn -> update_thumbnail(camera_exid) end
+    camera = Camera.get_full(camera_exid)
+    spawn fn -> update_thumbnail(camera) end
     thumbnail_exists? = Storage.thumbnail_exists?(camera_exid)
     cond do
-      Permissions.Camera.can_snapshot?(user, camera_exid) == false ->
+      Permissions.Camera.can_snapshot?(user, camera) == false ->
         [403, %{message: "Forbidden"}]
       thumbnail_exists? ->
         [200, %{image: Storage.thumbnail_load(camera_exid)}]
@@ -172,10 +174,9 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  defp update_thumbnail(camera_exid) do
-    camera = Camera.get_full(camera_exid)
+  defp update_thumbnail(camera) do
     if camera.is_online && !Camera.recording?(camera) do
-      construct_args(camera_exid, true, "Evercam Thumbnail") |> fetch_snapshot(3)
+      construct_args(camera, true, "Evercam Thumbnail") |> fetch_snapshot(3)
     end
   end
 
@@ -183,8 +184,7 @@ defmodule EvercamMedia.SnapshotController do
   ## Args functions ##
   ####################
 
-  defp construct_args(camera_exid, store_snapshot, notes) do
-    camera = Camera.get_full(camera_exid)
+  defp construct_args(camera, store_snapshot, notes) do
     timestamp = DateTime.Format.unix(DateTime.now_utc)
 
     %{

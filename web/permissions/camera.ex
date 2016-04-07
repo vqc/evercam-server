@@ -2,32 +2,31 @@ defmodule Permissions.Camera do
   import Ecto.Query
   alias EvercamMedia.Repo
 
-  def can_edit?(requester, camera_exid) do
-    can_access?("edit", requester, camera_exid)
+  def can_edit?(requester, camera) do
+    can_access?("edit", requester, camera)
   end
 
-  def can_view?(requester, camera_exid) do
-    can_access?("view", requester, camera_exid)
+  def can_view?(requester, camera) do
+    can_access?("view", requester, camera)
   end
 
-  def can_snapshot?(requester, camera_exid) do
-    can_access?("snapshot", requester, camera_exid)
+  def can_snapshot?(requester, camera) do
+    can_access?("snapshot", requester, camera)
   end
 
-  def can_delete?(requester, camera_exid) do
-    can_access?("delete", requester, camera_exid)
+  def can_delete?(requester, camera) do
+    can_access?("delete", requester, camera)
   end
 
-  def can_list?(requester, camera_exid) do
-    can_access?("list", requester, camera_exid)
+  def can_list?(requester, camera) do
+    can_access?("list", requester, camera)
   end
 
-  def can_grant?(requester, camera_exid) do
-    can_access?("grant", requester, camera_exid)
+  def can_grant?(requester, camera) do
+    can_access?("grant", requester, camera)
   end
 
-  defp can_access?(right, requester, camera_exid) do
-    camera = Camera.get(camera_exid)
+  defp can_access?(right, requester, camera) do
     is_public?(right, camera) or is_owner?(requester, camera) or has_right?(right, requester, camera)
   end
 

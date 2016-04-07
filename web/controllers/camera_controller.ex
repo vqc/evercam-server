@@ -15,7 +15,7 @@ defmodule EvercamMedia.CameraController do
       |> String.replace_trailing(".json", "")
       |> Camera.get_full
 
-    if Permissions.Camera.can_list?(current_user, camera.exid) do
+    if Permissions.Camera.can_list?(current_user, camera) do
       conn
       |> render("show.json", %{camera: camera, user: current_user})
     else
