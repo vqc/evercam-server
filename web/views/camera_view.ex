@@ -80,6 +80,7 @@ defmodule EvercamMedia.CameraView do
     }
   end
 
+  defp format_timestamp(nil), do: nil
   defp format_timestamp(ecto_datetime) do
     ecto_datetime
     |> Ecto.DateTime.to_erl
