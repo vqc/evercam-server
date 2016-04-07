@@ -28,7 +28,7 @@ defmodule Permissions.Camera do
 
   defp can_access?(right, requester, camera_exid) do
     camera = Camera.get(camera_exid)
-    is_public?(camera) or is_owner?(requester, camera) or has_right?(right, requester, camera)
+    is_public?(right, camera) or is_owner?(requester, camera) or has_right?(right, requester, camera)
   end
 
   defp has_right?(_right, nil, _camera), do: false
@@ -72,7 +72,11 @@ defmodule Permissions.Camera do
     user.id == camera.owner_id
   end
 
-  defp is_public?(camera) do
-    camera.is_public
+  defp is_public?(right, camera) do
+    case right do
+      "snapshot" -> camera.is_public
+      "list" -> camera.is_public
+      _right -> false
+    end
   end
 end
