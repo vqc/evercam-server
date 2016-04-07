@@ -60,7 +60,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   """
   def initiate_workers do
     Logger.info "Initiate workers for snapshot recording."
-    Camera.get_all
+    Camera.all
     |> Enum.map(&(start_worker &1))
   end
 

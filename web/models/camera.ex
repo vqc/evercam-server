@@ -34,7 +34,7 @@ defmodule Camera do
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
 
-  def get_all do
+  def all do
     Camera
     |> join(:full, [c], vm in assoc(c, :vendor_model))
     |> join(:full, [c, vm], v in assoc(vm, :vendor))
