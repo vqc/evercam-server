@@ -37,7 +37,7 @@ defmodule AccessRight do
       access_rights == [] ->
         "snapshot,list"
       true ->
-        access_rights |> Enum.map(fn(ar) -> ar.right end) |> Enum.join(",")
+        access_rights |> Enum.map(fn(ar) -> ar.right end) |> Enum.uniq |> Enum.join(",")
     end
   end
 end
