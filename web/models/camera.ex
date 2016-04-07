@@ -86,21 +86,21 @@ defmodule Camera do
     "#{camera.config["auth"]["basic"]["password"]}"
   end
 
-  def snapshot_url(camera) do
-    external_url(camera) <> res_url(camera)
+  def snapshot_url(camera, type \\ "jpg") do
+    external_url(camera) <> res_url(camera, type)
   end
 
-  defp external_url(camera, type \\ "http") do
-    host = camera.config["external_host"] |> to_string
-    port = camera.config["external_#{type}_port"] |> to_string
+  def external_url(camera, protocol \\ "http") do
+    host = host(camera) |> to_string
+    port = port(camera, protocol) |> to_string
     case {host, port} do
       {"", _} -> ""
-      {host, ""} -> "#{type}://#{host}"
-      {host, port} -> "#{type}://#{host}:#{port}"
+      {host, ""} -> "#{protocol}://#{host}"
+      {host, port} -> "#{protocol}://#{host}:#{port}"
     end
   end
 
-  defp res_url(camera, type \\ "jpg") do
+  def res_url(camera, type \\ "jpg") do
     url = "#{camera.config["snapshots"][type]}"
     case String.starts_with?(url, "/") || String.length(url) == 0 do
       true -> "#{url}"
@@ -108,24 +108,33 @@ defmodule Camera do
     end
   end
 
-  defp h264_path(camera) do
+  defp url_path(camera, type) do
     cond do
-      res_url(camera, "h264") != "" ->
-        res_url(camera, "h264")
-      res_url(camera, "h264") == "" && get_model_attr(camera, :config) != "" ->
-        res_url(camera.vendor_model, "h264")
+      res_url(camera, type) != "" ->
+        res_url(camera, type)
+      res_url(camera, type) == "" && get_model_attr(camera, :config) != "" ->
+        res_url(camera.vendor_model, type)
       true ->
         ""
     end
   end
 
-  defp rtsp_url(camera) do
-    h264_path = h264_path(camera)
-    host = camera.config["external_host"]
-    port = camera.config["external_rtsp_port"]
+  def host(camera) do
+    camera.config["external_host"]
+  end
 
-    case h264_path != "" && host != "" && "#{port}" != "" && "#{port}" != 0 do
-      true -> "rtsp://#{auth(camera)}@#{host}:#{port}#{h264_path}"
+  def port(camera, protocol) do
+    camera.config["external_#{protocol}_port"]
+  end
+
+  def rtsp_url(camera, type \\ "h264", include_auth \\ true) do
+    auth = if include_auth, do: "#{auth(camera)}@", else: ""
+    path = url_path(camera, type)
+    host = host(camera)
+    port = port(camera, "rtsp")
+
+    case path != "" && host != "" && "#{port}" != "" && "#{port}" != 0 do
+      true -> "rtsp://#{auth}#{host}:#{port}#{path}"
       false -> ""
     end
   end
