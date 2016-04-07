@@ -9,14 +9,15 @@ defmodule EvercamMedia.CameraController do
   require Logger
 
   def show(conn, params) do
-    if conn.assigns[:current_user] do
-      camera =
-        params["id"]
-        |> String.replace_trailing(".json", "")
-        |> Camera.get_full
+    current_user = conn.assigns[:current_user]
+    camera =
+      params["id"]
+      |> String.replace_trailing(".json", "")
+      |> Camera.get_full
 
+    if Permissions.Camera.can_list?(current_user, camera.exid) do
       conn
-      |> render("show.json", %{camera: camera, user: conn.assigns[:current_user]})
+      |> render("show.json", %{camera: camera, user: current_user})
     else
       conn
       |> put_status(404)
