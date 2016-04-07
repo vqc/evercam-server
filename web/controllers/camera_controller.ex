@@ -1,5 +1,6 @@
 defmodule EvercamMedia.CameraController do
   use EvercamMedia.Web, :controller
+  alias EvercamMedia.ErrorView
   alias EvercamMedia.Snapshot.Storage
   alias EvercamMedia.Snapshot.StreamerSupervisor
   alias EvercamMedia.Snapshot.WorkerSupervisor
@@ -8,13 +9,19 @@ defmodule EvercamMedia.CameraController do
   require Logger
 
   def show(conn, params) do
-    camera =
-      params["id"]
-      |> String.replace_trailing(".json", "")
-      |> Camera.get_full
+    if conn.assigns[:current_user] do
+      camera =
+        params["id"]
+        |> String.replace_trailing(".json", "")
+        |> Camera.get_full
 
-    conn
-    |> render("show.json", %{camera: camera, user: conn.assigns[:current_user]})
+      conn
+      |> render("show.json", %{camera: camera, user: conn.assigns[:current_user]})
+    else
+      conn
+      |> put_status(404)
+      |> render(ErrorView, "error.json", %{message: "Not found."})
+    end
   end
 
   def thumbnail(conn, %{"id" => exid, "timestamp" => iso_timestamp, "token" => token}) do
