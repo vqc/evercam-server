@@ -186,6 +186,10 @@ defmodule Camera do
     end
   end
 
+  def get_mac_address(camera) do
+    camera.mac_address |> to_string
+  end
+
   def get_location(camera) do
     {lng, lat} =
       case camera.location do
