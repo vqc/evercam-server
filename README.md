@@ -11,9 +11,9 @@ Evercam Media is the component that is responsible for talking  to the camera. C
 
 ## Features
 
-* Request snapshots from snapshot endpoint
-* Request rtsp stream from rtsp endpoint
-* Convert rtsp stream to rtmp
+* Request snapshots from cameras
+* Request rtsp stream from cameras
+* Convert rtsp stream to rtmp / hls
 * store snapshots
 
 ## Come on in, the water's warm :)
