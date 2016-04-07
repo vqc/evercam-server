@@ -12,6 +12,7 @@ defmodule Camera do
   schema "cameras" do
     belongs_to :owner, User, foreign_key: :owner_id
     belongs_to :vendor_model, VendorModel, foreign_key: :model_id
+    has_many :access_rights, AccessRight
     has_many :shares, CameraShare
     has_many :snapshots, Snapshot
     has_one :cloud_recordings, CloudRecording
@@ -71,6 +72,8 @@ defmodule Camera do
     |> preload(:owner)
     |> preload(:vendor_model)
     |> preload([vendor_model: :vendor])
+    |> preload(:access_rights)
+    |> preload([access_rights: :access_token])
     |> Repo.first
   end
 

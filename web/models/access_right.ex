@@ -30,14 +30,13 @@ defmodule AccessRight do
   end
 
   def list(camera, user) do
-    access_rights = active_for(camera, user)
     cond do
       is_owner?(user, camera) ->
         "snapshot,view,edit,delete,list,grant~snapshot,grant~view,grant~edit,grant~delete,grant~list"
-      access_rights == [] ->
+      camera.access_rights == [] ->
         "snapshot,list"
       true ->
-        access_rights |> Enum.map(fn(ar) -> ar.right end) |> Enum.uniq |> Enum.join(",")
+        camera.access_rights |> Enum.map(fn(ar) -> ar.right end) |> Enum.uniq |> Enum.join(",")
     end
   end
 end

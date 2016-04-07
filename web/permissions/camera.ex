@@ -33,13 +33,7 @@ defmodule Permissions.Camera do
   defp has_right?(_right, nil, _camera), do: false
 
   defp has_right?(right, %User{} = user, camera) do
-    AccessRight
-    |> join(:inner, [ar], at in AccessToken, ar.token_id == at.id)
-    |> where([ar, at], at.user_id == ^user.id)
-    |> where([ar], ar.camera_id == ^camera.id)
-    |> where([ar], ar.status == 1)
-    |> where([ar], ar.right == ^right)
-    |> Repo.first
+    Enum.any?(camera.access_rights, fn(ar) -> ar.right == right end)
   end
 
   defp has_right?(right, %AccessToken{} = token, camera) do
