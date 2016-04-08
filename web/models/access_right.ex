@@ -1,7 +1,5 @@
 defmodule AccessRight do
   use EvercamMedia.Web, :model
-  import Ecto.Query
-  alias EvercamMedia.Repo
 
   schema "access_rights" do
     belongs_to :access_token, AccessToken, foreign_key: :token_id
