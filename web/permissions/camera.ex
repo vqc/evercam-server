@@ -1,6 +1,4 @@
 defmodule Permissions.Camera do
-  import Ecto.Query
-  alias EvercamMedia.Repo
 
   def can_edit?(requester, camera) do
     can_access?("edit", requester, camera)
@@ -37,27 +35,28 @@ defmodule Permissions.Camera do
   end
 
   defp has_right?(right, %AccessToken{} = token, camera) do
-    has_camera_right?(right, token, camera) || has_account_right?(right, token)
+    has_camera_right?(right, token, camera) || has_account_right?(right, token, camera)
     true
   end
 
   defp has_camera_right?(right, token, camera) do
-    AccessRight
-    |> where([ar], ar.token_id == ^token.id)
-    |> where([ar], ar.status == 1)
-    |> where([ar], ar.right == ^right)
-    |> where([ar], ar.camera_id == ^camera.id)
-    |> Repo.first
+    Enum.any?(camera.access_rights, fn(ar) ->
+      ar.right == right &&
+        ar.token_id == token.id &&
+        ar.camera_id == camera.id &&
+        ar.status == 1
+    end)
   end
 
-  defp has_account_right?(right, token) do
-    AccessRight
-    |> where([ar], ar.token_id == ^token.id)
-    |> where([ar], ar.account_id == ^token.grantor_id)
-    |> where([ar], ar.status == 1)
-    |> where([ar], ar.right == ^right)
-    |> where([ar], ar.scope == "cameras")
-    |> Repo.first
+  defp has_account_right?(right, token, camera) do
+    Enum.any?(camera.access_rights, fn(ar) ->
+      ar.right == right &&
+        ar.account_id == token.grantor_id &&
+        ar.token_id == token.id &&
+        ar.camera_id == camera.id &&
+        ar.scope == "cameras" &&
+        ar.status == 1
+    end)
   end
 
   def is_owner?(nil, _camera), do: false
