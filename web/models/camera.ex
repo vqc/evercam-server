@@ -46,6 +46,37 @@ defmodule Camera do
     |> Repo.all
   end
 
+  def for(user, include_shared? \\ true) do
+    case include_shared? do
+      true -> owned_by(user) |> Enum.into(shared_with(user))
+      false -> owned_by(user)
+    end
+  end
+
+  def owned_by(user) do
+    Camera
+    |> where([cam], cam.owner_id == ^user.id)
+    |> preload(:owner)
+    |> preload(:access_rights)
+    |> preload([access_rights: :access_token])
+    |> preload(:vendor_model)
+    |> preload([vendor_model: :vendor])
+    |> Repo.all
+  end
+
+  def shared_with(user) do
+    Camera
+    |> join(:left, [u], cs in CameraShare)
+    |> where([cam, cs], cs.user_id == ^user.id)
+    |> where([cam, cs], cam.id == cs.camera_id)
+    |> preload(:owner)
+    |> preload(:access_rights)
+    |> preload([access_rights: :access_token])
+    |> preload(:vendor_model)
+    |> preload([vendor_model: :vendor])
+    |> Repo.all
+  end
+
   def get(exid) do
     ConCache.dirty_get_or_store(:camera, exid, fn() ->
       Camera.by_exid(exid)

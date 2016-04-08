@@ -2,6 +2,10 @@ defmodule EvercamMedia.CameraView do
   use EvercamMedia.Web, :view
   import Permissions.Camera, only: [is_owner?: 2]
 
+  def render("index.json", %{cameras: cameras, user: user}) do
+    %{cameras: render_many(cameras, __MODULE__, "camera.json", user: user)}
+  end
+
   def render("show.json", %{camera: camera, user: user}) do
     %{cameras: render_many([camera], __MODULE__, "camera.json", user: user)}
   end

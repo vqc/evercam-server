@@ -8,6 +8,28 @@ defmodule EvercamMedia.CameraController do
   alias EvercamMedia.Util
   require Logger
 
+  def index(conn, params) do
+    requester = conn.assigns[:current_user]
+
+    requested_user =
+      case requester do
+        %User{} -> requester
+        %AccessToken{} -> User.by_username(params["user_id"])
+      end
+
+    include_shared? =
+      case params["include_shared"] do
+        "false" -> false
+        "true" -> true
+        _ -> true
+      end
+
+    cameras = Camera.for(requested_user, include_shared?)
+
+    conn
+    |> render("index.json", %{cameras: cameras, user: requester})
+  end
+
   def show(conn, params) do
     current_user = conn.assigns[:current_user]
     camera =
