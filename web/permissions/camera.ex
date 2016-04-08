@@ -32,7 +32,7 @@ defmodule Permissions.Camera do
 
   defp has_right?(_right, nil, _camera), do: false
 
-  defp has_right?(right, %User{} = user, camera) do
+  defp has_right?(right, %User{}, camera) do
     Enum.any?(camera.access_rights, fn(ar) -> ar.right == right end)
   end
 
