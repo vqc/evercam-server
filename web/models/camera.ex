@@ -248,7 +248,11 @@ defmodule Camera do
       camera.access_rights == [] ->
         "snapshot,list"
       true ->
-        camera.access_rights |> Enum.map(fn(ar) -> ar.right end) |> Enum.uniq |> Enum.join(",")
+        camera.access_rights
+        |> Enum.filter(fn(ar) -> ar.access_token.user_id == user.id end)
+        |> Enum.map(fn(ar) -> ar.right end)
+        |> Enum.uniq
+        |> Enum.join(",")
     end
   end
 
