@@ -18,14 +18,4 @@ defmodule AccessRight do
     field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
-
-  def active_for(_camera, nil), do: []
-  def active_for(camera, user) do
-    token = AccessToken.active_token_for(user.id)
-    AccessRight
-    |> where([ar], ar.camera_id == ^camera.id)
-    |> where([ar], ar.token_id == ^token.id)
-    |> where([ar], ar.status == 1)
-    |> Repo.all
-  end
 end
