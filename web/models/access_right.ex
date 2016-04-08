@@ -28,15 +28,4 @@ defmodule AccessRight do
     |> where([ar], ar.status == 1)
     |> Repo.all
   end
-
-  def list(camera, user) do
-    cond do
-      is_owner?(user, camera) ->
-        "snapshot,view,edit,delete,list,grant~snapshot,grant~view,grant~edit,grant~delete,grant~list"
-      camera.access_rights == [] ->
-        "snapshot,list"
-      true ->
-        camera.access_rights |> Enum.map(fn(ar) -> ar.right end) |> Enum.uniq |> Enum.join(",")
-    end
-  end
 end
