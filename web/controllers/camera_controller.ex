@@ -11,23 +11,29 @@ defmodule EvercamMedia.CameraController do
   def index(conn, params) do
     requester = conn.assigns[:current_user]
 
-    requested_user =
-      case requester do
-        %User{} -> requester
-        %AccessToken{} -> User.by_username(params["user_id"])
-      end
+    if requester do
+      requested_user =
+        case requester do
+          %User{} -> requester
+          %AccessToken{} -> User.by_username(params["user_id"])
+        end
 
-    include_shared? =
-      case params["include_shared"] do
-        "false" -> false
-        "true" -> true
-        _ -> true
-      end
+      include_shared? =
+        case params["include_shared"] do
+          "false" -> false
+          "true" -> true
+          _ -> true
+        end
 
-    cameras = Camera.for(requested_user, include_shared?)
+      cameras = Camera.for(requested_user, include_shared?)
 
-    conn
-    |> render("index.json", %{cameras: cameras, user: requester})
+      conn
+      |> render("index.json", %{cameras: cameras, user: requester})
+    else
+      conn
+      |> put_status(404)
+      |> render(ErrorView, "error.json", %{message: "Not found."})
+    end
   end
 
   def show(conn, params) do
