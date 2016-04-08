@@ -1,7 +1,6 @@
 defmodule AccessRight do
   use EvercamMedia.Web, :model
   import Ecto.Query
-  import Permissions.Camera, only: [is_owner?: 2]
   alias EvercamMedia.Repo
 
   schema "access_rights" do

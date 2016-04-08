@@ -252,6 +252,11 @@ defmodule Camera do
     end
   end
 
+  def is_owner?(nil, _camera), do: false
+  def is_owner?(user, camera) do
+    user.id == camera.owner_id
+  end
+
   def recording?(camera_full) do
     !!Application.get_env(:evercam_media, :start_camera_workers)
     && CloudRecording.sleep(camera_full.cloud_recordings) == 1000

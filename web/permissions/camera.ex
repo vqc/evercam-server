@@ -1,4 +1,5 @@
 defmodule Permissions.Camera do
+  import Camera, only: [is_owner?: 2]
 
   def can_edit?(requester, camera) do
     can_access?("edit", requester, camera)
@@ -57,11 +58,6 @@ defmodule Permissions.Camera do
         ar.scope == "cameras" &&
         ar.status == 1
     end)
-  end
-
-  def is_owner?(nil, _camera), do: false
-  def is_owner?(user, camera) do
-    user.id == camera.owner_id
   end
 
   defp is_public?(right, camera) do
