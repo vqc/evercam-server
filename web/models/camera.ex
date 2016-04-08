@@ -54,10 +54,13 @@ defmodule Camera do
   end
 
   def owned_by(user) do
+    token = AccessToken.active_token_for(user.id)
+    access_rights_query = AccessRight |> where([ar], ar.token_id == ^token.id)
+
     Camera
     |> where([cam], cam.owner_id == ^user.id)
     |> preload(:owner)
-    |> preload(:access_rights)
+    |> preload(access_rights: ^access_rights_query)
     |> preload([access_rights: :access_token])
     |> preload(:vendor_model)
     |> preload([vendor_model: :vendor])
@@ -65,12 +68,15 @@ defmodule Camera do
   end
 
   def shared_with(user) do
+    token = AccessToken.active_token_for(user.id)
+    access_rights_query = AccessRight |> where([ar], ar.token_id == ^token.id)
+
     Camera
     |> join(:left, [u], cs in CameraShare)
     |> where([cam, cs], cs.user_id == ^user.id)
     |> where([cam, cs], cam.id == cs.camera_id)
     |> preload(:owner)
-    |> preload(:access_rights)
+    |> preload(access_rights: ^access_rights_query)
     |> preload([access_rights: :access_token])
     |> preload(:vendor_model)
     |> preload([vendor_model: :vendor])
