@@ -34,6 +34,7 @@ defmodule EvercamMedia.Mixfile do
     :ecto,
     :ex_aws,
     :exq,
+    :geo,
     :httpoison,
     :httpotion,
     :inets,
