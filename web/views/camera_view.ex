@@ -42,6 +42,7 @@ defmodule EvercamMedia.CameraView do
         hls: Camera.get_hls_url(camera),
         rtmp: Camera.get_rtmp_url(camera),
       },
+      thumbnail_url: thumbnail_url(camera),
     }
   end
 
@@ -81,6 +82,10 @@ defmodule EvercamMedia.CameraView do
         },
       },
     }
+  end
+
+  defp thumbnail_url(camera) do
+    EvercamMedia.Endpoint.static_url <> "/v1/cameras/" <> camera.exid <> "/thumbnail"
   end
 
   defp format_timestamp(nil), do: nil
