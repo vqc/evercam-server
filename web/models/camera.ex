@@ -48,9 +48,21 @@ defmodule Camera do
 
   def for(user, include_shared? \\ true) do
     case include_shared? do
-      true -> owned_by(user) |> Enum.into(shared_with(user))
-      false -> owned_by(user)
+      true -> get_owned_by(user) |> Enum.into(get_shared_with(user))
+      false -> get_owned_by(user)
     end
+  end
+
+  def get_owned_by(user) do
+    ConCache.dirty_get_or_store(:cameras, "owned_by_#{user.username}", fn() ->
+      Camera.owned_by(user)
+    end)
+  end
+
+  def get_shared_with(user) do
+    ConCache.dirty_get_or_store(:cameras, "shared_with_#{user.username}", fn() ->
+      Camera.shared_with(user)
+    end)
   end
 
   def owned_by(user) do
