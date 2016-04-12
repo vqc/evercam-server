@@ -81,7 +81,7 @@ defmodule EvercamMedia.CameraController do
       if exid != token_exid, do: raise "Invalid token."
 
       Logger.info "Camera update for #{exid}"
-      ConCache.delete(:camera_full, exid)
+      exid |> Camera.get_full |> Camera.invalidate_camera
       camera = exid |> Camera.get_full
       worker = exid |> String.to_atom |> Process.whereis
 

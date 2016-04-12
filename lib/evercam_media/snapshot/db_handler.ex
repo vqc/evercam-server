@@ -92,7 +92,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         params = construct_camera(datetime, status, camera.is_online == status)
         changeset = Camera.changeset(camera, params)
         Repo.update!(changeset)
-        ConCache.delete(:camera_full, camera.exid)
+        Camera.invalidate_camera(camera)
         invalidate_camera_cache(camera)
         broadcast_change_to_users(camera)
         log_camera_status(camera, status, datetime)

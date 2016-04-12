@@ -46,6 +46,22 @@ defmodule Camera do
     |> Repo.all
   end
 
+  def invalidate_user(%User{} = user) do
+    ConCache.delete(:cameras, "#{user.username}_true")
+    ConCache.delete(:cameras, "#{user.username}_false")
+  end
+
+  def invalidate_camera(%Camera{} = camera) do
+    ConCache.delete(:camera_full, camera.exid)
+    CameraShare
+    |> where(camera_id: ^camera.id)
+    |> preload(:user)
+    |> Repo.all
+    |> Enum.map(fn(cs) -> cs.user end)
+    |> Enum.into([camera.owner])
+    |> Enum.each(fn(user) -> invalidate_user(user) end)
+  end
+
   def for(user, include_shared? \\ true) do
     case include_shared? do
       true -> owned_by(user) |> Enum.into(shared_with(user))
