@@ -1,11 +1,60 @@
 defmodule EvercamMedia.CameraController do
   use EvercamMedia.Web, :controller
+  alias EvercamMedia.CameraView
+  alias EvercamMedia.ErrorView
   alias EvercamMedia.Snapshot.Storage
   alias EvercamMedia.Snapshot.StreamerSupervisor
   alias EvercamMedia.Snapshot.WorkerSupervisor
   alias EvercamMedia.Snapshot.Worker
   alias EvercamMedia.Util
   require Logger
+
+  def index(conn, params) do
+    requester = conn.assigns[:current_user]
+
+    if requester do
+      requested_user =
+        case requester do
+          %User{} -> requester
+          %AccessToken{} -> User.by_username(params["user_id"])
+        end
+
+      include_shared? =
+        case params["include_shared"] do
+          "false" -> false
+          "true" -> true
+          _ -> true
+        end
+
+      data = ConCache.get_or_store(:cameras, "#{requested_user.username}_#{include_shared?}", fn() ->
+        cameras = Camera.for(requested_user, include_shared?)
+        Phoenix.View.render(CameraView, "index.json", %{cameras: cameras, user: requester})
+      end)
+
+      json(conn, data)
+    else
+      conn
+      |> put_status(404)
+      |> render(ErrorView, "error.json", %{message: "Not found."})
+    end
+  end
+
+  def show(conn, params) do
+    current_user = conn.assigns[:current_user]
+    camera =
+      params["id"]
+      |> String.replace_trailing(".json", "")
+      |> Camera.get_full
+
+    if Permissions.Camera.can_list?(current_user, camera) do
+      conn
+      |> render("show.json", %{camera: camera, user: current_user})
+    else
+      conn
+      |> put_status(404)
+      |> render(ErrorView, "error.json", %{message: "Not found."})
+    end
+  end
 
   def thumbnail(conn, %{"id" => exid, "timestamp" => iso_timestamp, "token" => token}) do
     try do
@@ -32,7 +81,7 @@ defmodule EvercamMedia.CameraController do
       if exid != token_exid, do: raise "Invalid token."
 
       Logger.info "Camera update for #{exid}"
-      ConCache.delete(:camera_full, exid)
+      exid |> Camera.get_full |> Camera.invalidate_camera
       camera = exid |> Camera.get_full
       worker = exid |> String.to_atom |> Process.whereis
 

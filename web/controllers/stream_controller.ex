@@ -63,13 +63,13 @@ defmodule EvercamMedia.StreamController do
     construct_ffmpeg_command(rtsp_url, token) |> Porcelain.spawn_shell
   end
 
-  defp sleep_until_hls_playlist_exists(token), do: do_sleep_until_hls_playlist_exists(token, 0)
+  defp sleep_until_hls_playlist_exists(token, retry \\ 0)
 
-  defp do_sleep_until_hls_playlist_exists(_token, retry) when retry > 30, do: :noop
-  defp do_sleep_until_hls_playlist_exists(token, retry) do
+  defp sleep_until_hls_playlist_exists(_token, retry) when retry > 30, do: :noop
+  defp sleep_until_hls_playlist_exists(token, retry) do
     unless File.exists?("#{@hls_dir}/#{token}/index.m3u8") do
       :timer.sleep(500)
-      do_sleep_until_hls_playlist_exists(token, retry + 1)
+      sleep_until_hls_playlist_exists(token, retry + 1)
     end
   end
 

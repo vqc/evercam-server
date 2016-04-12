@@ -1,12 +1,9 @@
 defmodule EvercamMedia.ErrorView do
   use EvercamMedia.Web, :view
 
-  def render("error.json", %{message: message, status: status}) do
+  def render("error.json", %{message: message}) do
     %{
-      errors: %{
-        status: status,
-        message: message
-      }
+      message: message
     }
   end
 

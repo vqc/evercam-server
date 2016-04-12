@@ -19,6 +19,7 @@
   "exactor": {:hex, :exactor, "2.2.0"},
   "exq": {:hex, :exq, "0.6.4"},
   "exrm": {:git, "https://github.com/bitwalker/exrm.git", "35a7d0d9caae83efdbf1152de5145b82a07e5363", []},
+  "geo": {:hex, :geo, "1.0.2"},
   "getopt": {:hex, :getopt, "0.8.2"},
   "hackney": {:hex, :hackney, "1.5.3"},
   "httpoison": {:hex, :httpoison, "0.8.2"},

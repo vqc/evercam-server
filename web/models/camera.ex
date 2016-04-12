@@ -4,6 +4,7 @@ defmodule Camera do
   import Ecto.Query
   alias EvercamMedia.Repo
   alias EvercamMedia.Schedule
+  alias EvercamMedia.Util
 
   @required_fields ~w(exid name owner_id config is_public is_online_email_owner_notification)
   @optional_fields ~w(timezone thumbnail_url is_online last_polled_at last_online_at updated_at created_at)
@@ -11,6 +12,7 @@ defmodule Camera do
   schema "cameras" do
     belongs_to :owner, User, foreign_key: :owner_id
     belongs_to :vendor_model, VendorModel, foreign_key: :model_id
+    has_many :access_rights, AccessRight
     has_many :shares, CameraShare
     has_many :snapshots, Snapshot
     has_one :cloud_recordings, CloudRecording
@@ -25,18 +27,73 @@ defmodule Camera do
     field :is_online_email_owner_notification, :boolean, default: false
     field :discoverable, :boolean, default: false
     field :config, EvercamMedia.Types.JSON
+    field :mac_address, EvercamMedia.Types.MACADDR
+    field :location, Geo.Point
     field :last_polled_at, Ecto.DateTime, default: Ecto.DateTime.utc
     field :last_online_at, Ecto.DateTime, default: Ecto.DateTime.utc
     field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
   end
 
-  def get_all do
+  def all do
     Camera
     |> join(:full, [c], vm in assoc(c, :vendor_model))
     |> join(:full, [c, vm], v in assoc(vm, :vendor))
     |> preload(:cloud_recordings)
     |> preload(:motion_detections)
+    |> preload(:vendor_model)
+    |> preload([vendor_model: :vendor])
+    |> Repo.all
+  end
+
+  def invalidate_user(%User{} = user) do
+    ConCache.delete(:cameras, "#{user.username}_true")
+    ConCache.delete(:cameras, "#{user.username}_false")
+  end
+
+  def invalidate_camera(%Camera{} = camera) do
+    ConCache.delete(:camera_full, camera.exid)
+    CameraShare
+    |> where(camera_id: ^camera.id)
+    |> preload(:user)
+    |> Repo.all
+    |> Enum.map(fn(cs) -> cs.user end)
+    |> Enum.into([camera.owner])
+    |> Enum.each(fn(user) -> invalidate_user(user) end)
+  end
+
+  def for(user, include_shared? \\ true) do
+    case include_shared? do
+      true -> owned_by(user) |> Enum.into(shared_with(user))
+      false -> owned_by(user)
+    end
+  end
+
+  def owned_by(user) do
+    token = AccessToken.active_token_for(user.id)
+    access_rights_query = AccessRight |> where([ar], ar.token_id == ^token.id)
+
+    Camera
+    |> where([cam], cam.owner_id == ^user.id)
+    |> preload(:owner)
+    |> preload(access_rights: ^access_rights_query)
+    |> preload([access_rights: :access_token])
+    |> preload(:vendor_model)
+    |> preload([vendor_model: :vendor])
+    |> Repo.all
+  end
+
+  def shared_with(user) do
+    token = AccessToken.active_token_for(user.id)
+    access_rights_query = AccessRight |> where([ar], ar.token_id == ^token.id)
+
+    Camera
+    |> join(:left, [u], cs in CameraShare)
+    |> where([cam, cs], cs.user_id == ^user.id)
+    |> where([cam, cs], cam.id == cs.camera_id)
+    |> preload(:owner)
+    |> preload(access_rights: ^access_rights_query)
+    |> preload([access_rights: :access_token])
     |> preload(:vendor_model)
     |> preload([vendor_model: :vendor])
     |> Repo.all
@@ -68,6 +125,8 @@ defmodule Camera do
     |> preload(:owner)
     |> preload(:vendor_model)
     |> preload([vendor_model: :vendor])
+    |> preload(:access_rights)
+    |> preload([access_rights: :access_token])
     |> Repo.first
   end
 
@@ -83,26 +142,83 @@ defmodule Camera do
     "#{camera.config["auth"]["basic"]["password"]}"
   end
 
-  def snapshot_url(camera) do
-    external_url(camera) <> res_url(camera)
-  end
-
-  defp external_url(camera, type \\ "http") do
-    host = camera.config["external_host"] |> to_string
-    port = camera.config["external_#{type}_port"] |> to_string
-    case {host, port} do
-      {"", _} -> ""
-      {host, ""} -> "#{type}://#{host}"
-      {host, port} -> "#{type}://#{host}:#{port}"
+  def snapshot_url(camera, type \\ "jpg") do
+    case external_url(camera) != "" && res_url(camera, type) != "" do
+      true -> external_url(camera) <> res_url(camera, type)
+      false -> ""
     end
   end
 
-  defp res_url(camera, type \\ "jpg") do
+  def external_url(camera, protocol \\ "http") do
+    host = host(camera) |> to_string
+    port = port(camera, "external", protocol) |> to_string
+    case {host, port} do
+      {"", _} -> ""
+      {host, ""} -> "#{protocol}://#{host}"
+      {host, port} -> "#{protocol}://#{host}:#{port}"
+    end
+  end
+
+  def res_url(camera, type \\ "jpg") do
     url = "#{camera.config["snapshots"][type]}"
     case String.starts_with?(url, "/") || String.length(url) == 0 do
       true -> "#{url}"
       false -> "/#{url}"
     end
+  end
+
+  defp url_path(camera, type) do
+    cond do
+      res_url(camera, type) != "" ->
+        res_url(camera, type)
+      res_url(camera, type) == "" && get_model_attr(camera, :config) != "" ->
+        res_url(camera.vendor_model, type)
+      true ->
+        ""
+    end
+  end
+
+  def host(camera, network \\ "external") do
+    camera.config["#{network}_host"]
+  end
+
+  def port(camera, network, protocol) do
+    camera.config["#{network}_#{protocol}_port"]
+  end
+
+  def rtsp_url(camera, network \\ "external", type \\ "h264", include_auth \\ true) do
+    auth = if include_auth, do: "#{auth(camera)}@", else: ""
+    path = url_path(camera, type)
+    host = host(camera)
+    port = port(camera, network, "rtsp")
+
+    case path != "" && host != "" && "#{port}" != "" && "#{port}" != 0 do
+      true -> "rtsp://#{auth}#{host}:#{port}#{path}"
+      false -> ""
+    end
+  end
+
+  def get_rtmp_url(camera) do
+    if rtsp_url(camera) != "" do
+      base_url = EvercamMedia.Endpoint.url |> String.replace("http", "rtmp") |> String.replace("4000", "1935")
+      base_url <> "/live/" <> streaming_token(camera) <> "?camera_id=" <> camera.exid
+    else
+      ""
+    end
+  end
+
+  def get_hls_url(camera) do
+    if rtsp_url(camera) != "" do
+      base_url = EvercamMedia.Endpoint.url
+      base_url <> "/live/" <> streaming_token(camera) <> "/index.m3u8?camera_id="<> camera.exid
+    else
+      ""
+    end
+  end
+
+  defp streaming_token(camera) do
+    token = username(camera) <> "|" <> password(camera) <> "|" <> rtsp_url(camera)
+    Util.encode([token])
   end
 
   def get_vendor_attr(camera_full, attr) do
@@ -112,12 +228,60 @@ defmodule Camera do
     end
   end
 
+  def get_model_attr(camera_full, attr) do
+    case camera_full.vendor_model do
+      nil -> ""
+      vendor_model -> Map.get(vendor_model, attr)
+    end
+  end
+
+  def get_timezone(camera) do
+    case camera.timezone do
+      nil -> "Etc/UTC"
+      timezone -> timezone
+    end
+  end
+
+  def get_mac_address(camera) do
+    camera.mac_address |> to_string
+  end
+
+  def get_location(camera) do
+    {lng, lat} =
+      case camera.location do
+        %Geo.Point{} -> camera.location.coordinates
+        _nil -> {0, 0}
+      end
+    %{lng: lng, lat: lat}
+  end
+
   def get_camera_info(exid) do
     camera = Camera.get(exid)
     %{
       "url" => external_url(camera),
       "auth" => auth(camera)
     }
+  end
+
+  def get_rights(camera, user) do
+    cond do
+      is_owner?(user, camera) ->
+        "snapshot,view,edit,delete,list,grant~snapshot,grant~view,grant~edit,grant~delete,grant~list"
+      camera.access_rights == [] ->
+        "snapshot,list"
+      true ->
+        camera.access_rights
+        |> Enum.filter(fn(ar) -> ar.access_token.user_id == user.id end)
+        |> Enum.map(fn(ar) -> ar.right end)
+        |> Enum.into(["snapshot", "list"])
+        |> Enum.uniq
+        |> Enum.join(",")
+    end
+  end
+
+  def is_owner?(nil, _camera), do: false
+  def is_owner?(user, camera) do
+    user.id == camera.owner_id
   end
 
   def recording?(camera_full) do
