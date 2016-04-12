@@ -1,5 +1,6 @@
 defmodule EvercamMedia.CameraController do
   use EvercamMedia.Web, :controller
+  alias EvercamMedia.CameraView
   alias EvercamMedia.ErrorView
   alias EvercamMedia.Snapshot.Storage
   alias EvercamMedia.Snapshot.StreamerSupervisor
@@ -25,10 +26,12 @@ defmodule EvercamMedia.CameraController do
           _ -> true
         end
 
-      cameras = Camera.for(requested_user, include_shared?)
+      data = ConCache.get_or_store(:cameras, "#{requested_user.username}_#{include_shared?}", fn() ->
+        cameras = Camera.for(requested_user, include_shared?)
+        Phoenix.View.render(CameraView, "index.json", %{cameras: cameras, user: requester})
+      end)
 
-      conn
-      |> render("index.json", %{cameras: cameras, user: requester})
+      json(conn, data)
     else
       conn
       |> put_status(404)
