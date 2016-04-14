@@ -55,6 +55,9 @@ config :evercam_media,
 config :evercam_media,
   storage_dir: "/storage"
 
+config :evercam_media,
+  seaweedfs_url: System.get_env["SEAWEEDFS_URL"]
+
 config :exq,
   port: System.get_env("REDIS_PORT") |> String.to_integer,
   host: System.get_env("REDIS_HOST"),
