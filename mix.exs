@@ -40,6 +40,7 @@ defmodule EvercamMedia.Mixfile do
     :inets,
     :jsx,
     :mailgun,
+    :meck,
     :phoenix,
     :phoenix_ecto,
     :phoenix_html,
