@@ -35,3 +35,14 @@ config :evercam_media, EvercamMedia.SnapshotRepo,
   password: "postgres",
   database: "evercam_tst",
   pool: Ecto.Adapters.SQL.Sandbox
+
+
+ config :exvcr, [
+  vcr_cassette_library_dir: "test/fixtures/vcr_cassettes",
+  custom_cassette_library_dir: "test/fixtures/custom_cassettes",
+  filter_sensitive_data: [
+    [pattern: "<PASSWORD>.+</PASSWORD>", placeholder: "PASSWORD_PLACEHOLDER"]
+  ],
+  filter_url_params: false,
+  response_headers_blacklist: []
+]
