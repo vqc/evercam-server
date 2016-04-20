@@ -82,7 +82,7 @@ defmodule EvercamMedia.Snapshot.Error do
         update_camera_status("#{camera_exid}", timestamp, false, "unauthorized", 100)
         [504, %{message: "Camera responded with a Unauthorized message.", response: error[:response]}]
       :device_error ->
-        Logger.debug "[#{camera_exid}] [snapshot_error] [device_error]"
+        Logger.warn "[#{camera_exid}] [snapshot_error] [device_error] #{inspect error}"
         update_camera_status("#{camera_exid}", timestamp, false, "device_error", 2)
         [504, %{message: "Camera responded with a Device Error message.", response: error[:response]}]
       :device_busy ->
