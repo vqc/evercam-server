@@ -7,62 +7,38 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   def thumbnail_link(camera_exid, snapshot_path) do
     thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
-    try do
-      task = Task.async(fn() ->
-        File.rm(thumbnail_path)
-        File.ln_s(snapshot_path, thumbnail_path)
-      end)
-      Task.await(task, :timer.seconds(1))
-    catch _type, error ->
-      Util.error_handler(error)
-    end
+    File.rm(thumbnail_path)
+    File.ln_s(snapshot_path, thumbnail_path)
   end
 
   def thumbnail_load(camera_exid) do
     thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
-    try do
-      task = Task.async(fn() ->
-        case File.lstat(thumbnail_path) do
-          {:error, :enoent} ->
-            File.ln_s(latest(camera_exid), thumbnail_path)
-          {:ok, %File.Stat{type: :regular}} ->
-            File.rm(thumbnail_path)
-            File.ln_s(latest(camera_exid), thumbnail_path)
-          _ -> :noop
-        end
-        {file_path, _status} = System.cmd("readlink", [thumbnail_path])
-        file_path = String.replace_trailing(file_path, "\n", "")
-        file = File.open(file_path, [:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
-        case file do
-          {:ok, content} ->
-            content
-          {:error, :enoent} ->
-            Util.unavailable
-          {:error, error} ->
-            Logger.error inspect(error)
-            Util.unavailable
-        end
+    case File.lstat(thumbnail_path) do
+      {:error, :enoent} ->
+        File.ln_s(latest(camera_exid), thumbnail_path)
+      {:ok, %File.Stat{type: :regular}} ->
+        File.rm(thumbnail_path)
+        File.ln_s(latest(camera_exid), thumbnail_path)
+      _ -> :noop
+    end
+    {file_path, _status} = System.cmd("readlink", [thumbnail_path])
+    file_path = String.replace_trailing(file_path, "\n", "")
+    file = File.open(file_path, [:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
+    case file do
+      {:ok, content} ->
         content
-      end)
-      Task.await(task, :timer.seconds(2))
-    catch _type, error ->
-      Util.error_handler(error)
-      Util.unavailable
+      {:error, :enoent} ->
+        Util.unavailable
+      {:error, error} ->
+        Logger.error inspect(error)
+        Util.unavailable
     end
   end
 
   def thumbnail_exists?(camera_exid) do
-    try do
-      task = Task.async(fn() ->
-        case File.lstat("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg") do
-          {:error, _error} -> false
-          {:ok, %File.Stat{}} -> true
-        end
-      end)
-      Task.await(task, :timer.seconds(1))
-    catch _type, error ->
-      Util.error_handler(error)
-      false
+    case File.lstat("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg") do
+      {:error, _error} -> false
+      {:ok, %File.Stat{}} -> true
     end
   end
 
@@ -83,101 +59,64 @@ defmodule EvercamMedia.Snapshot.Storage do
     app_name = parse_note(notes)
     directory_path = construct_directory_path(camera_exid, timestamp, app_name)
     file_name = construct_file_name(timestamp)
-    try do
-      task = Task.async(fn() ->
-        :filelib.ensure_dir(to_char_list(directory_path))
-        File.open("#{directory_path}#{file_name}", [:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
-        thumbnail_link(camera_exid, "#{directory_path}#{file_name}")
-      end)
-      Task.await(task, :timer.seconds(2))
-    catch _type, error ->
-      Util.error_handler(error)
-    end
+    :filelib.ensure_dir(to_char_list(directory_path))
+    File.open("#{directory_path}#{file_name}", [:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
+    spawn fn -> thumbnail_link(camera_exid, "#{directory_path}#{file_name}") end
   end
 
   def load(camera_exid, snapshot_id, notes) do
-    try do
-      task = Task.async(fn() ->
-        app_name = parse_note(notes)
-        timestamp =
-          snapshot_id
-          |> String.split("_")
-          |> List.last
-          |> Util.snapshot_timestamp_to_unix
-        directory_path = construct_directory_path(camera_exid, timestamp, app_name)
-        file_name = construct_file_name(timestamp)
-        {:ok, content} = File.open("#{directory_path}#{file_name}", [:read, :binary, :raw], fn(file) ->
-          IO.binread(file, :all)
-        end)
-        content
-      end)
-      Task.await(task, :timer.seconds(1))
-    catch _type, error ->
-      Util.error_handler(error)
-      Util.unavailable
-    end
+    app_name = parse_note(notes)
+    timestamp =
+      snapshot_id
+      |> String.split("_")
+      |> List.last
+      |> Util.snapshot_timestamp_to_unix
+    directory_path = construct_directory_path(camera_exid, timestamp, app_name)
+    file_name = construct_file_name(timestamp)
+    {:ok, content} = File.open("#{directory_path}#{file_name}", [:read, :binary, :raw], fn(file) ->
+      IO.binread(file, :all)
+    end)
+    content
   end
 
   def exists?(camera_exid, snapshot_id, notes) do
-    try do
-      task = Task.async(fn() ->
-        app_name = parse_note(notes)
-        timestamp =
-          snapshot_id
-          |> String.split("_")
-          |> List.last
-          |> Util.snapshot_timestamp_to_unix
-        directory_path = construct_directory_path(camera_exid, timestamp, app_name)
-        file_name = construct_file_name(timestamp)
-        File.exists?("#{directory_path}#{file_name}")
-      end)
-      Task.await(task, :timer.seconds(1))
-    catch _type, error ->
-      Util.error_handler(error)
-      false
-    end
+    app_name = parse_note(notes)
+    timestamp =
+      snapshot_id
+      |> String.split("_")
+      |> List.last
+      |> Util.snapshot_timestamp_to_unix
+    directory_path = construct_directory_path(camera_exid, timestamp, app_name)
+    file_name = construct_file_name(timestamp)
+    File.exists?("#{directory_path}#{file_name}")
   end
 
   def cleanup(cloud_recording) do
-    try do
-      task = Task.async(fn() ->
-        unless cloud_recording.storage_duration == -1 do
-          camera_exid = cloud_recording.camera.exid
-          seconds_to_day_before_expiry = (cloud_recording.storage_duration) * (24 * 60 * 60) * (-1)
-          day_before_expiry =
-            DateTime.now_utc
-            |> DateTime.advance!(seconds_to_day_before_expiry)
-            |> DateTime.to_date
+    unless cloud_recording.storage_duration == -1 do
+      camera_exid = cloud_recording.camera.exid
+      seconds_to_day_before_expiry = (cloud_recording.storage_duration) * (24 * 60 * 60) * (-1)
+      day_before_expiry =
+        DateTime.now_utc
+        |> DateTime.advance!(seconds_to_day_before_expiry)
+        |> DateTime.to_date
 
-          Logger.info "[#{camera_exid}] [snapshot_delete_disk]"
-          Path.wildcard("#{@root_dir}/#{camera_exid}/snapshots/recordings/????/??/??/")
-          |> Enum.each(fn(path) -> delete_if_expired(camera_exid, path, day_before_expiry) end)
-        end
-      end)
-      Task.await(task, :timer.seconds(25))
-    catch _type, error ->
-      Util.error_handler(error)
+      Logger.info "[#{camera_exid}] [snapshot_delete_disk]"
+      Path.wildcard("#{@root_dir}/#{camera_exid}/snapshots/recordings/????/??/??/")
+      |> Enum.each(fn(path) -> delete_if_expired(camera_exid, path, day_before_expiry) end)
     end
   end
 
   defp delete_if_expired(camera_exid, path, day_before_expiry) do
-    try do
-      task = Task.async(fn() ->
-        date =
-          path
-          |> String.replace_leading("#{@root_dir}/#{camera_exid}/snapshots/recordings/", "")
-          |> String.replace("/", "-")
-          |> Date.Parse.iso8601!
+    date =
+      path
+      |> String.replace_leading("#{@root_dir}/#{camera_exid}/snapshots/recordings/", "")
+      |> String.replace("/", "-")
+      |> Date.Parse.iso8601!
 
-        if Calendar.Date.before?(date, day_before_expiry) do
-          Logger.info "[#{camera_exid}] [snapshot_delete_disk] [#{Date.Format.iso8601(date)}]"
-          dir_path = Strftime.strftime!(date, "#{@root_dir}/#{camera_exid}/snapshots/recordings/%Y/%m/%d")
-          Porcelain.shell("find '#{dir_path}' -delete")
-        end
-      end)
-      Task.await(task, :timer.seconds(5))
-    catch _type, error ->
-      Util.error_handler(error)
+    if Calendar.Date.before?(date, day_before_expiry) do
+      Logger.info "[#{camera_exid}] [snapshot_delete_disk] [#{Date.Format.iso8601(date)}]"
+      dir_path = Strftime.strftime!(date, "#{@root_dir}/#{camera_exid}/snapshots/recordings/%Y/%m/%d")
+      Porcelain.shell("find '#{dir_path}' -delete")
     end
   end
 
