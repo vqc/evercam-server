@@ -32,7 +32,16 @@ defmodule EvercamMedia.Snapshot.Storage do
         end
         {file_path, _status} = System.cmd("readlink", [thumbnail_path])
         file_path = String.replace_trailing(file_path, "\n", "")
-        {:ok, content} = File.open(file_path, [:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
+        file = File.open(file_path, [:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
+        case file do
+          {:ok, content} ->
+            content
+          {:error, :enoent} ->
+            Util.unavailable
+          {:error, error} ->
+            Logger.error inspect(error)
+            Util.unavailable
+        end
         content
       end)
       Task.await(task, :timer.seconds(2))
