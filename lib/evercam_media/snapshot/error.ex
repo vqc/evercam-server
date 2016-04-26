@@ -86,6 +86,7 @@ defmodule EvercamMedia.Snapshot.Error do
         update_camera_status("#{camera_exid}", timestamp, false, "device_error", 2)
         [504, %{message: "Camera responded with a Device Error message.", response: error[:response]}]
       :device_busy ->
+        ConCache.put(:camera_lock, camera_exid, camera_exid)
         Logger.debug "[#{camera_exid}] [snapshot_error] [device_busy]"
         update_camera_status("#{camera_exid}", timestamp, false, "device_busy", 1)
         [502, %{message: "Camera responded with a Device Busy message.", response: error[:response]}]
