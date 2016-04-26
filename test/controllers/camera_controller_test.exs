@@ -18,7 +18,6 @@ defmodule EvercamMedia.CameraControllerTest do
     datetime = now |> Ecto.DateTime.cast!
     snapshot_timestamp = now |> Strftime.strftime!("%Y%m%d%H%M%S%f")
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
-    SnapshotRepo.delete_all Snapshot
     %Snapshot{}
     |> Snapshot.changeset(%{camera_id: camera.id, notes: "", motionlevel: 0, created_at: datetime, snapshot_id: snapshot_id})
     |> SnapshotRepo.insert
