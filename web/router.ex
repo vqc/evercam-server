@@ -34,6 +34,7 @@ defmodule EvercamMedia.Router do
   scope "/v1", EvercamMedia do
     pipe_through :api
 
+    get "/cameras/port-check", CameraController, :port_check
     post "/cameras/test", SnapshotController, :test
     get "/cameras/:id/recordings/snapshots/:snapshot_id", SnapshotController, :data
 
