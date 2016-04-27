@@ -27,6 +27,7 @@ defmodule EvercamMedia.PlugCase do
   setup do
     # Wrap this case in a transaction
     Ecto.Adapters.SQL.Sandbox.checkout(EvercamMedia.Repo)
+    Ecto.Adapters.SQL.Sandbox.checkout(EvercamMedia.SnapshotRepo)
 
     :ok
   end

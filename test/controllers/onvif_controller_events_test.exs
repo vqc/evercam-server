@@ -5,7 +5,7 @@ defmodule EvercamMedia.ONVIFControllerEventsTest do
   @access_params "url=http://recorded_response&auth=admin:mehcam"
 
   test "GET /v1/onvif/v20/Events/GetServiceCapabilities, returns something" do
-    use_cassette "ev_get_service_capabilities" do 
+    use_cassette "ev_get_service_capabilities" do
       conn = get conn(), "/v1/onvif/v20/Events/GetServiceCapabilities?#{@access_params}"
       subscription_policy_support = json_response(conn, 200) |> Map.get("Capabilities") |> Map.get("WSSubscriptionPolicySupport")
       assert subscription_policy_support == "true"

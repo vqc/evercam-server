@@ -61,6 +61,7 @@ defmodule SnapshotTest do
     {:ok, cloud_recording: Repo.preload(cloud_recording, :camera), expiry_day: expiry_day}
   end
 
+  @tag :skip
   test "lists ranges of expired snapshots", %{cloud_recording: cloud_recording, expiry_day: expiry_day} do
     timestamp = NaiveDateTime.Parse.asn1_generalized("#{expiry_day}000000") |> elem(1)
     end_day = timestamp |> Date.next_day! |> Strftime.strftime!("%Y%m%d")

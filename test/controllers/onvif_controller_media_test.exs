@@ -21,7 +21,7 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
   end
 
   test "GET /v1/onvif/v20/Media/GetSnapshotUri, returns snapshot uri" do
-    use_cassette "get_snapshot_uri" do 
+    use_cassette "get_snapshot_uri" do
       conn = get conn(), "/v1/onvif/v20/Media/GetSnapshotUri?#{@access_params}&ProfileToken=Profile_1"
       snapshot_uri = json_response(conn, 200) |> Map.get("MediaUri") |> Map.get("Uri")
       assert snapshot_uri == "http://192.168.1.100:8100/onvif-http/snapshot?Profile_1"
@@ -29,7 +29,7 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
   end
 
   test "GET /v1/onvif/v20/Media/GetVideoAnalyticsConfigurations" do
-    use_cassette "get_video_analytics_configuration" do 
+    use_cassette "get_video_analytics_configuration" do
       conn = get conn(), "/v1/onvif/v20/Media/GetVideoAnalyticsConfigurations?#{@access_params}"
       token = json_response(conn, 200) |> Map.get("Configurations") |> Map.get("token")
       assert token == "VideoAnalyticsToken"

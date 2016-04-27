@@ -1,0 +1,34 @@
+sudo: required
+
+language: elixir
+
+elixir:
+  - 1.2.3
+
+addons:
+  postgresql: 9.4
+
+services:
+  - redis-server
+
+before_script:
+  - rvm install 2.2.2
+  - git clone https://github.com/evercam/evercam-api evercam-api
+  - cd evercam-api
+  - ./scripts/travis
+  - bundle install --local
+  - bundle exec rake db:migrate --trace
+  - cd ..
+
+script:
+  - mix test --exclude external:true
+
+env:
+  matrix:
+    - DATABASE_URL="postgres://localhost/evercam_tst" EVERCAM_ENV="test"
+  global:
+    - secure: BTrnsgd5wuCTmOOCsFDZ4+JFUj6bvTmwkYvW3snzLBmA1g58mqA/HdqL50tKdRaCb2/Hw0VfNIRvuEmg3zXY4bwF6OpcLKnnwG78MCQqwkHcMaSIkH8xDSjpwkat/UQIHCGuz5U13nGbb6+7UAjQPufJ5S340y0RnrNSl8ZYUSs=
+    - secure: PswTKqbdTSwg5Wh1bir4bh834BVqtBvBcTsPT+oIooi27irlsV1VqUOA/imanL36xaIjJjvqy1WzpnYoDRCU4UuQekqhREv4wI9NTVF7qFuy0A/kgeaGdtY2MzOWsCrL/bXH2/N24b3AWiW4B2O3QPCpWqsKb6b/leDdCO+6OW8=
+    - secure: pdA4W86uI6o7XP5bkOHgVFscVc2eARfwTEZroE89N7hQxmNyXb7wQ6/nOTnAwIHVsZvlYUcJXm4PHXLvSmLguBB/kJ2qloAufdh6AOXWsoxiP3AmtonSQqk5eMkIdu5ctjy+AgV8cu3FquTU9hRFL+GLkCqI4AySBiv7Hnda54M=
+    - secure: j+xkR8Z+mehpaqhHoNy+58YsFwky0ybJvaAzhqGjuJ1/WoE6VeAXZbdayn8B69f3wmmXwr3IsqSAK6u9IHD59CfIyWPWkj3ZxjfQeDehoREBXZX2FfB5dZ8RfcpLgHlVGk7cIUUF6BG1a1LjoMvzl4TUh/2ToE+i74fuMLDgvc4=
+    - secure: aCBbXKAVPwGujiOvMg6QcqDjObgzEtqgGACxjsi4TjzIT3uyZmky5iy8w1C/vo2DPcc/90C6BuNU7tU6jhjM2XP/MttiOM2re/yu8SDxSZRW1OM11negoPftrApddeheaqb61lWJzQwhcpB6yD2pt1LxwvLCkagc7+ixRy4ovHE=

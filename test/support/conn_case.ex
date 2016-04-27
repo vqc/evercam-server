@@ -48,7 +48,6 @@ defmodule EvercamMedia.ConnCase do
 
     {:ok, _camera} = EvercamMedia.Repo.insert %Camera{name: "EXVCR Camera", exid: "recorded-response", owner_id: user.id, is_online_email_owner_notification: false, is_public: false, config: %{"snapshots": %{"jpg": "/Streaming/Channels/1/picture"}, "internal_rtsp_port": "", "internal_http_port": "", "internal_host": "", "external_rtsp_port": 9100, "external_http_port": 12345, "external_host": "recorded_response", "auth": %{"basic": %{"username": "admin","password": "mehcam"}}}}
 
-
     :ok
   end
 end

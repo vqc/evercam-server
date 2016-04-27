@@ -17,6 +17,4 @@ defmodule EvercamMedia.ONVIFPTZControllerTest do
       assert error_status == "NO error"
     end
   end
-
-  
 end
