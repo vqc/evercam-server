@@ -8,6 +8,21 @@ defmodule EvercamMedia.CameraController do
   alias EvercamMedia.Snapshot.Worker
   alias EvercamMedia.Util
   require Logger
+  import String, only: [to_integer: 1]
+
+  def port_check(conn, %{"address" => address, "port" => port}) do
+    connection = :gen_tcp.connect(to_char_list(address), to_integer(port), [:binary, active: false], 500)
+
+    port_open? =
+      case connection do
+        {:ok, socket} ->
+          :gen_tcp.close(socket)
+          true
+        {:error, _error} ->
+          false
+      end
+    json(conn, %{address: address, port: to_integer(port), open: port_open?})
+  end
 
   def index(conn, params) do
     requester = conn.assigns[:current_user]
