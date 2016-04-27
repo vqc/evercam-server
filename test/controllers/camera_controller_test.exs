@@ -27,6 +27,7 @@ defmodule EvercamMedia.CameraControllerTest do
     {:ok, datetime: now}
   end
 
+  @tag :skip
   test "GET /v1/cameras/:id/thumbnail", %{datetime: datetime} do
     camera_exid = "austin"
     iso_timestamp =
