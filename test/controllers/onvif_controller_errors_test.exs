@@ -4,7 +4,7 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
 
   @access_params "url=http://recorded_response&auth=admin:mehcam"
 
-  @tag :capture_log 
+  @tag :capture_log
   test "GET /v1/onvif/v20/DeviceIO/GetUnknownAction" do
     use_cassette "error_unknown_action" do
       conn = get conn(), "/v1/onvif/v20/DeviceIO/GetUnknownAction?#{@access_params}"
@@ -15,11 +15,11 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
 
   @tag :capture_log
   test "bad credentials" do
-    use_cassette "error_bad_credentials" do 
+    use_cassette "error_bad_credentials" do
       conn = get conn(), "/v1/onvif/v20/device_service/GetNetworkInterfaces?url=http://recorded_response&auth=admin:foo"
       error_type = json_response(conn, 400) |> parse_error_type
       assert error_type == "ter:NotAuthorized"
-    end 
+    end
   end
 
   @tag :capture_log
