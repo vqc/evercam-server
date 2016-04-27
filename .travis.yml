@@ -16,7 +16,7 @@ before_script:
   - git clone https://github.com/evercam/evercam-api evercam-api
   - cd evercam-api
   - ./scripts/travis
-  - bundle install
+  - bundle install --local
   - bundle exec rake db:migrate --trace
   - cd ..
 
