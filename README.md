@@ -1,4 +1,4 @@
-# Evercam Media
+# Evercam Media [![Build Status][travis-image]][travis-url]
 
 Evercam Media is the component that is responsible for talking  to the camera. Consider it as a "proxy" for all commands. Processes here request either snapshots or streams and then send them to the API, Storage, or to any of the clients (e.g. Evercam-Dashboard, Evercam-Play-Android, Evercam-Play-iOS).
 
@@ -25,3 +25,6 @@ The  Evercam codebase is open source, see details: http://www.evercam.io/open-so
 Documentation about Evercam can be found here: https://github.com/evercam/evercam-api/wiki
 
 Any questions or suggestions, drop us a line: http://www.evercam.io/contact
+
+[travis-url]: https://travis-ci.org/evercam/evercam-media
+[travis-image]: https://travis-ci.org/evercam/evercam-media.svg?branch=master
