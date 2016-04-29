@@ -43,6 +43,9 @@ defmodule EvercamMedia.Snapshot.Streamer do
   def handle_info(:tick, camera_exid) do
     camera = Camera.get_full(camera_exid)
     cond do
+      camera.is_online && ConCache.get(:snapshot_error, camera.exid) > 0 ->
+        Logger.debug "[#{camera.exid}] Checking ..."
+        spawn fn -> stream(camera) end
       length(subscribers(camera.exid)) == 0 ->
         Logger.debug "[#{camera.exid}] Shutting down streamer, no subscribers"
         StreamerSupervisor.stop_streamer(camera.exid)
