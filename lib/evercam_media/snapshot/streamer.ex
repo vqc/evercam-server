@@ -32,17 +32,16 @@ defmodule EvercamMedia.Snapshot.Streamer do
   Initialize the camera streamer
   """
   def init(camera_exid) do
-    camera = Camera.get_full(camera_exid)
-
     Process.send_after(self, :tick, 0)
-    {:ok, camera}
+    {:ok, camera_exid}
   end
 
   @doc """
   Either stream a snapshot to subscribers or shut down streaming
   """
   def handle_info(:tick, nil), do: :noop
-  def handle_info(:tick, camera) do
+  def handle_info(:tick, camera_exid) do
+    camera = Camera.get_full(camera_exid)
     cond do
       length(subscribers(camera.exid)) == 0 ->
         Logger.debug "[#{camera.exid}] Shutting down streamer, no subscribers"
@@ -55,7 +54,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
         spawn fn -> stream(camera) end
     end
     Process.send_after(self, :tick, 1000)
-    {:noreply, camera}
+    {:noreply, camera_exid}
   end
 
   @doc """
