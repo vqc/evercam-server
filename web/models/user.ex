@@ -21,7 +21,7 @@ defmodule User do
     field :api_key, :string
     field :billing_id, :string
     field :token_expires_at, Ecto.DateTime
-
+    field :stripe_customer_id, :string
     field :confirmed_at, Ecto.DateTime
     field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
     field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
@@ -39,6 +39,7 @@ defmodule User do
   def by_username(username) do
     User
     |> where(username: ^username)
+    |> preload(:country)
     |> Repo.one
   end
 
@@ -56,6 +57,13 @@ defmodule User do
     |> where([u, cs], u.id == cs.user_id)
     |> Repo.all
     |> Enum.into([camera_full.owner])
+  end
+
+  def get_country_attr(user, attr) do
+    case user.country do
+      nil -> ""
+      country -> Map.get(country, attr)
+    end
   end
 
   def changeset(model, params \\ :invalid) do
