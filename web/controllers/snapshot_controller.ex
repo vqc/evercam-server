@@ -136,6 +136,8 @@ defmodule EvercamMedia.SnapshotController do
 
   defp fetch_snapshot(args, attempt \\ 1) do
     response = CamClient.fetch_snapshot(args)
+    timestamp = DateTime.Format.unix(DateTime.now_utc)
+    args = Map.put(args, :timestamp, timestamp)
 
     case {response, args[:is_online], attempt} do
       {{:error, _error}, true, attempt} when attempt <= 3 ->
