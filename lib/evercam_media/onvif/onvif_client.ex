@@ -36,7 +36,7 @@ defmodule EvercamMedia.ONVIFClient do
     [username, password] = auth |> String.split(":")
     onvif_request = gen_onvif_request(namespace, operation, username, password, parameters)
     try do
-      response = HTTPotion.post url, [body: onvif_request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]] 
+      response = HTTPotion.post url, [body: onvif_request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
       {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
       soap_ns = case elem(xml, 3) do
                   {ns, _} -> ns
