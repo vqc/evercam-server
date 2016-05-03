@@ -9,19 +9,27 @@ defmodule EvercamMedia.ONVIFClient do
     url = "#{base_url}/onvif/#{service}"
     namespace =  case service do
                    "PTZ" -> "tptz"
+                   "ptz_service" -> "tptz"
                    "device_service" -> "tds"
                    "Media" -> "trt"
+                   "media_service" -> "trt"
                    "Display" -> "tls"
                    "Events" -> "tev"
+                   "event_service" -> "tev"
                    "Analytics" -> "tan"
                    "AnalyticsDevice" -> "tad"
                    "DeviceIO" -> "tmd"
                    "Imaging" -> "timg"
+                   "imaging_service" -> "timg"
                    "Search" -> "tse"
+                   "search_service" -> "trsrch"
                    "Replay" -> "trp"
+                   "replay_service" -> "treplay"
                    "Recording" -> "trc"
+                   "recording_service" -> "trec"
                    "Storage" -> "tst"
                    "Receiver" -> "trv"
+                   "receiver_service" -> "trcv"
                    "Network" -> "dn"
                   end
 
@@ -30,16 +38,22 @@ defmodule EvercamMedia.ONVIFClient do
     try do
       response = HTTPotion.post url, [body: onvif_request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
       {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
-      {soap_ns, _} =  elem(xml, 3)
+      soap_ns = case elem(xml, 3) do
+                  {ns, _} -> ns
+                  _ -> "env"
+                end
+
       if HTTPotion.Response.success?(response) do
-        {:ok, "/#{soap_ns}:Envelope/#{soap_ns}:Body/#{namespace}:#{operation}Response" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
+        case "/#{soap_ns}:Envelope/#{soap_ns}:Body/#{namespace}:#{operation}Response" |> to_char_list |> :xmerl_xpath.string(xml) do
+          [] -> {:error, 405, "/#{soap_ns}:Envelope/#{soap_ns}:Body" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
+          xpath_string -> {:ok, parse_elements xpath_string}
+        end
       else
         Logger.error "Error invoking #{operation}. URL: #{url} auth: #{auth}. Request: #{inspect onvif_request}. Response #{inspect response}."
-        xpath_contents = case contents = "/#{soap_ns}:Envelope/#{soap_ns}:Body" |> to_char_list |> :xmerl_xpath.string(xml) do
-                           [] -> "/html" |> to_char_list |> :xmerl_xpath.string(xml)
-                           _ -> contents
-                         end
-        {:error, response.status_code, xpath_contents |> parse_elements}
+        case "/html" |> to_char_list |> :xmerl_xpath.string(xml) do
+          [] ->  {:error, response.status_code, "/#{soap_ns}:Envelope/#{soap_ns}:Body" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
+          contents -> {:error, response.status_code, contents |> parse_elements}
+        end
       end
     rescue
       error in HTTPotion.HTTPError -> {:error, 500, %{"message" => error.message}}
@@ -61,9 +75,13 @@ defmodule EvercamMedia.ONVIFClient do
         "dn" -> "http://www.onvif.org/ver10/network/wsdl"
         "tmd" -> "http://www.onvif.org/ver10/deviceIO/wsdl"
         "trc" -> "http://www.onvif.org/ver10/recording/wsdl"
+        "trec" -> "http://www.onvif.org/ver10/recording/wsdl"
         "tse" -> "http://www.onvif.org/ver10/search/wsdl"
+        "trsrch" -> "http://www.onvif.org/ver10/search/wsdl"
         "trp" -> "http://www.onvif.org/ver10/replay/wsdl"
+        "treplay" -> "http://www.onvif.org/ver10/replay/wsdl"
         "trv" -> "http://www.onvif.org/ver10/receiver/wsdl"
+        "trcv" -> "http://www.onvif.org/ver10/receiver/wsdl"
        end
 
     {wsse_username, wsse_password, wsse_nonce, wsse_created} = get_wsse_header_data(username,password)
