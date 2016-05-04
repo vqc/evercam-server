@@ -8,18 +8,18 @@ defmodule EvercamMedia.CameraController do
   require Logger
   import String, only: [to_integer: 1]
 
-  def port_check(conn, %{"address" => address, "port" => port}) do
-    connection = :gen_tcp.connect(to_char_list(address), to_integer(port), [:binary, active: false], 500)
-
-    port_open? =
-      case connection do
-        {:ok, socket} ->
-          :gen_tcp.close(socket)
-          true
-        {:error, _error} ->
-          false
-      end
-    json(conn, %{address: address, port: to_integer(port), open: port_open?})
+  def port_check(conn, params) do
+    case check_params(params) do
+      {:invalid, message} ->
+        json(conn, %{error: message})
+      :ok ->
+        response = %{
+          address: params["address"],
+          port: to_integer(params["port"]),
+          open: port_open?(params["address"], params["port"])
+        }
+        json(conn, response)
+    end
   end
 
   def index(conn, params) do
@@ -111,4 +111,41 @@ defmodule EvercamMedia.CameraController do
         send_resp(conn, 500, "Invalid token.")
     end
   end
+
+  defp port_open?(address, port) do
+    case :gen_tcp.connect(to_char_list(address), to_integer(port), [:binary, active: false], 500) do
+      {:ok, socket} ->
+        :gen_tcp.close(socket)
+        true
+      {:error, _error} ->
+        false
+    end
+  end
+
+  defp check_params(params) do
+    with :ok <- valid?("address", params["address"]),
+         :ok <- valid?("port", params["port"]),
+         do: :ok
+  end
+
+  defp valid?(key, value) when value in [nil, ""],  do: invalid(key)
+
+  defp valid?("address" = key, value) do
+    case :inet_parse.address(String.to_char_list(value)) do
+      {:ok, _} -> :ok
+      {:error, _} -> invalid(key)
+    end
+  end
+
+  defp valid?("port" = _key, value) when is_integer(value) and value < 65535, do: :ok
+  defp valid?("port" = key, value) when is_binary(value) do
+    case Integer.parse(value) do
+      {int_value, ""} -> valid?(key, int_value)
+      _ -> invalid(key)
+    end
+  end
+
+  defp valid?("port" = key, _), do: invalid(key)
+
+  defp invalid(key), do: {:invalid, "The parameter '#{key}' isn't valid."}
 end
