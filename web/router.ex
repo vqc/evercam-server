@@ -41,6 +41,8 @@ defmodule EvercamMedia.Router do
     get "/cameras/:id/touch", CameraController, :touch
     get "/cameras/:id/thumbnail/:timestamp", CameraController, :thumbnail
 
+    get "/models/:id", ModelController, :show
+
     get "/vendors/:id", VendorController, :show
 
     scope "/" do
