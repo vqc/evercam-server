@@ -116,7 +116,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     if Calendar.Date.before?(date, day_before_expiry) do
       Logger.info "[#{camera_exid}] [snapshot_delete_disk] [#{Date.Format.iso8601(date)}]"
       dir_path = Strftime.strftime!(date, "#{@root_dir}/#{camera_exid}/snapshots/recordings/%Y/%m/%d")
-      Porcelain.shell("ionice -c3 find '#{dir_path}' -delete")
+      Porcelain.shell("ionice -c 3 find '#{dir_path}' -exec sleep 0.01 \\; -delete")
     end
   end
 
