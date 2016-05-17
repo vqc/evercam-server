@@ -1,4 +1,4 @@
-defmodule Permissions.Camera do
+defmodule Permission.Camera do
   import Camera, only: [is_owner?: 2]
 
   def can_edit?(requester, camera) do

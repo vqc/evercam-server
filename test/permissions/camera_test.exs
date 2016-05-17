@@ -1,4 +1,4 @@
-defmodule Permissions.CameraTest do
+defmodule Permission.CameraTest do
   use EvercamMedia.ModelCase
 
   setup do
@@ -14,12 +14,12 @@ defmodule Permissions.CameraTest do
     _access_right = Repo.insert!(%AccessRight{token_id: token.id, right: "edit", camera_id: camera.id, status: 1, scope: "cameras"})
     camera = Repo.preload(camera, [:access_rights, [access_rights: :access_token]])
 
-    assert Permissions.Camera.can_edit?(user, camera)
-    assert Permissions.Camera.can_view?(user, camera)
-    assert Permissions.Camera.can_snapshot?(user, camera)
-    assert Permissions.Camera.can_delete?(user, camera)
-    assert Permissions.Camera.can_list?(user, camera)
-    assert Permissions.Camera.can_grant?(user, camera)
+    assert Permission.Camera.can_edit?(user, camera)
+    assert Permission.Camera.can_view?(user, camera)
+    assert Permission.Camera.can_snapshot?(user, camera)
+    assert Permission.Camera.can_delete?(user, camera)
+    assert Permission.Camera.can_list?(user, camera)
+    assert Permission.Camera.can_grant?(user, camera)
   end
 
   test ".can_edit(user, camera) - returns false if the USER cannot EDIT the CAMERA" do
@@ -31,8 +31,8 @@ defmodule Permissions.CameraTest do
     _access_right = Repo.insert!(%AccessRight{token_id: token.id, right: "view", camera_id: camera.id, status: 1, scope: "cameras"})
     camera = Repo.preload(camera, [:access_rights, [access_rights: :access_token]])
 
-    assert Permissions.Camera.can_view?(user, camera)
-    refute Permissions.Camera.can_edit?(user, camera)
+    assert Permission.Camera.can_view?(user, camera)
+    refute Permission.Camera.can_edit?(user, camera)
   end
 
   test ".can_edit(user, camera) - returns true if the USER can EDIT the CAMERA" do
@@ -44,7 +44,7 @@ defmodule Permissions.CameraTest do
     _access_right = Repo.insert!(%AccessRight{token_id: token.id, right: "edit", camera_id: camera.id, status: 1, scope: "cameras"})
     camera = Repo.preload(camera, [:access_rights, [access_rights: :access_token]])
 
-    assert Permissions.Camera.can_edit?(user, camera)
+    assert Permission.Camera.can_edit?(user, camera)
   end
 
   test ".can_edit(user, camera) - returns false if USER has other access rights but not EDIT" do
@@ -57,8 +57,8 @@ defmodule Permissions.CameraTest do
     _view_right = Repo.insert!(%AccessRight{token_id: token.id, right: "list", camera_id: camera.id, status: 1, scope: "cameras"})
     camera = Repo.preload(camera, [:access_rights, [access_rights: :access_token]])
 
-    assert Permissions.Camera.can_list?(user, camera)
-    assert Permissions.Camera.can_grant?(user, camera)
-    refute Permissions.Camera.can_edit?(user, camera)
+    assert Permission.Camera.can_list?(user, camera)
+    assert Permission.Camera.can_grant?(user, camera)
+    refute Permission.Camera.can_edit?(user, camera)
   end
 end
