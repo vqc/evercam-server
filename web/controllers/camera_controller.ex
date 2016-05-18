@@ -90,7 +90,7 @@ defmodule EvercamMedia.CameraController do
     end
   end
 
-  def update(conn, %{"id" => exid, "token" => token}) do
+  def touch(conn, %{"id" => exid, "token" => token}) do
     try do
       [token_exid, _timestamp] = Util.decode(token)
       if exid != token_exid, do: raise "Invalid token."
