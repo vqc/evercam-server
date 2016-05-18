@@ -181,7 +181,7 @@ defmodule EvercamMedia.Snapshot.Worker do
     try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, 1)
   end
 
-  defp try_snapshot(_state, config, camera_exid, timestamp, reply_to, worker, 3) do
+  defp try_snapshot(_state, config, camera_exid, _timestamp, reply_to, worker, 3) do
     spawn fn ->
       timestamp = DateTime.Format.unix(DateTime.now_utc)
       result = CamClient.fetch_snapshot(config)
