@@ -14,6 +14,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
 
   use Supervisor
   require Logger
+  alias EvercamMedia.Snapshot.StreamerSupervisor
   alias EvercamMedia.Snapshot.Worker
 
   @event_handlers [
@@ -39,7 +40,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   end
 
   @doc """
-  Start
+  Start camera worker
   """
   def start_worker(camera) do
     if camera do
@@ -54,6 +55,20 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   end
 
   @doc """
+  Reinitialize camera worker with new configuration
+  """
+  def update_worker(worker, camera) do
+    case get_config(camera) do
+      {:ok, settings} ->
+        Logger.info "Updating worker for #{settings.config.camera_exid}"
+        StreamerSupervisor.restart_streamer(camera.exid)
+        Worker.update_config(worker, settings)
+      {:error, _message} ->
+        Logger.info "Skipping camera worker update as the host is invalid"
+    end
+  end
+
+  @doc """
   Start a workers for each camera in the database.
 
   This function is intended to be called after the EvercamMedia.Snapshot.WorkerSupervisor
@@ -61,8 +76,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   """
   def initiate_workers do
     Logger.info "Initiate workers for snapshot recording."
-    Camera.all
-    |> Enum.map(&(start_worker &1))
+    Camera.all |> Enum.map(&(start_worker &1))
   end
 
   @doc """

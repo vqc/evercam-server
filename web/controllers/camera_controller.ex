@@ -3,9 +3,7 @@ defmodule EvercamMedia.CameraController do
   alias EvercamMedia.CameraView
   alias EvercamMedia.ErrorView
   alias EvercamMedia.Snapshot.Storage
-  alias EvercamMedia.Snapshot.StreamerSupervisor
   alias EvercamMedia.Snapshot.WorkerSupervisor
-  alias EvercamMedia.Snapshot.Worker
   alias EvercamMedia.Util
   require Logger
   import String, only: [to_integer: 1]
@@ -102,30 +100,15 @@ defmodule EvercamMedia.CameraController do
 
       case worker do
         nil ->
-          start_worker(camera)
+          WorkerSupervisor.start_worker(camera)
         _ ->
-          update_worker(worker, camera)
+          WorkerSupervisor.update_worker(worker, camera)
       end
       send_resp(conn, 200, "Camera update request received.")
     rescue
       error ->
         Logger.error "Camera update for #{exid} with error: #{inspect error}"
         send_resp(conn, 500, "Invalid token.")
-    end
-  end
-
-  defp start_worker(camera) do
-    WorkerSupervisor.start_worker(camera)
-  end
-
-  defp update_worker(worker, camera) do
-    case WorkerSupervisor.get_config(camera) do
-      {:ok, settings} ->
-        Logger.info "Updating worker for #{settings.config.camera_exid}"
-        StreamerSupervisor.restart_streamer(camera.exid)
-        Worker.update_config(worker, settings)
-      {:error, _message} ->
-        Logger.info "Skipping camera worker update as the host is invalid"
     end
   end
 end
