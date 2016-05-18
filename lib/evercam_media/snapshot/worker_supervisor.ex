@@ -14,6 +14,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
 
   use Supervisor
   require Logger
+  alias EvercamMedia.Snapshot.Worker
 
   @event_handlers [
     EvercamMedia.Snapshot.BroadcastHandler,
@@ -31,9 +32,9 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
 
   def init(:ok) do
     if Application.get_env(:evercam_media, :start_camera_workers) do
-      Task.start_link(&EvercamMedia.Snapshot.WorkerSupervisor.initiate_workers/0)
+      Task.start_link(&initiate_workers/0)
     end
-    children = [worker(EvercamMedia.Snapshot.Worker, [], restart: :permanent)]
+    children = [worker(Worker, [], restart: :permanent)]
     supervise(children, strategy: :simple_one_for_one, max_restarts: 1_000_000)
   end
 
