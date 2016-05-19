@@ -62,7 +62,7 @@ defmodule EvercamMedia.Mixfile do
     [
       {:calecto, "~> 0.5.0"},
       {:calendar, "~> 0.12.4"},
-      {:con_cache, "~> 0.10.0"},
+      {:con_cache, "~> 0.11.0"},
       {:cors_plug, "~> 1.1"},
       {:cowboy, "~> 1.0"},
       {:credo, github: "rrrene/credo", only: :dev},
