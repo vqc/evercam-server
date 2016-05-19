@@ -143,9 +143,13 @@ defmodule Camera do
   end
 
   def snapshot_url(camera, type \\ "jpg") do
-    case external_url(camera) != "" && res_url(camera, type) != "" do
-      true -> external_url(camera) <> res_url(camera, type)
-      false -> ""
+    cond do
+      external_url(camera) != "" && res_url(camera, type) != "" ->
+        "#{external_url(camera)}#{res_url(camera, type)}"
+      external_url(camera) != "" ->
+        "#{external_url(camera)}"
+      true ->
+        ""
     end
   end
 
