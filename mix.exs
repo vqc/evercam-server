@@ -66,7 +66,7 @@ defmodule EvercamMedia.Mixfile do
       {:cors_plug, "~> 1.1"},
       {:cowboy, "~> 1.0"},
       {:credo, github: "rrrene/credo", only: :dev},
-      {:dotenv, "~> 2.0.0", only: :dev},
+      {:dotenv, "~> 2.1.0", only: :dev},
       {:ecto, "~> 2.0.0-beta.1", override: true},
       {:ex_aws, github: "CargoSense/ex_aws"},
       {:exq, "~> 0.6.2"},

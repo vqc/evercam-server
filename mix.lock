@@ -13,7 +13,7 @@
   "credo": {:git, "https://github.com/rrrene/credo.git", "d063c42e1f12669cf2405cdcd37c1ff03811cf41", []},
   "db_connection": {:hex, :db_connection, "0.2.3", "9718deeb713ceb5213950a0de4f29b98133f4cb73cc9aca65648b5a8a1414c59", [:mix], [{:sbroker, "~> 0.7", [hex: :sbroker, optional: true]}, {:poolboy, "~> 1.5", [hex: :poolboy, optional: true]}, {:connection, "~> 1.0.2", [hex: :connection, optional: false]}]},
   "decimal": {:hex, :decimal, "1.1.1", "a8ff5b673105e6cdaca96f799aeefc6f07142881b616c65db16e14e556b16e76", [:mix], []},
-  "dotenv": {:hex, :dotenv, "2.0.0", "87e77a94e54c20eca49989876395e26878b109f016f9fd9c42b65bb9c59bca3f", [:mix], []},
+  "dotenv": {:hex, :dotenv, "2.1.0", "2a66462dbc3038c43147a67a6c4d6eab365223c4bd5ba6f6205db9da0e3e3068", [:mix], []},
   "ecto": {:hex, :ecto, "2.0.0-beta.1", "56fc6a3d71dfea955b8849aff20ee24e760f780622ad09ec225fbbaa331f032d", [:mix], [{:sbroker, "~> 0.7", [hex: :sbroker, optional: true]}, {:postgrex, "~> 0.11.1", [hex: :postgrex, optional: true]}, {:poolboy, "~> 1.5", [hex: :poolboy, optional: false]}, {:poison, "~> 1.5 or ~> 2.0", [hex: :poison, optional: true]}, {:mariaex, "~> 0.6", [hex: :mariaex, optional: true]}, {:decimal, "~> 1.0", [hex: :decimal, optional: false]}]},
   "erlware_commons": {:hex, :erlware_commons, "0.19.0", "7b43caf2c91950c5f60dc20451e3c3afba44d3d4f7f27bcdc52469285a5a3e70", [:rebar3], [{:cf, "0.2.1", [hex: :cf, optional: false]}]},
   "ex_aws": {:git, "https://github.com/CargoSense/ex_aws.git", "63f25a8960e1f70c79f8b1bf303043f24125c769", []},
