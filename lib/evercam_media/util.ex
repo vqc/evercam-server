@@ -65,7 +65,7 @@ defmodule EvercamMedia.Util do
       Task.async(fn() -> function.() end)
       |> Task.await(:timer.seconds(timeout))
     catch _type, error ->
-      error_handler(error)
+      Logger.error inspect(error)
       [504, %{message: "Request timed out."}]
     end
   end
