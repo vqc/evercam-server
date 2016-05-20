@@ -79,7 +79,7 @@ defmodule EvercamMedia.CameraController do
 
       conn
       |> put_status(200)
-      |> put_resp_header("content-type", "image/jpg")
+      |> put_resp_header("content-type", "image/jpeg")
       |> text(image)
     rescue
       error ->

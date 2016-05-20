@@ -47,7 +47,7 @@ defmodule EvercamMedia.SnapshotController do
   defp show_render(conn, 200, response) do
     conn
     |> put_status(200)
-    |> put_resp_header("content-type", "image/jpg")
+    |> put_resp_header("content-type", "image/jpeg")
     |> text(response[:image])
   end
 
@@ -94,7 +94,7 @@ defmodule EvercamMedia.SnapshotController do
   defp data_render(conn, 200, response) do
     conn
     |> put_status(200)
-    |> put_resp_header("content-type", "image/jpg")
+    |> put_resp_header("content-type", "image/jpeg")
     |> text(response)
   end
 
@@ -102,14 +102,14 @@ defmodule EvercamMedia.SnapshotController do
     image = Util.storage_unavailable
     conn
     |> put_status(code)
-    |> put_resp_header("content-type", "image/jpg")
+    |> put_resp_header("content-type", "image/jpeg")
     |> text(image)
   end
 
   defp thumbnail_render(conn, 200, response) do
     conn
     |> put_status(200)
-    |> put_resp_header("content-type", "image/jpg")
+    |> put_resp_header("content-type", "image/jpeg")
     |> text(response[:image])
   end
 
@@ -117,7 +117,7 @@ defmodule EvercamMedia.SnapshotController do
     image = Util.unavailable
     conn
     |> put_status(code)
-    |> put_resp_header("content-type", "image/jpg")
+    |> put_resp_header("content-type", "image/jpeg")
     |> text(image)
   end
 
