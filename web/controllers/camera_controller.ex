@@ -16,7 +16,7 @@ defmodule EvercamMedia.CameraController do
         response = %{
           address: params["address"],
           port: to_integer(params["port"]),
-          open: port_open?(params["address"], params["port"])
+          open: Util.port_open?(params["address"], params["port"])
         }
         json(conn, response)
     end
@@ -109,16 +109,6 @@ defmodule EvercamMedia.CameraController do
       error ->
         Logger.error "Camera update for #{exid} with error: #{inspect error}"
         send_resp(conn, 500, "Invalid token.")
-    end
-  end
-
-  defp port_open?(address, port) do
-    case :gen_tcp.connect(to_char_list(address), to_integer(port), [:binary, active: false], 500) do
-      {:ok, socket} ->
-        :gen_tcp.close(socket)
-        true
-      {:error, _error} ->
-        false
     end
   end
 

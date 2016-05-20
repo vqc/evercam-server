@@ -1,6 +1,7 @@
 defmodule EvercamMedia.Util do
   use Calendar
   require Logger
+  import String, only: [to_integer: 1]
 
   def unavailable do
     Application.app_dir(:evercam_media)
@@ -18,6 +19,16 @@ defmodule EvercamMedia.Util do
     case data do
       <<0xFF,0xD8, _data :: binary>> -> true
       _ -> false
+    end
+  end
+
+  def port_open?(address, port) do
+    case :gen_tcp.connect(to_char_list(address), to_integer(port), [:binary, active: false], 500) do
+      {:ok, socket} ->
+        :gen_tcp.close(socket)
+        true
+      {:error, _error} ->
+        false
     end
   end
 
