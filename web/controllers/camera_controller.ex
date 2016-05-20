@@ -121,9 +121,10 @@ defmodule EvercamMedia.CameraController do
   defp valid?(key, value) when value in [nil, ""],  do: invalid(key)
 
   defp valid?("address" = key, value) do
-    case :inet_parse.address(String.to_char_list(value)) do
-      {:ok, _} -> :ok
-      {:error, _} -> invalid(key)
+    cond do
+      :inet_parse.address(String.to_char_list(value)) |> elem(0) == :ok -> :ok
+      :inet_parse.domain(String.to_char_list(value)) -> :ok
+      true -> invalid(key)
     end
   end
 
