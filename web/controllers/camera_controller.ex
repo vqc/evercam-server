@@ -128,7 +128,7 @@ defmodule EvercamMedia.CameraController do
     end
   end
 
-  defp valid?("port" = _key, value) when is_integer(value) and value < 65535, do: :ok
+  defp valid?("port" = _key, value) when is_integer(value) and value >= 1 and value <= 65535, do: :ok
   defp valid?("port" = key, value) when is_binary(value) do
     case Integer.parse(value) do
       {int_value, ""} -> valid?(key, int_value)
