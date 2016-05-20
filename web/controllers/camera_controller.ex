@@ -118,7 +118,7 @@ defmodule EvercamMedia.CameraController do
          do: :ok
   end
 
-  defp valid?(key, value) when value in [nil, ""],  do: invalid(key)
+  defp valid?(key, value) when value in [nil, ""], do: invalid(key)
 
   defp valid?("address", value) do
     cond do
@@ -135,7 +135,6 @@ defmodule EvercamMedia.CameraController do
       _ -> invalid("port")
     end
   end
-
   defp valid?("port", _), do: invalid("port")
 
   defp invalid(key), do: {:invalid, "The parameter '#{key}' isn't valid."}
