@@ -122,7 +122,7 @@ defmodule EvercamMedia.CameraController do
 
   defp valid?("address" = key, value) do
     cond do
-      :inet_parse.address(String.to_char_list(value)) |> elem(0) == :ok -> :ok
+      :inet_parse.strict_address(String.to_char_list(value)) |> elem(0) == :ok -> :ok
       :inet_parse.domain(String.to_char_list(value)) -> :ok
       true -> invalid(key)
     end
