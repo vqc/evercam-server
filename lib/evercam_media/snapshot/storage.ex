@@ -13,12 +13,9 @@ defmodule EvercamMedia.Snapshot.Storage do
     file_name = construct_file_name(timestamp)
     file_path = directory_path <> file_name
     try do
-      task = Task.async(fn() ->
-        File.mkdir_p!("#{@ram_dir}#{directory_path}")
-        File.write!("#{@ram_dir}#{file_path}", image)
-        HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{:file, "#{@ram_dir}#{file_path}", []}]}, [], [recv_timeout: 15000])
-      end)
-      Task.await(task, :timer.seconds(15))
+      File.mkdir_p!("#{@ram_dir}#{directory_path}")
+      File.write!("#{@ram_dir}#{file_path}", image)
+      HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{:file, "#{@ram_dir}#{file_path}", []}]}, [], [recv_timeout: 30000])
     catch _type, error ->
       Util.error_handler(error)
     after
