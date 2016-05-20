@@ -8,7 +8,7 @@ defmodule EvercamMedia.HTTPClient do
   end
 
   def get(:digest_auth, response, url, username, password) do
-    digest_token =  DigestAuth.get_digest_token(response, url, username, password)
+    digest_token = DigestAuth.get_digest_token(response, url, username, password)
     hackney = [pool: :snapshot_pool]
     HTTPoison.get url, ["Authorization": "Digest #{digest_token}"], hackney: hackney
   end
@@ -90,14 +90,12 @@ defmodule EvercamMedia.HTTPClient do
   end
 end
 
-
 defmodule EvercamMedia.HTTPClient.DigestAuth do
   def get_digest_token(response, url, username, password) do
-
     case response.headers |> Enum.find(fn({k,_v}) -> k == "WWW-Authenticate" end ) do
       {"WWW-Authenticate", auth_string} ->
         digest_head = parse_digest_header(auth_string)
-        %{"realm" => realm, "nonce"  => nonce} = digest_head
+        %{"realm" => realm, "nonce" => nonce} = digest_head
         cnonce = :crypto.strong_rand_bytes(16) |> md5
         url = URI.parse(url)
         response = create_digest_response(

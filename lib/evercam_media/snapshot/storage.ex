@@ -4,6 +4,15 @@ defmodule EvercamMedia.Snapshot.Storage do
   alias EvercamMedia.Util
 
   @root_dir Application.get_env(:evercam_media, :storage_dir)
+  @seaweedfs Application.get_env(:evercam_media, :seaweedfs_url)
+
+  def seaweedfs_save(camera_exid, timestamp, image, notes) do
+    app_name = parse_note(notes)
+    directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
+    file_name = construct_file_name(timestamp)
+    file_path = directory_path <> file_name
+    HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], hackney: [pool: :seaweedfs_pool])
+  end
 
   def thumbnail_link(camera_exid, snapshot_path) do
     thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
