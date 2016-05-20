@@ -3,7 +3,6 @@ defmodule EvercamMedia.Snapshot.Storage do
   require Logger
   alias EvercamMedia.Util
 
-  @ram_dir "/run/shm/evercam"
   @root_dir Application.get_env(:evercam_media, :storage_dir)
   @seaweedfs Application.get_env(:evercam_media, :seaweedfs_url)
 
@@ -12,15 +11,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
     file_name = construct_file_name(timestamp)
     file_path = directory_path <> file_name
-    try do
-      File.mkdir_p!("#{@ram_dir}#{directory_path}")
-      File.write!("#{@ram_dir}#{file_path}", image)
-      HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{:file, "#{@ram_dir}#{file_path}", []}]}, [], [recv_timeout: 30000])
-    catch _type, error ->
-      Util.error_handler(error)
-    after
-      File.rm_rf!("#{@ram_dir}#{file_path}")
-    end
+    HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], [recv_timeout: 30000])
   end
 
   def thumbnail_link(camera_exid, snapshot_path) do
