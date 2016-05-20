@@ -120,23 +120,23 @@ defmodule EvercamMedia.CameraController do
 
   defp valid?(key, value) when value in [nil, ""],  do: invalid(key)
 
-  defp valid?("address" = key, value) do
+  defp valid?("address", value) do
     cond do
       :inet_parse.strict_address(String.to_char_list(value)) |> elem(0) == :ok -> :ok
       :inet_parse.domain(String.to_char_list(value)) -> :ok
-      true -> invalid(key)
+      true -> invalid("address")
     end
   end
 
-  defp valid?("port" = _key, value) when is_integer(value) and value >= 1 and value <= 65535, do: :ok
-  defp valid?("port" = key, value) when is_binary(value) do
+  defp valid?("port", value) when is_integer(value) and value >= 1 and value <= 65535, do: :ok
+  defp valid?("port", value) when is_binary(value) do
     case Integer.parse(value) do
-      {int_value, ""} -> valid?(key, int_value)
-      _ -> invalid(key)
+      {int_value, ""} -> valid?("port", int_value)
+      _ -> invalid("port")
     end
   end
 
-  defp valid?("port" = key, _), do: invalid(key)
+  defp valid?("port", _), do: invalid("port")
 
   defp invalid(key), do: {:invalid, "The parameter '#{key}' isn't valid."}
 end
