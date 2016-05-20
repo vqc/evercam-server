@@ -11,7 +11,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
     file_name = construct_file_name(timestamp)
     file_path = directory_path <> file_name
-    HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], [recv_timeout: 30000])
+    HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], hackney: [pool: :seaweedfs_pool])
   end
 
   def thumbnail_link(camera_exid, snapshot_path) do
