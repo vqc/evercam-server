@@ -113,14 +113,14 @@ defmodule EvercamMedia.CameraController do
   end
 
   defp check_params(params) do
-    with :ok <- valid?("address", params["address"]),
-         :ok <- valid?("port", params["port"]),
+    with :ok <- validate("address", params["address"]),
+         :ok <- validate("port", params["port"]),
          do: :ok
   end
 
-  defp valid?(key, value) when value in [nil, ""], do: invalid(key)
+  defp validate(key, value) when value in [nil, ""], do: invalid(key)
 
-  defp valid?("address", value) do
+  defp validate("address", value) do
     cond do
       :inet_parse.strict_address(String.to_char_list(value)) |> elem(0) == :ok -> :ok
       :inet_parse.domain(String.to_char_list(value)) -> :ok
@@ -128,14 +128,14 @@ defmodule EvercamMedia.CameraController do
     end
   end
 
-  defp valid?("port", value) when is_integer(value) and value >= 1 and value <= 65535, do: :ok
-  defp valid?("port", value) when is_binary(value) do
+  defp validate("port", value) when is_integer(value) and value >= 1 and value <= 65535, do: :ok
+  defp validate("port", value) when is_binary(value) do
     case Integer.parse(value) do
-      {int_value, ""} -> valid?("port", int_value)
+      {int_value, ""} -> validate("port", int_value)
       _ -> invalid("port")
     end
   end
-  defp valid?("port", _), do: invalid("port")
+  defp validate("port", _), do: invalid("port")
 
   defp invalid(key), do: {:invalid, "The parameter '#{key}' isn't valid."}
 end
