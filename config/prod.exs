@@ -65,15 +65,6 @@ config :exq,
   namespace: "sidekiq",
   queues: ["to_elixir"]
 
-config :quantum,
-  cron: [
-    snapshot_cleanup: [
-      task: {"EvercamMedia.Snapshot.Cleanup", "init"},
-      schedule: "0 * * * *",
-      overlap: false
-    ]
-  ]
-
 config :evercam_media, :mailgun,
   domain: System.get_env("MAILGUN_DOMAIN"),
   key: System.get_env("MAILGUN_KEY"),
