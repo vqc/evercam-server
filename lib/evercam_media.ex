@@ -22,6 +22,7 @@ defmodule EvercamMedia do
       supervisor(EvercamMedia.Snapshot.WorkerSupervisor, []),
       :hackney_pool.child_spec(:snapshot_pool, [timeout: 5000, max_connections: 1000]),
       :hackney_pool.child_spec(:seaweedfs_upload_pool, [timeout: 5000, max_connections: 1000]),
+      :hackney_pool.child_spec(:seaweedfs_download_pool, [timeout: 5000, max_connections: 1000]),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

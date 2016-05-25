@@ -14,6 +14,18 @@ defmodule EvercamMedia.Snapshot.Storage do
     HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], hackney: [pool: :seaweedfs_upload_pool])
   end
 
+  def seaweedfs_load_range(camera_exid, from) do
+    hackney = [pool: :seaweedfs_download_pool]
+    app_name = "recordings"
+    directory_path = construct_directory_path(camera_exid, from, app_name, "")
+
+    with {:ok, response} <- HTTPoison.get("#{@seaweedfs}#{directory_path}?limit=3600", [], hackney: hackney),
+         %HTTPoison.Response{status_code: 200, body: body} <- response,
+         {:ok, data} <- Poison.decode(body) do
+      {:ok, Enum.map(data["Files"], fn(file) -> construct_snapshot_record(directory_path, file) end)}
+    end
+  end
+
   def thumbnail_link(camera_exid, snapshot_path) do
     thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
     File.rm(thumbnail_path)
@@ -140,6 +152,23 @@ defmodule EvercamMedia.Snapshot.Storage do
     |> DateTime.Parse.unix!
     |> Strftime.strftime!("%M_%S_%f")
     |> format_file_name
+  end
+
+  defp construct_snapshot_record(directory_path, file) do
+    %{
+      created_at: parse_file_timestamp(directory_path, file["name"]),
+      notes: "Evercam Proxy",
+      motion_level: nil
+    }
+  end
+
+  defp parse_file_timestamp(directory_path, file_path) do
+    [_, _, _, year, month, day, hour] = String.split(directory_path, "/", trim: true)
+    [minute, second, _] = String.split(file_path, "_")
+
+    DateTime.Parse.rfc3339_utc("#{year}-#{month}-#{day}T#{hour}:#{minute}:#{second}Z")
+    |> elem(1)
+    |> DateTime.Format.unix
   end
 
   def format_file_name(<<file_name::bytes-size(6)>>) do
