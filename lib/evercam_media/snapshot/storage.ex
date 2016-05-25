@@ -7,7 +7,7 @@ defmodule EvercamMedia.Snapshot.Storage do
   @seaweedfs Application.get_env(:evercam_media, :seaweedfs_url)
 
   def seaweedfs_save(camera_exid, timestamp, image, notes) do
-    app_name = parse_note(notes)
+    app_name = notes_to_app_name(notes)
     directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
     file_name = construct_file_name(timestamp)
     file_path = directory_path <> file_name
@@ -77,7 +77,7 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def save(camera_exid, timestamp, image, notes) do
-    app_name = parse_note(notes)
+    app_name = notes_to_app_name(notes)
     directory_path = construct_directory_path(camera_exid, timestamp, app_name)
     file_name = construct_file_name(timestamp)
     :filelib.ensure_dir(to_char_list(directory_path))
@@ -86,7 +86,7 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def load(camera_exid, snapshot_id, notes) do
-    app_name = parse_note(notes)
+    app_name = notes_to_app_name(notes)
     timestamp =
       snapshot_id
       |> String.split("_")
@@ -101,7 +101,7 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def exists?(camera_exid, snapshot_id, notes) do
-    app_name = parse_note(notes)
+    app_name = notes_to_app_name(notes)
     timestamp =
       snapshot_id
       |> String.split("_")
@@ -179,7 +179,17 @@ defmodule EvercamMedia.Snapshot.Storage do
     "#{file_name}" <> ".jpg"
   end
 
-  def parse_note(notes) do
+  def app_name_to_notes(name) do
+    case name do
+      "recordings" -> "Evercam Proxy"
+      "thumbnail" -> "Evercam Thumbnail"
+      "timelapse" -> "Evercam Timelapse"
+      "snapmail" -> "Evercam SnapMail"
+      _ -> "User Created"
+    end
+  end
+
+  def notes_to_app_name(notes) do
     case notes do
       "Evercam Proxy" -> "recordings"
       "Evercam Thumbnail" -> "thumbnail"
