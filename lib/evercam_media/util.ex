@@ -4,9 +4,11 @@ defmodule EvercamMedia.Util do
   import String, only: [to_integer: 1]
 
   def unavailable do
-    Application.app_dir(:evercam_media)
-    |> Path.join("priv/static/images/unavailable.jpg")
-    |> File.read!
+    ConCache.dirty_get_or_store(:snapshot_error, "unavailable", fn() ->
+      Application.app_dir(:evercam_media)
+      |> Path.join("priv/static/images/unavailable.jpg")
+      |> File.read!
+    end)
   end
 
   def storage_unavailable do
