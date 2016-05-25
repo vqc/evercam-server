@@ -15,14 +15,31 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def seaweedfs_load_range(camera_exid, from) do
+    with {:ok, response} <- HTTPoison.get("#{@seaweedfs}/#{camera_exid}/snapshots/"),
+         %HTTPoison.Response{status_code: 200, body: body} <- response,
+         {:ok, data} <- Poison.decode(body),
+          true <- is_list(data["Subdirectories"]) do
+      snapshots =
+        data["Subdirectories"]
+        |> Enum.filter(fn(dir) -> dir["Name"] != "thumbnail" end)
+        |> Enum.flat_map(fn(dir) -> do_seaweedfs_load_range(camera_exid, from, dir["Name"]) end)
+      {:ok, snapshots}
+    end
+  end
+
+  defp do_seaweedfs_load_range(camera_exid, from, app_name) do
     hackney = [pool: :seaweedfs_download_pool]
-    app_name = "recordings"
     directory_path = construct_directory_path(camera_exid, from, app_name, "")
 
     with {:ok, response} <- HTTPoison.get("#{@seaweedfs}#{directory_path}?limit=3600", [], hackney: hackney),
          %HTTPoison.Response{status_code: 200, body: body} <- response,
-         {:ok, data} <- Poison.decode(body) do
-      {:ok, Enum.map(data["Files"], fn(file) -> construct_snapshot_record(directory_path, file) end)}
+         {:ok, data} <- Poison.decode(body),
+         true <- is_list(data["Files"]) do
+      {:ok, Enum.map(data["Files"], fn(file) -> construct_snapshot_record(directory_path, file, app_name) end)}
+    end
+    |> case do
+      {:ok, snapshots} -> snapshots
+      _ -> []
     end
   end
 
@@ -154,10 +171,10 @@ defmodule EvercamMedia.Snapshot.Storage do
     |> format_file_name
   end
 
-  defp construct_snapshot_record(directory_path, file) do
+  defp construct_snapshot_record(directory_path, file, app_name) do
     %{
       created_at: parse_file_timestamp(directory_path, file["name"]),
-      notes: "Evercam Proxy",
+      notes: app_name_to_notes(app_name),
       motion_level: nil
     }
   end
