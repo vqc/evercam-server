@@ -6,7 +6,8 @@ defmodule EvercamMedia.CalendarController do
   def index(conn, %{"id" => camera_exid, "from" => from, "to" => _to, "limit" => "3600", "page" => _page}) do
     seaweedfs_storage_start_timestmap = 1463788800
     camera = Camera.get_full(camera_exid)
-    offset = DateTime.now!(camera.timezone).std_off
+    camera_datetime = camera |> Camera.get_timezone |> DateTime.now!
+    offset = camera_datetime.std_off
     from = convert_to_camera_timestamp(from, offset)
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
