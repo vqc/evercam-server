@@ -12,7 +12,7 @@ services:
   - redis-server
 
 before_script:
-  - rvm install 2.2.2
+  - rvm install 2.3.0
   - git clone https://github.com/evercam/evercam-api evercam-api
   - cd evercam-api
   - ./scripts/travis
