@@ -21,7 +21,6 @@ defmodule EvercamMedia.Snapshot.Storage do
           true <- is_list(data["Subdirectories"]) do
       snapshots =
         data["Subdirectories"]
-        |> Enum.filter(fn(dir) -> dir["Name"] != "thumbnail" end)
         |> Enum.flat_map(fn(dir) -> do_seaweedfs_load_range(camera_exid, from, dir["Name"]) end)
       {:ok, snapshots}
     end
