@@ -26,13 +26,13 @@ defmodule AccessToken do
     |> where([t], t.user_id == ^user_id)
     |> where([t], t.is_revoked == false)
     |> where([t], t.expires_at > ^Ecto.DateTime.utc)
-    |> Repo.first
+    |> Repo.one
   end
 
   def by_request_token(token) do
     AccessToken
     |> where(request: ^token)
-    |> Repo.first
+    |> Repo.one
   end
 
   def changeset(model, params \\ :invalid) do

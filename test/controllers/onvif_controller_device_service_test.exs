@@ -6,7 +6,7 @@ defmodule EvercamMedia.ONVIFControllerDeviceServiceTest do
 
   test "GET /v1/onvif/v20/device_service/GetDeviceInformation, returns meaningful info" do
     use_cassette "get_device_information" do
-      conn = get conn(), "/v1/onvif/v20/device_service/GetDeviceInformation?#{@access_params}"
+      conn = get build_conn(), "/v1/onvif/v20/device_service/GetDeviceInformation?#{@access_params}"
       camera_model = json_response(conn, 200) |> Map.get("Model")
       assert camera_model == "DS-2DF7286-A"
     end
@@ -14,7 +14,7 @@ defmodule EvercamMedia.ONVIFControllerDeviceServiceTest do
 
   test "GET /v1/onvif/v20/device_service/GetNetworkInterfaces, returns meaningful info" do
     use_cassette "get_network_interfaces" do
-      conn = get conn(), "/v1/onvif/v20/device_service/GetNetworkInterfaces?#{@access_params}"
+      conn = get build_conn(), "/v1/onvif/v20/device_service/GetNetworkInterfaces?#{@access_params}"
       enabled =  json_response(conn, 200) |> Map.get("NetworkInterfaces") |> Map.get("Enabled")
       assert enabled == "true"
     end
@@ -22,7 +22,7 @@ defmodule EvercamMedia.ONVIFControllerDeviceServiceTest do
 
   test "GET /v1/onvif/v20/device_service/GetCapabilities, returns meaningful info" do
     use_cassette "get_capabilities" do
-      conn = get conn(), "/v1/onvif/v20/device_service/GetCapabilities?#{@access_params}"
+      conn = get build_conn(), "/v1/onvif/v20/device_service/GetCapabilities?#{@access_params}"
       device_xaddr = json_response(conn, 200) |> Map.get("Capabilities") |> Map.get("Device") |> Map.get("XAddr")
       assert device_xaddr == "http://192.168.1.100:8100/onvif/device_service"
     end

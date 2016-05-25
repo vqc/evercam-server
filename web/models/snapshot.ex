@@ -21,7 +21,7 @@ defmodule Snapshot do
   def by_id(snapshot_id) do
     Snapshot
     |> where(snapshot_id: ^snapshot_id)
-    |> SnapshotRepo.first
+    |> SnapshotRepo.one
   end
 
   def latest(camera_id) do
@@ -63,7 +63,7 @@ defmodule Snapshot do
       |> where([snap], snap.snapshot_id < ^"#{camera_id}_#{end_timestamp}")
       |> where([snap], snap.notes == "Evercam Proxy")
       |> limit(1)
-      |> SnapshotRepo.first
+      |> SnapshotRepo.one
     kept_snapshots =
       Snapshot
       |> where([snap], snap.snapshot_id > ^"#{camera_id}_#{begin_timestamp}")

@@ -39,14 +39,14 @@ defmodule User do
   def by_username(username) do
     User
     |> where(username: ^username)
-    |> Repo.first
+    |> Repo.one
   end
 
   def by_api_keys(api_id, api_key) do
     User
     |> where(api_id: ^api_id)
     |> where(api_key: ^api_key)
-    |> Repo.first
+    |> Repo.one
   end
 
   def with_access_to(camera_full) do

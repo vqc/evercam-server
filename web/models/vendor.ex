@@ -15,7 +15,7 @@ defmodule Vendor do
     Vendor
     |> where(exid: ^exid)
     |> preload(:vendor_models)
-    |> Repo.first
+    |> Repo.one
   end
 
   def get_models_count(vendor) do

@@ -38,7 +38,7 @@ defmodule EvercamMedia.CameraControllerTest do
     token = Util.encode([camera_exid, iso_timestamp])
 
     response =
-      conn()
+      build_conn()
       |> get("/v1/cameras/#{camera_exid}/thumbnail/#{iso_timestamp}?token=#{token}")
       |> response(200)
 

@@ -25,7 +25,7 @@ defmodule Client do
     |> where([_, t], t.request == ^token)
     |> where([_, t], t.is_revoked == false)
     |> where([_, t], t.expires_at > ^Ecto.DateTime.utc)
-    |> Repo.first
+    |> Repo.one
   end
 
   def changeset(model, params \\ :invalid) do

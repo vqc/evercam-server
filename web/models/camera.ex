@@ -114,7 +114,7 @@ defmodule Camera do
   def by_exid(exid) do
     Camera
     |> where(exid: ^exid)
-    |> Repo.first
+    |> Repo.one
   end
 
   def by_exid_with_associations(exid) do
@@ -127,7 +127,7 @@ defmodule Camera do
     |> preload([vendor_model: :vendor])
     |> preload(:access_rights)
     |> preload([access_rights: :access_token])
-    |> Repo.first
+    |> Repo.one
   end
 
   def auth(camera) do
