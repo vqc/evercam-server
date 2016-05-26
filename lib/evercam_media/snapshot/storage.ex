@@ -13,10 +13,10 @@ defmodule EvercamMedia.Snapshot.Storage do
     file_name = construct_file_name(timestamp)
     file_path = directory_path <> file_name
     HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], hackney: hackney)
-    case HTTPoison.head!("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", [], hackney: hackney) do
-      %HTTPoison.Response{status_code: 200} ->
-        HTTPoison.put!("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", {:multipart, [{file_path, image, []}]}, [], hackney: hackney)
-      %HTTPoison.Response{status_code: 404} ->
+    case HTTPoison.put("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", {:multipart, [{file_path, image, []}]}, [], hackney: hackney) do
+      {:ok, %HTTPoison.Response{status_code: 200}} ->
+        :noop
+      _ ->
         HTTPoison.post!("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", {:multipart, [{file_path, image, []}]}, [], hackney: hackney)
     end
   end
