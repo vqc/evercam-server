@@ -164,7 +164,6 @@ defmodule EvercamMedia.SnapshotController do
 
   defp snapshot_thumbnail(camera_exid, user) do
     camera = Camera.get_full(camera_exid)
-    spawn fn -> update_thumbnail(camera) end
     thumbnail_exists? = Storage.thumbnail_exists?(camera_exid)
     cond do
       Permission.Camera.can_snapshot?(user, camera) == false ->
@@ -173,12 +172,6 @@ defmodule EvercamMedia.SnapshotController do
         [200, %{image: Storage.thumbnail_load(camera_exid)}]
       true ->
         [404, %{message: "Snapshot not found"}]
-    end
-  end
-
-  defp update_thumbnail(camera) do
-    if camera.is_online && !Camera.recording?(camera) do
-      construct_args(camera, true, "Evercam Thumbnail") |> fetch_snapshot(3)
     end
   end
 
