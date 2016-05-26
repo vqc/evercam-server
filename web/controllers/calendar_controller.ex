@@ -21,13 +21,26 @@ defmodule EvercamMedia.CalendarController do
         |> json(%{snapshots: snapshots})
       _ ->
         conn
-        |> redirect(external: "https://api.evercam.io#{conn.request_path}?#{conn.query_string}")
+        |> proxy_api_data
     end
   end
 
   def index(conn, _params) do
-    conn
-    |> redirect(external: "https://api.evercam.io#{conn.request_path}?#{conn.query_string}")
+    proxy_api_data(conn)
+  end
+
+  defp proxy_api_data(conn) do
+    url = "https://api.evercam.io#{conn.request_path}?#{conn.query_string}"
+    case HTTPoison.get(url, [], [recv_timeout: 25000]) do
+      {:ok, %HTTPoison.Response{body: body}} ->
+        {:ok, data} = Poison.decode(body)
+        conn
+        |> json(data)
+      {:error, %HTTPoison.Error{}} ->
+        conn
+        |> put_status(500)
+        |> json(%{message: "Sorry, we dropped the ball."})
+    end
   end
 
   defp convert_to_camera_timestamp(timestamp, offset) do
