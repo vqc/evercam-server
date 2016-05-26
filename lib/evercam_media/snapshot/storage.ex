@@ -54,7 +54,7 @@ defmodule EvercamMedia.Snapshot.Storage do
       {:ok, %HTTPoison.Response{status_code: 200, body: thumbnail}} ->
         {:ok, thumbnail}
       {:ok, %HTTPoison.Response{status_code: 404}} ->
-        thumbnail = file_thumbnail_load(camera_exid)
+        thumbnail = disk_thumbnail_load(camera_exid)
         spawn fn -> HTTPoison.post!("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", {:multipart, [{"", thumbnail, []}]}, [], hackney: [pool: :seaweedfs_upload_pool]) end
         {:ok, thumbnail}
       error ->
@@ -63,7 +63,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
-  def file_thumbnail_load(camera_exid) do
+  def disk_thumbnail_load(camera_exid) do
     thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
     file =
       System.cmd("readlink", [thumbnail_path])
@@ -110,17 +110,38 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def load(camera_exid, snapshot_id, notes) do
+    seaweedfs_storage_start_timestmap = 1463788800
     app_name = notes_to_app_name(notes)
     timestamp =
       snapshot_id
       |> String.split("_")
       |> List.last
       |> Util.snapshot_timestamp_to_unix
+    if seaweedfs_storage_start_timestmap < timestamp do
+      seaweedfs_load(camera_exid, timestamp, app_name)
+    else
+      disk_load(camera_exid, timestamp, app_name)
+    end
+  end
+
+  defp disk_load(camera_exid, timestamp, app_name) do
     directory_path = construct_directory_path(camera_exid, timestamp, app_name)
     file_name = construct_file_name(timestamp)
     File.open("#{directory_path}#{file_name}", [:read, :binary, :raw], fn(file) ->
       IO.binread(file, :all)
     end)
+  end
+
+  defp seaweedfs_load(camera_exid, timestamp, app_name) do
+    directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
+    file_name = construct_file_name(timestamp)
+    file_path = directory_path <> file_name
+    case HTTPoison.get("#{@seaweedfs}#{file_path}", [], hackney: [pool: :seaweedfs_upload_pool]) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: snapshot}} ->
+        {:ok, snapshot}
+      error ->
+        {:error, :not_found}
+    end
   end
 
   def cleanup(cloud_recording) do
