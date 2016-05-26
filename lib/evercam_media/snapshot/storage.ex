@@ -7,11 +7,18 @@ defmodule EvercamMedia.Snapshot.Storage do
   @seaweedfs Application.get_env(:evercam_media, :seaweedfs_url)
 
   def seaweedfs_save(camera_exid, timestamp, image, notes) do
+    hackney = [pool: :seaweedfs_upload_pool]
     app_name = notes_to_app_name(notes)
     directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
     file_name = construct_file_name(timestamp)
     file_path = directory_path <> file_name
-    HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], hackney: [pool: :seaweedfs_upload_pool])
+    HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], hackney: hackney)
+    case HTTPoison.head!("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", [], hackney: hackney) do
+      %HTTPoison.Response{status_code: 200} ->
+        HTTPoison.put!("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", {:multipart, [{file_path, image, []}]}, [], hackney: hackney)
+      %HTTPoison.Response{status_code: 404} ->
+        HTTPoison.post!("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", {:multipart, [{file_path, image, []}]}, [], hackney: hackney)
+    end
   end
 
   def seaweedfs_load_range(camera_exid, from) do
