@@ -80,6 +80,7 @@ defmodule Camera do
     |> preload([access_rights: :access_token])
     |> preload(:vendor_model)
     |> preload([vendor_model: :vendor])
+    |> preload(:cloud_recordings)
     |> Repo.all
   end
 
@@ -96,6 +97,7 @@ defmodule Camera do
     |> preload([access_rights: :access_token])
     |> preload(:vendor_model)
     |> preload([vendor_model: :vendor])
+    |> preload(:cloud_recordings)
     |> Repo.all
   end
 

@@ -81,11 +81,22 @@ defmodule EvercamMedia.CameraView do
           h264: Camera.rtsp_url(camera, "external", "h264", false),
         },
       },
+      cloud_recordings: cloud_recording(camera.cloud_recordings),
     }
   end
 
   defp thumbnail_url(camera) do
     EvercamMedia.Endpoint.static_url <> "/v1/cameras/" <> camera.exid <> "/thumbnail"
+  end
+
+  defp cloud_recording(nil), do: nil
+  defp cloud_recording(cloud_recording) do
+    %{
+      frequency: cloud_recording.frequency,
+      storage_duration: cloud_recording.storage_duration,
+      status: cloud_recording.status,
+      schedule: cloud_recording.schedule
+    }
   end
 
   defp format_timestamp(nil), do: nil
