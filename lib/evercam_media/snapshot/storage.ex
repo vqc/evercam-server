@@ -118,22 +118,9 @@ defmodule EvercamMedia.Snapshot.Storage do
       |> Util.snapshot_timestamp_to_unix
     directory_path = construct_directory_path(camera_exid, timestamp, app_name)
     file_name = construct_file_name(timestamp)
-    {:ok, content} = File.open("#{directory_path}#{file_name}", [:read, :binary, :raw], fn(file) ->
+    File.open("#{directory_path}#{file_name}", [:read, :binary, :raw], fn(file) ->
       IO.binread(file, :all)
     end)
-    content
-  end
-
-  def exists?(camera_exid, snapshot_id, notes) do
-    app_name = notes_to_app_name(notes)
-    timestamp =
-      snapshot_id
-      |> String.split("_")
-      |> List.last
-      |> Util.snapshot_timestamp_to_unix
-    directory_path = construct_directory_path(camera_exid, timestamp, app_name)
-    file_name = construct_file_name(timestamp)
-    File.exists?("#{directory_path}#{file_name}")
   end
 
   def cleanup(cloud_recording) do

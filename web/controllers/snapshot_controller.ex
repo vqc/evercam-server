@@ -153,11 +153,11 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp snapshot_data(camera_exid, snapshot_id, notes) do
-    case Storage.exists?(camera_exid, snapshot_id, notes) do
-      false ->
-        [404, %{message: "Snapshot not found"}]
+    case Storage.load(camera_exid, snapshot_id, notes) do
+      {:ok, snapshot} ->
+        [200, snapshot]
       _ ->
-        [200, Storage.load(camera_exid, snapshot_id, notes)]
+        [404, %{message: "Snapshot not found"}]
     end
   end
 
