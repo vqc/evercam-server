@@ -75,7 +75,7 @@ defmodule EvercamMedia.CameraController do
       if exid != token_exid, do: raise "Invalid token."
       if iso_timestamp != token_timestamp, do: raise "Invalid token."
 
-      image = Storage.thumbnail_load(exid)
+      {:ok, image} = Storage.thumbnail_load(exid)
 
       conn
       |> put_status(200)

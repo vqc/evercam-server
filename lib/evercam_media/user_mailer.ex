@@ -27,7 +27,10 @@ defmodule EvercamMedia.UserMailer do
   end
 
   defp thumbnail(camera) do
-    if Storage.thumbnail_exists?(camera.exid), do: Storage.thumbnail_load(camera.exid), else: nil
+    case Storage.thumbnail_load(camera.exid) do
+      {:ok, image} -> image
+      _ -> nil
+    end
   end
 
   defp attachments(thumbnail) do

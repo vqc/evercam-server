@@ -113,12 +113,11 @@ defmodule EvercamMedia.SnapshotController do
     |> text(response[:image])
   end
 
-  defp thumbnail_render(conn, code, _response) do
-    image = Util.unavailable
+  defp thumbnail_render(conn, code, response) do
     conn
     |> put_status(code)
     |> put_resp_header("content-type", "image/jpeg")
-    |> text(image)
+    |> text(response[:image])
   end
 
   ######################
@@ -164,15 +163,15 @@ defmodule EvercamMedia.SnapshotController do
 
   defp snapshot_thumbnail(camera_exid, user) do
     camera = Camera.get_full(camera_exid)
-    thumbnail_exists? = Storage.thumbnail_exists?(camera_exid)
-    cond do
-      Permission.Camera.can_snapshot?(user, camera) == false ->
-        [403, %{message: "Forbidden"}]
-      thumbnail_exists? ->
-        [200, %{image: Storage.thumbnail_load(camera_exid)}]
-      true ->
-        [404, %{message: "Snapshot not found"}]
+    with true <- Permission.Camera.can_snapshot?(user, camera),
+         {:ok, image} <- Storage.thumbnail_load(camera_exid) do
+      {:ok, image}
     end
+    |> case do
+         {:ok, image} -> [200, %{image: image}]
+         {:error, error_image} -> [404, %{image: error_image}]
+         false -> [403, %{message: "Forbidden"}]
+       end
   end
 
   ####################

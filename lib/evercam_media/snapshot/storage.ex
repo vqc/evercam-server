@@ -52,14 +52,14 @@ defmodule EvercamMedia.Snapshot.Storage do
   def thumbnail_load(camera_exid) do
     case HTTPoison.get("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", [], hackney: [pool: :seaweedfs_upload_pool]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: thumbnail}} ->
-        thumbnail
+        {:ok, thumbnail}
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         thumbnail = file_thumbnail_load(camera_exid)
         spawn fn -> HTTPoison.post!("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", {:multipart, [{"", thumbnail, []}]}, [], hackney: [pool: :seaweedfs_upload_pool]) end
-        thumbnail
+        {:ok, thumbnail}
       error ->
         Logger.error inspect(error)
-        Util.unavailable
+        {:error, Util.unavailable}
     end
   end
 
