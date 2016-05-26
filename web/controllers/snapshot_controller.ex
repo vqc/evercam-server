@@ -36,7 +36,7 @@ defmodule EvercamMedia.SnapshotController do
 
   def thumbnail(conn, %{"id" => camera_exid}) do
     function = fn -> snapshot_thumbnail(camera_exid, conn.assigns[:current_user]) end
-    [code, response] = Util.exec_with_timeout(function)
+    [code, response] = Util.exec_with_timeout(function, 15)
     thumbnail_render(conn, code, response)
   end
 
