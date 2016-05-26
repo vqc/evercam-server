@@ -57,9 +57,11 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   def thumbnail_load(camera_exid) do
     thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
-    {file_path, _status} = System.cmd("readlink", [thumbnail_path])
-    file_path = String.replace_trailing(file_path, "\n", "")
-    file = File.open(file_path, [:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
+    file =
+      System.cmd("readlink", [thumbnail_path])
+      |> elem(0)
+      |> String.replace_trailing("\n", "")
+      |> File.open([:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
     case file do
       {:ok, content} ->
         content
