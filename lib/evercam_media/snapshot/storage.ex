@@ -63,12 +63,6 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
-  def thumbnail_link(camera_exid, snapshot_path) do
-    thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
-    File.rm(thumbnail_path)
-    File.ln_s(snapshot_path, thumbnail_path)
-  end
-
   def file_thumbnail_load(camera_exid) do
     thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
     file =
@@ -113,7 +107,6 @@ defmodule EvercamMedia.Snapshot.Storage do
     file_name = construct_file_name(timestamp)
     :filelib.ensure_dir(to_char_list(directory_path))
     File.open("#{directory_path}#{file_name}", [:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
-    spawn fn -> thumbnail_link(camera_exid, "#{directory_path}#{file_name}") end
   end
 
   def load(camera_exid, snapshot_id, notes) do
