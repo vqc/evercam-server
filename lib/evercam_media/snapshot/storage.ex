@@ -49,13 +49,27 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
+  def thumbnail_load(camera_exid) do
+    case HTTPoison.get("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", [], hackney: [pool: :seaweedfs_upload_pool]) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: thumbnail}} ->
+        thumbnail
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        thumbnail = file_thumbnail_load(camera_exid)
+        spawn fn -> HTTPoison.post!("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", {:multipart, [{"", thumbnail, []}]}, [], hackney: [pool: :seaweedfs_upload_pool]) end
+        thumbnail
+      error ->
+        Logger.error inspect(error)
+        Util.unavailable
+    end
+  end
+
   def thumbnail_link(camera_exid, snapshot_path) do
     thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
     File.rm(thumbnail_path)
     File.ln_s(snapshot_path, thumbnail_path)
   end
 
-  def thumbnail_load(camera_exid) do
+  def file_thumbnail_load(camera_exid) do
     thumbnail_path = "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
     file =
       System.cmd("readlink", [thumbnail_path])
