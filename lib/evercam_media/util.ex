@@ -75,16 +75,6 @@ defmodule EvercamMedia.Util do
     Logger.error Exception.format_stacktrace System.stacktrace
   end
 
-  def exec_with_timeout(function, timeout \\ 5) do
-    try do
-      Task.async(fn() -> function.() end)
-      |> Task.await(:timer.seconds(timeout))
-    catch _type, error ->
-      error_handler(error)
-      [504, %{message: "Request timed out."}]
-    end
-  end
-
   defp format_token_message(args) do
     [""]
     |> Enum.into(args)
