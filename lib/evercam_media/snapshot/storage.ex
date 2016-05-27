@@ -120,7 +120,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     case HTTPoison.get("#{@seaweedfs}#{file_path}", [], hackney: [pool: :seaweedfs_upload_pool]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: snapshot}} ->
         {:ok, snapshot}
-      error ->
+      _error ->
         {:error, :not_found}
     end
   end
