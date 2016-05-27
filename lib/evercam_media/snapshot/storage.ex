@@ -105,7 +105,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     app_name = notes_to_app_name(notes)
     directory_path = construct_directory_path(camera_exid, timestamp, app_name)
     file_name = construct_file_name(timestamp)
-    :filelib.ensure_dir(to_char_list(directory_path))
+    File.mkdir_p!(directory_path)
     File.open("#{directory_path}#{file_name}", [:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
   end
 
