@@ -10,8 +10,7 @@ defmodule EvercamMedia.SnapshotController do
   @optional_params %{"notes" => nil, "with_data" => false}
 
   def show(conn, %{"id" => camera_exid}) do
-    function = fn -> snapshot_with_user(camera_exid, conn.assigns[:current_user], false) end
-    [code, response] = Util.exec_with_timeout(function, 15)
+    [code, response] = snapshot_with_user(camera_exid, conn.assigns[:current_user], false)
     show_render(conn, code, response)
   end
 
