@@ -7,7 +7,7 @@ defmodule EvercamMedia.CalendarController do
     seaweedfs_storage_start_timestmap = 1463788800
     camera = Camera.get_full(camera_exid)
     camera_datetime = camera |> Camera.get_timezone |> DateTime.now!
-    offset = camera_datetime.std_off
+    offset = camera_datetime.utc_off
     from = convert_to_camera_timestamp(from, offset)
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
