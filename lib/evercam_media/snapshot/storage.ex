@@ -81,26 +81,6 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
-  def thumbnail_exists?(camera_exid) do
-    case File.lstat("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg") do
-      {:error, _error} -> false
-      {:ok, %File.Stat{}} -> true
-    end
-  end
-
-  def latest(camera_exid) do
-    Path.wildcard("#{@root_dir}/#{camera_exid}/snapshots/*")
-    |> Enum.reject(fn(x) -> String.match?(x, ~r/thumbnail.jpg/) end)
-    |> Enum.reduce("", fn(type, acc) ->
-      year = Path.wildcard("#{type}/????/") |> List.last
-      month = Path.wildcard("#{year}/??/") |> List.last
-      day = Path.wildcard("#{month}/??/") |> List.last
-      hour = Path.wildcard("#{day}/??/") |> List.last
-      last = Path.wildcard("#{hour}/??_??_???.jpg") |> List.last
-      Enum.max_by([acc, last], fn(x) -> String.slice(x, -27, 27) end)
-    end)
-  end
-
   def save(camera_exid, timestamp, image, notes) do
     app_name = notes_to_app_name(notes)
     directory_path = construct_directory_path(camera_exid, timestamp, app_name)
