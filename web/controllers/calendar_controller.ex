@@ -24,13 +24,11 @@ defmodule EvercamMedia.CalendarController do
         |> proxy_api_data
     end
   end
-
-  def index(conn, _params) do
-    proxy_api_data(conn)
-  end
+  def index(conn, _params), do: proxy_api_data(conn)
 
   defp proxy_api_data(conn) do
     url = "https://api.evercam.io#{conn.request_path}?#{conn.query_string}"
+
     case HTTPoison.get(url, [], [recv_timeout: 25000]) do
       {:ok, %HTTPoison.Response{body: body}} ->
         {:ok, data} = Poison.decode(body)
