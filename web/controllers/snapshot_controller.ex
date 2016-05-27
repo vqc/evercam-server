@@ -9,7 +9,7 @@ defmodule EvercamMedia.SnapshotController do
 
   @optional_params %{"notes" => nil, "with_data" => false}
 
-  def show(conn, %{"id" => camera_exid}) do
+  def live(conn, %{"id" => camera_exid}) do
     case snapshot_with_user(camera_exid, conn.assigns[:current_user], false) do
       {200, response} ->
         conn
