@@ -12,9 +12,11 @@ defmodule EvercamMedia.Util do
   end
 
   def storage_unavailable do
-    Application.app_dir(:evercam_media)
-    |> Path.join("priv/static/images/storage-unavailable.jpg")
-    |> File.read!
+    ConCache.dirty_get_or_store(:snapshot_error, "storage_unavailable", fn() ->
+      Application.app_dir(:evercam_media)
+      |> Path.join("priv/static/images/storage-unavailable.jpg")
+      |> File.read!
+    end)
   end
 
   def is_jpeg(data) do
