@@ -54,6 +54,8 @@ defmodule EvercamMedia.Router do
       get "/cameras/:id/live/snapshot.jpg", SnapshotController, :live
       get "/cameras/:id/recordings/snapshots", SnapshotController, :index
       options "/cameras/:id/recordings/snapshots", SnapshotController, :nothing
+      get "/cameras/:id/recordings/snapshots/:timestamp", SnapshotController, :show
+      options "/cameras/:id/recordings/snapshots/:timestamp", SnapshotController, :nothing
       post "/cameras/:id/recordings/snapshots", SnapshotController, :create
     end
 

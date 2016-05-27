@@ -6,6 +6,8 @@ defmodule EvercamMedia.Snapshot.Storage do
   @root_dir Application.get_env(:evercam_media, :storage_dir)
   @seaweedfs Application.get_env(:evercam_media, :seaweedfs_url)
 
+  def seaweedfs_storage_start_timestmap, do: 1463788800
+
   def seaweedfs_save(camera_exid, timestamp, image, notes) do
     hackney = [pool: :seaweedfs_upload_pool]
     app_name = notes_to_app_name(notes)
@@ -91,7 +93,6 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def load(camera_exid, snapshot_id, notes) do
-    seaweedfs_storage_start_timestmap = 1463788800
     app_name = notes_to_app_name(notes)
     timestamp =
       snapshot_id

@@ -91,15 +91,14 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   def index(conn, %{"id" => camera_exid, "from" => from, "to" => _to, "limit" => "3600", "page" => _page}) do
-    seaweedfs_storage_start_timestmap = 1463788800
     camera = Camera.get_full(camera_exid)
     camera_datetime = camera |> Camera.get_timezone |> DateTime.now!
     offset = camera_datetime.utc_off
     from = convert_to_camera_timestamp(from, offset)
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
-         true <- seaweedfs_storage_start_timestmap < from,
-           true <- rem(offset, 3600) == 0 do
+         true <- Storage.seaweedfs_storage_start_timestmap < from,
+         true <- rem(offset, 3600) == 0 do
       Storage.seaweedfs_load_range(camera_exid, from)
     end
     |> case do
@@ -112,6 +111,33 @@ defmodule EvercamMedia.SnapshotController do
        end
   end
   def index(conn, _params), do: proxy_api_data(conn)
+
+  def show(conn, %{"id" => camera_exid, "timestamp" => timestamp, "with_data" => "true", "range" => "1"}) do
+    timestamp = String.to_integer(timestamp)
+    camera = Camera.get_full(camera_exid)
+    snapshot_timestamp =
+      timestamp
+      |> DateTime.Parse.unix!
+      |> Strftime.strftime!("%Y%m%d%H%M%S%f")
+    snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
+    snapshot = Snapshot.by_id(snapshot_id)
+
+    with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
+         true <- Storage.seaweedfs_storage_start_timestmap < timestamp,
+         %Snapshot{notes: notes} <- snapshot do
+      Storage.load(camera_exid, snapshot_id, notes)
+    end
+    |> case do
+      {:ok, image} ->
+        data = "data:image/jpeg;base64,#{Base.encode64(image)}"
+        conn
+        |> json(%{snapshots: [%{created_at: timestamp, notes: snapshot.notes, data: data}]})
+      _ ->
+        conn
+        |> proxy_api_data
+    end
+  end
+  def show(conn, _params), do: proxy_api_data(conn)
 
   ######################
   ## Fetch functions  ##
