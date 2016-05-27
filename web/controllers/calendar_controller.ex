@@ -16,7 +16,7 @@ defmodule EvercamMedia.CalendarController do
       Storage.seaweedfs_load_range(camera_exid, from)
     end
     |> case do
-      {:ok, snapshots} ->
+      {:ok, snapshots} when snapshots != [] ->
         conn
         |> json(%{snapshots: snapshots})
       _ ->
