@@ -78,8 +78,16 @@ defmodule EvercamMedia.Snapshot.Storage do
     app_name = notes_to_app_name(notes)
     directory_path = construct_directory_path(camera_exid, timestamp, app_name)
     file_name = construct_file_name(timestamp)
-    File.mkdir_p!(directory_path)
-    File.open("#{directory_path}#{file_name}", [:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
+    file_path = directory_path <> file_name
+
+    with {:error, :enoent} <- do_save(file_path, image) do
+      File.mkdir_p!(directory_path)
+      do_save(file_path, image)
+    end
+  end
+
+  defp do_save(file_path, image) do
+    File.open(file_path, [:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
   end
 
   def load(camera_exid, snapshot_id, notes) do
