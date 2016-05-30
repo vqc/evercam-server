@@ -9,7 +9,6 @@ defmodule VendorModel do
 
     field :exid, :string
     field :name, :string
-
     field :username, :string
     field :password, :string
     field :jpg_url, :string
@@ -31,7 +30,6 @@ defmodule VendorModel do
     field :discontinued, :boolean
     field :onvif, :boolean
     field :psia, :boolean
-
     field :config, EvercamMedia.Types.JSON
   end
 
