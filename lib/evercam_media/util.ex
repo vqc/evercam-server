@@ -109,8 +109,8 @@ defmodule EvercamMedia.Util do
     |> DateTime.Format.unix
   end
 
-  def format_timestamp(nil), do: nil
-  def format_timestamp(ecto_datetime) do
+  def ecto_datetime_to_unix(nil), do: nil
+  def ecto_datetime_to_unix(ecto_datetime) do
     ecto_datetime
     |> Ecto.DateTime.to_erl
     |> Calendar.DateTime.from_erl!("Etc/UTC")

@@ -13,9 +13,9 @@ defmodule EvercamMedia.UserView do
           email: user.email,
           country: User.get_country_attr(user, :iso3166_a2),
           stripe_customer_id: user.stripe_customer_id,
-          created_at: Util.format_timestamp(user.created_at),
-          updated_at: Util.format_timestamp(user.updated_at),
-          confirmed_at: Util.format_timestamp(user.confirmed_at),
+          created_at: Util.ecto_datetime_to_unix(user.created_at),
+          updated_at: Util.ecto_datetime_to_unix(user.updated_at),
+          confirmed_at: Util.ecto_datetime_to_unix(user.confirmed_at),
         }
       ]
     }
