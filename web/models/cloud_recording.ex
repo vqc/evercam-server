@@ -3,6 +3,8 @@ defmodule CloudRecording do
   import Ecto.Query
   alias EvercamMedia.Repo
 
+  @required_fields ~w(camera_id frequency storage_duration status schedule)
+
   schema "cloud_recordings" do
     belongs_to :camera, Camera, foreign_key: :camera_id
 
@@ -17,6 +19,12 @@ defmodule CloudRecording do
     |> where([cl], cl.storage_duration != -1)
     |> preload(:camera)
     |> Repo.all
+  end
+
+  def cloud_recording(camera_id) do
+    CloudRecording
+    |> where(camera_id: ^camera_id)
+    |> Repo.first
   end
 
   def schedule(cloud_recording) do
@@ -41,5 +49,10 @@ defmodule CloudRecording do
     else
       div(60_000, cloud_recording.frequency)
     end
+  end
+
+  def changeset(model, params \\ :invalid) do
+    model
+    |> cast(params, @required_fields)
   end
 end
