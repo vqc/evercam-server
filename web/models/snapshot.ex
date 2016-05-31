@@ -28,7 +28,8 @@ defmodule Snapshot do
     Snapshot
     |> where([snap], snap.snapshot_id > ^"#{camera_id}_2000")
     |> where([snap], snap.snapshot_id < ^"#{camera_id}_2099")
-    |> SnapshotRepo.last
+    |> last()
+    |> SnapshotRepo.one
   end
 
   def delete_by_range(camera_id, [start, finish]) do
