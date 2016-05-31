@@ -3,53 +3,43 @@ defmodule EvercamMedia.ONVIFPTZController do
   alias EvercamMedia.ONVIFPTZ
 
   def status(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.get_status("Profile_1")
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.get_status("Profile_1") |> respond(conn)
   end
 
   def nodes(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.get_nodes
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.get_nodes |> respond(conn)
   end
 
   def configurations(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.get_configurations
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.get_configurations |> respond(conn)
   end
 
   def presets(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.get_presets("Profile_1")
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.get_presets("Profile_1") |> respond(conn)
   end
 
   def stop(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.stop("Profile_1")
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.stop("Profile_1") |> respond(conn)
   end
 
   def home(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.goto_home_position("Profile_1")
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.goto_home_position("Profile_1") |> respond(conn)
   end
 
   def sethome(conn, _params) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.set_home_position("Profile_1")
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.set_home_position("Profile_1") |> respond(conn)
   end
 
   def gotopreset(conn, %{"preset_token" => token}) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.goto_preset("Profile_1", token)
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.goto_preset("Profile_1", token) |> respond(conn)
   end
 
   def setpreset(conn, %{"preset_token" => token}) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.set_preset("Profile_1", "", token)
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.set_preset("Profile_1", "", token) |> respond(conn)
   end
 
   def createpreset(conn, %{"preset_name" => name}) do
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.set_preset("Profile_1", name)
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.set_preset("Profile_1", name) |> respond(conn)
   end
 
   def continuousmove(conn, %{"direction" => direction}) do
@@ -61,8 +51,7 @@ defmodule EvercamMedia.ONVIFPTZController do
         "down" -> [x: 0.0, y: -0.1]
         _ -> [x: 0.0, y: 0.0]
       end
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.continuous_move("Profile_1", velocity)
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.continuous_move("Profile_1", velocity) |> respond(conn)
   end
 
   def continuouszoom(conn, %{"mode" => mode}) do
@@ -72,8 +61,7 @@ defmodule EvercamMedia.ONVIFPTZController do
         "out" -> [zoom: -0.01]
         _ -> [zoom: 0.0]
       end
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.continuous_move("Profile_1", velocity)
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.continuous_move("Profile_1", velocity) |> respond(conn)
   end
 
   def relativemove(conn, params) do
@@ -92,11 +80,16 @@ defmodule EvercamMedia.ONVIFPTZController do
         down > up -> down
         true -> -up
       end
-    {:ok, response} = conn.assigns.onvif_access_info |> ONVIFPTZ.relative_move("Profile_1", [x: x / 100.0, y: y / 100.0, zoom: zoom / 100.0])
-    default_respond(conn, 200, response)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.relative_move("Profile_1", [x: x / 100.0, y: y / 100.0, zoom: zoom / 100.0]) |> respond(conn)
   end
 
-  defp default_respond(conn, code, response) do
+  defp respond({:ok, response}, conn) do
+    conn
+    |> put_status(200)
+    |> json(response)
+  end
+
+  defp respond({:error, code, response}, conn) do
     conn
     |> put_status(code)
     |> json(response)

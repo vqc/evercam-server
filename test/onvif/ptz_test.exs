@@ -1,12 +1,13 @@
 defmodule PTZTest do
   use ExUnit.Case
   use ExVCR.Mock, options: [clear_mock: true]
+  import EvercamMedia.ConnCase ,only: [parse_onvif_error_type: 1]
   alias EvercamMedia.ONVIFPTZ
 
   @access_info %{"url" => "http://recorded_response", "auth" => "admin:mehcam"}
 
   test "get_nodes method on hikvision camera" do
-    use_cassette "get_nodes" do 
+    use_cassette "get_nodes" do
       {:ok, response} = ONVIFPTZ.get_nodes @access_info
       assert response |> Map.get("PTZNode") |> Map.get("Name") == "PTZNODE"
       assert response |> Map.get("PTZNode") |> Map.get("token") == "PTZNODETOKEN"
@@ -14,7 +15,7 @@ defmodule PTZTest do
   end
 
   test "get_configurations method on hikvision camera" do
-    use_cassette "get_configurations" do 
+    use_cassette "get_configurations" do
       {:ok, response} = ONVIFPTZ.get_configurations @access_info
       assert response |> Map.get("PTZConfiguration") |> Map.get("Name") == "PTZ"
       assert response |> Map.get("PTZConfiguration") |> Map.get("NodeToken") == "PTZNODETOKEN"
@@ -27,6 +28,15 @@ defmodule PTZTest do
       [first_preset | _] = response |> Map.get("Presets")
       assert first_preset |> Map.get("Name") == "Back Main Yard"
       assert first_preset |> Map.get("token") == "1"
+    end
+  end
+
+  @tag :capture_log
+  test "get_presets method returns error" do
+    use_cassette "get_presets_with_error" do
+      {:error, code, response} = ONVIFPTZ.get_presets(@access_info, "Profile_1")
+      assert code == 400
+      assert parse_onvif_error_type(response) == "ter:NotAuthorized"
     end
   end
 

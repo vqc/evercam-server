@@ -50,4 +50,12 @@ defmodule EvercamMedia.ConnCase do
 
     :ok
   end
+
+  def parse_onvif_error_type(response) do
+    response
+    |> Map.get("Fault")
+    |> Map.get("Code")
+    |> Map.get("Subcode")
+    |> Map.get("Value")
+  end
 end

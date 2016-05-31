@@ -3,13 +3,16 @@ defmodule EvercamMedia.ONVIFController do
   alias EvercamMedia.ONVIFClient
 
   def invoke(conn, %{"service" => service, "operation" => operation}) do
-    case ONVIFClient.request(conn.assigns.onvif_access_info, service, operation, conn.assigns.onvif_parameters) do
-      {:ok, response} -> default_respond(conn, 200, response)
-      {:error, code, response} -> default_respond(conn, code, response)
-    end
+    ONVIFClient.request(conn.assigns.onvif_access_info, service, operation, conn.assigns.onvif_parameters) |> respond(conn)
   end
 
-  defp default_respond(conn, code, response) do
+  defp respond({:ok, response}, conn) do
+    conn
+    |> put_status(200)
+    |> json(response)
+  end
+
+  defp respond({:error, code, response}, conn) do
     conn
     |> put_status(code)
     |> json(response)
