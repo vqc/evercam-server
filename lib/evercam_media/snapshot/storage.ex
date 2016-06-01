@@ -99,11 +99,13 @@ defmodule EvercamMedia.Snapshot.Storage do
       |> String.split("_")
       |> List.last
       |> Util.snapshot_timestamp_to_unix
-    if seaweedfs_storage_start_timestmap < timestamp do
+    with true <- seaweedfs_storage_start_timestmap < timestamp do
       seaweedfs_load(camera_exid, timestamp, app_name)
-    else
-      disk_load(camera_exid, timestamp, app_name)
     end
+    |> case do
+         {:ok, snapshot} -> {:ok, snapshot}
+         _ -> disk_load(camera_exid, timestamp, app_name)
+       end
   end
 
   defp disk_load(camera_exid, timestamp, app_name) do
