@@ -56,6 +56,48 @@ defmodule CameraShare do
     |> Repo.delete_all
   end
 
+  def camera_shares(camera) do
+    CameraShare
+    |> where(camera_id: ^camera.id)
+    |> preload(:user)
+    |> preload(:sharer)
+    |> preload(:camera)
+    |> preload([camera: :access_rights])
+    |> preload([camera: [access_rights: :access_token]])
+    |> Repo.all
+  end
+
+  def user_camera_share(camera, user) do
+    CameraShare
+    |> where(camera_id: ^camera.id)
+    |> where(user_id: ^user.id)
+    |> preload(:user)
+    |> preload(:sharer)
+    |> preload(:camera)
+    |> preload([camera: :access_rights])
+    |> preload([camera: [access_rights: :access_token]])
+    |> Repo.all
+  end
+
+  def get_rights("private", user, camera) do
+    list = []
+    list = add_right(Permission.Camera.can_snapshot?(user, camera), list, "snapshot")
+    list = add_right(Permission.Camera.can_view?(user, camera), list, "view")
+    list = add_right(Permission.Camera.can_edit?(user, camera), list, "edit")
+    list = add_right(Permission.Camera.can_delete?(user, camera), list, "delete")
+    list = add_right(Permission.Camera.can_list?(user, camera), list, "list")
+    Enum.join(list, ",")
+  end
+  def get_rights(kind, user, camera) do
+    ["snapshot", "list"]
+    |> Enum.join(",")
+  end
+
+  defp add_right(false, list, right), do: list
+  defp add_right(true, list, right) do
+    List.insert_at(list, -1, right)
+  end
+
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)

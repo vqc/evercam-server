@@ -35,6 +35,13 @@ defmodule User do
     end)
   end
 
+  def by_username_or_email(login) when login in["", nil], do: nil
+  def by_username_or_email(login) do
+    User
+    |> where([u], u.username == ^login or u.email == ^login)
+    |> Repo.one
+  end
+
   def by_username(username) do
     User
     |> where(username: ^username)
@@ -71,5 +78,9 @@ defmodule User do
     |> unique_constraint(:email, [name: "ux_users_email"])
     |> unique_constraint(:username, [name: "ux_users_username"])
     |> validate_format(:email, ~r/^.+@.+\..+$/)
+  end
+
+  def fullname(user) do
+    "#{user.firstname} #{user.lastname}"
   end
 end
