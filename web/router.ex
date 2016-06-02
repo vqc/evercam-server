@@ -63,6 +63,7 @@ defmodule EvercamMedia.Router do
       post "/cameras/:id/recordings/snapshots", SnapshotController, :create
       get "/cameras/:id/apps/cloud-recording", CloudRecordingController, :show
       post "/cameras/:id/apps/cloud-recording", CloudRecordingController, :create
+      get "/cameras/:id/shares/requests", CameraShareRequestController, :show
     end
 
     scope "/" do
