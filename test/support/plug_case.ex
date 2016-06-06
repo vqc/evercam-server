@@ -28,6 +28,7 @@ defmodule EvercamMedia.PlugCase do
     # Wrap this case in a transaction
     Ecto.Adapters.SQL.Sandbox.checkout(EvercamMedia.Repo)
     Ecto.Adapters.SQL.Sandbox.checkout(EvercamMedia.SnapshotRepo)
+    EvercamMedia.TestHelpers.invalidate_caches
 
     :ok
   end

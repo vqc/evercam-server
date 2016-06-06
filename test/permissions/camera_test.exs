@@ -1,11 +1,6 @@
 defmodule Permission.CameraTest do
   use EvercamMedia.ModelCase
 
-  setup do
-    ConCache.delete(:camera, "123")
-    :ok
-  end
-
   test "owner can do anything with the camera" do
     country = Repo.insert!(%Country{name: "Something", iso3166_a2: "SMT"})
     user = Repo.insert!(%User{firstname: "John", lastname: "Doe", username: "johndoe", email: "john@doe.com", password: "password123", country_id: country.id})

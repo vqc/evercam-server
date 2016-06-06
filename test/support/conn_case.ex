@@ -39,6 +39,7 @@ defmodule EvercamMedia.ConnCase do
     # Wrap this case in a transaction
     Ecto.Adapters.SQL.Sandbox.checkout(EvercamMedia.Repo)
     Ecto.Adapters.SQL.Sandbox.checkout(EvercamMedia.SnapshotRepo)
+    EvercamMedia.TestHelpers.invalidate_caches
 
     {:ok, country} = EvercamMedia.Repo.insert %Country{iso3166_a2: "ad", name: "Andorra"}
 
