@@ -6,10 +6,10 @@ defmodule EvercamMedia.CameraShareRequestController do
   def show(conn, %{"id" => exid} = params) do
     current_user = conn.assigns[:current_user]
     camera = Camera.get_full(exid)
-    status = validate_status(params["status"])
+    status = parse_status(params["status"])
 
-    with  :ok <- is_authorized(conn, current_user),
-          :ok <- camera_exists(conn, exid, camera)
+    with :ok <- is_authorized(conn, current_user),
+         :ok <- camera_exists(conn, exid, camera)
     do
       share_requests = CameraShareRequest.by_camera_and_status(camera, status)
       conn
@@ -31,11 +31,10 @@ defmodule EvercamMedia.CameraShareRequestController do
   end
   defp camera_exists(_conn, _camera_exid, _camera), do: :ok
 
-  defp validate_status(value) when value in [nil, ""], do: nil
-  defp validate_status(value) do
+  defp parse_status(value) when value in [nil, ""], do: nil
+  defp parse_status(value) do
     value
     |> String.downcase
     |> CameraShareRequest.get_status
   end
-
 end

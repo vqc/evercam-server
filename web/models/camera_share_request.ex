@@ -38,7 +38,7 @@ defmodule CameraShareRequest do
     case status do
       "used" -> @status.used
       "cancelled" -> @status.cancelled
-      _ -> @status.pending
+      "pending" -> @status.pending
     end
   end
 end
