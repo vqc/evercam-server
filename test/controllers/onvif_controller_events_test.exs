@@ -2,6 +2,7 @@ defmodule EvercamMedia.ONVIFControllerEventsTest do
   use EvercamMedia.ConnCase
   use ExVCR.Mock, options: [clear_mock: true]
 
+  @moduletag :onvif
   @access_params "url=http://recorded_response&auth=admin:mehcam"
 
   test "GET /v1/onvif/v20/Events/GetServiceCapabilities, returns something" do

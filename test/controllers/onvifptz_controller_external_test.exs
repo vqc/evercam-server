@@ -1,8 +1,8 @@
 defmodule EvercamMedia.ONVIFPTZControllerExternalTest do
   use EvercamMedia.ConnCase
 
+  @moduletag :onvif
   @moduletag :external
-
 
   test "POST /v1/cameras/:id/ptz/relative?left=0&right=10&up=0&down=10&zoom=0 moves right and down" do
     # get home first

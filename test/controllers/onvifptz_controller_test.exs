@@ -3,6 +3,8 @@ defmodule EvercamMedia.ONVIFPTZControllerTest do
   use ExVCR.Mock, options: [clear_mock: true]
   import EvercamMedia.ConnCase ,only: [parse_onvif_error_type: 1]
 
+  @moduletag :onvif
+
   test "GET /v1/cameras/:id/ptz/presets, gives something" do
     use_cassette "ptz_presets" do
       conn = get build_conn(), "/v1/cameras/recorded-response/ptz/presets"
