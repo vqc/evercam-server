@@ -3,6 +3,12 @@ defmodule AccessRight do
   alias EvercamMedia.Repo
   import Ecto.Query
 
+  @required_fields ~w(token_id right status)
+  @optional_fields ~w(camera_id grantor_id snapshot_id account_id scope updated_at created_at)
+  @camera_rights ["delete", "edit", "list", "snapshot", "view", "grant~delete",
+                  "grant~edit", "grant~list", "grant~snapshot", "grant~view"]
+  @status %{active: 1, deleted: -1}
+
   schema "access_rights" do
     belongs_to :access_token, AccessToken, foreign_key: :token_id
     belongs_to :camera, Camera, foreign_key: :camera_id
@@ -35,5 +41,55 @@ defmodule AccessRight do
       [] -> false
       _ -> true
     end
+  end
+
+  def camera_rights, do: @camera_rights
+
+  def valid_right_name?(name) when name in [nil, ""], do: false
+  def valid_right_name?(name) do
+    Enum.member?(@camera_rights, name)
+  end
+
+  def grant(user, camera, rights) do
+    token = AccessToken.active_token_for(user.id)
+    saved_rights = recorded_rights(user, camera)
+    rights
+    |> Enum.reject(fn(right) -> Enum.member?(saved_rights, right) end)
+    |> Enum.each(fn(right) ->
+      if !Camera.is_owner?(user, camera) do
+        right_params = %{token_id: token.id, camera_id: camera.id, right: right, status: @status.active}
+        %AccessRight{}
+        |> changeset(right_params)
+        |> Repo.insert
+      end
+    end)
+  end
+
+  def recorded_rights(user, camera) do
+    token = AccessToken.active_token_for(user.id)
+    AccessRight
+    |> where(token_id: ^token.id)
+    |> where(camera_id: ^camera.id)
+    |> where(status: ^@status.active)
+    |> Repo.all
+    |> Enum.map(fn(ar) -> ar.right end)
+    |> Enum.uniq
+  end
+
+  def revoke(user, camera, rights) do
+    token = AccessToken.active_token_for(user.id)
+    if !Camera.is_owner?(user, camera) do
+      AccessRight
+      |> where(token_id: ^token.id)
+      |> where(camera_id: ^camera.id)
+      |> where(status: ^@status.active)
+      |> where([r], r.right in ^rights)
+      |> Repo.update_all(set: [status: @status.deleted])
+    end
+  end
+
+  def changeset(model, params \\ :invalid) do
+    model
+    |> cast(params, @required_fields, @optional_fields)
   end
 end

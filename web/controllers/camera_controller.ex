@@ -69,6 +69,27 @@ defmodule EvercamMedia.CameraController do
     end
   end
 
+  def transfer(conn, %{"id" => exid, "user_id" => user_id}) do
+    current_user = conn.assigns[:current_user]
+    camera = Camera.get_full(exid)
+    user = User.by_username(user_id)
+
+    with :ok <- is_authorized(conn, current_user),
+         :ok <- camera_exists(conn, exid, camera),
+         :ok <- user_exists(conn, user_id, user),
+         :ok <- has_rights(conn, current_user, camera)
+    do
+      old_owner = camera.owner
+      CameraShare.delete_share(user, camera)
+      camera = change_camera_owner(user, camera)
+      rights = CameraShare.generate_rights_list("full")
+      CameraShare.create_share(camera, old_owner, user, rights)
+      update_camera_worker(camera.exid)
+      conn
+      |> render("show.json", %{camera: camera, user: current_user})
+    end
+  end
+
   def thumbnail(conn, %{"id" => exid, "timestamp" => iso_timestamp, "token" => token}) do
     try do
       [token_exid, token_timestamp] = Util.decode(token)
@@ -94,16 +115,7 @@ defmodule EvercamMedia.CameraController do
       if exid != token_exid, do: raise "Invalid token."
 
       Logger.info "Camera update for #{exid}"
-      exid |> Camera.get_full |> Camera.invalidate_camera
-      camera = exid |> Camera.get_full
-      worker = exid |> String.to_atom |> Process.whereis
-
-      case worker do
-        nil ->
-          WorkerSupervisor.start_worker(camera)
-        _ ->
-          WorkerSupervisor.update_worker(worker, camera)
-      end
+      exid |> update_camera_worker
       send_resp(conn, 200, "Camera update request received.")
     rescue
       error ->
@@ -145,4 +157,55 @@ defmodule EvercamMedia.CameraController do
   end
 
   defp invalid(key), do: {:invalid, "The parameter '#{key}' isn't valid."}
+
+  defp is_authorized(conn, nil) do
+    conn
+    |> put_status(401)
+    |> render(ErrorView, "error.json", %{message: "Unauthorized."})
+  end
+  defp is_authorized(_conn, _user), do: :ok
+
+  defp camera_exists(conn, camera_exid, nil) do
+    conn
+    |> put_status(404)
+    |> render(ErrorView, "error.json", %{message: "The #{camera_exid} camera does not exist."})
+  end
+  defp camera_exists(_conn, _camera_exid, _camera), do: :ok
+
+  defp user_exists(conn, user_id, nil) do
+    conn
+    |> put_status(404)
+    |> render(ErrorView, "error.json", %{message: "User '#{user_id}' does not exist."})
+  end
+  defp user_exists(_conn, _user_id, _user), do: :ok
+
+  defp has_rights(conn, user, camera) do
+    if Camera.is_owner?(user, camera) do
+      :ok
+    else
+      conn
+      |> put_status(403)
+      |> render(ErrorView, "error.json", %{message: "Unauthorized."})
+    end
+  end
+
+  defp update_camera_worker(exid) do
+    exid |> Camera.get_full |> Camera.invalidate_camera
+    camera = exid |> Camera.get_full
+    worker = exid |> String.to_atom |> Process.whereis
+
+    case worker do
+      nil ->
+        WorkerSupervisor.start_worker(camera)
+      _ ->
+        WorkerSupervisor.update_worker(worker, camera)
+    end
+  end
+
+  defp change_camera_owner(user, camera) do
+    camera
+    |> Camera.changeset(%{owner_id: user.id})
+    |> Repo.update!
+    |> Repo.preload(:owner, force: true)
+  end
 end

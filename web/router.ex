@@ -53,6 +53,8 @@ defmodule EvercamMedia.Router do
       get "/cameras", CameraController, :index
       get "/cameras.json", CameraController, :index
       get "/cameras/:id", CameraController, :show
+      put "/cameras/:id", CameraController, :transfer
+      options "/cameras/:id", CameraController, :nothing
       get "/cameras/:id/thumbnail", SnapshotController, :thumbnail
       get "/cameras/:id/live/snapshot", SnapshotController, :live
       get "/cameras/:id/live/snapshot.jpg", SnapshotController, :live

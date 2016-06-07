@@ -5,29 +5,36 @@ defmodule EvercamMedia.CameraControllerTest do
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.Storage
 
-  setup do
+  setup context do
     System.put_env("SNAP_KEY", "aaaaaaaaaaaaaaaa")
     System.put_env("SNAP_IV", "bbbbbbbbbbbbbbbb")
+    expire_at = {{2032, 1, 1}, {0, 0, 0}} |> Ecto.DateTime.from_erl
 
     country = Repo.insert!(%Country{name: "Something", iso3166_a2: "SMT"})
-    user = Repo.insert!(%User{firstname: "John", lastname: "Doe", username: "johndoe", email: "john@doe.com", password: "password123", country_id: country.id})
-    camera = Repo.insert!(%Camera{owner_id: user.id, name: "Austin", exid: "austin", is_public: false, config: ""})
+    user = Repo.insert!(%User{firstname: "John", lastname: "Doe", username: "johndoe", email: "john@doe.com", password: "password123", country_id: country.id, api_id: UUID.uuid4(:hex), api_key: UUID.uuid4(:hex)})
+    _access_token1 = Repo.insert!(%AccessToken{user_id: user.id, request: UUID.uuid4(:hex), expires_at: expire_at, is_revoked: false})
+    user_b = Repo.insert!(%User{firstname: "Smith", lastname: "Marc", username: "smithmarc", email: "smith@dmarc.com", password: "password456", country_id: country.id, api_id: UUID.uuid4(:hex), api_key: UUID.uuid4(:hex)})
+    _access_token2 = Repo.insert!(%AccessToken{user_id: user_b.id, request: UUID.uuid4(:hex), expires_at: expire_at, is_revoked: false})
+    camera = Repo.insert!(%Camera{owner_id: user.id, name: "Austin", exid: "austin", is_public: false, config: %{"external_host" => "192.168.1.100", "external_http_port" => "80"}})
 
     now = DateTime.now!("UTC")
-    timestamp = now |> DateTime.Format.unix
-    datetime = now |> Ecto.DateTime.cast!
-    snapshot_timestamp = now |> Strftime.strftime!("%Y%m%d%H%M%S%f")
-    snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
-    %Snapshot{}
-    |> Snapshot.changeset(%{camera_id: camera.id, notes: "", motionlevel: 0, created_at: datetime, snapshot_id: snapshot_id})
-    |> SnapshotRepo.insert
+    if context[:thumbnail] do
+      timestamp = now |> DateTime.Format.unix
+      datetime = now |> Ecto.DateTime.cast!
+      snapshot_timestamp = now |> Strftime.strftime!("%Y%m%d%H%M%S%f")
+      snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
+      %Snapshot{}
+      |> Snapshot.changeset(%{camera_id: camera.id, notes: "", motionlevel: 0, created_at: datetime, snapshot_id: snapshot_id})
+      |> SnapshotRepo.insert
 
-    Storage.save(camera.exid, timestamp, "test_content", "Test Note")
+      Storage.save(camera.exid, timestamp, "test_content", "Test Note")
+    end
 
-    {:ok, datetime: now}
+    {:ok, datetime: now, user: user, camera: camera, user_b: user_b}
   end
 
   @tag :skip
+  @tag :thumbnail
   test "GET /v1/cameras/:id/thumbnail", %{datetime: datetime} do
     camera_exid = "austin"
     iso_timestamp =
@@ -43,5 +50,78 @@ defmodule EvercamMedia.CameraControllerTest do
       |> response(200)
 
     assert "test_content" == response
+  end
+
+  test 'PUT /v1/cameras/:id, returns success and the camera details when given valid parameters', context do
+    response =
+      build_conn
+      |> put("/v1/cameras/#{context[:camera].exid}?user_id=smithmarc&api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}")
+
+    camera =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("cameras")
+      |> List.first
+
+    assert response.status == 200
+    assert camera != nil
+    assert camera["id"] == context[:camera].exid
+    assert camera["owner"] == context[:user_b].username
+  end
+
+  test 'PUT /v1/cameras/:id, returns an unauthorized error if the caller is not the camera owner', context do
+    response =
+      build_conn
+      |> put("/v1/cameras/#{context[:camera].exid}?user_id=smithmarc&api_id=#{context[:user_b].api_id}&api_key=#{context[:user_b].api_key}")
+
+    message =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("message")
+
+    assert response.status == 403
+    assert message == "Unauthorized."
+  end
+
+  test 'PUT /v1/cameras/:id, returns a not found error for a camera that does not exist', context do
+    response =
+      build_conn
+      |> put("/v1/cameras/cameraxyz?user_id=smithmarc&api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}")
+
+    message =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("message")
+
+    assert response.status == 404
+    assert message == "The cameraxyz camera does not exist."
+  end
+
+  test 'PUT /v1/cameras/:id, returns a not found error when the new owner does not exist', context do
+    response =
+      build_conn
+      |> put("/v1/cameras/#{context[:camera].exid}?user_id=userxyz&api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}")
+
+    message =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("message")
+
+    assert response.status == 404
+    assert message == "User 'userxyz' does not exist."
+  end
+
+  test 'PUT /v1/cameras/:id, returns an unauthenticated error when no authentication details are provided' do
+    response =
+      build_conn
+      |> put("/v1/cameras/austin?user_id=smithmarc")
+
+    message =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("message")
+
+    assert response.status == 401
+    assert message == "Unauthorized."
   end
 end
