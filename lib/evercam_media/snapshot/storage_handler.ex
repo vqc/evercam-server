@@ -10,7 +10,6 @@ defmodule EvercamMedia.Snapshot.StorageHandler do
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, image} = data
     spawn fn -> Storage.save(camera_exid, timestamp, image, "Evercam Proxy") end
-    spawn fn -> Storage.seaweedfs_save(camera_exid, timestamp, image, "Evercam Proxy") end
     {:ok, state}
   end
 
