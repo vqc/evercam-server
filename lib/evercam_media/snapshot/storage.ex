@@ -52,27 +52,15 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def thumbnail_load(camera_exid) do
-    case HTTPoison.get("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", [], hackney: [pool: :seaweedfs_upload_pool]) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: thumbnail}} ->
-        {:ok, thumbnail}
-      {:ok, %HTTPoison.Response{status_code: 404}} ->
-        thumbnail = disk_thumbnail_load(camera_exid)
-        spawn fn -> HTTPoison.post!("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", {:multipart, [{"", thumbnail, []}]}, [], hackney: [pool: :seaweedfs_upload_pool]) end
-        {:ok, thumbnail}
-      error ->
-        Logger.error inspect(error)
-        {:error, Util.unavailable}
-    end
+    disk_thumbnail_load(camera_exid)
   end
 
   def disk_thumbnail_load(camera_exid) do
     "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
     |> File.open([:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
     |> case do
-      {:ok, content} ->
-        content
-      {:error, _error} ->
-        Util.unavailable
+      {:ok, content} -> {:ok, content}
+      {:error, _error} -> {:error, Util.unavailable}
     end
   end
 
@@ -86,10 +74,15 @@ defmodule EvercamMedia.Snapshot.Storage do
       File.mkdir_p!(directory_path)
       do_save(file_path, image)
     end
+    thumbnail_save(camera_exid, image)
   end
 
   defp do_save(file_path, image) do
     File.open(file_path, [:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
+  end
+
+  defp thumbnail_save(camera_exid, image) do
+    File.open("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg", [:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
   end
 
   def load(camera_exid, snapshot_id, notes) do
