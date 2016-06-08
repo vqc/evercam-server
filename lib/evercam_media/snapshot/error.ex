@@ -92,8 +92,8 @@ defmodule EvercamMedia.Snapshot.Error do
         {502, %{message: "Camera responded with a Device Busy message.", response: error[:response]}}
       :not_a_jpeg ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [not_a_jpeg]"
-        update_camera_status("#{camera_exid}", timestamp, false, "device_busy", 1)
-        {504, %{message: "Camera didn't respond with an image.", response: error[:response]}}
+        update_camera_status("#{camera_exid}", timestamp, false, "not_a_jpeg", 1)
+        {502, %{message: "Camera didn't respond with an image.", response: error[:response]}}
       _reason ->
         Logger.warn "[#{camera_exid}] [snapshot_error] [unhandled] #{inspect error}"
         update_camera_status("#{camera_exid}", timestamp, false, "unhandled", 1)
