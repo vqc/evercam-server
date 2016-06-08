@@ -53,6 +53,8 @@ defmodule EvercamMedia.Snapshot.CamClient do
         :device_busy
       String.contains?(response_text, "Device Error") ->
         :device_error
+      String.contains?(response_text, "Moved Permanently") ->
+        :moved_permanently
       true ->
         :not_a_jpeg
     end

@@ -90,6 +90,10 @@ defmodule EvercamMedia.Snapshot.Error do
         Logger.debug "[#{camera_exid}] [snapshot_error] [device_busy]"
         update_camera_status("#{camera_exid}", timestamp, false, "device_busy", 1)
         {502, %{message: "Camera responded with a Device Busy message.", response: error[:response]}}
+      :moved_permanently ->
+        Logger.debug "[#{camera_exid}] [snapshot_error] [moved_permanently]"
+        update_camera_status("#{camera_exid}", timestamp, false, "moved_permanently", 100)
+        {502, %{message: "Camera url has changed, please update it.", response: error[:response]}}
       :not_a_jpeg ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [not_a_jpeg]"
         update_camera_status("#{camera_exid}", timestamp, false, "not_a_jpeg", 1)
