@@ -37,9 +37,12 @@ defmodule EvercamMedia.CloudRecordingController do
           |> Process.whereis
           |> WorkerSupervisor.update_worker(camera)
 
-          conn |> render("cloud_recording.json", %{cloud_recording: cloud_recording})
+          conn
+          |> render("cloud_recording.json", %{cloud_recording: cloud_recording})
         {:error, changeset} ->
-          conn |> put_status(404) |> render(ErrorView, "error.json", %{message: changeset})
+          conn
+          |> put_status(404)
+          |> render(ErrorView, "error.json", %{message: changeset})
       end
     end
   end
@@ -49,13 +52,15 @@ defmodule EvercamMedia.CloudRecordingController do
     |> put_status(404)
     |> render(ErrorView, "error.json", %{message: "Camera '#{exid}' not found!"})
   end
-  defp ensure_camera_exists(camera, _id, _conn), do: :ok
+  defp ensure_camera_exists(_camera, _id, _conn), do: :ok
 
   defp ensure_can_edit(current_user, camera, conn) do
     if Permission.Camera.can_edit?(current_user, camera) do
       :ok
     else
-      conn |> put_status(403) |> render(ErrorView, "error.json", %{message: "You don't have sufficient rights for this."})
+      conn
+      |> put_status(403)
+      |> render(ErrorView, "error.json", %{message: "You don't have sufficient rights for this."})
     end
   end
 
