@@ -32,7 +32,6 @@ defmodule EvercamMedia.AuthenticationPlug do
   end
 
   defp extract_credential_from_query_string(conn, query_string_name) do
-    Plug.Conn.fetch_query_params(conn, query_string_name)
     Map.get(conn.params, query_string_name)
   end
 
