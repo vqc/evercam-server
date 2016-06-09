@@ -43,17 +43,20 @@ defmodule EvercamMedia.Snapshot.Streamer do
   def handle_info(:tick, camera_exid) do
     camera = Camera.get_full(camera_exid)
     cond do
-      camera.is_online && ConCache.get(:snapshot_error, camera.exid) > 0 ->
-        Logger.debug "[#{camera.exid}] Checking ..."
+      camera == nil ->
+        Logger.debug "[#{camera_exid}] Shutting down streamer, camera doesn't exist"
+        StreamerSupervisor.stop_streamer(camera_exid)
+      camera.is_online && ConCache.get(:snapshot_error, camera_exid) > 0 ->
+        Logger.debug "[#{camera_exid}] Checking ..."
         spawn fn -> stream(camera) end
-      length(subscribers(camera.exid)) == 0 ->
-        Logger.debug "[#{camera.exid}] Shutting down streamer, no subscribers"
-        StreamerSupervisor.stop_streamer(camera.exid)
+      length(subscribers(camera_exid)) == 0 ->
+        Logger.debug "[#{camera_exid}] Shutting down streamer, no subscribers"
+        StreamerSupervisor.stop_streamer(camera_exid)
       Camera.recording?(camera) ->
-        Logger.debug "[#{camera.exid}] Shutting down streamer, already streaming"
-        StreamerSupervisor.stop_streamer(camera.exid)
+        Logger.debug "[#{camera_exid}] Shutting down streamer, already streaming"
+        StreamerSupervisor.stop_streamer(camera_exid)
       true ->
-        Logger.debug "[#{camera.exid}] Streaming ..."
+        Logger.debug "[#{camera_exid}] Streaming ..."
         spawn fn -> stream(camera) end
     end
     Process.send_after(self, :tick, 1000)
