@@ -28,7 +28,7 @@ defmodule CameraShare do
       }
     %CameraShare{}
     |> changeset(share_changeset)
-    |> Repo.insert
+    |> Repo.insert!
     AccessRight.grant(sharee, camera, rights)
   end
 
@@ -44,8 +44,8 @@ defmodule CameraShare do
     rights
     |> String.downcase
     |> String.split(",", trim: true)
-    |> Enum.map(&String.strip/1)
-    |> Enum.reject(fn(right) -> !AccessRight.valid_right_name?(right) end)
+    |> Enum.map(fn(right) -> String.strip(right) end)
+    |> Enum.filter(fn(right) -> AccessRight.valid_right_name?(right) end)
   end
 
   def delete_share(user, camera) do

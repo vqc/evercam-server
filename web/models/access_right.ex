@@ -56,7 +56,7 @@ defmodule AccessRight do
     rights
     |> Enum.reject(fn(right) -> Enum.member?(saved_rights, right) end)
     |> Enum.each(fn(right) ->
-      if !Camera.is_owner?(user, camera) do
+      unless Camera.is_owner?(user, camera) do
         right_params = %{token_id: token.id, camera_id: camera.id, right: right, status: @status.active}
         %AccessRight{}
         |> changeset(right_params)
