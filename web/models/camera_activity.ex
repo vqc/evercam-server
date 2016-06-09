@@ -18,12 +18,6 @@ defmodule CameraActivity do
     field :name, :string
   end
 
-  def min_date do
-    CameraActivity
-    |> select([c], min(c.done_at))
-    |> SnapshotRepo.one
-  end
-
   def changeset(camera_activity, params \\ :invalid) do
     camera_activity
     |> cast(params, @required_fields, @optional_fields)
