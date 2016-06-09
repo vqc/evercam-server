@@ -1,8 +1,6 @@
 defmodule CameraActivity do
   use EvercamMedia.Web, :model
   import Ecto.Changeset
-  import Ecto.Query
-  alias EvercamMedia.SnapshotRepo
 
   @required_fields ~w(camera_id)
   @optional_fields ~w(action done_at)
