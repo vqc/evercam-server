@@ -115,7 +115,7 @@ defmodule EvercamMedia.CameraController do
       if exid != token_exid, do: raise "Invalid token."
 
       Logger.info "Camera update for #{exid}"
-      exid |> update_camera_worker
+      update_camera_worker(exid)
       send_resp(conn, 200, "Camera update request received.")
     rescue
       error ->
@@ -192,14 +192,11 @@ defmodule EvercamMedia.CameraController do
   defp update_camera_worker(exid) do
     exid |> Camera.get_full |> Camera.invalidate_camera
     camera = exid |> Camera.get_full
-    worker = exid |> String.to_atom |> Process.whereis
 
-    case worker do
-      nil ->
-        WorkerSupervisor.start_worker(camera)
-      _ ->
-        WorkerSupervisor.update_worker(worker, camera)
-    end
+    exid
+    |> String.to_atom
+    |> Process.whereis
+    |> WorkerSupervisor.update_worker(camera)
   end
 
   defp change_camera_owner(user, camera) do

@@ -32,13 +32,11 @@ defmodule EvercamMedia.CloudRecordingController do
       cloud_recording = camera.cloud_recordings || %CloudRecording{}
       case cloud_recording |> CloudRecording.changeset(cr_params) |> Repo.insert_or_update do
         {:ok, cloud_recording} ->
-          worker = exid |> String.to_atom |> Process.whereis
-          case worker do
-            nil ->
-              WorkerSupervisor.start_worker(camera)
-            _ ->
-              WorkerSupervisor.update_worker(worker, camera)
-          end
+          exid
+          |> String.to_atom
+          |> Process.whereis
+          |> WorkerSupervisor.update_worker(camera)
+
           conn |> render("cloud_recording.json", %{cloud_recording: cloud_recording})
         {:error, changeset} ->
           conn |> put_status(404) |> render(ErrorView, "error.json", %{message: changeset})

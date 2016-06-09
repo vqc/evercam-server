@@ -42,21 +42,21 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   @doc """
   Start camera worker
   """
+  def start_worker(nil), do: :noop
   def start_worker(camera) do
-    if camera do
-      case get_config(camera) do
-        {:ok, settings} ->
-          Logger.debug "[#{settings.config.camera_exid}] Starting worker"
-          Supervisor.start_child(__MODULE__, [settings])
-        {:error, _message, url} ->
-          Logger.warn "[#{camera.exid}] Skipping camera worker as the host is invalid: #{url}"
-      end
+    case get_config(camera) do
+      {:ok, settings} ->
+        Logger.debug "[#{settings.config.camera_exid}] Starting worker"
+        Supervisor.start_child(__MODULE__, [settings])
+      {:error, _message, url} ->
+        Logger.warn "[#{camera.exid}] Skipping camera worker as the host is invalid: #{url}"
     end
   end
 
   @doc """
   Reinitialize camera worker with new configuration
   """
+  def update_worker(nil, _camera), do: :noop
   def update_worker(worker, camera) do
     case get_config(camera) do
       {:ok, settings} ->
