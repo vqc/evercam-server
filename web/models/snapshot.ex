@@ -39,6 +39,13 @@ defmodule Snapshot do
     |> SnapshotRepo.delete_all
   end
 
+  def exists_between?(camera_id, from, to) do
+    Snapshot
+    |> where([snap], snap.snapshot_id > ^"#{camera_id}_#{from}")
+    |> where([snap], snap.snapshot_id < ^"#{camera_id}_#{to}")
+    |> SnapshotRepo.exists?
+  end
+
   def expired(cloud_recording) do
     expired(cloud_recording.camera_id, cloud_recording.storage_duration)
   end

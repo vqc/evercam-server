@@ -5,6 +5,7 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.Error
   alias EvercamMedia.Snapshot.Storage
+  alias EvercamMedia.Validation
   alias EvercamMedia.Util
 
   @optional_params %{"notes" => nil, "with_data" => false}
@@ -139,6 +140,46 @@ defmodule EvercamMedia.SnapshotController do
   end
   def show(conn, _params), do: proxy_api_data(conn)
 
+  def day(conn, %{"id" => camera_exid, "year" => year, "month" => month, "day" => day}) do
+    current_user = conn.assigns[:current_user]
+    camera = Camera.get_full(camera_exid)
+
+    with :ok <- ensure_params(:day, conn, year, month, day),
+         :ok <- ensure_camera_exists(conn, camera_exid, camera),
+         :ok <- ensure_authorized(conn, current_user, camera)
+    do
+      from = construct_timestamp(camera, year, month, day, "00:00:00")
+      to = construct_timestamp(camera, year, month, day, "23:59:59")
+      exists? = Snapshot.exists_between?(camera.id, from, to)
+
+      conn
+      |> json(%{exists: exists?})
+    end
+  end
+
+  #######################
+  ## Ensure functions  ##
+  #######################
+
+  defp ensure_params(:day, conn, year, month, day) do
+    case Validation.Snapshot.validate_params(:day, year, month, day) do
+      :ok -> :ok
+      {:invalid, message} -> render_error(conn, 400, message)
+    end
+  end
+
+  defp ensure_authorized(conn, user, camera) do
+    case Permission.Camera.can_list?(user, camera) do
+      true -> :ok
+      false -> render_error(conn, 403, "Forbidden.")
+    end
+  end
+
+  defp ensure_camera_exists(conn, camera_exid, nil) do
+    render_error(conn, 404, "The #{camera_exid} camera does not exist.")
+  end
+  defp ensure_camera_exists(_conn, _camera_exid, _camera), do: :ok
+
   ######################
   ## Fetch functions  ##
   ######################
@@ -225,6 +266,22 @@ defmodule EvercamMedia.SnapshotController do
       username: params["cam_username"],
       password: params["cam_password"]
     }
+  end
+
+  defp construct_timestamp(camera, year, month, day, time) do
+    month = String.rjust(month, 2, ?0)
+    day = String.rjust(day, 2, ?0)
+
+    offset =
+      camera
+      |> Camera.get_timezone
+      |> Calendar.DateTime.now!
+      |> Calendar.Strftime.strftime!("%z")
+
+    "#{year}-#{month}-#{day}T#{time}#{offset}"
+    |> DateTime.Parse.rfc3339_utc
+    |> elem(1)
+    |> Strftime.strftime!("%Y%m%d%H%M%S%f")
   end
 
   #######################
