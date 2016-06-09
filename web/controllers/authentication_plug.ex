@@ -8,7 +8,8 @@ defmodule EvercamMedia.AuthenticationPlug do
     api_id = extract_credential(conn, %{header: "x-api-id", query: "api_id"})
     api_key = extract_credential(conn, %{header: "x-api-key", query: "api_key"})
     token =
-      extract_credential(conn, %{header: "authorization", query: "authorization"})
+      conn
+      |> extract_credential(%{header: "authorization", query: "authorization"})
       |> String.downcase
       |> String.replace_leading("bearer ", "")
 
@@ -16,10 +17,11 @@ defmodule EvercamMedia.AuthenticationPlug do
       :valid ->
         conn
       {:valid, user} ->
-        assign(conn, :current_user, user)
+        conn
+        |> assign(:current_user, user)
       :invalid ->
         conn
-        |> resp(401, Poison.encode!(%{ message: "Invalid API keys" }, []))
+        |> resp(401, Poison.encode!(%{message: "Invalid API keys"}))
         |> send_resp
         |> halt
     end
@@ -31,7 +33,7 @@ defmodule EvercamMedia.AuthenticationPlug do
 
   defp extract_credential_from_query_string(conn, query_string_name) do
     Plug.Conn.fetch_query_params(conn, query_string_name)
-    Map.get(conn.params, query_string_name, nil)
+    Map.get(conn.params, query_string_name)
   end
 
   defp extract_credential_from_header(conn, header_name) do

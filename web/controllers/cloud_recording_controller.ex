@@ -1,8 +1,8 @@
 defmodule EvercamMedia.CloudRecordingController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.ErrorView
-  import EvercamMedia.Validation.CloudRecording
   alias EvercamMedia.Snapshot.WorkerSupervisor
+  import EvercamMedia.Validation.CloudRecording
 
   def show(conn, %{"id" => exid}) do
     current_user = conn.assigns[:current_user]
