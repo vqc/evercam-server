@@ -37,6 +37,7 @@ defmodule EvercamMedia.Web do
       import Ecto.Schema
       import Ecto.Query, only: [from: 1, from: 2]
       import EvercamMedia.Router.Helpers
+      import EvercamMedia.ControllerHelpers
 
       require Logger
     end
