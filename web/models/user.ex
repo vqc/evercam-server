@@ -23,8 +23,7 @@ defmodule User do
     field :token_expires_at, Ecto.DateTime
     field :stripe_customer_id, :string
     field :confirmed_at, Ecto.DateTime
-    field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
-    field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
+    timestamps(inserted_at: :created_at, type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
 
   def get_by_api_keys("", ""), do: nil

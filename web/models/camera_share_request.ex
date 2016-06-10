@@ -13,8 +13,7 @@ defmodule CameraShareRequest do
     field :email, :string
     field :rights, :string
     field :status, :integer
-    field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
-    field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
+    timestamps(inserted_at: :created_at, type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
 
   def by_camera_and_status(camera, nil) do

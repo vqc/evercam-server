@@ -19,9 +19,7 @@ defmodule AccessRight do
     field :right, :string
     field :status, :integer
     field :scope, :string
-
-    field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
-    field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
+    timestamps(inserted_at: :created_at, type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
 
   def allows?(requester, resource, right, scope) do

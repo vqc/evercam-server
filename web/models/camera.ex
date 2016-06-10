@@ -31,8 +31,7 @@ defmodule Camera do
     field :location, Geo.Point
     field :last_polled_at, Ecto.DateTime, default: Ecto.DateTime.utc
     field :last_online_at, Ecto.DateTime, default: Ecto.DateTime.utc
-    field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
-    field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
+    timestamps(inserted_at: :created_at, type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
 
   def all do

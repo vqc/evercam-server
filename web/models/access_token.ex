@@ -17,8 +17,7 @@ defmodule AccessToken do
     field :expires_at, Ecto.DateTime
     field :request, :string, null: false
     field :refresh, :string
-    field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
-    field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
+    timestamps(inserted_at: :created_at, type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
 
   def active_token_for(user_id) do

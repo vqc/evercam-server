@@ -15,7 +15,7 @@ defmodule Snapshot do
     field :notes, :string
     field :is_public, :boolean
     field :motionlevel, :integer
-    field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
+    timestamps(inserted_at: :created_at, updated_at: false, type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
 
   def by_id(snapshot_id) do

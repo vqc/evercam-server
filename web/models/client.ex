@@ -14,9 +14,7 @@ defmodule Client do
     field :api_key, :string
     field :callback_uris, {:array, :string}
     field :settings, :string
-
-    field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
-    field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
+    timestamps(inserted_at: :created_at, type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
 
   def get_by_bearer(token) do

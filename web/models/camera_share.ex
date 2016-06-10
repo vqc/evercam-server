@@ -14,8 +14,7 @@ defmodule CameraShare do
 
     field :kind, :string
     field :message, :string
-    field :updated_at, Ecto.DateTime, default: Ecto.DateTime.utc
-    field :created_at, Ecto.DateTime, default: Ecto.DateTime.utc
+    timestamps(inserted_at: :created_at, type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
 
   def create_share(camera, sharee, sharer, rights) do
