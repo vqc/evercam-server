@@ -96,15 +96,20 @@ defmodule EvercamMedia.CameraController do
       if exid != token_exid, do: raise "Invalid token."
       if iso_timestamp != token_timestamp, do: raise "Invalid token."
 
-      {:ok, image} = Storage.thumbnail_load(exid)
-
-      conn
-      |> put_status(200)
-      |> put_resp_header("content-type", "image/jpeg")
-      |> text(image)
+      case Storage.thumbnail_load(exid) do
+        {:ok, snapshot} ->
+          conn
+          |> put_resp_header("content-type", "image/jpeg")
+          |> text(snapshot)
+        {:error, error_image} ->
+          conn
+          |> put_status(404)
+          |> put_resp_header("content-type", "image/jpeg")
+          |> text(error_image)
+      end
     rescue
       error ->
-        Logger.error "[#{exid}] [thumbnail] [error] [inspect #{error}]"
+        Logger.error "[#{exid}] [thumbnail] [error] [#{inspect error}]"
         send_resp(conn, 500, "Invalid token.")
     end
   end
