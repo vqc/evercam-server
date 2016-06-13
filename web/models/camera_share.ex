@@ -17,6 +17,9 @@ defmodule CameraShare do
     timestamps(inserted_at: :created_at, type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
 
+  def rights_list("full"), do: ["snapshot", "view", "edit", "list"]
+  def rights_list(_), do: ["snapshot", "list"]
+
   def create_share(camera, sharee, sharer, rights) do
     share_changeset =
       %{
@@ -29,14 +32,6 @@ defmodule CameraShare do
     |> changeset(share_changeset)
     |> Repo.insert!
     AccessRight.grant(sharee, camera, rights)
-  end
-
-  def generate_rights_list(permissions) do
-    if permissions == "full" do
-      ["snapshot", "view", "edit", "list"]
-    else
-      ["snapshot", "list"]
-    end
   end
 
   def to_rights_list(rights) do
