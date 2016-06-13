@@ -13,6 +13,7 @@ defmodule EvercamMedia.ONVIFPTZControllerTest do
     end
   end
 
+  @tag :skip
   @tag :capture_log
   test "GET /v1/cameras/:id/ptz/presets, returns error" do
     use_cassette "ptz_presets_with_error" do
