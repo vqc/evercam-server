@@ -80,22 +80,14 @@ defmodule CameraShare do
   end
 
   def get_rights("private", user, camera) do
-    list = []
-    list = add_right(Permission.Camera.can_snapshot?(user, camera), list, "snapshot")
-    list = add_right(Permission.Camera.can_view?(user, camera), list, "view")
-    list = add_right(Permission.Camera.can_edit?(user, camera), list, "edit")
-    list = add_right(Permission.Camera.can_delete?(user, camera), list, "delete")
-    list = add_right(Permission.Camera.can_list?(user, camera), list, "list")
-    Enum.join(list, ",")
-  end
-  def get_rights(kind, user, camera) do
-    ["snapshot", "list"]
+    ["snapshot", "list", "view", "edit", "delete"]
+    |> Enum.filter(fn(right) -> Permission.Camera.can_access?(right, user, camera) end)
     |> Enum.join(",")
   end
 
-  defp add_right(false, list, right), do: list
-  defp add_right(true, list, right) do
-    List.insert_at(list, -1, right)
+  def get_rights("public", _user, _camera) do
+    ["snapshot", "list"]
+    |> Enum.join(",")
   end
 
   def changeset(model, params \\ :invalid) do

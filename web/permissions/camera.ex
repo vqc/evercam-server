@@ -25,7 +25,7 @@ defmodule Permission.Camera do
     can_access?("grant", requester, camera)
   end
 
-  defp can_access?(right, requester, camera) do
+  def can_access?(right, requester, camera) do
     is_public?(right, camera) or is_owner?(requester, camera) or has_right?(right, requester, camera)
   end
 
