@@ -15,11 +15,19 @@ defmodule EvercamMedia.Snapshot.Storage do
     file_name = construct_file_name(timestamp)
     file_path = directory_path <> file_name
     HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], hackney: hackney)
-    case HTTPoison.put("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", {:multipart, [{file_path, image, []}]}, [], hackney: hackney) do
+  end
+
+  def seaweedfs_thumbnail_save(file_path, image) do
+    path = String.replace_leading(file_path, "/storage", "")
+    hackney = [pool: :seaweedfs_upload_pool]
+    url = "#{@seaweedfs}#{path}"
+    case HTTPoison.head(url, [], hackney: hackney) do
       {:ok, %HTTPoison.Response{status_code: 200}} ->
-        :noop
-      _ ->
-        HTTPoison.post!("#{@seaweedfs}/#{camera_exid}/snapshots/thumbnail.jpg", {:multipart, [{file_path, image, []}]}, [], hackney: hackney)
+        Logger.warn "File path '#{file_path}' already exists"
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        HTTPoison.post!(url, {:multipart, [{path, image, []}]}, [], hackney: hackney)
+      error ->
+        raise "Upload for file path '#{file_path}' failed with: #{inspect error}"
     end
   end
 
