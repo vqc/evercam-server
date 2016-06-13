@@ -7,7 +7,7 @@ defmodule Camera do
   alias EvercamMedia.Util
 
   @required_fields ~w(exid name owner_id config is_public is_online_email_owner_notification)
-  @optional_fields ~w(timezone thumbnail_url is_online last_polled_at last_online_at updated_at created_at)
+  @optional_fields ~w(timezone thumbnail_url is_online last_polled_at last_online_at updated_at created_at model_id location mac_address discoverable)
 
   schema "cameras" do
     belongs_to :owner, User, foreign_key: :owner_id
@@ -164,8 +164,25 @@ defmodule Camera do
     end
   end
 
+  def internal_snapshot_url(camera, type \\ "jpg") do
+    case internal_url(camera) != "" && res_url(camera, type) != "" do
+      true -> internal_url(camera) <> res_url(camera, type)
+      false -> ""
+    end
+  end
+
+  def internal_url(camera, protocol \\ "http") do
+    host = host(camera, "internal") |> to_string
+    port = port(camera, "internal", protocol) |> to_string
+    case {host, port} do
+      {"", _} -> ""
+      {host, ""} -> "#{protocol}://#{host}"
+      {host, port} -> "#{protocol}://#{host}:#{port}"
+    end
+  end
+
   def res_url(camera, type \\ "jpg") do
-    url = "#{camera.config["snapshots"][type]}"
+    url = "#{camera.config["snapshots"]["#{type}"]}"
     case String.starts_with?(url, "/") || String.length(url) == 0 do
       true -> "#{url}"
       false -> "/#{url}"
@@ -311,9 +328,46 @@ defmodule Camera do
     |> Repo.delete_all
   end
 
+  def validate_params(camera_changeset) do
+    timezone = get_field(camera_changeset, :timezone)
+    config = get_field(camera_changeset, :config)
+    cond do
+      !valid?("address", config["external_host"]) ->
+        add_error(camera_changeset, :external_host, "External url is invalid")
+      !is_nil(timezone) && !Tzdata.zone_exists?(timezone) ->
+        add_error(camera_changeset, :timezone, "Timezone does not exist or is invalid")
+      true ->
+        camera_changeset
+    end
+  end
+
+  defp valid?("address", value) do
+    if valid?("ip_address", value) || valid?("domain", value), do: true, else: false
+  end
+
+  defp valid?("ip_address", value) do
+    case :inet_parse.strict_address(to_char_list(value)) do
+      {:ok, _} -> true
+      {:error, _} -> false
+    end
+  end
+
+  defp valid?("domain", value) do
+    :inet_parse.domain(to_char_list(value)) && String.contains?(value, ".")
+  end
+
+  defp validate_lng_lat(camera_changeset, nil, nil), do: camera_changeset
+  defp validate_lng_lat(camera_changeset, _lng, nil), do: add_error(camera_changeset, :location_lat, "Must provide both location coordinates")
+  defp validate_lng_lat(camera_changeset, nil, _lat), do: add_error(camera_changeset, :location_lng, "Must provide both location coordinates")
+  defp validate_lng_lat(camera_changeset, lng, lat), do: put_change(camera_changeset, :location, %Geo.Point{coordinates: {lng, lat}})
+
   def changeset(camera, params \\ :invalid) do
     camera
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:exid, [name: "cameras_exid_index"])
+    |> validate_length(:name, max: 24, message: "Camera Name is too long. Maximum 24 characters.")
+    |> validate_format(:mac_address, ~r/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/, message: "Mac address is invalid")
+    |> validate_params
+    |> validate_lng_lat(params[:location_lng], params[:location_lat])
   end
 end

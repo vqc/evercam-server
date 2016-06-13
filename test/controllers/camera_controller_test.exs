@@ -124,4 +124,80 @@ defmodule EvercamMedia.CameraControllerTest do
     assert response.status == 401
     assert message == "Unauthorized."
   end
+
+  test 'PATCH /v1/cameras/:id, returns success and the camera details when given valid parameters', context do
+    camera_params = %{
+      name: "Rename Camera",
+      external_host: "212.78.102.10",
+      external_rtsp_port: "8100",
+      external_http_port: "8100",
+      vendor: "hikvision",
+      is_public: "true"
+    }
+    response =
+      build_conn
+      |> patch("/v1/cameras/#{context[:camera].exid}?api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}", camera_params)
+
+    camera =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("cameras")
+      |> List.first
+
+    assert response.status == 200
+    assert camera != nil
+    assert camera["id"] == context[:camera].exid
+    assert camera["name"] == camera_params[:name]
+    assert camera["external"]["host"] == camera_params[:external_host]
+    assert camera["external"]["http"]["port"] == camera_params[:external_http_port]
+  end
+
+  test 'PATCH /v1/cameras/:id, returns a not found error for a camera that does not exist', context do
+    response =
+      build_conn
+      |> patch("/v1/cameras/cameraxyz?api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}", %{})
+
+    message =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("message")
+
+    assert response.status == 404
+    assert message == "The cameraxyz camera does not exist."
+  end
+
+  test 'PATCH /v1/cameras/:id, returns Unauthorized error when user does not have permissions', context do
+    camera_params = %{
+      name: "Rename Camera"
+    }
+    response =
+      build_conn
+      |> patch("/v1/cameras/#{context[:camera].exid}?api_id=#{context[:user_b].api_id}&api_key=#{context[:user_b].api_key}", camera_params)
+
+    message =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("message")
+
+    assert response.status == 403
+    assert message == "Unauthorized."
+  end
+
+  test 'PATCH /v1/cameras/:id, returns error when passed invalid params', context do
+    camera_params = %{
+      external_host: "Rename Camera"
+    }
+    response =
+      build_conn
+      |> patch("/v1/cameras/#{context[:camera].exid}?api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}", camera_params)
+
+    message =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("message")
+      |> Map.get("external_host")
+
+    assert response.status == 400
+    assert message == ["External url is invalid"]
+  end
 end

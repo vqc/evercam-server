@@ -90,6 +90,30 @@ defmodule EvercamMedia.CameraController do
     end
   end
 
+  def update(conn, %{"id" => exid} = params) do
+    caller = conn.assigns[:current_user]
+    camera =
+      exid
+      |> String.downcase
+      |> Camera.get_full
+
+    with :ok <- camera_exists(conn, exid, camera),
+         :ok <- user_has_rights(conn, caller, camera)
+    do
+      camera_changeset = update_camera(camera, params)
+      case Repo.update(camera_changeset) do
+        {:ok, camera} ->
+          Camera.invalidate_camera(camera)
+          camera = Camera.get_full(camera.exid)
+          CameraActivity.log_activity(caller, camera, "edited")
+          conn
+          |> render("show.json", %{camera: camera, user: caller})
+        {:error, changeset} ->
+          render_error(conn, 400, Util.parse_changeset(changeset))
+      end
+    end
+  end
+
   def thumbnail(conn, %{"id" => exid, "timestamp" => iso_timestamp, "token" => token}) do
     try do
       [token_exid, token_timestamp] = Util.decode(token)
@@ -209,5 +233,68 @@ defmodule EvercamMedia.CameraController do
     |> Camera.changeset(%{owner_id: user.id})
     |> Repo.update!
     |> Repo.preload(:owner, force: true)
+  end
+
+  defp user_has_rights(conn, user, camera) do
+    if !Permission.Camera.can_edit?(user, camera) do
+      conn
+      |> put_status(403)
+      |> render(ErrorView, "error.json", %{message: "Unauthorized."})
+    else
+      :ok
+    end
+  end
+
+  defp update_camera(camera, params) do
+    model = VendorModel.get_model(params["vendor"], params["model"])
+
+    camera_params = %{config: Map.get(camera, :config)}
+    camera_params = add_parameter("field", camera_params, :name, params["name"])
+    camera_params = add_parameter("field", camera_params, :timezone, params["timezone"])
+    camera_params = add_parameter("field", camera_params, :mac_address, params["mac_address"])
+    camera_params = add_parameter("field", camera_params, :is_online, params["is_online"])
+    camera_params = add_parameter("field", camera_params, :is_public, params["is_public"])
+    camera_params = add_parameter("field", camera_params, :discoverable, params["discoverable"])
+    camera_params = add_parameter("field", camera_params, :is_online_email_owner_notification, params["is_online_email_owner_notification"])
+    camera_params = add_parameter("field", camera_params, :location_lng, params["location_lng"])
+    camera_params = add_parameter("field", camera_params, :location_lat, params["location_lat"])
+
+    camera_params = add_parameter("model", camera_params, :model_id, model)
+
+    camera_params = add_parameter("host", camera_params, "external_host", params["external_host"])
+    camera_params = add_parameter("host", camera_params, "external_http_port", params["external_http_port"])
+    camera_params = add_parameter("host", camera_params, "external_rtsp_port", params["external_rtsp_port"])
+
+    camera_params = add_parameter("host", camera_params, "internal_host", params["internal_host"])
+    camera_params = add_parameter("host", camera_params, "internal_http_port", params["internal_http_port"])
+    camera_params = add_parameter("host", camera_params, "internal_rtsp_port", params["internal_rtsp_port"])
+
+    camera_params = add_parameter("url", camera_params, "jpg", params["jpg_url"])
+    camera_params = add_parameter("url", camera_params, "mjpg", params["mjpg_url"])
+    camera_params = add_parameter("url", camera_params, "h264", params["h264_url"])
+    camera_params = add_parameter("url", camera_params, "audio", params["audio_url"])
+    camera_params = add_parameter("url", camera_params, "mpeg", params["mpeg_url"])
+
+    camera_params = add_parameter("auth", camera_params, "username", params["cam_username"])
+    camera_params = add_parameter("auth", camera_params, "password", params["cam_password"])
+
+    Camera.changeset(camera, camera_params)
+  end
+
+  defp add_parameter(_field, params, _key, value) when value in [nil, ""], do: params
+  defp add_parameter("field", params, key, value) do
+    Map.put(params, key, value)
+  end
+  defp add_parameter("model", params, key, value) do
+    Map.put(params, key, value.id)
+  end
+  defp add_parameter("host", params, key, value) do
+    put_in(params, [:config, key], value)
+  end
+  defp add_parameter("url", params, key, value) do
+    put_in(params, [:config, "snapshots", key], value)
+  end
+  defp add_parameter("auth", params, key, value) do
+    put_in(params, [:config, "auth", "basic", key], value)
   end
 end
