@@ -15,7 +15,12 @@ defmodule EvercamMedia.ONVIFPTZController do
   end
 
   def presets(conn, _params) do
-    conn.assigns.onvif_access_info |> ONVIFPTZ.get_presets("Profile_1") |> respond(conn)
+    conn.assigns.onvif_access_info
+    |> ONVIFPTZ.get_presets("Profile_1")
+    |> case do
+      {:ok, response} -> respond({:ok, response}, conn)
+      _ -> respond({:ok, %{"Presets" => []}}, conn)
+    end
   end
 
   def stop(conn, _params) do
