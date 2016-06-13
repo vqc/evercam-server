@@ -6,7 +6,7 @@ defmodule EvercamMedia.LogView do
     %{
       logs: Enum.map(logs, fn(log) ->
         %{
-          who: log.name,
+          who: name(log.name),
           action: log.action,
           done_at: Util.ecto_datetime_to_unix(log.done_at),
           extra: log.extra
@@ -17,4 +17,7 @@ defmodule EvercamMedia.LogView do
       camera_exid: camera_exid
     }
   end
+
+  defp name(name) when name in [nil, ""], do: "Anonymous"
+  defp name(name), do: name
 end
