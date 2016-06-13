@@ -3,6 +3,17 @@ defmodule EvercamMedia.Util do
   require Logger
   import String, only: [to_integer: 1]
 
+  def deep_get(map, keys, default \\ nil), do: do_deep_get(map, keys, default)
+
+  def do_deep_get(nil, _, default), do: default
+  def do_deep_get(%{}, [], default), do: default
+  def do_deep_get(value, [], _default), do: value
+  def do_deep_get(map, [key|rest], default) do
+    map
+    |> Map.get(key, %{})
+    |> deep_get(rest, default)
+  end
+
   def unavailable do
     ConCache.dirty_get_or_store(:snapshot_error, "unavailable", fn() ->
       Application.app_dir(:evercam_media)
