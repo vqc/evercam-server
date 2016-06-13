@@ -8,6 +8,19 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   def seaweedfs_storage_start_timestmap, do: 1463788800
 
+  def latest(camera_exid) do
+    Path.wildcard("#{@root_dir}/#{camera_exid}/snapshots/*")
+    |> Enum.reject(fn(x) -> String.match?(x, ~r/thumbnail.jpg/) end)
+    |> Enum.reduce("", fn(type, acc) ->
+      year = Path.wildcard("#{type}/????/") |> List.last
+      month = Path.wildcard("#{year}/??/") |> List.last
+      day = Path.wildcard("#{month}/??/") |> List.last
+      hour = Path.wildcard("#{day}/??/") |> List.last
+      last = Path.wildcard("#{hour}/??_??_???.jpg") |> List.last
+      Enum.max_by([acc, "#{last}"], fn(x) -> String.slice(x, -27, 27) end)
+    end)
+  end
+
   def seaweedfs_save(camera_exid, timestamp, image, notes) do
     hackney = [pool: :seaweedfs_upload_pool]
     app_name = notes_to_app_name(notes)
