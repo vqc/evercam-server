@@ -125,13 +125,18 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def save_snapshot_record(camera, timestamp, motion_level, notes) do
+    datetime =
+      timestamp
+      |> DateTime.Parse.unix!
+      |> DateTime.to_erl
+      |> Ecto.DateTime.cast!
     snapshot_timestamp =
       timestamp
       |> DateTime.Parse.unix!
       |> Strftime.strftime!("%Y%m%d%H%M%S%f")
 
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
-    parameters = %{camera_id: camera.id, notes: notes, motionlevel: motion_level, snapshot_id: snapshot_id}
+    parameters = %{camera_id: camera.id, notes: notes, motionlevel: motion_level, snapshot_id: snapshot_id, created_at: datetime}
     changeset = Snapshot.changeset(%Snapshot{}, parameters)
     SnapshotRepo.insert(changeset)
   end
