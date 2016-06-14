@@ -33,18 +33,6 @@ defmodule CameraShareRequest do
     |> Repo.all
   end
 
-  def get_sharer_email(share_request) do
-    if share_request.user, do: share_request.user.email, else: ""
-  end
-
-  def get_sharer_username(share_request) do
-    if share_request.user, do: share_request.user.username, else: ""
-  end
-
-  def get_sharer_fullname(share_request) do
-    if share_request.user, do: "#{share_request.user.firstname} #{share_request.user.lastname}", else: ""
-  end
-
   def get_status(status) do
     case status do
       "used" -> @status.used

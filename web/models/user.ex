@@ -72,15 +72,16 @@ defmodule User do
     end
   end
 
+  def get_fullname(nil), do: ""
+  def get_fullname(user) do
+    "#{user.firstname} #{user.lastname}"
+  end
+
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:email, [name: "ux_users_email"])
     |> unique_constraint(:username, [name: "ux_users_username"])
     |> validate_format(:email, ~r/^.+@.+\..+$/)
-  end
-
-  def fullname(user) do
-    "#{user.firstname} #{user.lastname}"
   end
 end

@@ -1,5 +1,6 @@
 defmodule EvercamMedia.CameraShareRequestView do
   use EvercamMedia.Web, :view
+  alias EvercamMedia.Util
 
   def render("index.json", %{camera_share_requests: camera_share_requests}) do
     %{share_requests: render_many(camera_share_requests, __MODULE__, "camera_share_request.json")}
@@ -8,12 +9,12 @@ defmodule EvercamMedia.CameraShareRequestView do
   def render("camera_share_request.json", %{camera_share_request: camera_share_request}) do
     %{
       id: camera_share_request.key,
-      camera_id: camera_share_request.camera.exid,
-      user_id: CameraShareRequest.get_sharer_username(camera_share_request),
-      sharer_name: CameraShareRequest.get_sharer_fullname(camera_share_request),
-      sharer_email: CameraShareRequest.get_sharer_email(camera_share_request),
       email: camera_share_request.email,
-      rights: camera_share_request.rights
+      rights: camera_share_request.rights,
+      camera_id: camera_share_request.camera.exid,
+      sharer_name: User.get_fullname(camera_share_request.user),
+      user_id: Util.deep_get(camera_share_request, [:user, :username], ""),
+      sharer_email: Util.deep_get(camera_share_request, [:user, :email], ""),
     }
   end
 end

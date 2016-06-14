@@ -1,5 +1,6 @@
 defmodule EvercamMedia.CameraShareView do
   use EvercamMedia.Web, :view
+  alias EvercamMedia.Util
 
   def render("index.json", %{camera_shares: camera_shares, camera: camera, user: user}) do
     shares_json = %{shares: render_many(camera_shares, __MODULE__, "camera_share.json")}
@@ -13,15 +14,15 @@ defmodule EvercamMedia.CameraShareView do
   def render("camera_share.json", %{camera_share: camera_share}) do
     %{
       id: camera_share.id,
-      camera_id: camera_share.camera.exid,
-      sharer_id: CameraShare.get_sharer_username(camera_share),
-      sharer_name: CameraShare.get_sharer_fullname(camera_share),
-      sharer_email: CameraShare.get_sharer_email(camera_share),
-      user_id: camera_share.user.username,
-      fullname: User.fullname(camera_share.user),
-      email: camera_share.user.email,
       kind: camera_share.kind,
-      rights: CameraShare.get_rights(camera_share.kind, camera_share.user, camera_share.camera)
+      email: camera_share.user.email,
+      camera_id: camera_share.camera.exid,
+      fullname: User.get_fullname(camera_share.user),
+      sharer_name: User.get_fullname(camera_share.sharer),
+      sharer_id: Util.deep_get(camera_share, [:sharer, :username], ""),
+      sharer_email: Util.deep_get(camera_share, [:sharer, :email], ""),
+      user_id: Util.deep_get(camera_share, [:user, :username], ""),
+      rights: CameraShare.get_rights(camera_share.kind, camera_share.user, camera_share.camera),
     }
   end
 
@@ -30,7 +31,7 @@ defmodule EvercamMedia.CameraShareView do
       owner: %{
         email: camera.owner.email,
         username: camera.owner.username,
-        fullname: User.fullname(camera.owner)
+        fullname: User.get_fullname(camera.owner),
       }
     }
   end

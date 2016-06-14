@@ -85,18 +85,6 @@ defmodule CameraShare do
     |> Enum.join(",")
   end
 
-  def get_sharer_email(share) do
-    if share.sharer, do: share.sharer.email, else: ""
-  end
-
-  def get_sharer_username(share) do
-    if share.sharer, do: share.sharer.username, else: ""
-  end
-
-  def get_sharer_fullname(share) do
-    if share.sharer, do: "#{share.sharer.firstname} #{share.sharer.lastname}", else: ""
-  end
-
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
