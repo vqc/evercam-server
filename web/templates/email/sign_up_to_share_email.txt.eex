@@ -1,0 +1,16 @@
+Hello from Evercam,
+
+<%= full_name(@user) %> has shared the camera <%= @camera.name %> with you.
+
+<%= @user.firstname %>'s message for you: <%= @message %>
+
+To access this camera, you will need to click on the link below and create an account with Evercam.
+
+https://dash.evercam.io/v1/users/signup?key=<%= @key %>
+
+Your Evercam account will give you access to this camera and a whole world of possibilities for cameras!
+
+We greatly appreciate any feedback, so if you have any suggestions or if there is anything we can do to improve your Evercam experience, please let us know.
+
+The Evercam Team
+support@evercam.io

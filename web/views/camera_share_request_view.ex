@@ -6,6 +6,10 @@ defmodule EvercamMedia.CameraShareRequestView do
     %{share_requests: render_many(camera_share_requests, __MODULE__, "camera_share_request.json")}
   end
 
+  def render("show.json", %{camera_share_requests: camera_share_request}) do
+    %{share_requests: render_many([camera_share_request], __MODULE__, "camera_share_request.json")}
+  end
+
   def render("camera_share_request.json", %{camera_share_request: camera_share_request}) do
     %{
       id: camera_share_request.key,

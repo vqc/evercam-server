@@ -131,4 +131,11 @@ defmodule EvercamMedia.Util do
     |> Calendar.DateTime.from_erl!("Etc/UTC")
     |> Calendar.DateTime.Format.unix
   end
+
+  def parse_changeset(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn
+      {msg, opts} -> String.replace(msg, "%{count}", to_string(opts[:count]))
+      msg -> msg
+    end)
+  end
 end

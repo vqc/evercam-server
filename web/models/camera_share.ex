@@ -20,18 +20,33 @@ defmodule CameraShare do
   def rights_list("full"), do: ["snapshot", "view", "edit", "list"]
   def rights_list(_), do: ["snapshot", "list"]
 
-  def create_share(camera, sharee, sharer, rights) do
-    share_changeset =
+  def create_share(camera, sharee, sharer, rights, message \\ nil) do
+    share_params =
       %{
         camera_id: camera.id,
         user_id: sharee.id,
         sharer_id: sharer.id,
-        kind: @kind.private
+        kind: @kind.private,
+        message: message,
+        rights: rights,
+        owner: camera.owner.id
       }
-    %CameraShare{}
-    |> changeset(share_changeset)
-    |> Repo.insert!
-    AccessRight.grant(sharee, camera, rights)
+    share_changeset = changeset(%CameraShare{}, share_params)
+    case Repo.insert(share_changeset) do
+      {:ok, share} ->
+        rights_list = to_rights_list(rights)
+        AccessRight.grant(sharee, camera, rights_list)
+        camera_share =
+          share
+          |> Repo.preload(:user)
+          |> Repo.preload(:sharer)
+          |> Repo.preload(:camera)
+          |> Repo.preload([camera: :access_rights])
+          |> Repo.preload([camera: [access_rights: :access_token]])
+        {:ok, camera_share}
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 
   def to_rights_list(rights) do
@@ -85,6 +100,37 @@ defmodule CameraShare do
     |> Enum.join(",")
   end
 
+  defp validate_rights(changeset, rights) do
+    with true <- ensure_rights(changeset, rights),
+         do: changeset
+  end
+
+  defp ensure_rights(changeset, nil), do: add_error(changeset, :rights, "Invalid rights specified in request.")
+  defp ensure_rights(changeset, rights) do
+    access_rights =
+      rights
+      |> CameraShare.to_rights_list
+      |> Enum.join(",")
+    if rights == access_rights do
+      true
+    else
+      add_error(changeset, :rights, "Invalid rights specified in request.")
+    end
+  end
+
+  defp can_share(changeset, owner) do
+    sharee = get_field(changeset, :user_id)
+    sharer = get_field(changeset, :sharer_id)
+
+    cond do
+      sharee == owner && sharer == owner ->
+        add_error(changeset, :share, "You can't share with yourself.")
+      sharee == owner && sharer != owner ->
+        add_error(changeset, :share, "Sharee is the camera owner - you cannot remove their rights.")
+      true -> changeset
+    end
+  end
+
   def delete_by_user(user_id) do
     CameraShare
     |> where(user_id: ^user_id)
@@ -94,5 +140,8 @@ defmodule CameraShare do
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
+    |> unique_constraint(:share, [name: "camera_shares_camera_id_user_id_index", message: "The camera has already been shared with this user."])
+    |> validate_rights(params[:rights])
+    |> can_share(params[:owner])
   end
 end
