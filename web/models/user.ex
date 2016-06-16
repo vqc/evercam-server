@@ -80,8 +80,8 @@ defmodule User do
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
-    |> unique_constraint(:email, [name: "ux_users_email"])
-    |> unique_constraint(:username, [name: "ux_users_username"])
+    |> unique_constraint(:username, [name: :user_username_unique_index])
+    |> unique_constraint(:email, [name: :user_email_unique_index])
     |> validate_format(:email, ~r/^.+@.+\..+$/)
   end
 end
