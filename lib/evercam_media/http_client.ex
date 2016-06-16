@@ -125,11 +125,13 @@ defmodule EvercamMedia.HTTPClient.DigestAuth do
   end
 
   defp parse_digest_header(auth_head) do
-    cond do
-      parsed = Regex.scan(~r/(\w+\s*)=\"([\w=\s\\]+)/, auth_head) -> parsed
-      |> Enum.map(fn [_, key, val] -> {key, val} end)
-      |> Enum.into(%{})
-      true -> raise "Error in digest authentication header: #{auth_head}"
+    case parsed = Regex.scan(~r/(\w+\s*)=\"([\w=\s\\]+)/, auth_head) do
+      true ->
+        parsed
+        |> Enum.map(fn([_, key, val]) -> {key, val} end)
+        |> Enum.into(%{})
+      false ->
+        raise "Error in digest authentication header: #{auth_head}"
     end
   end
 
@@ -156,9 +158,9 @@ defmodule EvercamMedia.HTTPClient.DigestAuth do
   end
 
   defp add_auth(digest, cop) do
-    cond do
-      cop |> String.contains?("auth") -> [{"qop", "\"auth\""} | digest]
-      true -> digest
+    case String.contains?(cop, "auth") do
+      true -> [{"qop", "\"auth\""} | digest]
+      false -> digest
     end
   end
 

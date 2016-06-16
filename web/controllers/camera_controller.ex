@@ -141,7 +141,7 @@ defmodule EvercamMedia.CameraController do
     if valid?("ip_address", value) || valid?("domain", value), do: :ok, else: invalid("address")
   end
 
-  defp validate("port", value) when is_integer(value) and value >= 1 and value <= 65535, do: :ok
+  defp validate("port", value) when is_integer(value) and value >= 1 and value <= 65_535, do: :ok
   defp validate("port", value) when is_binary(value) do
     case Integer.parse(value) do
       {int_value, ""} -> validate("port", int_value)

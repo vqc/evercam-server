@@ -335,7 +335,7 @@ defmodule EvercamMedia.SnapshotController do
   defp proxy_api_data(conn) do
     url = "https://api.evercam.io#{conn.request_path}?#{conn.query_string}"
 
-    case HTTPoison.get(url, [], [recv_timeout: 25000]) do
+    case HTTPoison.get(url, [], [recv_timeout: 25_000]) do
       {:ok, %HTTPoison.Response{body: body}} ->
         {:ok, data} = Poison.decode(body)
         conn

@@ -11,8 +11,8 @@ defmodule EvercamMedia.StreamController do
   end
 
   def hls(conn, params) do
-    request_stream(params["camera_id"], params["token"], :check)
-    |> hls_response(conn, params)
+    code = request_stream(params["camera_id"], params["token"], :check)
+    hls_response(code, conn, params)
   end
 
   defp hls_response(200, conn, params) do
@@ -53,14 +53,26 @@ defmodule EvercamMedia.StreamController do
 
   defp stream(rtsp_url, token, :check) do
     if length(ffmpeg_pids(rtsp_url)) == 0 do
-      construct_ffmpeg_command(rtsp_url, token) |> Porcelain.spawn_shell
+      start_stream(rtsp_url, token)
     end
     sleep_until_hls_playlist_exists(token)
   end
 
   defp stream(rtsp_url, token, :kill) do
-    Enum.each(ffmpeg_pids(rtsp_url), &Porcelain.shell("kill -9 #{&1}"))
-    construct_ffmpeg_command(rtsp_url, token) |> Porcelain.spawn_shell
+    kill_streams(rtsp_url)
+    start_stream(rtsp_url, token)
+  end
+
+  defp start_stream(rtsp_url, token) do
+    rtsp_url
+    |> construct_ffmpeg_command(token)
+    |> Porcelain.spawn_shell
+  end
+
+  defp kill_streams(rtsp_url) do
+    rtsp_url
+    |> ffmpeg_pids
+    |> Enum.each(fn(pid) -> Porcelain.shell("kill -9 #{pid}") end)
   end
 
   defp sleep_until_hls_playlist_exists(token, retry \\ 0)
