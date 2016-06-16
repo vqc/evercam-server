@@ -81,6 +81,8 @@ defmodule EvercamMedia.Router do
       patch "/cameras/:id/shares", CameraShareController, :update
       delete "/cameras/:id/shares", CameraShareController, :delete
       get "/cameras/:id/shares/requests", CameraShareRequestController, :show
+      patch "/cameras/:id/shares/requests", CameraShareRequestController, :update
+      delete "/cameras/:id/shares/requests", CameraShareRequestController, :delete
 
       get "/cameras/:id/archives", ArchiveController, :index
       get "/cameras/:id/archives/:archive_id", ArchiveController, :show

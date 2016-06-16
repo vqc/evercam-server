@@ -44,6 +44,8 @@ defmodule CameraShareRequest do
     |> where(camera_id: ^camera_id)
     |> where(status: ^@status.pending)
     |> where(email: ^email)
+    |> preload(:camera)
+    |> preload(:user)
     |> Repo.one
   end
 
@@ -65,7 +67,7 @@ defmodule CameraShareRequest do
       message: message,
       key: UUID.uuid4(:hex)
     }
-    changeset = changeset(%CameraShareRequest{}, share_request_params)
+    changeset = insert_changeset(%CameraShareRequest{}, share_request_params)
     case Repo.insert(changeset) do
       {:ok, share_request} ->
         camera_share_request =
@@ -86,12 +88,21 @@ defmodule CameraShareRequest do
     end
   end
 
-  def changeset(model, params \\ :invalid) do
+  def insert_changeset(model, params \\ :invalid) do
+    model
+    |> changeset(params)
+    |> share_request_exist(:camera_id, :email)
+  end
+
+  def update_changeset(model, params \\ :invalid) do
+    changeset(model, params)
+  end
+
+  def changeset(model, params) do
     model
     |> cast(params, @required_fields, @optional_fields)
     |> validate_required(:email)
-    |> validate_format(:email, ~r/\A.+\@.+\..+\z/, [message: "You've entered an invalid email address."])
+    |> validate_format(:email, ~r/^\S+@\S+$/, [message: "You've entered an invalid email address."])
     |> validate_rights
-    |> share_request_exist(:camera_id, :email)
   end
 end
