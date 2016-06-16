@@ -28,7 +28,7 @@ defmodule EvercamMedia.AuthenticationPlug do
     end
   end
 
-  defp extract_credential(conn, %{ header: header_name, query: query_string_name }) do
+  defp extract_credential(conn, %{header: header_name, query: query_string_name}) do
     extract_credential_from_query_string(conn, query_string_name) || extract_credential_from_header(conn, header_name)
   end
 

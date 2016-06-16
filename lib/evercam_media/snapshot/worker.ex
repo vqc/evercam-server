@@ -145,7 +145,7 @@ defmodule EvercamMedia.Snapshot.Worker do
       {:ok, image} ->
         data = {state.name, timestamp, image}
         GenEvent.sync_notify(state.event_manager, {:got_snapshot, data})
-      {:error, error}->
+      {:error, error} ->
         data = {state.name, timestamp, error}
         GenEvent.sync_notify(state.event_manager, {:snapshot_error, data})
     end
@@ -201,7 +201,7 @@ defmodule EvercamMedia.Snapshot.Worker do
       case {result, camera.is_online} do
         {{:error, _error}, true} ->
           ConCache.put(:camera_lock, camera_exid, camera_exid)
-          try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, attempt+1)
+          try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, attempt + 1)
         _ ->
           ConCache.delete(:camera_lock, camera_exid)
           send worker, {:camera_reply, result, timestamp, reply_to}

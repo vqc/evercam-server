@@ -64,7 +64,7 @@ defmodule EvercamMedia.HTTPClient do
   end
 
   defp parse_cookie_header(response) do
-    case response.headers |> Enum.find(fn({k,_v}) -> k == "Set-Cookie" end ) do
+    case response.headers |> Enum.find(fn({k,_v}) -> k == "Set-Cookie" end) do
       {"Set-Cookie", cookie_string} ->
         case Regex.run(~r/(AIROS_SESSIONID=[a-z0-9]+)/, cookie_string) do
           [h|_] -> h
@@ -92,7 +92,7 @@ end
 
 defmodule EvercamMedia.HTTPClient.DigestAuth do
   def get_digest_token(response, url, username, password) do
-    case response.headers |> Enum.find(fn({k,_v}) -> k == "WWW-Authenticate" end ) do
+    case response.headers |> Enum.find(fn({k,_v}) -> k == "WWW-Authenticate" end) do
       {"WWW-Authenticate", auth_string} ->
         digest_head = parse_digest_header(auth_string)
         %{"realm" => realm, "nonce" => nonce} = digest_head

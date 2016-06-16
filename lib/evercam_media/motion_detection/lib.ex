@@ -17,7 +17,7 @@ defmodule EvercamMedia.MotionDetection.Lib do
       {:ok, {width1, height1, bytes1}} = loaded_image1
       {:ok, {_width2, _height2, bytes2}} = loaded_image2
 
-      position = width1*height1*3 # end position for a process
+      position = width1 * height1 * 3 # end position for a process
       min_position = 0 # start position for a process in a binary list of pixesl {R,G,B}
       step = 2 # check each 2nd pixel
       minimum = 30 # change between previous and current image should be at least
