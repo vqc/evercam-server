@@ -298,5 +298,6 @@ defmodule Camera do
   def changeset(camera, params \\ :invalid) do
     camera
     |> cast(params, @required_fields, @optional_fields)
+    |> unique_constraint(:exid, [name: "cameras_exid_index"])
   end
 end
