@@ -20,6 +20,9 @@ config :evercam_media, EvercamMedia.Endpoint,
            adapter: Phoenix.PubSub.PG2]
 
 config :evercam_media,
+  ecto_repos: [EvercamMedia.Repo]
+
+config :evercam_media,
   mailgun_domain: System.get_env("MAILGUN_DOMAIN"),
   mailgun_key: System.get_env("MAILGUN_KEY")
 
