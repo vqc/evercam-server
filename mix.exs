@@ -68,7 +68,7 @@ defmodule EvercamMedia.Mixfile do
       {:cowboy, "~> 1.0"},
       {:credo, github: "rrrene/credo", only: :dev},
       {:dotenv, "~> 2.1.0", only: :dev},
-      {:ecto, "~> 2.0.0-beta.1", override: true},
+      {:ecto, "~> 2.0.0-rc.6", override: true},
       {:ex_aws, github: "CargoSense/ex_aws"},
       {:exq, "~> 0.7.1"},
       {:exrm, github: "bitwalker/exrm"},
@@ -83,7 +83,7 @@ defmodule EvercamMedia.Mixfile do
       {:phoenix_html, "~> 2.5"},
       {:poison, "~> 1.5"},
       {:porcelain, "~> 2.0.1"},
-      {:postgrex, ">= 0.11.0"},
+      {:postgrex, ">= 0.11.2"},
       {:quantum, github: "c-rack/quantum-elixir"},
       {:uuid, "~> 1.1"},
       {:relx, github: "erlware/relx", override: true}, # <-- depends on erlware_commons-0.18.0
