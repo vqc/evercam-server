@@ -36,7 +36,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     url = "#{@seaweedfs}#{path}"
     case HTTPoison.head(url, [], hackney: hackney) do
       {:ok, %HTTPoison.Response{status_code: 200}} ->
-        Logger.warn "File path '#{file_path}' already exists"
+        HTTPoison.put!(url, {:multipart, [{path, image, []}]}, [], hackney: hackney)
       {:ok, %HTTPoison.Response{status_code: 404}} ->
         HTTPoison.post!(url, {:multipart, [{path, image, []}]}, [], hackney: hackney)
       error ->
