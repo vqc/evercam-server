@@ -103,13 +103,13 @@ defmodule EvercamMedia.SnapshotController do
       Storage.seaweedfs_load_range(camera_exid, from)
     end
     |> case do
-         {:ok, snapshots} when snapshots != [] ->
-           conn
-           |> json(%{snapshots: snapshots})
-         _ ->
-           conn
-           |> proxy_api_data
-       end
+      {:ok, snapshots} when snapshots != [] ->
+        conn
+        |> json(%{snapshots: snapshots})
+      _ ->
+        conn
+        |> proxy_api_data
+    end
   end
   def index(conn, _params), do: proxy_api_data(conn)
 
