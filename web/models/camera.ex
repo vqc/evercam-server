@@ -255,7 +255,10 @@ defmodule Camera do
   end
 
   def get_mac_address(camera) do
-    camera.mac_address |> to_string
+    case camera.mac_address do
+      nil -> ""
+      mac_address -> mac_address
+    end
   end
 
   def get_location(camera) do
@@ -278,7 +281,7 @@ defmodule Camera do
   def get_rights(camera, user) do
     cond do
       is_owner?(user, camera) ->
-        "snapshot,view,edit,delete,list,grant~snapshot,grant~view,grant~edit,grant~delete,grant~list"
+        "snapshot,list,edit,delete,view,grant~snapshot,grant~view,grant~edit,grant~delete,grant~list"
       camera.access_rights == [] ->
         "snapshot,list"
       true ->
