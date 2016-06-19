@@ -93,13 +93,12 @@ defmodule EvercamMedia.SnapshotController do
 
   def index(conn, %{"id" => camera_exid, "from" => from, "to" => _to, "limit" => "3600", "page" => _page}) do
     camera = Camera.get_full(camera_exid)
-    camera_datetime = camera |> Camera.get_timezone |> DateTime.now!
-    offset = camera_datetime.utc_off
+    offset = Camera.get_offset(camera)
     from = convert_to_camera_timestamp(from, offset)
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
          true <- Storage.seaweedfs_storage_start_timestmap < from,
-         true <- rem(offset, 3600) == 0 do
+         true <- String.match?(offset, ~r/.+00/) do
       Storage.seaweedfs_load_range(camera_exid, from)
     end
     |> case do
@@ -143,13 +142,14 @@ defmodule EvercamMedia.SnapshotController do
   def day(conn, %{"id" => camera_exid, "year" => year, "month" => month, "day" => day}) do
     current_user = conn.assigns[:current_user]
     camera = Camera.get_full(camera_exid)
+    offset = Camera.get_offset(camera)
 
     with :ok <- ensure_params(:day, conn, year, month, day),
          :ok <- ensure_camera_exists(conn, camera_exid, camera),
          :ok <- ensure_authorized(conn, current_user, camera)
     do
-      from = construct_timestamp(camera, year, month, day, "00:00:00")
-      to = construct_timestamp(camera, year, month, day, "23:59:59")
+      from = construct_timestamp(year, month, day, "00:00:00", offset)
+      to = construct_timestamp(year, month, day, "23:59:59", offset)
       exists? = Snapshot.exists_between?(camera.id, from, to)
 
       conn
@@ -268,18 +268,6 @@ defmodule EvercamMedia.SnapshotController do
     }
   end
 
-  defp construct_timestamp(camera, year, month, day, time) do
-    month = String.rjust(month, 2, ?0)
-    day = String.rjust(day, 2, ?0)
-
-    offset = Camera.get_offset(camera)
-
-    "#{year}-#{month}-#{day}T#{time}#{offset}"
-    |> DateTime.Parse.rfc3339_utc
-    |> elem(1)
-    |> Strftime.strftime!("%Y%m%d%H%M%S%f")
-  end
-
   #######################
   ## Handler functions ##
   #######################
@@ -343,11 +331,23 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
+  defp construct_timestamp(year, month, day, time, offset) do
+    month = String.rjust(month, 2, ?0)
+    day = String.rjust(day, 2, ?0)
+
+    "#{year}-#{month}-#{day}T#{time}#{offset}"
+    |> DateTime.Parse.rfc3339_utc
+    |> elem(1)
+    |> Strftime.strftime!("%Y%m%d%H%M%S%f")
+  end
+
   defp convert_to_camera_timestamp(timestamp, offset) do
     timestamp
     |> String.to_integer
     |> DateTime.Parse.unix!
-    |> DateTime.advance!(-offset)
+    |> Strftime.strftime!("%Y-%m-%dT%H:%M:%S#{offset}")
+    |> DateTime.Parse.rfc3339_utc
+    |> elem(1)
     |> DateTime.Format.unix
   end
 end
