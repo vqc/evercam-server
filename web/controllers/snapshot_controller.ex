@@ -112,7 +112,7 @@ defmodule EvercamMedia.SnapshotController do
   end
   def index(conn, _params), do: proxy_api_data(conn)
 
-  def show(conn, %{"id" => camera_exid, "timestamp" => timestamp, "with_data" => "true", "range" => "1"}) do
+  def show(conn, %{"id" => camera_exid, "timestamp" => timestamp, "with_data" => "true", "range" => _}) do
     timestamp = String.to_integer(timestamp)
     camera = Camera.get_full(camera_exid)
     snapshot_timestamp =
