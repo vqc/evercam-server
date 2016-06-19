@@ -113,7 +113,10 @@ defmodule EvercamMedia.Snapshot.Storage do
       |> String.split("_")
       |> List.last
       |> Util.snapshot_timestamp_to_unix
-    disk_load(camera_exid, timestamp, app_name)
+    case seaweedfs_load(camera_exid, timestamp, app_name) do
+      {:ok, snapshot} -> {:ok, snapshot}
+      {:error, :not_found} -> disk_load(camera_exid, timestamp, app_name)
+    end
   end
 
   defp disk_load(camera_exid, timestamp, app_name) do
@@ -128,7 +131,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
     file_name = construct_file_name(timestamp)
     file_path = directory_path <> file_name
-    case HTTPoison.get("#{@seaweedfs}#{file_path}", [], hackney: [pool: :seaweedfs_upload_pool]) do
+    case HTTPoison.get("#{@seaweedfs}#{file_path}", [], hackney: [pool: :seaweedfs_download_pool]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: snapshot}} ->
         {:ok, snapshot}
       _error ->
