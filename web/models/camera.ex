@@ -247,6 +247,13 @@ defmodule Camera do
     end
   end
 
+  def get_offset(camera) do
+    camera
+    |> Camera.get_timezone
+    |> Calendar.DateTime.now!
+    |> Calendar.Strftime.strftime!("%z")
+  end
+
   def get_mac_address(camera) do
     camera.mac_address |> to_string
   end

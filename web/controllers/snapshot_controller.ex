@@ -272,11 +272,7 @@ defmodule EvercamMedia.SnapshotController do
     month = String.rjust(month, 2, ?0)
     day = String.rjust(day, 2, ?0)
 
-    offset =
-      camera
-      |> Camera.get_timezone
-      |> Calendar.DateTime.now!
-      |> Calendar.Strftime.strftime!("%z")
+    offset = Camera.get_offset(camera)
 
     "#{year}-#{month}-#{day}T#{time}#{offset}"
     |> DateTime.Parse.rfc3339_utc
