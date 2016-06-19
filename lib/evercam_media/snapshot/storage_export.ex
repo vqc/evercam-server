@@ -8,7 +8,7 @@ defmodule EvercamMedia.Snapshot.Storage.Export do
     |> Enum.each(fn(path) ->
       case File.read(path) do
         {:ok, image} ->
-          Storage.seaweedfs_thumbnail_save(path, image)
+          Storage.seaweedfs_thumbnail_export(path, image)
           File.rm!(path)
           File.write!(path, image)
         {:error, :enoent} ->
@@ -18,7 +18,7 @@ defmodule EvercamMedia.Snapshot.Storage.Export do
             |> String.replace_trailing("/snapshots/thumbnail.jpg", "")
             |> Storage.latest
             |> File.read!
-          Storage.seaweedfs_thumbnail_save(path, image)
+          Storage.seaweedfs_thumbnail_export(path, image)
           File.rm!(path)
           File.write!(path, image)
       end

@@ -30,7 +30,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], hackney: hackney)
   end
 
-  def seaweedfs_thumbnail_save(file_path, image) do
+  def seaweedfs_thumbnail_export(file_path, image) do
     path = String.replace_leading(file_path, "/storage", "")
     hackney = [pool: :seaweedfs_upload_pool]
     url = "#{@seaweedfs}#{path}"
