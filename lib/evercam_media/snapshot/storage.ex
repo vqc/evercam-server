@@ -86,20 +86,8 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def save(camera_exid, timestamp, image, notes) do
-    app_name = notes_to_app_name(notes)
-    directory_path = construct_directory_path(camera_exid, timestamp, app_name)
-    file_name = construct_file_name(timestamp)
-    file_path = directory_path <> file_name
-
-    with {:error, :enoent} <- do_save(file_path, image) do
-      File.mkdir_p!(directory_path)
-      do_save(file_path, image)
-    end
+    seaweedfs_save(camera_exid, timestamp, image, notes)
     thumbnail_save(camera_exid, image)
-  end
-
-  defp do_save(file_path, image) do
-    File.open(file_path, [:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
   end
 
   defp thumbnail_save(camera_exid, image) do
