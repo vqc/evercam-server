@@ -3,8 +3,8 @@ defmodule User do
   import Ecto.Query
   alias EvercamMedia.Repo
 
-  @required_fields ~w(username password firstname lastname email country_id)
-  @optional_fields ~w(api_id api_key confirmed_at)
+  @required_fields ~w(username password firstname lastname email)
+  @optional_fields ~w(api_id api_key country_id confirmed_at updated_at created_at)
 
   schema "users" do
     belongs_to :country, Country, foreign_key: :country_id
