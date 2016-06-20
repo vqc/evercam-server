@@ -3,6 +3,8 @@ defmodule User do
   import Ecto.Query
   alias EvercamMedia.Repo
 
+  @email_regex ~r/^\S+@\S+$/
+
   @required_fields ~w(username password firstname lastname email)
   @optional_fields ~w(api_id api_key country_id confirmed_at updated_at created_at)
 
@@ -82,6 +84,6 @@ defmodule User do
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:username, [name: :user_username_unique_index])
     |> unique_constraint(:email, [name: :user_email_unique_index])
-    |> validate_format(:email, ~r/^.+@.+\..+$/)
+    |> validate_format(:email, @email_regex)
   end
 end
