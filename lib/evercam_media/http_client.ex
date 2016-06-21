@@ -41,9 +41,7 @@ defmodule EvercamMedia.HTTPClient do
     login_url = u.scheme <> "://" <> u.authority <> "/login.cgi"
     cookie = get_cookie(login_url, username, password)
     hackney = [pool: :snapshot_pool]
-    headers = [
-      "Cookie": cookie
-    ]
+    headers = ["Cookie": cookie]
     HTTPoison.get snapshot_url, headers, hackney: hackney
   end
 
@@ -56,7 +54,8 @@ defmodule EvercamMedia.HTTPClient do
           raise "Cookie is not set for url: #{url}"
         end
         hackney = [pool: :snapshot_pool]
-        HTTPoison.post url, multipart_text(username, password), ["Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryEq1VsbBovj79sSoL", "Cookie": cookie], hackney: hackney
+        headers = ["Content-Type": "multipart/form-data; boundary=----WebKitFormBoundaryEq1VsbBovj79sSoL", "Cookie": cookie]
+        HTTPoison.post(url, multipart_text(username, password), headers, hackney: hackney)
         cookie
       response ->
         response
@@ -127,13 +126,13 @@ defmodule EvercamMedia.HTTPClient.DigestAuth do
   defp create_digest_response(username, password, realm, qop, uri, nonce, cnonce) do
     ha1 = [username, realm, password] |> Enum.join(":") |> md5
     ha2 = ["GET", uri] |> Enum.join(":") |> md5
-    create_digest_response(ha1, ha2, qop, nonce, cnonce)
+    do_create_digest_response(ha1, ha2, qop, nonce, cnonce)
   end
 
-  defp create_digest_response(ha1, ha2, nil, nonce, _cnonce),
-  do: [ha1, nonce, ha2] |> Enum.join(":") |> md5
-
-  defp create_digest_response(ha1, ha2, _qop, nonce, cnonce) do
+  defp do_create_digest_response(ha1, ha2, nil, nonce, _cnonce) do
+    [ha1, nonce, ha2] |> Enum.join(":") |> md5
+  end
+  defp do_create_digest_response(ha1, ha2, _qop, nonce, cnonce) do
     [ha1, nonce, "00000001", cnonce, "auth", ha2] |> Enum.join(":") |> md5
   end
 
@@ -142,10 +141,7 @@ defmodule EvercamMedia.HTTPClient.DigestAuth do
 
   defp add_nonce_counter(digest), do: [{"nc", "00000001"} | digest]
 
-  defp add_auth(digest, nil) do
-    digest
-  end
-
+  defp add_auth(digest, nil), do: digest
   defp add_auth(digest, cop) do
     case String.contains?(cop, "auth") do
       true -> [{"qop", "\"auth\""} | digest]
