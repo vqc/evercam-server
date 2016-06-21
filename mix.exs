@@ -25,7 +25,6 @@ defmodule EvercamMedia.Mixfile do
   defp app_list(:dev), do: [:dotenv, :credo | app_list]
   defp app_list(_), do: app_list
   defp app_list, do: [
-    :calecto,
     :calendar,
     :con_cache,
     :connection,
@@ -61,7 +60,6 @@ defmodule EvercamMedia.Mixfile do
 
   defp deps do
     [
-      {:calecto, "~> 0.5.0"},
       {:calendar, "~> 0.12.4"},
       {:con_cache, "~> 0.11.0"},
       {:cors_plug, "~> 1.1"},
