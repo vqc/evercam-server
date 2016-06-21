@@ -21,12 +21,6 @@ defmodule CloudRecording do
     |> Repo.all
   end
 
-  def cloud_recording(camera_id) do
-    CloudRecording
-    |> where(camera_id: ^camera_id)
-    |> Repo.first
-  end
-
   def schedule(cloud_recording) do
     if cloud_recording == nil || cloud_recording.status == "off" do
       %{}
