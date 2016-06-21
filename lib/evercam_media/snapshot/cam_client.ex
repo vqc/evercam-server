@@ -49,6 +49,8 @@ defmodule EvercamMedia.Snapshot.CamClient do
         :forbidden
       String.contains?(response_text, "Unauthorized") ->
         :unauthorized
+      String.contains?(response_text, "Unsupported Authorization Type") ->
+        :unauthorized
       String.contains?(response_text, "Device Busy") ->
         :device_busy
       String.contains?(response_text, "Device Error") ->
