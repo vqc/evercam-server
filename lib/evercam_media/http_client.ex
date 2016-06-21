@@ -72,17 +72,6 @@ defmodule EvercamMedia.HTTPClient do
         end
       _ -> nil
     end
-    # session_header = Dict.get(response.headers, :"Set-Cookie")
-    # session_string =
-    #   case session_header do
-    #     [hd|tl] -> session_header |> Enum.join(",")
-    #     _ ->  ""
-    #   end
-    #
-    # case Regex.run(~r/(AIROS_SESSIONID=[a-z0-9]+)/, session_string) do
-    #   [h|_] -> h
-    #   _ -> nil
-    # end
   end
 
   defp multipart_text(username, password) do
