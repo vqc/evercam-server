@@ -26,6 +26,7 @@ defmodule EvercamMedia.Mixfile do
   defp app_list(_), do: app_list
   defp app_list, do: [
     :calendar,
+    :cf,
     :con_cache,
     :connection,
     :cors_plug,
