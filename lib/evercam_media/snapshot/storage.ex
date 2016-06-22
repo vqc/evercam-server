@@ -52,6 +52,7 @@ defmodule EvercamMedia.Snapshot.Storage do
       snapshots =
         data["Subdirectories"]
         |> Enum.flat_map(fn(dir) -> do_seaweedfs_load_range(camera_exid, from, dir["Name"]) end)
+        |> Enum.sort_by(fn(snapshot) -> snapshot.created_at end)
       {:ok, snapshots}
     end
   end
