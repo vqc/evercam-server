@@ -305,6 +305,12 @@ defmodule Camera do
     && Schedule.scheduled_now?(camera_full) == {:ok, true}
   end
 
+  def delete_by_owner(owner_id) do
+    Camera
+    |> where([cam], cam.owner_id == ^owner_id)
+    |> Repo.delete_all
+  end
+
   def changeset(camera, params \\ :invalid) do
     camera
     |> cast(params, @required_fields, @optional_fields)

@@ -85,6 +85,12 @@ defmodule CameraShare do
     |> Enum.join(",")
   end
 
+  def delete_by_user(user_id) do
+    CameraShare
+    |> where(user_id: ^user_id)
+    |> Repo.delete_all
+  end
+
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)

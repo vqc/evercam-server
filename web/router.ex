@@ -49,6 +49,7 @@ defmodule EvercamMedia.Router do
       pipe_through :auth
 
       get "/users/:id", UserController, :get
+      delete "/users/:id", UserController, :delete
 
       get "/cameras", CameraController, :index
       get "/cameras.json", CameraController, :index
