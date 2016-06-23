@@ -48,7 +48,7 @@ config :exq,
   host: '127.0.0.1',
   port: 6379,
   namespace: "sidekiq",
-  queues: ["to_elixir"]
+  queues: ["export_dir"]
 
 config :ex_aws,
   access_key_id: [{:system, "AWS_ACCESS_KEY"}, :instance_role],
