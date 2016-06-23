@@ -6,8 +6,6 @@ defmodule EvercamMedia.Snapshot.Storage do
   @root_dir Application.get_env(:evercam_media, :storage_dir)
   @seaweedfs Application.get_env(:evercam_media, :seaweedfs_url)
 
-  def seaweedfs_storage_start_timestmap, do: 1_466_305_200
-
   def latest(camera_exid) do
     Path.wildcard("#{@root_dir}/#{camera_exid}/snapshots/*")
     |> Enum.reject(fn(x) -> String.match?(x, ~r/thumbnail.jpg/) end)

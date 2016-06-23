@@ -97,7 +97,6 @@ defmodule EvercamMedia.SnapshotController do
     from = convert_to_camera_timestamp(from, offset)
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
-         true <- Storage.seaweedfs_storage_start_timestmap < from,
          true <- String.match?(offset, ~r/.+00/) do
       Storage.seaweedfs_load_range(camera_exid, from)
     end
@@ -123,7 +122,6 @@ defmodule EvercamMedia.SnapshotController do
     snapshot = Snapshot.by_id(snapshot_id)
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
-         true <- Storage.seaweedfs_storage_start_timestmap < timestamp,
          %Snapshot{notes: notes} <- snapshot do
       Storage.load(camera_exid, snapshot_id, notes)
     end
