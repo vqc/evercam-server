@@ -1,4 +1,4 @@
- defmodule EvercamMedia.UserController do
+defmodule EvercamMedia.UserController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.UserView
   alias EvercamMedia.ErrorView
