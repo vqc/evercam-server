@@ -25,7 +25,7 @@ defmodule Vendor do
     end
   end
 
-  def get_all(query) do
+  def get_all(query \\ Vendor) do
     query
     |> preload(:vendor_models)
     |> Repo.all
