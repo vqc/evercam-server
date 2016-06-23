@@ -14,4 +14,16 @@ defmodule EvercamMedia.VendorController do
         |> render(VendorView, "show.json", %{vendor: vendor})
     end
   end
+
+  def index(conn, params) do
+    vendors =
+      Vendor
+      |> Vendor.with_exid_if_given(params["id"])
+      |> Vendor.with_name_if_given(params["name"])
+      |> Vendor.with_known_macs_if_given(params["mac"])
+      |> Vendor.get_all
+
+    conn
+    |> render(VendorView, "index.json", %{vendors: vendors})
+  end
 end

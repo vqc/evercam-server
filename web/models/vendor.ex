@@ -24,4 +24,29 @@ defmodule Vendor do
       vendor_models -> Enum.count(vendor_models)
     end
   end
+
+  def get_all(query) do
+    query
+    |> preload(:vendor_models)
+    |> Repo.all
+  end
+
+  def with_exid_if_given(query, nil), do: query
+  def with_exid_if_given(query, exid) do
+    query
+    |> where([v], v.exid == ^exid)
+  end
+
+  def with_name_if_given(query, nil), do: query
+  def with_name_if_given(query, name) do
+    query
+    |> where([v], like(v.name, ^name))
+  end
+
+  def with_known_macs_if_given(query, nil), do: query
+  def with_known_macs_if_given(query, mac_address) do
+    mac_address = String.upcase(mac_address)
+    query
+    |> where([v], fragment("? @> ARRAY[?]", v.known_macs, ^mac_address))
+  end
 end

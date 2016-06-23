@@ -1,6 +1,10 @@
 defmodule EvercamMedia.VendorView do
   use EvercamMedia.Web, :view
 
+  def render("index.json", %{vendors: vendors}) do
+    %{vendors: render_many(vendors, __MODULE__, "vendor.json")}
+  end
+
   def render("show.json", %{vendor: vendor}) do
     %{vendors: render_many([vendor], __MODULE__, "vendor.json")}
   end

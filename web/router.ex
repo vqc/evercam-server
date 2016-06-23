@@ -44,6 +44,7 @@ defmodule EvercamMedia.Router do
     get "/models/:id", ModelController, :show
 
     get "/vendors/:id", VendorController, :show
+    get "/vendors", VendorController, :index
 
     scope "/" do
       pipe_through :auth
