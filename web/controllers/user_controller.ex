@@ -1,7 +1,6 @@
 defmodule EvercamMedia.UserController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.UserView
-  alias EvercamMedia.ErrorView
 
   def get(conn, params) do
     caller = conn.assigns[:current_user]
