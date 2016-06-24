@@ -62,7 +62,7 @@ defmodule EvercamMedia.Mixfile do
   defp deps do
     [
       {:calendar, "~> 0.16.0"},
-      {:con_cache, "~> 0.11.0"},
+      {:con_cache, "~> 0.11.1"},
       {:cors_plug, "~> 1.1"},
       {:cowboy, "~> 1.0"},
       {:credo, github: "rrrene/credo", only: :dev},
