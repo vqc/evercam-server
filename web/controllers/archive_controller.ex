@@ -15,8 +15,8 @@ defmodule EvercamMedia.ArchiveController do
         |> Archive.by_camera_id(camera.id)
         |> Archive.with_status_if_given(status)
         |> Archive.get_all_with_associations
+
       conn
-      |> put_status(200)
       |> render(ArchiveView, "index.json", %{archives: archives})
     end
   end
@@ -30,11 +30,13 @@ defmodule EvercamMedia.ArchiveController do
          :ok <- ensure_can_view(current_user, camera, conn)
     do
       archive = Archive.by_exid(archive_id)
+
       case archive do
-        nil -> render_error(conn, 404, "Archive '#{archive_id}' not found!")
+        nil ->
+          conn
+          |> render_error(404, "Archive '#{archive_id}' not found!")
         _ ->
           conn
-          |> put_status(200)
           |> render(ArchiveView, "show.json", %{archive: archive})
       end
     end
@@ -52,7 +54,6 @@ defmodule EvercamMedia.ArchiveController do
       Archive.delete_by_exid(archive_id)
 
       conn
-      |> put_status(200)
       |> json(%{message: "Archive has been deleted!"})
     end
   end
@@ -91,8 +92,7 @@ defmodule EvercamMedia.ArchiveController do
 
   defp ensure_archive(conn, archive_id) do
     case Archive.by_exid(archive_id) do
-      nil ->
-        render_error(conn, 404, "Archive '#{archive_id}' not found!")
+      nil -> render_error(conn, 404, "Archive '#{archive_id}' not found!")
       _ -> :ok
     end
   end
