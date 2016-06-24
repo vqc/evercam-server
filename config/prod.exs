@@ -63,7 +63,7 @@ config :exq,
   host: System.get_env("REDIS_HOST"),
   password: System.get_env("REDIS_PASS"),
   namespace: "sidekiq",
-  queues: ["export_dir"]
+  queues: ["export_dir_day", "export_dir_hour"]
 
 config :evercam_media, :mailgun,
   domain: System.get_env("MAILGUN_DOMAIN"),
