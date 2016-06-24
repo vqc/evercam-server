@@ -4,7 +4,7 @@ defmodule EvercamMedia.Mixfile do
   def project do
     [app: :evercam_media,
      version: "1.0.1",
-     elixir: "> 1.2.0",
+     elixir: "~> 1.3.0",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -61,7 +61,7 @@ defmodule EvercamMedia.Mixfile do
 
   defp deps do
     [
-      {:calendar, "~> 0.12.4"},
+      {:calendar, "~> 0.16.0"},
       {:con_cache, "~> 0.11.0"},
       {:cors_plug, "~> 1.1"},
       {:cowboy, "~> 1.0"},
