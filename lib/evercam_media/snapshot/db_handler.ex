@@ -43,17 +43,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     {:ok, state}
   end
 
-  def calculate_motion_level(_camera_exid, _image_1, nil), do: nil
-  def calculate_motion_level(camera_exid, image_1, %{image: image_2}) do
-    try do
-      EvercamMedia.MotionDetection.Lib.compare(camera_exid, image_1, image_2)
-    rescue
-      error ->
-        Util.error_handler(error)
-        nil
-    end
-  end
-
   def update_camera_status(camera_exid, timestamp, status, error_code \\ "generic", error_weight \\ 0)
 
   def update_camera_status("", _timestamp, _status, _error_code, _error_weight), do: :noop
