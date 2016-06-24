@@ -108,6 +108,10 @@ defmodule EvercamMedia.Util do
     "#{snapshot_timestamp}000"
   end
 
+  def format_snapshot_timestamp(<<snapshot_timestamp::bytes-size(15)>>) do
+    "#{snapshot_timestamp}00"
+  end
+
   def format_snapshot_timestamp(<<snapshot_timestamp::bytes-size(17), _rest :: binary>>) do
     snapshot_timestamp
   end

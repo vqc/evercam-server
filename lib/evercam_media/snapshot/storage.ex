@@ -191,6 +191,10 @@ defmodule EvercamMedia.Snapshot.Storage do
     "#{file_name}000" <> ".jpg"
   end
 
+  def format_file_name(<<file_name::bytes-size(7)>>) do
+    "#{file_name}00" <> ".jpg"
+  end
+
   def format_file_name(<<file_name::bytes-size(9), _rest :: binary>>) do
     "#{file_name}" <> ".jpg"
   end
