@@ -18,6 +18,8 @@ defmodule EvercamMedia do
       supervisor(EvercamMedia.Repo, []),
       supervisor(EvercamMedia.Endpoint, []),
       supervisor(EvercamMedia.SnapshotRepo, []),
+      supervisor(EvercamMedia.Snapshot.Storage.Export.PoolSupervisor, []),
+      supervisor(EvercamMedia.Snapshot.Storage.Export.Supervisor, []),
       supervisor(EvercamMedia.Snapshot.StreamerSupervisor, []),
       supervisor(EvercamMedia.Snapshot.WorkerSupervisor, []),
       :hackney_pool.child_spec(:snapshot_pool, [timeout: 5000, max_connections: 1000]),
