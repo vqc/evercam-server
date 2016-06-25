@@ -68,6 +68,8 @@ defmodule EvercamMedia.Snapshot.Storage.Export do
   alias EvercamMedia.Snapshot.Storage
 
   @root_dir Application.get_env(:evercam_media, :storage_dir)
+  @expired_dir Application.get_env(:evercam_media, :storage_dir) <> "/_expired"
+  @invalid_dir Application.get_env(:evercam_media, :storage_dir) <> "/_invalid"
   @seaweedfs Application.get_env(:evercam_media, :seaweedfs_url)
   @hackney_opts [pool: :seaweedfs_upload_pool]
 
@@ -90,7 +92,12 @@ defmodule EvercamMedia.Snapshot.Storage.Export do
       HTTPoison.post!("#{@seaweedfs}#{url_path}", {:multipart, [{url_path, image, []}]}, [], hackney: @hackney_opts)
       File.rm!(file_path)
     else
-      _ -> raise "[#{camera_exid}] [storage_export] Reading file #{file_path} failed!"
+      false ->
+        path = String.replace_leading(file_path, "#{@root_dir}/#{camera_exid}/", "#{@invalid_dir}/#{camera_exid}/")
+        File.mkdir_p!(path)
+        File.rename(file_path, path)
+      _ ->
+        raise "[#{camera_exid}] [storage_export] Reading file #{file_path} failed!"
     end
   end
 
@@ -105,10 +112,17 @@ defmodule EvercamMedia.Snapshot.Storage.Export do
 
   defp do_export(camera_exid, [current_dir|rest]) do
     Logger.warn "[#{camera_exid}] [storage_export_start] [#{current_dir}]"
-    "#{current_dir}/??_??_???.jpg"
-    |> Path.wildcard
-    |> Enum.each(fn(path) -> Supervisor.start_child(Storage.Export.Supervisor, [{camera_exid, path}]) end)
-    wait_until_processed(current_dir)
+    case expired?(camera_exid, current_dir) do
+      true ->
+        path = String.replace_leading(current_dir, "#{@root_dir}/#{camera_exid}/", "#{@expired_dir}/#{camera_exid}/")
+        File.mkdir_p!(path)
+        File.rename(current_dir, path)
+      false ->
+        "#{current_dir}/??_??_???.jpg"
+        |> Path.wildcard
+        |> Enum.each(fn(path) -> Supervisor.start_child(Storage.Export.Supervisor, [{camera_exid, path}]) end)
+        wait_until_processed(current_dir)
+    end
     do_export(camera_exid, rest)
   end
 
@@ -118,6 +132,35 @@ defmodule EvercamMedia.Snapshot.Storage.Export do
       {:error, :eexist} -> wait_until_processed(dir)
       :ok -> :noop
     end
+  end
+
+  def expired?(camera_exid, path) do
+    camera = Camera.get_full(camera_exid)
+    cond do
+      camera == nil ->
+        true
+      !String.starts_with?(path, "#{@root_dir}/#{camera_exid}/snapshots/recordings/") ->
+        false
+      camera.cloud_recordings == nil ->
+        false
+      camera.cloud_recordings.storage_duration == -1 ->
+        false
+      true ->
+        seconds_to_day_before_expiry = (camera.cloud_recordings.storage_duration) * (24 * 60 * 60) * (-1)
+        day_before_expiry =
+          Calendar.DateTime.now_utc
+          |> Calendar.DateTime.advance!(seconds_to_day_before_expiry)
+          |> Calendar.DateTime.to_date
+        path_date = parse_path_date(camera_exid, path)
+        Calendar.Date.diff(path_date, day_before_expiry) < 0
+    end
+  end
+
+  def parse_path_date(camera_exid, path) do
+    path
+    |> String.replace_leading("#{@root_dir}/#{camera_exid}/snapshots/recordings/", "")
+    |> String.replace("/", "-")
+    |> Calendar.Date.Parse.iso8601!
   end
 
   def get_list_of_dirs_for_export(camera_exid) do
