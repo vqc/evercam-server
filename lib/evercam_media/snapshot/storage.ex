@@ -46,7 +46,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     snapshots =
       camera_exid
       |> get_camera_apps_list
-      |> Enum.flat_map(fn(dir) -> do_seaweedfs_load_range(camera_exid, from, dir["Name"]) end)
+      |> Enum.flat_map(fn(app) -> do_seaweedfs_load_range(camera_exid, from, app) end)
       |> Enum.sort_by(fn(snapshot) -> snapshot.created_at end)
     {:ok, snapshots}
   end
@@ -54,21 +54,21 @@ defmodule EvercamMedia.Snapshot.Storage do
   defp do_seaweedfs_load_range(camera_exid, from, app_name) do
     directory_path = construct_directory_path(camera_exid, from, app_name, "")
 
-    request_from_seaweedfs("#{@seaweedfs}#{directory_path}?limit=3600", "Files")
-    |> Enum.map(fn(file) -> construct_snapshot_record(directory_path, file, app_name) end)
+    request_from_seaweedfs("#{@seaweedfs}#{directory_path}?limit=3600", "Files", "name")
+    |> Enum.map(fn(file_path) -> construct_snapshot_record(directory_path, file_path, app_name) end)
   end
 
   defp get_camera_apps_list(camera_exid) do
-    request_from_seaweedfs("#{@seaweedfs}/#{camera_exid}/snapshots/", "Subdirectories")
+    request_from_seaweedfs("#{@seaweedfs}/#{camera_exid}/snapshots/", "Subdirectories", "Name")
   end
 
-  defp request_from_seaweedfs(url, type) do
+  defp request_from_seaweedfs(url, type, attribute) do
     hackney = [pool: :seaweedfs_download_pool]
     with {:ok, response} <- HTTPoison.get(url, [], hackney: hackney),
          %HTTPoison.Response{status_code: 200, body: body} <- response,
          {:ok, data} <- Poison.decode(body),
          true <- is_list(data[type]) do
-      data[type]
+      Enum.map(data[type], fn(item) -> item[attribute] end)
     else
       _ -> []
     end
@@ -178,9 +178,9 @@ defmodule EvercamMedia.Snapshot.Storage do
     |> format_file_name
   end
 
-  defp construct_snapshot_record(directory_path, file, app_name) do
+  defp construct_snapshot_record(directory_path, file_path, app_name) do
     %{
-      created_at: parse_file_timestamp(directory_path, file["name"]),
+      created_at: parse_file_timestamp(directory_path, file_path),
       notes: app_name_to_notes(app_name),
       motion_level: nil
     }
