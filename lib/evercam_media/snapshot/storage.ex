@@ -90,7 +90,14 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   defp thumbnail_save(camera_exid, image) do
-    File.open("#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg", [:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
+    "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
+    |> File.open([:write, :binary, :raw], fn(file) -> IO.binwrite(file, image) end)
+    |> case do
+      {:error, :enoent} ->
+        File.mkdir_p!("#{@root_dir}/#{camera_exid}/snapshots/")
+        thumbnail_save(camera_exid, image)
+      _ -> :noop
+    end
   end
 
   def load(camera_exid, snapshot_id, notes) do
