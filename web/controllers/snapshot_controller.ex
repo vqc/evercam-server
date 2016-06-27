@@ -141,13 +141,14 @@ defmodule EvercamMedia.SnapshotController do
     current_user = conn.assigns[:current_user]
     camera = Camera.get_full(camera_exid)
     offset = Camera.get_offset(camera)
+    format = "%Y%m%d%H%M%S%f"
 
     with :ok <- ensure_params(:day, conn, year, month, day),
          :ok <- ensure_camera_exists(conn, camera_exid, camera),
          :ok <- ensure_authorized(conn, current_user, camera)
     do
-      from = construct_timestamp(year, month, day, "00:00:00", offset)
-      to = construct_timestamp(year, month, day, "23:59:59", offset)
+      from = construct_timestamp(year, month, day, "00:00:00", offset, format)
+      to = construct_timestamp(year, month, day, "23:59:59", offset, format)
       exists? = Snapshot.exists_between?(camera.id, from, to)
 
       conn
@@ -329,14 +330,14 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  defp construct_timestamp(year, month, day, time, offset) do
+  defp construct_timestamp(year, month, day, time, offset, format) do
     month = String.rjust(month, 2, ?0)
     day = String.rjust(day, 2, ?0)
 
     "#{year}-#{month}-#{day}T#{time}#{offset}"
     |> DateTime.Parse.rfc3339_utc
     |> elem(1)
-    |> Strftime.strftime!("%Y%m%d%H%M%S%f")
+    |> Strftime.strftime!(format)
   end
 
   defp convert_to_camera_timestamp(timestamp, offset) do
