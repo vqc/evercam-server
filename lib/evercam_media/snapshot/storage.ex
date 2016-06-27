@@ -52,27 +52,23 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   defp do_seaweedfs_load_range(camera_exid, from, app_name) do
-    hackney = [pool: :seaweedfs_download_pool]
     directory_path = construct_directory_path(camera_exid, from, app_name, "")
 
-    with {:ok, response} <- HTTPoison.get("#{@seaweedfs}#{directory_path}?limit=3600", [], hackney: hackney),
-         %HTTPoison.Response{status_code: 200, body: body} <- response,
-         {:ok, data} <- Poison.decode(body),
-         true <- is_list(data["Files"]) do
-      {:ok, Enum.map(data["Files"], fn(file) -> construct_snapshot_record(directory_path, file, app_name) end)}
-    end
-    |> case do
-      {:ok, snapshots} -> snapshots
-      _ -> []
-    end
+    request_from_seaweedfs("#{@seaweedfs}#{directory_path}?limit=3600", "Files")
+    |> Enum.map(fn(file) -> construct_snapshot_record(directory_path, file, app_name) end)
   end
 
   defp get_camera_apps_list(camera_exid) do
-    with {:ok, response} <- HTTPoison.get("#{@seaweedfs}/#{camera_exid}/snapshots/"),
+    request_from_seaweedfs("#{@seaweedfs}/#{camera_exid}/snapshots/", "Subdirectories")
+  end
+
+  defp request_from_seaweedfs(url, type) do
+    hackney = [pool: :seaweedfs_download_pool]
+    with {:ok, response} <- HTTPoison.get(url, [], hackney: hackney),
          %HTTPoison.Response{status_code: 200, body: body} <- response,
          {:ok, data} <- Poison.decode(body),
-         true <- is_list(data["Subdirectories"]) do
-      data["Subdirectories"]
+         true <- is_list(data[type]) do
+      data[type]
     else
       _ -> []
     end
