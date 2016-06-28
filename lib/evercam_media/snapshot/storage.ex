@@ -42,6 +42,31 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
+  def hours(camera_exid, from, to, timezone) do
+    url_base = "#{@seaweedfs}/#{camera_exid}/snapshots"
+    apps_list = get_camera_apps_list(camera_exid)
+    from_date = Strftime.strftime!(from, "%Y/%m/%d")
+    to_date = Strftime.strftime!(to, "%Y/%m/%d")
+
+    from_hours =
+      apps_list
+      |> Enum.flat_map(fn(app) -> request_from_seaweedfs("#{url_base}/#{app}/#{from_date}/", "Subdirectories", "Name") end)
+      |> Enum.uniq
+      |> Enum.map(fn(hour) -> parse_hour(from.year, from.month, from.day, "#{hour}:00:00", timezone) end)
+      |> Enum.reject(fn(datetime) -> DateTime.before?(datetime, from) end)
+
+    to_hours =
+      apps_list
+      |> Enum.flat_map(fn(app) -> request_from_seaweedfs("#{url_base}/#{app}/#{to_date}/", "Subdirectories", "Name") end)
+      |> Enum.uniq
+      |> Enum.map(fn(hour) -> parse_hour(to.year, to.month, to.day, "#{hour}:00:00", timezone) end)
+      |> Enum.reject(fn(datetime) -> DateTime.after?(datetime, to) end)
+
+    Enum.concat(from_hours, to_hours)
+    |> Enum.map(fn(datetime) -> datetime.hour end)
+    |> Enum.sort
+  end
+
   def seaweedfs_load_range(camera_exid, from) do
     snapshots =
       camera_exid
@@ -193,6 +218,16 @@ defmodule EvercamMedia.Snapshot.Storage do
     DateTime.Parse.rfc3339_utc("#{year}-#{month}-#{day}T#{hour}:#{minute}:#{second}Z")
     |> elem(1)
     |> DateTime.Format.unix
+  end
+
+  defp parse_hour(year, month, day, time, timezone) do
+    month = String.rjust("#{month}", 2, ?0)
+    day = String.rjust("#{day}", 2, ?0)
+
+    "#{year}-#{month}-#{day}T#{time}Z"
+    |> Calendar.DateTime.Parse.rfc3339_utc
+    |> elem(1)
+    |> Calendar.DateTime.shift_zone!(timezone)
   end
 
   def format_file_name(<<file_name::bytes-size(6)>>) do

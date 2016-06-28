@@ -156,6 +156,25 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
+  def hours(conn, %{"id" => camera_exid, "year" => year, "month" => month, "day" => day}) do
+    current_user = conn.assigns[:current_user]
+    camera = Camera.get_full(camera_exid)
+
+    with :ok <- ensure_params(:day, conn, year, month, day),
+         :ok <- ensure_camera_exists(conn, camera_exid, camera),
+         :ok <- ensure_authorized(conn, current_user, camera)
+    do
+      timezone = Camera.get_timezone(camera)
+      offset = Camera.get_offset(camera)
+      from = construct_timestamp(year, month, day, "00:00:00", offset)
+      to = construct_timestamp(year, month, day, "23:59:59", offset)
+      hours = Storage.hours(camera_exid, from, to, timezone)
+
+      conn
+      |> json(%{hours: hours})
+    end
+  end
+
   #######################
   ## Ensure functions  ##
   #######################
@@ -331,13 +350,17 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   defp construct_timestamp(year, month, day, time, offset, format) do
+    construct_timestamp(year, month, day, time, offset)
+    |> Strftime.strftime!(format)
+  end
+
+  defp construct_timestamp(year, month, day, time, offset) do
     month = String.rjust(month, 2, ?0)
     day = String.rjust(day, 2, ?0)
 
     "#{year}-#{month}-#{day}T#{time}#{offset}"
     |> DateTime.Parse.rfc3339_utc
     |> elem(1)
-    |> Strftime.strftime!(format)
   end
 
   defp convert_to_camera_timestamp(timestamp, offset) do
