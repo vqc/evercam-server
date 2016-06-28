@@ -168,10 +168,15 @@ defmodule EvercamMedia.SnapshotController do
       offset = Camera.get_offset(camera)
       from = construct_timestamp(year, month, day, "00:00:00", offset)
       to = construct_timestamp(year, month, day, "23:59:59", offset)
-      hours = Storage.hours(camera_exid, from, to, timezone)
-
-      conn
-      |> json(%{hours: hours})
+      Storage.hours(camera_exid, from, to, timezone)
+    end
+    |> case do
+      [] ->
+        conn
+        |> proxy_api_data
+      hours ->
+        conn
+        |> json(%{hours: hours})
     end
   end
 
