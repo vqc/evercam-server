@@ -264,14 +264,13 @@ defmodule EvercamMedia.SnapshotController do
     camera = Camera.get_full(camera_exid)
     spawn fn -> update_thumbnail(camera) end
     with true <- Permission.Camera.can_snapshot?(user, camera),
-         {:ok, image} <- Storage.thumbnail_load(camera_exid) do
-      {:ok, image}
+         {:ok, image} <- Storage.thumbnail_load(camera_exid)
+    do
+      {200, %{image: image}}
+    else
+      {:error, error_image} -> {404, %{image: error_image}}
+      false -> {403, %{message: "Forbidden"}}
     end
-    |> case do
-         {:ok, image} -> {200, %{image: image}}
-         {:error, error_image} -> {404, %{image: error_image}}
-         false -> {403, %{message: "Forbidden"}}
-       end
   end
 
   defp update_thumbnail(camera) do
