@@ -71,14 +71,14 @@ defmodule EvercamMedia.Snapshot.Storage do
     url_base = "#{@seaweedfs}/#{camera_exid}/snapshots"
     apps_list = get_camera_apps_list(camera_exid)
     hour_datetime = Strftime.strftime!(hour, "%Y/%m/%d/%H")
-    timestamp = DateTime.Format.unix(hour)
+    dir_paths = lookup_dir_paths(camera_exid, apps_list, hour)
 
     apps_list
     |> Enum.map(fn(app_name) -> {app_name, request_from_seaweedfs("#{url_base}/#{app_name}/#{hour_datetime}/?limit=3600", "Files", "name")} end)
     |> Enum.reject(fn({app_name, files}) -> files == [] end)
     |> Enum.flat_map(fn({app_name, files}) ->
       Enum.map(files, fn(file_path) ->
-        construct_directory_path(camera_exid, timestamp, app_name, "")
+        Map.get(dir_paths, app_name)
         |> construct_snapshot_record(file_path, app_name)
       end)
     end)
@@ -257,6 +257,15 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   def format_file_name(<<file_name::bytes-size(9), _rest :: binary>>) do
     "#{file_name}" <> ".jpg"
+  end
+
+  def lookup_dir_paths(camera_exid, apps_list, datetime) do
+    timestamp = DateTime.Format.unix(datetime)
+
+    Enum.reduce(apps_list, %{}, fn(app_name, map) ->
+      dir_path = construct_directory_path(camera_exid, timestamp, app_name, "")
+      Map.put(map, app_name, dir_path)
+    end)
   end
 
   def app_name_to_notes(name) do
