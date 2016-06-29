@@ -3,6 +3,7 @@ defmodule CameraActivity do
   import Ecto.Changeset
   import Ecto.Query
   alias EvercamMedia.SnapshotRepo
+  alias EvercamMedia.Util
 
   @required_fields ~w(camera_id action)
   @optional_fields ~w(access_token_id camera_exid name action extra done_at)
@@ -23,7 +24,7 @@ defmodule CameraActivity do
     params = %{
       camera_id: camera.id,
       camera_exid: camera.exid,
-      access_token_id: get_access_token_id(access_token),
+      access_token_id: Util.deep_get(access_token, [:id], nil),
       name: User.get_fullname(user),
       action: action,
       done_at: Ecto.DateTime.utc
@@ -32,9 +33,6 @@ defmodule CameraActivity do
     |> changeset(params)
     |> SnapshotRepo.insert
   end
-
-  defp get_access_token_id(nil), do: nil
-  defp get_access_token_id(access_token), do: access_token.id
 
   def changeset(camera_activity, params \\ :invalid) do
     camera_activity
