@@ -143,7 +143,7 @@ defmodule EvercamMedia.SnapshotController do
     offset = Camera.get_offset(camera)
     format = "%Y%m%d%H%M%S%f"
 
-    with :ok <- ensure_params(:day, conn, year, month, day),
+    with :ok <- ensure_params(:day, conn, {year, month, day}),
          :ok <- ensure_camera_exists(conn, camera_exid, camera),
          :ok <- ensure_authorized(conn, current_user, camera)
     do
@@ -160,7 +160,7 @@ defmodule EvercamMedia.SnapshotController do
     current_user = conn.assigns[:current_user]
     camera = Camera.get_full(camera_exid)
 
-    with :ok <- ensure_params(:day, conn, year, month, day),
+    with :ok <- ensure_params(:day, conn, {year, month, day}),
          :ok <- ensure_camera_exists(conn, camera_exid, camera),
          :ok <- ensure_authorized(conn, current_user, camera)
     do
@@ -171,12 +171,30 @@ defmodule EvercamMedia.SnapshotController do
       Storage.hours(camera_exid, from, to, timezone)
     end
     |> case do
-      [] ->
-        conn
-        |> proxy_api_data
-      hours ->
+      hours when hours != [] ->
         conn
         |> json(%{hours: hours})
+      _ ->
+        conn
+        |> proxy_api_data
+    end
+  end
+
+  def hour(conn, %{"id" => camera_exid, "year" => year, "month" => month, "day" => day, "hour" => hour}) do
+    current_user = conn.assigns[:current_user]
+    camera = Camera.get_full(camera_exid)
+
+    with :ok <- ensure_params(:hour, conn, {year, month, day, hour}),
+         :ok <- ensure_camera_exists(conn, camera_exid, camera),
+         :ok <- ensure_authorized(conn, current_user, camera)
+    do
+      timezone = Camera.get_timezone(camera)
+      offset = Camera.get_offset(camera)
+      hour = construct_timestamp(year, month, day, "#{hour}:00:00", offset)
+      snapshots = Storage.hour(camera_exid, hour, timezone)
+
+      conn
+      |> json(%{snapshots: snapshots})
     end
   end
 
@@ -184,8 +202,8 @@ defmodule EvercamMedia.SnapshotController do
   ## Ensure functions  ##
   #######################
 
-  defp ensure_params(:day, conn, year, month, day) do
-    case Validation.Snapshot.validate_params(:day, year, month, day) do
+  defp ensure_params(type, conn, params) do
+    case Validation.Snapshot.validate_params(type, params) do
       :ok -> :ok
       {:invalid, message} -> render_error(conn, 400, message)
     end

@@ -1,8 +1,17 @@
 defmodule EvercamMedia.Validation.Snapshot do
-  def validate_params(:day, year, month, day) do
+  def validate_params(:day, {year, month, day}) do
     with :ok <- validate(:year, year),
          :ok <- validate(:month, month),
          :ok <- validate(:day, day),
+         :ok <- validate(:date, year, month, day),
+         do: :ok
+  end
+
+  def validate_params(:hour, {year, month, day, hour}) do
+    with :ok <- validate(:year, year),
+         :ok <- validate(:month, month),
+         :ok <- validate(:day, day),
+         :ok <- validate(:hour, hour),
          :ok <- validate(:date, year, month, day),
          do: :ok
   end
@@ -28,6 +37,9 @@ defmodule EvercamMedia.Validation.Snapshot do
 
   defp validate(:day, value) when is_integer(value) and value >= 1 and value <= 31, do: :ok
   defp validate(:day = key, _value), do: invalid(key)
+
+  defp validate(:hour, value) when is_integer(value) and value >= 0 and value <= 23, do: :ok
+  defp validate(:hour = key, _value), do: invalid(key)
 
   defp invalid(key), do: {:invalid, "The parameter '#{key}' isn't valid."}
 

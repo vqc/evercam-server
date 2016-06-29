@@ -71,6 +71,8 @@ defmodule EvercamMedia.Router do
       options "/cameras/:id/recordings/snapshots/:year/:month/:day", SnapshotController, :nothing
       get "/cameras/:id/recordings/snapshots/:year/:month/:day/hours", SnapshotController, :hours
       options "/cameras/:id/recordings/snapshots/:year/:month/:day/hours", SnapshotController, :nothing
+      get "/cameras/:id/recordings/snapshots/:year/:month/:day/:hour", SnapshotController, :hour
+      options "/cameras/:id/recordings/snapshots/:year/:month/:day/:hour", SnapshotController, :nothing
       get "/cameras/:id/logs", LogController, :show
       get "/cameras/:id/apps/cloud-recording", CloudRecordingController, :show
       post "/cameras/:id/apps/cloud-recording", CloudRecordingController, :create
