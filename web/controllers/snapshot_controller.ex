@@ -111,7 +111,7 @@ defmodule EvercamMedia.SnapshotController do
   end
   def index(conn, _params), do: proxy_api_data(conn)
 
-  def show(conn, %{"id" => camera_exid, "timestamp" => timestamp, "with_data" => "true", "range" => _}) do
+  def show(conn, %{"id" => camera_exid, "timestamp" => timestamp, "with_data" => "true", "notes" => notes, "range" => _}) do
     timestamp = String.to_integer(timestamp)
     camera = Camera.get_full(camera_exid)
     snapshot_timestamp =
@@ -119,17 +119,15 @@ defmodule EvercamMedia.SnapshotController do
       |> DateTime.Parse.unix!
       |> Strftime.strftime!("%Y%m%d%H%M%S%f")
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
-    snapshot = Snapshot.by_id(snapshot_id)
 
-    with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
-         %Snapshot{notes: notes} <- snapshot do
+    with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera) do
       Storage.load(camera_exid, snapshot_id, notes)
     end
     |> case do
       {:ok, image} ->
         data = "data:image/jpeg;base64,#{Base.encode64(image)}"
         conn
-        |> json(%{snapshots: [%{created_at: timestamp, notes: snapshot.notes, data: data}]})
+        |> json(%{snapshots: [%{created_at: timestamp, notes: notes, data: data}]})
       _ ->
         conn
         |> proxy_api_data
