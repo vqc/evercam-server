@@ -40,6 +40,7 @@ defmodule VendorModel do
     |> Repo.one
   end
 
+  def get_vendor_default_model(nil), do: nil
   def get_vendor_default_model(vendor) do
     VendorModel
     |> where(vendor_id: ^vendor.id)
@@ -47,41 +48,22 @@ defmodule VendorModel do
     |> Repo.one
   end
 
-  def get_model(nil, nil), do: nil
-  def get_model(nil, model_exid) do
-    model =
-      model_exid
-      |> String.downcase
-      |> by_exid
-    if model do
-      model
-    else
-      nil
-    end
-  end
-  def get_model(vendor_exid, nil) do
-    vendor =
-      vendor_exid
-      |> String.downcase
-      |> Vendor.by_exid
-    if vendor do
-      get_vendor_default_model(vendor)
-    else
-      nil
-    end
-  end
   def get_model(vendor_exid, model_exid) do
-    model =
-      model_exid
-      |> String.downcase
-      |> by_exid
-    if model do
-      model
-    else
-      vendor_exid
-      |> String.downcase
-      |> Vendor.by_exid
-      |> get_vendor_default_model
+    vendor_exid = String.downcase("#{vendor_exid}")
+    model_exid = String.downcase("#{model_exid}")
+
+    case {vendor_exid, model_exid} do
+      {"", ""} ->
+        nil
+      {"", model_exid} ->
+        by_exid(model_exid)
+      {vendor_exid, ""} ->
+        vendor_exid
+        |> Vendor.by_exid
+        |> get_vendor_default_model
+      {vendor_exid, model_exid} ->
+        model = by_exid(model_exid)
+        if model, do: model, else: get_model(vendor_exid, "")
     end
   end
 
