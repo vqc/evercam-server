@@ -100,21 +100,19 @@ defmodule CameraShare do
     |> Enum.join(",")
   end
 
-  defp validate_rights(changeset, rights) do
-    with true <- ensure_rights(changeset, rights),
-         do: changeset
+  def validate_rights(changeset) do
+    rights = get_field(changeset, :rights)
+    validate_rights(changeset, rights)
   end
 
-  defp ensure_rights(changeset, nil), do: add_error(changeset, :rights, "Invalid rights specified in request.")
-  defp ensure_rights(changeset, rights) do
-    access_rights =
-      rights
-      |> CameraShare.to_rights_list
-      |> Enum.join(",")
-    if rights == access_rights do
-      true
+  def validate_rights(changeset, rights) do
+    with true <- rights != nil,
+         access_rights = rights |> CameraShare.to_rights_list |> Enum.join(","),
+         true <- rights == access_rights
+    do
+      changeset
     else
-      add_error(changeset, :rights, "Invalid rights specified in request.")
+      false -> add_error(changeset, :rights, "Invalid rights specified in request.")
     end
   end
 

@@ -1,6 +1,7 @@
 defmodule CameraShareRequest do
   use EvercamMedia.Web, :model
   import Ecto.Query
+  import CameraShare, only: [validate_rights: 1]
   alias EvercamMedia.Repo
 
   @required_fields ~w(camera_id user_id key email status rights)
@@ -76,23 +77,6 @@ defmodule CameraShareRequest do
     end
   end
 
-  defp validate_rights(changeset, field) do
-    rights = get_field(changeset, field)
-    if rights do
-      access_rights =
-        rights
-        |> CameraShare.to_rights_list
-        |> Enum.join(",")
-      if rights == access_rights do
-        changeset
-      else
-        add_error(changeset, field, "Invalid rights specified in request.")
-      end
-    else
-      add_error(changeset, field, "Invalid rights specified in request.")
-    end
-  end
-
   defp share_request_exist(changeset, camera_field, email_field) do
     camera_id = get_field(changeset, camera_field)
     email = get_field(changeset, email_field)
@@ -107,7 +91,7 @@ defmodule CameraShareRequest do
     |> cast(params, @required_fields, @optional_fields)
     |> validate_required(:email)
     |> validate_format(:email, ~r/\A.+\@.+\..+\z/, [message: "You've entered an invalid email address."])
-    |> validate_rights(:rights)
+    |> validate_rights
     |> share_request_exist(:camera_id, :email)
   end
 end
