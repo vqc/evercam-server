@@ -5,7 +5,7 @@ defmodule Archive do
   alias EvercamMedia.Repo
 
   @required_fields ~w(title exid from_date to_date requested_by camera_id)
-  @optional_fields ~w(status embed_time public timezone)
+  @optional_fields ~w(status embed_time public)
 
   schema "archives" do
     belongs_to :camera, Camera, foreign_key: :camera_id
