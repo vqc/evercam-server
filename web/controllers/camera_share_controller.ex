@@ -37,14 +37,16 @@ defmodule EvercamMedia.CameraShareController do
           {:ok, camera_share} ->
             EvercamMedia.UserMailer.camera_shared_notification(caller, camera, sharee.email, params["message"])
             conn |> render(CameraShareView, "show.json", %{camera_share: camera_share})
-          {:error, changeset} -> render_error(conn, 400, Util.parse_changeset(changeset))
+          {:error, changeset} ->
+            render_error(conn, 400, Util.parse_changeset(changeset))
         end
       else
         case CameraShareRequest.create_share_request(camera, params["email"], caller, params["rights"], params["message"]) do
           {:ok, camera_share_request} ->
             EvercamMedia.UserMailer.camera_share_request_notification(caller, camera, params["email"], params["message"], camera_share_request.key)
             conn |> render(CameraShareRequestView, "show.json", %{camera_share_requests: camera_share_request})
-          {:error, changeset} -> render_error(conn, 400, Util.parse_changeset(changeset))
+          {:error, changeset} ->
+            render_error(conn, 400, Util.parse_changeset(changeset))
         end
       end
     end
