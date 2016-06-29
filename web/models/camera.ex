@@ -182,8 +182,8 @@ defmodule Camera do
   end
 
   def res_url(camera, type \\ "jpg") do
-    url = "#{camera.config["snapshots"]["#{type}"]}"
-    case String.starts_with?(url, "/") || String.length(url) == 0 do
+    url = Util.deep_get(camera.config, ["snapshots", "#{type}"], "")
+    case String.starts_with?(url, "/") || url == "" do
       true -> "#{url}"
       false -> "/#{url}"
     end
