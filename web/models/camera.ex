@@ -341,18 +341,18 @@ defmodule Camera do
     end
   end
 
-  defp valid?("address", value) do
-    if valid?("ip_address", value) || valid?("domain", value), do: true, else: false
+  def valid?("address", value) do
+    valid?("ip_address", value) || valid?("domain", value)
   end
 
-  defp valid?("ip_address", value) do
+  def valid?("ip_address", value) do
     case :inet_parse.strict_address(to_char_list(value)) do
       {:ok, _} -> true
       {:error, _} -> false
     end
   end
 
-  defp valid?("domain", value) do
+  def valid?("domain", value) do
     :inet_parse.domain(to_char_list(value)) && String.contains?(value, ".")
   end
 

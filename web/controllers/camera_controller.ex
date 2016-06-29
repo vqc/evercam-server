@@ -162,7 +162,7 @@ defmodule EvercamMedia.CameraController do
   defp validate(key, value) when value in [nil, ""], do: invalid(key)
 
   defp validate("address", value) do
-    if valid?("ip_address", value) || valid?("domain", value), do: :ok, else: invalid("address")
+    if Camera.valid?("address", value), do: :ok, else: invalid("address")
   end
 
   defp validate("port", value) when is_integer(value) and value >= 1 and value <= 65_535, do: :ok
@@ -173,17 +173,6 @@ defmodule EvercamMedia.CameraController do
     end
   end
   defp validate("port", _), do: invalid("port")
-
-  defp valid?("ip_address", value) do
-    case :inet_parse.strict_address(to_char_list(value)) do
-      {:ok, _} -> true
-      {:error, _} -> false
-    end
-  end
-
-  defp valid?("domain", value) do
-    :inet_parse.domain(to_char_list(value)) && String.contains?(value, ".")
-  end
 
   defp invalid(key), do: {:invalid, "The parameter '#{key}' isn't valid."}
 
