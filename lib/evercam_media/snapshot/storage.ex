@@ -129,6 +129,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
+  def save(camera_exid, _timestamp, image, "Evercam Thumbnail"), do: thumbnail_save(camera_exid, image)
   def save(camera_exid, timestamp, image, notes) do
     seaweedfs_save(camera_exid, timestamp, image, notes)
     thumbnail_save(camera_exid, image)
