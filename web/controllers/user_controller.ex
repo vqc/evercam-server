@@ -34,7 +34,6 @@ defmodule EvercamMedia.UserController do
     do
       spawn(fn -> delete_user(user) end)
       conn
-      |> put_status(200)
       |> json(%{message: "User has been deleted!"})
     end
   end

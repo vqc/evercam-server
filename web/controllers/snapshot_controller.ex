@@ -14,7 +14,6 @@ defmodule EvercamMedia.SnapshotController do
     case snapshot_with_user(camera_exid, conn.assigns[:current_user], false) do
       {200, response} ->
         conn
-        |> put_status(200)
         |> put_resp_header("content-type", "image/jpeg")
         |> text(response[:image])
       {code, response} ->
@@ -32,11 +31,9 @@ defmodule EvercamMedia.SnapshotController do
         data = "data:image/jpeg;base64,#{Base.encode64(response[:image])}"
 
         conn
-        |> put_status(200)
         |> json(%{created_at: response[:timestamp], notes: response[:notes], data: data})
       {{200, response}, _} ->
         conn
-        |> put_status(200)
         |> json(%{created_at: response[:timestamp], notes: response[:notes]})
       {{code, response}, _} ->
         conn
@@ -52,7 +49,6 @@ defmodule EvercamMedia.SnapshotController do
         data = "data:image/jpeg;base64,#{Base.encode64(response[:image])}"
 
         conn
-        |> put_status(200)
         |> json(%{data: data, status: "ok"})
       {code, response} ->
         conn
@@ -65,7 +61,6 @@ defmodule EvercamMedia.SnapshotController do
     case snapshot_thumbnail(camera_exid, conn.assigns[:current_user]) do
       {200, response} ->
         conn
-        |> put_status(200)
         |> put_resp_header("content-type", "image/jpeg")
         |> text(response[:image])
       {code, response} ->
@@ -80,7 +75,6 @@ defmodule EvercamMedia.SnapshotController do
     case snapshot_data(camera_exid, snapshot_id, notes) do
       {200, response} ->
         conn
-        |> put_status(200)
         |> put_resp_header("content-type", "image/jpeg")
         |> text(response)
       {code, _response} ->

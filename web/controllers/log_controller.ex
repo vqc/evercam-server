@@ -65,7 +65,6 @@ defmodule EvercamMedia.LogController do
       |> SnapshotRepo.all
 
     conn
-    |> put_status(200)
     |> render(LogView, "show.json", %{total_pages: total_pages, camera_exid: camera.exid, camera_name: camera.name, logs: logs})
   end
 

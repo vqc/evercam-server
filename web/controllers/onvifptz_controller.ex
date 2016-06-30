@@ -90,7 +90,6 @@ defmodule EvercamMedia.ONVIFPTZController do
 
   defp respond({:ok, response}, conn) do
     conn
-    |> put_status(200)
     |> json(response)
   end
 
