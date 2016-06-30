@@ -52,6 +52,52 @@ defmodule EvercamMedia.CameraShareController do
     end
   end
 
+  def update(conn, %{"id" => exid, "email" => email, "rights" => rights}) do
+    caller = conn.assigns[:current_user]
+    camera = exid |> String.downcase |> Camera.get_full
+    sharee = email |> String.downcase |> User.by_username_or_email
+
+    with :ok <- camera_exists(conn, exid, camera),
+         :ok <- caller_has_permission(conn, caller, camera),
+         :ok <- sharee_exists(conn, email, sharee)
+    do
+      case CameraShare.by_user_and_camera(camera.id, sharee.id) do
+        nil -> render_error(conn, 404, "Share not found.")
+        camera_share ->
+          share_changeset = CameraShare.changeset(camera_share, %{rights: rights})
+          with true <- share_changeset.valid?
+          do
+            CameraShare.update_share(sharee, camera, rights)
+            CameraActivity.log_activity(caller, camera, "updated share", %{with: caller.email })
+            camera_share =
+              camera_share
+              |> Repo.preload([camera: :access_rights], force: true)
+              |> Repo.preload([camera: [access_rights: :access_token]], force: true)
+            conn
+            |> render(CameraShareView, "show.json", %{camera_share: camera_share})
+          else
+            false -> render_error(conn, 400, Util.parse_changeset(share_changeset))
+          end
+      end
+    end
+  end
+
+  def delete(conn, %{"id" => exid, "email" => email}) do
+    caller = conn.assigns[:current_user]
+    camera = exid |> String.downcase |> Camera.get_full
+    sharee = email |> String.downcase |> User.by_username_or_email
+
+    with :ok <- camera_exists(conn, exid, camera),
+         :ok <- caller_has_permission(conn, caller, camera),
+         :ok <- sharee_exists(conn, email, sharee),
+         :ok <- share_exists(conn, sharee, camera)
+    do
+      CameraShare.delete_share(sharee, camera)
+      CameraActivity.log_activity(caller, camera, "stopped sharing", %{with: caller.email })
+      json(conn, %{})
+    end
+  end
+
   defp camera_exists(conn, camera_exid, nil), do: render_error(conn, 404, "The #{camera_exid} camera does not exist.")
   defp camera_exists(_conn, _camera_exid, _camera), do: :ok
 
@@ -73,6 +119,16 @@ defmodule EvercamMedia.CameraShareController do
       render_error(conn, 401, "Unauthorized.")
     else
       :ok
+    end
+  end
+
+  defp sharee_exists(conn, email, nil), do: render_error(conn, 404, "Sharee '#{email}' not found.")
+  defp sharee_exists(_conn, _email, _sharee), do: :ok
+
+  defp share_exists(conn, sharee, camera) do
+    case CameraShare.by_user_and_camera(camera.id, sharee.id)do
+      nil -> render_error(conn, 404, "Share not found.")
+      %CameraShare{} -> :ok
     end
   end
 end

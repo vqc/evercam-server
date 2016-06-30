@@ -19,7 +19,7 @@ defmodule CameraActivity do
     field :name, :string
   end
 
-  def log_activity(user, camera, action) do
+  def log_activity(user, camera, action, extra \\ nil) do
     access_token = AccessToken.active_token_for(user.id)
     params = %{
       camera_id: camera.id,
@@ -27,6 +27,7 @@ defmodule CameraActivity do
       access_token_id: Util.deep_get(access_token, [:id], nil),
       name: User.get_fullname(user),
       action: action,
+      extra: extra,
       done_at: Ecto.DateTime.utc
     }
     %CameraActivity{}

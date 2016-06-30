@@ -78,6 +78,8 @@ defmodule EvercamMedia.Router do
       post "/cameras/:id/apps/cloud-recording", CloudRecordingController, :create
       get "/cameras/:id/shares", CameraShareController, :show
       post "/cameras/:id/shares", CameraShareController, :create
+      patch "/cameras/:id/shares", CameraShareController, :update
+      delete "/cameras/:id/shares", CameraShareController, :delete
       get "/cameras/:id/shares/requests", CameraShareRequestController, :show
 
       get "/cameras/:id/archives", ArchiveController, :index

@@ -49,6 +49,15 @@ defmodule CameraShare do
     end
   end
 
+  def update_share(sharee, camera, rights) do
+    rights_list = to_rights_list(rights)
+    revoke_rights =
+      AccessRight.camera_rights
+      |> Enum.reject(fn(right) -> Enum.member?(rights_list, right) end)
+    AccessRight.revoke(sharee, camera, revoke_rights)
+    AccessRight.grant(sharee, camera, rights_list)
+  end
+
   def to_rights_list(rights) do
     rights
     |> String.downcase
@@ -87,6 +96,18 @@ defmodule CameraShare do
     |> preload([camera: :access_rights])
     |> preload([camera: [access_rights: :access_token]])
     |> Repo.all
+  end
+
+  def by_user_and_camera(camera_id, user_id) do
+    CameraShare
+    |> where(camera_id: ^camera_id)
+    |> where(user_id: ^user_id)
+    |> preload(:user)
+    |> preload(:sharer)
+    |> preload(:camera)
+    |> preload([camera: :access_rights])
+    |> preload([camera: [access_rights: :access_token]])
+    |> Repo.one
   end
 
   def get_rights("private", user, camera) do
