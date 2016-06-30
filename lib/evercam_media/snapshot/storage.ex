@@ -67,7 +67,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     |> Enum.sort
   end
 
-  def hour(camera_exid, hour, timezone) do
+  def hour(camera_exid, hour) do
     url_base = "#{@seaweedfs}/#{camera_exid}/snapshots"
     apps_list = get_camera_apps_list(camera_exid)
     hour_datetime = Strftime.strftime!(hour, "%Y/%m/%d/%H")
@@ -75,7 +75,7 @@ defmodule EvercamMedia.Snapshot.Storage do
 
     apps_list
     |> Enum.map(fn(app_name) -> {app_name, request_from_seaweedfs("#{url_base}/#{app_name}/#{hour_datetime}/?limit=3600", "Files", "name")} end)
-    |> Enum.reject(fn({app_name, files}) -> files == [] end)
+    |> Enum.reject(fn({_app_name, files}) -> files == [] end)
     |> Enum.flat_map(fn({app_name, files}) ->
       Enum.map(files, fn(file_path) ->
         Map.get(dir_paths, app_name)
