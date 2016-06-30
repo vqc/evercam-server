@@ -1,14 +1,13 @@
 defmodule SnapshotTest do
-  use Calendar
   use EvercamMedia.ModelCase
   alias EvercamMedia.Util
 
   setup do
     seconds_to_8_days_ago = (8) * (24 * 60 * 60) * (-1)
     expiry_day =
-      DateTime.now_utc
-      |> DateTime.advance!(seconds_to_8_days_ago)
-      |> Strftime.strftime!("%Y%m%d")
+      Calendar.DateTime.now_utc
+      |> Calendar.DateTime.advance!(seconds_to_8_days_ago)
+      |> Calendar.Strftime.strftime!("%Y%m%d")
 
     country = Repo.insert!(
       %Country{
@@ -63,8 +62,8 @@ defmodule SnapshotTest do
 
   @tag :skip
   test "lists ranges of expired snapshots", %{cloud_recording: cloud_recording, expiry_day: expiry_day} do
-    timestamp = NaiveDateTime.Parse.asn1_generalized("#{expiry_day}000000") |> elem(1)
-    end_day = timestamp |> Date.next_day! |> Strftime.strftime!("%Y%m%d")
+    timestamp = Calendar.NaiveDateTime.Parse.asn1_generalized("#{expiry_day}000000") |> elem(1)
+    end_day = timestamp |> Calendar.Date.next_day! |> Calendar.Strftime.strftime!("%Y%m%d")
     ranges = [["#{expiry_day}000000", "#{expiry_day}034746622"], ["#{expiry_day}034746622", "#{end_day}000000"]]
     assert Snapshot.expired(cloud_recording) == ranges
   end

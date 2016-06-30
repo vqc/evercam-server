@@ -1,5 +1,4 @@
 defmodule EvercamMedia.CameraControllerTest do
-  use Calendar
   use EvercamMedia.ConnCase
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Util
@@ -17,11 +16,11 @@ defmodule EvercamMedia.CameraControllerTest do
     _access_token2 = Repo.insert!(%AccessToken{user_id: user_b.id, request: UUID.uuid4(:hex), expires_at: expire_at, is_revoked: false})
     camera = Repo.insert!(%Camera{owner_id: user.id, name: "Austin", exid: "austin", is_public: false, config: %{"external_host" => "192.168.1.100", "external_http_port" => "80"}})
 
-    now = DateTime.now!("UTC")
+    now = Calendar.DateTime.now!("UTC")
     if context[:thumbnail] do
-      timestamp = now |> DateTime.Format.unix
-      datetime = now |> Ecto.DateTime.cast!
-      snapshot_timestamp = now |> Strftime.strftime!("%Y%m%d%H%M%S%f")
+      timestamp = now |> Calendar.DateTime.Format.unix
+      datetime = now |> Calendar.Ecto.DateTime.cast!
+      snapshot_timestamp = now |> Calendar.Strftime.strftime!("%Y%m%d%H%M%S%f")
       snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
       %Snapshot{}
       |> Snapshot.changeset(%{camera_id: camera.id, notes: "", motionlevel: 0, created_at: datetime, snapshot_id: snapshot_id})
@@ -39,7 +38,7 @@ defmodule EvercamMedia.CameraControllerTest do
     camera_exid = "austin"
     iso_timestamp =
       datetime
-      |> Strftime.strftime!("%Y-%m-%dT%H:%M:%S.%f")
+      |> Calendar.Strftime.strftime!("%Y-%m-%dT%H:%M:%S.%f")
       |> String.slice(0, 23)
       |> String.ljust(24, ?Z)
     token = Util.encode([camera_exid, iso_timestamp])
