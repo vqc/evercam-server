@@ -132,19 +132,21 @@ defmodule EvercamMedia.SnapshotController do
   def day(conn, %{"id" => camera_exid, "year" => year, "month" => month, "day" => day}) do
     current_user = conn.assigns[:current_user]
     camera = Camera.get_full(camera_exid)
-    offset = Camera.get_offset(camera)
-    format = "%Y%m%d%H%M%S%f"
 
     with :ok <- ensure_params(:day, conn, {year, month, day}),
          :ok <- ensure_camera_exists(conn, camera_exid, camera),
          :ok <- ensure_authorized(conn, current_user, camera)
     do
-      from = construct_timestamp(year, month, day, "00:00:00", offset, format)
-      to = construct_timestamp(year, month, day, "23:59:59", offset, format)
-      exists? = Snapshot.exists_between?(camera.id, from, to)
+      timezone = Camera.get_timezone(camera)
+      offset = Camera.get_offset(camera)
+      from = construct_timestamp(year, month, day, "00:00:00", offset)
+      to = construct_timestamp(year, month, day, "23:59:59", offset)
+      exists? = Storage.exists_for_day?(camera_exid, from, to, timezone)
 
-      conn
-      |> json(%{exists: exists?})
+      case exists? do
+        true -> json(conn, %{exists: true})
+        false -> proxy_api_data(conn)
+      end
     end
   end
 
@@ -360,11 +362,6 @@ defmodule EvercamMedia.SnapshotController do
         |> put_status(500)
         |> json(%{message: "Sorry, we dropped the ball."})
     end
-  end
-
-  defp construct_timestamp(year, month, day, time, offset, format) do
-    construct_timestamp(year, month, day, time, offset)
-    |> Strftime.strftime!(format)
   end
 
   defp construct_timestamp(year, month, day, time, offset) do

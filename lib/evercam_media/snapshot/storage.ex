@@ -42,6 +42,11 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
+  def exists_for_day?(camera_exid, from, to, timezone) do
+    hours = hours(camera_exid, from, to, timezone)
+    !Enum.empty?(hours)
+  end
+
   def hours(camera_exid, from, to, timezone) do
     url_base = "#{@seaweedfs}/#{camera_exid}/snapshots"
     apps_list = get_camera_apps_list(camera_exid)
