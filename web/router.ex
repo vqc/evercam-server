@@ -102,6 +102,7 @@ defmodule EvercamMedia.Router do
       get "/cameras/:id/archives/:archive_id", ArchiveController, :show
       delete "/cameras/:id/archives/:archive_id", ArchiveController, :delete
       post "/cameras/:id/archives", ArchiveController, :create
+      patch "/cameras/:id/archives/:archive_id", ArchiveController, :update
       options "/cameras/:id/archives/:archive_id", ArchiveController, :nothing
 
       get "/cameras/:id/apps/motion-detection", MotionDetectionController, :show

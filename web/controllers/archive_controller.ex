@@ -2,6 +2,7 @@ defmodule EvercamMedia.ArchiveController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.ArchiveView
   alias EvercamMedia.Util
+  require Logger
 
   @status %{pending: 0, processing: 1, completed: 2, failed: 3}
 
@@ -53,6 +54,18 @@ defmodule EvercamMedia.ArchiveController do
          :ok <- ensure_can_list(current_user, camera, conn)
     do
       create_clip(params, camera, conn)
+    end
+  end
+
+  def update(conn, %{"id" => exid, "archive_id" => archive_id} = params) do
+    current_user = conn.assigns[:current_user]
+    camera = Camera.by_exid_with_associations(exid)
+
+    with :ok <- valid_params(conn, params),
+         :ok <- ensure_camera_exists(camera, exid, conn),
+         :ok <- ensure_can_list(current_user, camera, conn)
+    do
+      update_clip(conn, camera, params, archive_id)
     end
   end
 
@@ -122,6 +135,36 @@ defmodule EvercamMedia.ArchiveController do
           {:ok, archive} ->
             conn
             |> render(ArchiveView, "show.json", %{archive: archive |> Repo.preload(:camera) |> Repo.preload(:user)})
+          {:error, changeset} ->
+            render_error(conn, 400, Util.parse_changeset(changeset))
+        end
+    end
+  end
+
+  defp update_clip(conn, camera, params, archive_id) do
+    case Archive.by_exid(archive_id) do
+      nil ->
+        render_error(conn, 404, "Archive '#{archive_id}' not found!")
+      archive ->
+        status = parse_status(params["status"], archive)
+        title = parse_title(params["title"], archive)
+        public = parse_public(params["public"], archive)
+
+        params = Map.delete(params, "api_key") |> Map.delete("api_id") |> Map.delete("id")
+        params = Map.merge(params, %{
+          "status" => status,
+          "title" => title,
+          "public" => public
+          })
+
+        changeset = Archive.changeset(archive, params)
+
+        case Repo.update(changeset) do
+          {:ok, archive} ->
+            updated_archive = archive |> Repo.preload(:camera) |> Repo.preload(:user)
+            send_archive_email(updated_archive.status, updated_archive)
+            conn
+            |> render(ArchiveView, "show.json", %{archive: updated_archive})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
         end
@@ -203,4 +246,17 @@ defmodule EvercamMedia.ArchiveController do
     random_string = Enum.concat(?a..?z, ?0..?9) |> Enum.take_random(4)
     "#{clip_exid}-#{random_string}"
   end
+
+  defp parse_status(nil, archive), do: archive.status
+  defp parse_status(status, _archive), do: status
+
+  defp parse_title(nil, archive), do: archive.title
+  defp parse_title(title, _archive), do: title
+
+  defp parse_public(nil, archive), do: archive.public
+  defp parse_public(public, _archive), do: public
+
+  defp send_archive_email(2, archive), do: EvercamMedia.UserMailer.archive_completed(archive, archive.user.email)
+  defp send_archive_email(3, archive), do: EvercamMedia.UserMailer.archive_failed(archive, archive.user.email)
+  defp send_archive_email(_, _), do: Logger.info "Archive updated!"
 end

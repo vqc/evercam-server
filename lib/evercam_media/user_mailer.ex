@@ -61,6 +61,28 @@ defmodule EvercamMedia.UserMailer do
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "camera_create_notification.txt", user: user, camera: camera)
   end
 
+  def archive_completed(archive, email) do
+    thumbnail = get_thumbnail(archive.camera)
+    Mailgun.Client.send_email @config,
+      to: email,
+      subject: "Archive #{archive.title} is ready.",
+      from: @from,
+      attachments: get_attachments(thumbnail),
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "archive_create_completed.html", archive: archive, thumbnail_available: !!thumbnail, year: @year),
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "archive_create_completed.txt", archive: archive, thumbnail_available: !!thumbnail, year: @year)
+  end
+
+  def archive_failed(archive, email) do
+    thumbnail = get_thumbnail(archive.camera)
+    Mailgun.Client.send_email @config,
+      to: email,
+      subject: "Archive #{archive.title} is failed.",
+      from: @from,
+      attachments: get_attachments(thumbnail),
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "archive_create_failed.html", archive: archive, thumbnail_available: !!thumbnail, year: @year),
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "archive_create_failed.txt", archive: archive, thumbnail_available: !!thumbnail, year: @year)
+  end
+
   defp get_thumbnail(camera) do
     case Storage.thumbnail_load(camera.exid) do
       {:ok, image} -> image
