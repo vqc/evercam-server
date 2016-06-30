@@ -130,11 +130,11 @@ defmodule EvercamMedia.Snapshot.Storage.Export do
     :timer.sleep(300)
     with {:error, :eexist} <- File.rmdir(dir),
          {:ok, files} <- File.ls(dir),
-         true <- length(files) == 1,
          filename = "#{dir}/#{List.first(files)}",
          {:ok, %File.Stat{size: 0}} <- File.stat(filename)
     do
       File.rm(filename)
+      wait_until_processed(dir)
     else
       :ok -> :noop
       _ -> wait_until_processed(dir)
