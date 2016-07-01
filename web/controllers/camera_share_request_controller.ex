@@ -21,20 +21,19 @@ defmodule EvercamMedia.CameraShareRequestController do
     camera = exid |> String.downcase |> Camera.get_full
 
     with :ok <- camera_exists(conn, exid, camera),
-         :ok <- caller_has_permission(conn, caller, camera)
+         :ok <- caller_has_permission(conn, caller, camera),
+         {:ok, share_request} <- share_request_exists(conn, email, camera)
     do
-      share_request = CameraShareRequest.get_pending_request(camera.id, email)
-      case share_request do
-        nil -> render_error(conn, 404, "Share request not found.")
-        %CameraShareRequest{} ->
-          share_request_changeset = CameraShareRequest.update_changeset(share_request, %{rights: rights})
-          case Repo.update(share_request_changeset) do
-            {:ok, camera_share_request} ->
-              conn
-              |> render(CameraShareRequestView, "show.json", %{camera_share_requests: camera_share_request})
-            {:error, changeset} ->
-              render_error(conn, 400, Util.parse_changeset(changeset))
-          end
+      share_request
+      |> CameraShareRequest.update_changeset(%{rights: rights})
+      |> Repo.update
+      |> case do
+        {:ok, camera_share_request} ->
+          conn
+          |> render(CameraShareRequestView, "show.json", %{camera_share_requests: camera_share_request})
+        {:error, changeset} ->
+          conn
+          |> render_error(400, Util.parse_changeset(changeset))
       end
     end
   end
@@ -44,17 +43,16 @@ defmodule EvercamMedia.CameraShareRequestController do
     camera = exid |> String.downcase |> Camera.get_full
 
     with :ok <- camera_exists(conn, exid, camera),
-         :ok <- caller_has_permission(conn, caller, camera)
+         :ok <- caller_has_permission(conn, caller, camera),
+         {:ok, share_request} <- share_request_exists(conn, email, camera)
     do
-      share_request = CameraShareRequest.get_pending_request(camera.id, email)
-      case share_request do
-        nil -> render_error(conn, 404, "Share request not found.")
-        %CameraShareRequest{} ->
-          share_request
-          |> CameraShareRequest.update_changeset(%{rights: share_request.rights, status: CameraShareRequest.status.cancelled})
-          |> Repo.update
-          json(conn, %{})
-      end
+      params = %{rights: share_request.rights, status: CameraShareRequest.status.cancelled}
+
+      share_request
+      |> CameraShareRequest.update_changeset(params)
+      |> Repo.update
+
+      json(conn, %{})
     end
   end
 
@@ -63,6 +61,13 @@ defmodule EvercamMedia.CameraShareRequestController do
       :ok
     else
       render_error(conn, 401, "Unauthorized.")
+    end
+  end
+
+  defp share_request_exists(conn, email, camera) do
+    case CameraShareRequest.get_pending_request(camera.id, email) do
+      nil -> render_error(conn, 404, "Share request not found.")
+      %CameraShareRequest{} = camera_share_request -> {:ok, camera_share_request}
     end
   end
 
