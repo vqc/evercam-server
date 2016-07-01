@@ -231,7 +231,7 @@ defmodule EvercamMedia.CameraShareControllerTest do
     assert Poison.decode!(response.resp_body)["message"] == "Sharee 'smithmarc1' not found."
   end
 
-  test "DELETE /v1/cameras/:id/shares, when required permission", context do
+  test "DELETE /v1/cameras/:id/shares, when required permission", _context do
     response =
       build_conn
       |> delete("/v1/cameras/austin/shares", %{email: "smithmarc"})
