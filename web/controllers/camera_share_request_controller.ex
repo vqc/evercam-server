@@ -39,7 +39,7 @@ defmodule EvercamMedia.CameraShareRequestController do
     end
   end
 
-  def delete(conn, %{"id" => exid, "email" => email}) do
+  def cancel(conn, %{"id" => exid, "email" => email}) do
     caller = conn.assigns[:current_user]
     camera = exid |> String.downcase |> Camera.get_full
 
