@@ -75,7 +75,8 @@ defmodule CameraShareRequest do
           |> Repo.preload(:camera)
           |> Repo.preload(:user)
         {:ok, camera_share_request}
-      {:error, changeset} -> {:error, changeset}
+      {:error, changeset} ->
+        {:error, changeset}
     end
   end
 
@@ -83,8 +84,10 @@ defmodule CameraShareRequest do
     camera_id = get_field(changeset, camera_field)
     email = get_field(changeset, email_field)
     case get_pending_request(camera_id, email) do
-      nil -> changeset
-      %CameraShareRequest{} -> add_error(changeset, email_field, "A share request already exists for the '#{email}' email address for this camera.")
+      nil ->
+        changeset
+      %CameraShareRequest{} ->
+        add_error(changeset, email_field, "A share request already exists for the '#{email}' email address for this camera.")
     end
   end
 
