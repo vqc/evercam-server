@@ -54,6 +54,15 @@ defmodule Archive do
     |> where(status: ^status)
   end
 
+  def get_one_with_associations(query \\ Archive) do
+    query
+    |> preload(:camera)
+    |> preload(:user)
+    |> order_by(desc: :created_at)
+    |> limit(1)
+    |> Repo.one
+  end
+
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)

@@ -66,6 +66,22 @@ defmodule EvercamMedia.ArchiveController do
     end
   end
 
+  def pending_archives(conn, _) do
+    requester = conn.assigns[:current_user]
+
+    if requester do
+      archive =
+        Archive
+        |> Archive.with_status_if_given(@status.pending)
+        |> Archive.get_one_with_associations
+
+      conn
+      |> render(ArchiveView, "show.json", %{archive: archive})
+    else
+      render_error(conn, 401, "Unauthorized.")
+    end
+  end
+
   def delete(conn, %{"id" => exid, "archive_id" => archive_id} = params) do
     current_user = conn.assigns[:current_user]
     camera = Camera.get_full(exid)
