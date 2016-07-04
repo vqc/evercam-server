@@ -75,6 +75,12 @@ defmodule CameraShare do
     |> Repo.delete_all
   end
 
+  def delete_by_camera_id(camera_id) do
+    CameraShare
+    |> where(camera_id: ^camera_id)
+    |> Repo.delete_all
+  end
+
   def camera_shares(camera) do
     CameraShare
     |> where(camera_id: ^camera.id)

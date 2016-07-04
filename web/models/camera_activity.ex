@@ -35,6 +35,12 @@ defmodule CameraActivity do
     |> SnapshotRepo.insert
   end
 
+  def delete_by_camera_id(camera_id) do
+    CameraActivity
+    |> where(camera_id: ^camera_id)
+    |> SnapshotRepo.delete_all
+  end
+
   def changeset(camera_activity, params \\ :invalid) do
     camera_activity
     |> cast(params, @required_fields, @optional_fields)

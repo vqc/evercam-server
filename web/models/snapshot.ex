@@ -98,6 +98,12 @@ defmodule Snapshot do
     |> Enum.chunk(2, 1)
   end
 
+  def delete_by_camera_id(camera_id) do
+    Snapshot
+    |> where(camera_id: ^camera_id)
+    |> SnapshotRepo.delete_all
+  end
+
   def changeset(snapshot, params \\ :invalid) do
     snapshot
     |> cast(params, @required_fields, @optional_fields)

@@ -45,6 +45,12 @@ defmodule CloudRecording do
     end
   end
 
+  def delete_by_camera_id(camera_id) do
+    CloudRecording
+    |> where(camera_id: ^camera_id)
+    |> Repo.delete_all
+  end
+
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields)

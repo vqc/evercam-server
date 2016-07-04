@@ -328,6 +328,12 @@ defmodule Camera do
     |> Repo.delete_all
   end
 
+  def delete_by_id(camera_id) do
+    Camera
+    |> where(id: ^camera_id)
+    |> Repo.delete_all
+  end
+
   def validate_params(camera_changeset) do
     timezone = get_field(camera_changeset, :timezone)
     config = get_field(camera_changeset, :config)

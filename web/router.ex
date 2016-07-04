@@ -59,6 +59,7 @@ defmodule EvercamMedia.Router do
       options "/cameras/:id", CameraController, :nothing
       put "/cameras/:id", CameraController, :transfer
       options "/cameras/:id", CameraController, :nothing
+      delete "/cameras/:id", CameraController, :delete
       get "/cameras/:id/thumbnail", SnapshotController, :thumbnail
       get "/cameras/:id/live/snapshot", SnapshotController, :live
       get "/cameras/:id/live/snapshot.jpg", SnapshotController, :live

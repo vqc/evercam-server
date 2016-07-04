@@ -114,6 +114,30 @@ defmodule EvercamMedia.CameraController do
     end
   end
 
+  def delete(conn, %{"id" => exid}) do
+    caller = conn.assigns[:current_user]
+    camera = exid |> String.downcase |> Camera.get_full
+
+    with :ok <- camera_exists(conn, exid, camera),
+         true <- user_has_delete_rights(conn, caller, camera)
+    do
+      admin_user = User.by_username_or_email("admin@evercam.io")
+      camera_params = %{
+        owner_id: admin_user.id,
+        discoverable: false,
+        is_public: false
+      }
+      camera
+      |> Camera.changeset(camera_params)
+      |> Repo.update!
+      |> Camera.invalidate_camera
+
+      spawn(fn -> delete_camera_worker(camera.id) end)
+      spawn(fn -> delete_snapshot_worker(camera.id) end)
+      json(conn, %{})
+    end
+  end
+
   def thumbnail(conn, %{"id" => exid, "timestamp" => iso_timestamp, "token" => token}) do
     try do
       [token_exid, token_timestamp] = Util.decode(token)
@@ -234,6 +258,16 @@ defmodule EvercamMedia.CameraController do
     end
   end
 
+  defp user_has_delete_rights(conn, user, camera) do
+    if !Permission.Camera.can_delete?(user, camera) do
+      conn
+      |> put_status(403)
+      |> render(ErrorView, "error.json", %{message: "Unauthorized."})
+    else
+      true
+    end
+  end
+
   defp update_camera(camera, params) do
     model = VendorModel.get_model(params["vendor"], params["model"])
 
@@ -285,5 +319,19 @@ defmodule EvercamMedia.CameraController do
   end
   defp add_parameter("auth", params, key, value) do
     put_in(params, [:config, "auth", "basic", key], value)
+  end
+
+  defp delete_camera_worker(camera_id) do
+    CloudRecording.delete_by_camera_id(camera_id)
+    MotionDetection.delete_by_camera_id(camera_id)
+    CameraShare.delete_by_camera_id(camera_id)
+    CameraShareRequest.delete_by_camera_id(camera_id)
+    Camera.delete_by_id(camera_id)
+  end
+
+  defp delete_snapshot_worker(camera_id) do
+    CameraActivity.delete_by_camera_id(camera_id)
+    Snapshot.delete_by_camera_id(camera_id)
+    # TODO Seaweedfs Deletion
   end
 end
