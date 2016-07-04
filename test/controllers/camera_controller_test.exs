@@ -11,7 +11,7 @@ defmodule EvercamMedia.CameraControllerTest do
 
     country = Repo.insert!(%Country{name: "Something", iso3166_a2: "SMT"})
     user = Repo.insert!(%User{firstname: "John", lastname: "Doe", username: "johndoe", email: "john@doe.com", password: "password123", country_id: country.id, api_id: UUID.uuid4(:hex), api_key: UUID.uuid4(:hex)})
-    admin_user = Repo.insert!(%User{firstname: "Admin", lastname: "Admin", username: "admin", email: "admin@evercam.io", password: "password123", country_id: country.id, api_id: UUID.uuid4(:hex), api_key: UUID.uuid4(:hex)})
+    _admin_user = Repo.insert!(%User{firstname: "Admin", lastname: "Admin", username: "admin", email: "admin@evercam.io", password: "password123", country_id: country.id, api_id: UUID.uuid4(:hex), api_key: UUID.uuid4(:hex)})
     _access_token1 = Repo.insert!(%AccessToken{user_id: user.id, request: UUID.uuid4(:hex), expires_at: expire_at, is_revoked: false})
     user_b = Repo.insert!(%User{firstname: "Smith", lastname: "Marc", username: "smithmarc", email: "smith@dmarc.com", password: "password456", country_id: country.id, api_id: UUID.uuid4(:hex), api_key: UUID.uuid4(:hex)})
     _access_token2 = Repo.insert!(%AccessToken{user_id: user_b.id, request: UUID.uuid4(:hex), expires_at: expire_at, is_revoked: false})
@@ -202,12 +202,16 @@ defmodule EvercamMedia.CameraControllerTest do
   end
 
   test 'DELETE /v1/cameras/:id, returns success when camera and all associations delete', context do
-    response =
+    delete_response =
       build_conn
       |> delete("/v1/cameras/#{context[:camera].exid}?api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}")
+    get_response =
+      build_conn
+      |> get("/v1/cameras/#{context[:camera].exid}?api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}")
 
-    assert response.status == 200
-    assert response.resp_body == "{}"
+    assert delete_response.status == 200
+    assert delete_response.resp_body == "{}"
+    assert get_response.status == 404
   end
 
   test 'DELETE /v1/cameras/:id, returns an unauthenticated error when no authentication details are provided' do
