@@ -241,4 +241,83 @@ defmodule EvercamMedia.CameraControllerTest do
     assert response.status == 403
     assert message == "Unauthorized."
   end
+
+  test 'POST /v1/cameras/:id, returns camera when the params are valid', context do
+    camera_params = %{
+      name: "Camera Name",
+      external_host: "212.78.102.10"
+    }
+
+    response =
+      build_conn
+      |> post("/v1/cameras?api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}", camera_params)
+
+    camera =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("cameras")
+      |> List.first
+
+    assert response.status == 200
+    assert camera != nil
+    assert camera["name"] == camera_params[:name]
+    assert camera["external"]["host"] == camera_params[:external_host]
+  end
+
+  test 'POST /v1/cameras/:id, when external_url is missing', context do
+    camera_params = %{
+      name: "Rename Camera"
+    }
+
+    response =
+      build_conn
+      |> post("/v1/cameras?api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}", camera_params)
+
+    message =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("message")
+      |> Map.get("external_host")
+
+    assert response.status == 400
+    assert message == ["can't be blank"]
+  end
+
+  test 'POST /v1/cameras/:id, returns Unauthorized error when user does not have permissions' do
+    camera_params = %{
+      name: "Rename Camera",
+      external_host: "212.78.102.10"
+    }
+
+    response =
+      build_conn
+      |> post("/v1/cameras", camera_params)
+
+    message =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("message")
+
+    assert response.status == 401
+    assert message == "Unauthorized."
+  end
+
+  test 'POST /v1/cameras/:id, returns error when passed invalid params', context do
+    camera_params = %{
+      name: "Camera Name",
+      external_host: "Rename Camera"
+    }
+    response =
+      build_conn
+      |> post("/v1/cameras?api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}", camera_params)
+
+    message =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("message")
+      |> Map.get("external_host")
+
+    assert response.status == 400
+    assert message == ["External url is invalid"]
+  end
 end

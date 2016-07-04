@@ -6,8 +6,8 @@ defmodule Camera do
   alias EvercamMedia.Schedule
   alias EvercamMedia.Util
 
-  @required_fields ~w(exid name owner_id config is_public is_online_email_owner_notification)
-  @optional_fields ~w(timezone thumbnail_url is_online last_polled_at last_online_at updated_at created_at model_id location mac_address discoverable)
+  @required_fields ~w(name owner_id config is_public is_online_email_owner_notification)
+  @optional_fields ~w(exid timezone thumbnail_url is_online last_polled_at last_online_at updated_at created_at model_id location mac_address discoverable)
 
   schema "cameras" do
     belongs_to :owner, User, foreign_key: :owner_id
@@ -338,6 +338,8 @@ defmodule Camera do
     timezone = get_field(camera_changeset, :timezone)
     config = get_field(camera_changeset, :config)
     cond do
+      config["external_host"] == nil || config["external_host"] == "" ->
+        add_error(camera_changeset, :external_host, "can't be blank")
       !valid?("address", config["external_host"]) ->
         add_error(camera_changeset, :external_host, "External url is invalid")
       !is_nil(timezone) && !Tzdata.zone_exists?(timezone) ->
@@ -367,13 +369,36 @@ defmodule Camera do
   defp validate_lng_lat(camera_changeset, nil, _lat), do: add_error(camera_changeset, :location_lng, "Must provide both location coordinates")
   defp validate_lng_lat(camera_changeset, lng, lat), do: put_change(camera_changeset, :location, %Geo.Point{coordinates: {lng, lat}})
 
+  defp validate_exid(changeset) do
+    case get_field(changeset, :exid) do
+      nil -> auto_generate_camera_id(changeset)
+      _exid -> changeset
+    end
+  end
+
+  defp auto_generate_camera_id(changeset) do
+    case get_field(changeset, :name) do
+      nil -> changeset
+      camera_name ->
+        camera_id =
+          camera_name
+          |> String.replace(" ", "")
+          |> String.replace("-", "")
+          |> String.downcase
+          |> String.slice(0..4)
+        put_change(changeset, :exid, "#{camera_id}-#{Enum.take_random(?a..?z, 5)}")
+    end
+  end
+
   def changeset(camera, params \\ :invalid) do
     camera
     |> cast(params, @required_fields, @optional_fields)
-    |> unique_constraint(:exid, [name: "cameras_exid_index"])
+    |> validate_required([:name, :owner_id])
     |> validate_length(:name, max: 24, message: "Camera Name is too long. Maximum 24 characters.")
-    |> validate_format(:mac_address, ~r/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/, message: "Mac address is invalid")
+    |> validate_exid
     |> validate_params
+    |> unique_constraint(:exid, [name: "cameras_exid_index"])
+    |> validate_format(:mac_address, ~r/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/, message: "Mac address is invalid")
     |> validate_lng_lat(params[:location_lng], params[:location_lat])
   end
 end

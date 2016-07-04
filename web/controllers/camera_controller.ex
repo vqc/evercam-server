@@ -138,6 +138,31 @@ defmodule EvercamMedia.CameraController do
     end
   end
 
+  def create(conn, params) do
+    caller = conn.assigns[:current_user]
+
+    with :ok <- is_authorized(conn, caller)
+    do
+      params = is_public(params, params["is_public"])
+      params = Map.merge(%{"owner_id" => caller.id}, params)
+      camera_changeset = create_camera(params)
+      case Repo.insert(camera_changeset) do
+        {:ok, camera} ->
+          full_camera =
+            camera
+            |> Repo.preload(:owner, force: true)
+            |> Repo.preload(:cloud_recordings, force: true)
+            |> Repo.preload(:vendor_model, force: true)
+            |> Repo.preload([vendor_model: :vendor], force: true)
+          CameraActivity.log_activity(caller, camera, "created")
+          conn
+          |> render("show.json", %{camera: full_camera, user: caller})
+        {:error, changeset} ->
+          render_error(conn, 400, Util.parse_changeset(changeset))
+      end
+    end
+  end
+
   def thumbnail(conn, %{"id" => exid, "timestamp" => iso_timestamp, "token" => token}) do
     try do
       [token_exid, token_timestamp] = Util.decode(token)
@@ -303,6 +328,51 @@ defmodule EvercamMedia.CameraController do
 
     Camera.changeset(camera, camera_params)
   end
+
+  defp create_camera(params) do
+    model = VendorModel.get_model(params["vendor"], params["model"])
+
+    camera_params = %{
+      name: params["name"],
+      owner_id: params["owner_id"],
+      is_public: params["is_public"],
+      config: %{
+        "external_host" => params["external_host"],
+        "snapshots" => %{}
+      }
+    }
+
+    camera_params = add_parameter("field", camera_params, :exid, params["id"])
+    camera_params = add_parameter("field", camera_params, :timezone, params["timezone"])
+    camera_params = add_parameter("field", camera_params, :mac_address, params["mac_address"])
+    camera_params = add_parameter("field", camera_params, :is_online, params["is_online"])
+    camera_params = add_parameter("field", camera_params, :discoverable, params["discoverable"])
+    camera_params = add_parameter("field", camera_params, :is_online_email_owner_notification, params["is_online_email_owner_notification"])
+    camera_params = add_parameter("field", camera_params, :location_lng, params["location_lng"])
+    camera_params = add_parameter("field", camera_params, :location_lat, params["location_lat"])
+
+    camera_params = add_parameter("model", camera_params, :model_id, model)
+    camera_params = add_parameter("host", camera_params, "external_http_port", params["external_http_port"])
+    camera_params = add_parameter("host", camera_params, "external_rtsp_port", params["external_rtsp_port"])
+
+    camera_params = add_parameter("host", camera_params, "internal_host", params["internal_host"])
+    camera_params = add_parameter("host", camera_params, "internal_http_port", params["internal_http_port"])
+    camera_params = add_parameter("host", camera_params, "internal_rtsp_port", params["internal_rtsp_port"])
+
+    camera_params = add_parameter("url", camera_params, "jpg", params["jpg_url"])
+    camera_params = add_parameter("url", camera_params, "mjpg", params["mjpg_url"])
+    camera_params = add_parameter("url", camera_params, "h264", params["h264_url"])
+    camera_params = add_parameter("url", camera_params, "audio", params["audio_url"])
+    camera_params = add_parameter("url", camera_params, "mpeg", params["mpeg_url"])
+
+    camera_params = add_parameter("auth", camera_params, "username", params["cam_username"])
+    camera_params = add_parameter("auth", camera_params, "password", params["cam_password"])
+
+    Camera.changeset(%Camera{}, camera_params)
+  end
+
+  defp is_public(params, value) when value in [nil, ""], do: Map.merge(%{"is_public" => "false"}, params)
+  defp is_public(params, _value), do: params
 
   defp add_parameter(_field, params, _key, value) when value in [nil, ""], do: params
   defp add_parameter("field", params, key, value) do
