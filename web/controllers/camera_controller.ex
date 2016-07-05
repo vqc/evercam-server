@@ -143,10 +143,12 @@ defmodule EvercamMedia.CameraController do
 
     with :ok <- is_authorized(conn, caller)
     do
-      params = is_public(params, params["is_public"])
-      params = Map.merge(%{"owner_id" => caller.id}, params)
-      camera_changeset = create_camera(params)
-      case Repo.insert(camera_changeset) do
+      params
+      |> is_public(params["is_public"])
+      |> Map.merge(%{"owner_id" => caller.id})
+      |> create_camera
+      |> Repo.insert
+      |> case do
         {:ok, camera} ->
           full_camera =
             camera
@@ -155,6 +157,7 @@ defmodule EvercamMedia.CameraController do
             |> Repo.preload(:vendor_model, force: true)
             |> Repo.preload([vendor_model: :vendor], force: true)
           CameraActivity.log_activity(caller, camera, "created")
+
           conn
           |> render("show.json", %{camera: full_camera, user: caller})
         {:error, changeset} ->

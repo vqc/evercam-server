@@ -378,7 +378,8 @@ defmodule Camera do
 
   defp auto_generate_camera_id(changeset) do
     case get_field(changeset, :name) do
-      nil -> changeset
+      nil ->
+        changeset
       camera_name ->
         camera_id =
           camera_name
