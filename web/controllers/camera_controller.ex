@@ -299,35 +299,31 @@ defmodule EvercamMedia.CameraController do
   defp update_camera(camera, params) do
     model = VendorModel.get_model(params["vendor"], params["model"])
 
-    camera_params = %{config: Map.get(camera, :config)}
-    camera_params = add_parameter(camera_params, "field", :name, params["name"])
-    camera_params = add_parameter(camera_params, "field", :timezone, params["timezone"])
-    camera_params = add_parameter(camera_params, "field", :mac_address, params["mac_address"])
-    camera_params = add_parameter(camera_params, "field", :is_online, params["is_online"])
-    camera_params = add_parameter(camera_params, "field", :is_public, params["is_public"])
-    camera_params = add_parameter(camera_params, "field", :discoverable, params["discoverable"])
-    camera_params = add_parameter(camera_params, "field", :is_online_email_owner_notification, params["is_online_email_owner_notification"])
-    camera_params = add_parameter(camera_params, "field", :location_lng, params["location_lng"])
-    camera_params = add_parameter(camera_params, "field", :location_lat, params["location_lat"])
-
-    camera_params = add_parameter(camera_params, "model", :model_id, model)
-
-    camera_params = add_parameter(camera_params, "host", "external_host", params["external_host"])
-    camera_params = add_parameter(camera_params, "host", "external_http_port", params["external_http_port"])
-    camera_params = add_parameter(camera_params, "host", "external_rtsp_port", params["external_rtsp_port"])
-
-    camera_params = add_parameter(camera_params, "host", "internal_host", params["internal_host"])
-    camera_params = add_parameter(camera_params, "host", "internal_http_port", params["internal_http_port"])
-    camera_params = add_parameter(camera_params, "host", "internal_rtsp_port", params["internal_rtsp_port"])
-
-    camera_params = add_parameter(camera_params, "url", "jpg", params["jpg_url"])
-    camera_params = add_parameter(camera_params, "url", "mjpg", params["mjpg_url"])
-    camera_params = add_parameter(camera_params, "url", "h264", params["h264_url"])
-    camera_params = add_parameter(camera_params, "url", "audio", params["audio_url"])
-    camera_params = add_parameter(camera_params, "url", "mpeg", params["mpeg_url"])
-
-    camera_params = add_parameter(camera_params, "auth", "username", params["cam_username"])
-    camera_params = add_parameter(camera_params, "auth", "password", params["cam_password"])
+    camera_params =
+      %{config: Map.get(camera, :config)}
+      |> add_parameter("field", :name, params["name"])
+      |> add_parameter("field", :timezone, params["timezone"])
+      |> add_parameter("field", :mac_address, params["mac_address"])
+      |> add_parameter("field", :is_online, params["is_online"])
+      |> add_parameter("field", :is_public, params["is_public"])
+      |> add_parameter("field", :discoverable, params["discoverable"])
+      |> add_parameter("field", :is_online_email_owner_notification, params["is_online_email_owner_notification"])
+      |> add_parameter("field", :location_lng, params["location_lng"])
+      |> add_parameter("field", :location_lat, params["location_lat"])
+      |> add_parameter("model", :model_id, model)
+      |> add_parameter("host", "external_host", params["external_host"])
+      |> add_parameter("host", "external_http_port", params["external_http_port"])
+      |> add_parameter("host", "external_rtsp_port", params["external_rtsp_port"])
+      |> add_parameter("host", "internal_host", params["internal_host"])
+      |> add_parameter("host", "internal_http_port", params["internal_http_port"])
+      |> add_parameter("host", "internal_rtsp_port", params["internal_rtsp_port"])
+      |> add_parameter("url", "jpg", params["jpg_url"])
+      |> add_parameter("url", "mjpg", params["mjpg_url"])
+      |> add_parameter("url", "h264", params["h264_url"])
+      |> add_parameter("url", "audio", params["audio_url"])
+      |> add_parameter("url", "mpeg", params["mpeg_url"])
+      |> add_parameter("auth", "username", params["cam_username"])
+      |> add_parameter("auth", "password", params["cam_password"])
 
     Camera.changeset(camera, camera_params)
   end
@@ -335,40 +331,32 @@ defmodule EvercamMedia.CameraController do
   defp create_camera(params) do
     model = VendorModel.get_model(params["vendor"], params["model"])
 
-    camera_params = %{
-      name: params["name"],
-      owner_id: params["owner_id"],
-      is_public: params["is_public"],
-      config: %{
-        "external_host" => params["external_host"],
-        "snapshots" => %{}
-      }
-    }
-
-    camera_params = add_parameter(camera_params, "field", :exid, params["id"])
-    camera_params = add_parameter(camera_params, "field", :timezone, params["timezone"])
-    camera_params = add_parameter(camera_params, "field", :mac_address, params["mac_address"])
-    camera_params = add_parameter(camera_params, "field", :is_online, params["is_online"])
-    camera_params = add_parameter(camera_params, "field", :discoverable, params["discoverable"])
-    camera_params = add_parameter(camera_params, "field", :is_online_email_owner_notification, params["is_online_email_owner_notification"])
-    camera_params = add_parameter(camera_params, "field", :location_lng, params["location_lng"])
-    camera_params = add_parameter(camera_params, "field", :location_lat, params["location_lat"])
-
-    camera_params = add_parameter(camera_params, "model", :model_id, model)
-    camera_params = add_parameter(camera_params, "host", "external_http_port", params["external_http_port"])
-    camera_params = add_parameter(camera_params, "host", "external_rtsp_port", params["external_rtsp_port"])
-    camera_params = add_parameter(camera_params, "host", "internal_host", params["internal_host"])
-    camera_params = add_parameter(camera_params, "host", "internal_http_port", params["internal_http_port"])
-    camera_params = add_parameter(camera_params, "host", "internal_rtsp_port", params["internal_rtsp_port"])
-
-    camera_params = add_parameter(camera_params, "url", "jpg", params["jpg_url"])
-    camera_params = add_parameter(camera_params, "url", "mjpg", params["mjpg_url"])
-    camera_params = add_parameter(camera_params, "url", "h264", params["h264_url"])
-    camera_params = add_parameter(camera_params, "url", "audio", params["audio_url"])
-    camera_params = add_parameter(camera_params, "url", "mpeg", params["mpeg_url"])
-
-    camera_params = add_parameter(camera_params, "auth", "username", params["cam_username"])
-    camera_params = add_parameter(camera_params, "auth", "password", params["cam_password"])
+    camera_params =
+      %{config: %{"external_host" => params["external_host"], "snapshots" => %{}}}
+      |> add_parameter("field", :name, params["name"])
+      |> add_parameter("field", :exid, params["id"])
+      |> add_parameter("field", :owner_id, params["owner_id"])
+      |> add_parameter("field", :timezone, params["timezone"])
+      |> add_parameter("field", :mac_address, params["mac_address"])
+      |> add_parameter("field", :is_online, params["is_online"])
+      |> add_parameter("field", :is_public, params["is_public"])
+      |> add_parameter("field", :discoverable, params["discoverable"])
+      |> add_parameter("field", :is_online_email_owner_notification, params["is_online_email_owner_notification"])
+      |> add_parameter("field", :location_lng, params["location_lng"])
+      |> add_parameter("field", :location_lat, params["location_lat"])
+      |> add_parameter("model", :model_id, model)
+      |> add_parameter("host", "external_http_port", params["external_http_port"])
+      |> add_parameter("host", "external_rtsp_port", params["external_rtsp_port"])
+      |> add_parameter("host", "internal_host", params["internal_host"])
+      |> add_parameter("host", "internal_http_port", params["internal_http_port"])
+      |> add_parameter("host", "internal_rtsp_port", params["internal_rtsp_port"])
+      |> add_parameter("url", "jpg", params["jpg_url"])
+      |> add_parameter("url", "mjpg", params["mjpg_url"])
+      |> add_parameter("url", "h264", params["h264_url"])
+      |> add_parameter("url", "audio", params["audio_url"])
+      |> add_parameter("url", "mpeg", params["mpeg_url"])
+      |> add_parameter("auth", "username", params["cam_username"])
+      |> add_parameter("auth", "password", params["cam_password"])
 
     Camera.changeset(%Camera{}, camera_params)
   end
