@@ -242,7 +242,7 @@ defmodule EvercamMedia.CameraControllerTest do
     assert message == "Unauthorized."
   end
 
-  test 'POST /v1/cameras/:id, returns camera when the params are valid', context do
+  test 'POST /v1/cameras, returns camera when the params are valid', context do
     camera_params = %{
       name: "Camera Name",
       external_host: "212.78.102.10"
@@ -264,7 +264,7 @@ defmodule EvercamMedia.CameraControllerTest do
     assert camera["external"]["host"] == camera_params[:external_host]
   end
 
-  test 'POST /v1/cameras/:id, when external_url is missing', context do
+  test 'POST /v1/cameras, when external_url is missing', context do
     camera_params = %{
       name: "Rename Camera"
     }
@@ -283,7 +283,7 @@ defmodule EvercamMedia.CameraControllerTest do
     assert message == ["can't be blank"]
   end
 
-  test 'POST /v1/cameras/:id, returns Unauthorized error when user does not have permissions' do
+  test 'POST /v1/cameras, returns Unauthorized error when user does not have permissions' do
     camera_params = %{
       name: "Rename Camera",
       external_host: "212.78.102.10"
@@ -302,7 +302,7 @@ defmodule EvercamMedia.CameraControllerTest do
     assert message == "Unauthorized."
   end
 
-  test 'POST /v1/cameras/:id, returns error when passed invalid params', context do
+  test 'POST /v1/cameras, returns error when passed invalid params', context do
     camera_params = %{
       name: "Camera Name",
       external_host: "Rename Camera"
