@@ -47,6 +47,31 @@ defmodule EvercamMedia.Snapshot.Storage do
     !Enum.empty?(hours)
   end
 
+  def days(camera_exid, from, to, timezone) do
+    url_base = "#{@seaweedfs}/#{camera_exid}/snapshots"
+    apps_list = get_camera_apps_list(camera_exid)
+    from_date = Strftime.strftime!(from, "%Y/%m")
+    to_date = Strftime.strftime!(to, "%Y/%m")
+
+    from_days =
+      apps_list
+      |> Enum.flat_map(fn(app) -> request_from_seaweedfs("#{url_base}/#{app}/#{from_date}/", "Subdirectories", "Name") end)
+      |> Enum.uniq
+      |> Enum.map(fn(day) -> parse_hour(from.year, from.month, day, "00:00:00", timezone) end)
+      |> Enum.reject(fn(datetime) -> DateTime.before?(datetime, from) end)
+
+    to_days =
+      apps_list
+      |> Enum.flat_map(fn(app) -> request_from_seaweedfs("#{url_base}/#{app}/#{to_date}/", "Subdirectories", "Name") end)
+      |> Enum.uniq
+      |> Enum.map(fn(day) -> parse_hour(to.year, to.month, day, "00:00:00", timezone) end)
+      |> Enum.reject(fn(datetime) -> DateTime.after?(datetime, to) end)
+
+    Enum.concat(from_days, to_days)
+    |> Enum.map(fn(datetime) -> datetime.day end)
+    |> Enum.sort
+  end
+
   def hours(camera_exid, from, to, timezone) do
     url_base = "#{@seaweedfs}/#{camera_exid}/snapshots"
     apps_list = get_camera_apps_list(camera_exid)

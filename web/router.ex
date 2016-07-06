@@ -69,6 +69,8 @@ defmodule EvercamMedia.Router do
       get "/cameras/:id/recordings/snapshots/:timestamp", SnapshotController, :show
       options "/cameras/:id/recordings/snapshots/:timestamp", SnapshotController, :nothing
       post "/cameras/:id/recordings/snapshots", SnapshotController, :create
+      get "/cameras/:id/recordings/snapshots/:year/:month/days", SnapshotController, :days
+      options "/cameras/:id/recordings/snapshots/:year/:month/days", SnapshotController, :nothing
       get "/cameras/:id/recordings/snapshots/:year/:month/:day", SnapshotController, :day
       options "/cameras/:id/recordings/snapshots/:year/:month/:day", SnapshotController, :nothing
       get "/cameras/:id/recordings/snapshots/:year/:month/:day/hours", SnapshotController, :hours

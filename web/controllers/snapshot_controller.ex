@@ -128,6 +128,38 @@ defmodule EvercamMedia.SnapshotController do
   end
   def show(conn, _params), do: proxy_api_data(conn)
 
+  def days(conn, %{"id" => camera_exid, "year" => year, "month" => month}) do
+    current_user = conn.assigns[:current_user]
+    camera = Camera.get_full(camera_exid)
+
+    with :ok <- ensure_params(:day, conn, {year, month, "01"}),
+         :ok <- ensure_camera_exists(conn, camera_exid, camera),
+         :ok <- ensure_authorized(conn, current_user, camera)
+      do
+      timezone = Camera.get_timezone(camera)
+      offset = Camera.get_offset(camera)
+
+      from = construct_timestamp(year, month, "01", "00:00:00", offset)
+      number_of_days_in_month =
+        Date.new(String.to_integer(year), String.to_integer(month), 1)
+        |> elem(1)
+        |> Calendar.Date.number_of_days_in_month
+      to =
+        from
+        |> Calendar.DateTime.add!(number_of_days_in_month * 86400)
+        |> Calendar.DateTime.subtract!(1)
+      Storage.days(camera_exid, from, to, timezone)
+    end
+    |> case do
+      days when days != [] ->
+        conn
+        |> json(%{days: days})
+      _ ->
+        conn
+        |> proxy_api_data
+    end
+  end
+
   def day(conn, %{"id" => camera_exid, "year" => year, "month" => month, "day" => day}) do
     current_user = conn.assigns[:current_user]
     camera = Camera.get_full(camera_exid)
