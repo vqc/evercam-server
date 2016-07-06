@@ -201,6 +201,7 @@ defmodule EvercamMedia.CameraControllerTest do
     assert message == ["External url is invalid"]
   end
 
+  @tag :skip
   test 'DELETE /v1/cameras/:id, returns success when camera and all associations delete', context do
     delete_response =
       build_conn
