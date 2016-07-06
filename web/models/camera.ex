@@ -6,6 +6,8 @@ defmodule Camera do
   alias EvercamMedia.Schedule
   alias EvercamMedia.Util
 
+  @mac_address_regex ~r/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/
+
   @required_fields ~w(name owner_id config is_public is_online_email_owner_notification)
   @optional_fields ~w(exid timezone thumbnail_url is_online last_polled_at last_online_at updated_at created_at model_id location mac_address discoverable)
 
@@ -399,7 +401,7 @@ defmodule Camera do
     |> validate_exid
     |> validate_params
     |> unique_constraint(:exid, [name: "cameras_exid_index"])
-    |> validate_format(:mac_address, ~r/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/, message: "Mac address is invalid")
+    |> validate_format(:mac_address, @mac_address_regex, message: "Mac address is invalid")
     |> validate_lng_lat(params[:location_lng], params[:location_lat])
   end
 end
