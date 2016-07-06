@@ -1,6 +1,5 @@
 defmodule EvercamMedia.SnapshotController do
   use EvercamMedia.Web, :controller
-  use Calendar
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.DBHandler
   alias EvercamMedia.Snapshot.Error
@@ -110,8 +109,8 @@ defmodule EvercamMedia.SnapshotController do
     camera = Camera.get_full(camera_exid)
     snapshot_timestamp =
       timestamp
-      |> DateTime.Parse.unix!
-      |> Strftime.strftime!("%Y%m%d%H%M%S%f")
+      |> Calendar.DateTime.Parse.unix!
+      |> Calendar.Strftime.strftime!("%Y%m%d%H%M%S%f")
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera) do
@@ -229,7 +228,7 @@ defmodule EvercamMedia.SnapshotController do
 
   defp fetch_snapshot(args, attempt \\ 1) do
     response = CamClient.fetch_snapshot(args)
-    timestamp = DateTime.Format.unix(DateTime.now_utc)
+    timestamp = Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
     args = Map.put(args, :timestamp, timestamp)
 
     case {response, args[:is_online], attempt} do
@@ -286,7 +285,7 @@ defmodule EvercamMedia.SnapshotController do
       username: Camera.username(camera),
       password: Camera.password(camera),
       vendor_exid: Camera.get_vendor_attr(camera, :exid),
-      timestamp: DateTime.Format.unix(DateTime.now_utc),
+      timestamp: Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc),
       store_snapshot: store_snapshot,
       notes: notes
     }
@@ -369,17 +368,17 @@ defmodule EvercamMedia.SnapshotController do
     day = String.rjust(day, 2, ?0)
 
     "#{year}-#{month}-#{day}T#{time}#{offset}"
-    |> DateTime.Parse.rfc3339_utc
+    |> Calendar.DateTime.Parse.rfc3339_utc
     |> elem(1)
   end
 
   defp convert_to_camera_timestamp(timestamp, offset) do
     timestamp
     |> String.to_integer
-    |> DateTime.Parse.unix!
-    |> Strftime.strftime!("%Y-%m-%dT%H:%M:%S#{offset}")
-    |> DateTime.Parse.rfc3339_utc
+    |> Calendar.DateTime.Parse.unix!
+    |> Calendar.Strftime.strftime!("%Y-%m-%dT%H:%M:%S#{offset}")
+    |> Calendar.DateTime.Parse.rfc3339_utc
     |> elem(1)
-    |> DateTime.Format.unix
+    |> Calendar.DateTime.Format.unix
   end
 end
