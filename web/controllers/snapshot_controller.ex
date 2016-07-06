@@ -299,6 +299,7 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
+  defp update_thumbnail(nil), do: :noop
   defp update_thumbnail(camera) do
     if camera.is_online && !Camera.recording?(camera) do
       construct_args(camera, true, "Evercam Thumbnail") |> fetch_snapshot(3)
