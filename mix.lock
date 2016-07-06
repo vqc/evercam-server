@@ -18,7 +18,7 @@
   "ex_aws": {:git, "https://github.com/CargoSense/ex_aws.git", "63f25a8960e1f70c79f8b1bf303043f24125c769", []},
   "exactor": {:hex, :exactor, "2.2.0", "2a7418b82d974fe8276edd62c1facf4a9dc06339cdf11b5dcd10359e107fe5c3", [:mix], []},
   "exjsx": {:hex, :exjsx, "3.2.0", "7136cc739ace295fc74c378f33699e5145bead4fdc1b4799822d0287489136fb", [:mix], [{:jsx, "~> 2.6.2", [hex: :jsx, optional: false]}]},
-  "exq": {:hex, :exq, "0.7.1", "459e31ba7422bb8b4f3183e68052f6fe9acf743b9991b98c077f63edf07cc351", [:mix], [{:uuid, ">= 1.0.0", [hex: :uuid, optional: false]}, {:timex, ">= 2.0.0", [hex: :timex, optional: false]}, {:redix, ">= 0.3.4", [hex: :redix, optional: false]}, {:poison, ">= 1.2.0 or ~> 2.0", [hex: :poison, optional: false]}]},
+  "exq": {:git, "https://github.com/akira/exq.git", "84fb09c615e46bd6f3852ec1c4aeeebe59101b4f", []},
   "exrm": {:git, "https://github.com/bitwalker/exrm.git", "35a7d0d9caae83efdbf1152de5145b82a07e5363", []},
   "exvcr": {:hex, :exvcr, "0.7.2", "64bddf1cba766a6a6ad5a6b5d8a70a4205ccbb9b747a2a1877fc2644b6c1024a", [:mix], [{:meck, "~> 0.8.3", [hex: :meck, optional: false]}, {:httpotion, "~> 2.1", [hex: :httpotion, optional: true]}, {:httpoison, "~> 0.8", [hex: :httpoison, optional: true]}, {:exjsx, "~> 3.2", [hex: :exjsx, optional: false]}, {:exactor, "~> 2.2", [hex: :exactor, optional: false]}]},
   "geo": {:hex, :geo, "1.0.5", "6b663b305bfaee4158306830f5aa5c43ca3de4ecfb01825a16faab4e4ca00692", [:mix], [{:poison, "~> 1.5 or ~> 2.0", [hex: :poison, optional: true]}, {:postgrex, "~> 0.11.1", [hex: :postgrex, optional: true]}, {:ecto, "~> 1.1 or ~> 2.0", [hex: :ecto, optional: true]}]},
@@ -47,9 +47,9 @@
   "providers": {:hex, :providers, "1.6.0", "db0e2f9043ae60c0155205fcd238d68516331d0e5146155e33d1e79dc452964a", [:rebar3], [{:getopt, "0.8.2", [hex: :getopt, optional: false]}]},
   "quantum": {:git, "https://github.com/c-rack/quantum-elixir.git", "92961565627a5c3cdea1bff4e334cdacf089cf51", []},
   "ranch": {:hex, :ranch, "1.2.1", "a6fb992c10f2187b46ffd17ce398ddf8a54f691b81768f9ef5f461ea7e28c762", [:make], []},
-  "redix": {:hex, :redix, "0.3.6", "882b3b9a81ac1245277a0ee60a0f33fef39dc5f988f513b605c8c93f40f7206f", [:mix], [{:connection, "~> 1.0.0", [hex: :connection, optional: false]}]},
+  "redix": {:hex, :redix, "0.4.0", "c8cfad755252e5441c4119437ba3a8989518af7aa90dbd6f4ff7207b72e4a967", [:mix], [{:connection, "~> 1.0.0", [hex: :connection, optional: false]}]},
   "relx": {:git, "https://github.com/erlware/relx.git", "1e15397a4924804f248facc18ccd07076baef7a4", []},
   "ssl_verify_fun": {:hex, :ssl_verify_fun, "1.1.0", "edee20847c42e379bf91261db474ffbe373f8acb56e9079acb6038d4e0bf414f", [:rebar, :make], []},
-  "timex": {:hex, :timex, "2.1.5", "d4afd4e5114de99ac3093bbdba3a692ff6d9408c9e0075985a568c323c39f6c5", [:mix], [{:tzdata, "~> 0.1.8 or ~> 0.5", [hex: :tzdata, optional: false]}, {:gettext, "~> 0.10", [hex: :gettext, optional: false]}, {:combine, "~> 0.7", [hex: :combine, optional: false]}]},
+  "timex": {:hex, :timex, "2.2.1", "0d69012a7fd69f4cbdaa00cc5f2a5f30f1bed56072fb362ed4bddf60db343022", [:mix], [{:gettext, "~> 0.10", [hex: :gettext, optional: false]}, {:combine, "~> 0.7", [hex: :combine, optional: false]}, {:tzdata, "~> 0.1.8 or ~> 0.5", [hex: :tzdata, optional: false]}]},
   "tzdata": {:hex, :tzdata, "0.5.8", "a4ffe564783c6519e4df230a5d0e1cf44b7db7f576bcae76d05540b5da5b6143", [:mix], [{:hackney, "~> 1.0", [hex: :hackney, optional: false]}]},
-  "uuid": {:hex, :uuid, "1.1.3", "06ca38801a1a95b751701ca40716bb97ddf76dfe7e26da0eec7dba636740d57a", [:mix], []}}
+  "uuid": {:hex, :uuid, "1.1.4", "36c7734e4c8e357f2f67ba57fb61799d60c20a7f817b104896cca64b857e3686", [:mix], []}}
