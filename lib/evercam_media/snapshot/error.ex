@@ -33,6 +33,10 @@ defmodule EvercamMedia.Snapshot.Error do
         Logger.error "[#{camera_exid}] [snapshot_error] [emfile] Traceback."
         Util.error_handler(error)
         {500, %{message: "Sorry, we dropped the ball."}}
+      :case_clause ->
+        Logger.debug "[#{camera_exid}] [snapshot_error] [case_clause]"
+        update_camera_status("#{camera_exid}", timestamp, false, "case_clause", 50)
+        {504, %{message: "Bad request."}}
       :bad_request ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [bad_request]"
         update_camera_status("#{camera_exid}", timestamp, false, "bad_request", 50)
