@@ -72,7 +72,7 @@ defmodule EvercamMedia.Mixfile do
       {:exq, github: "akira/exq"},
       {:exrm, github: "bitwalker/exrm"},
       {:geo, "~> 1.0"},
-      {:httpoison, "~> 0.8.2"},
+      {:httpoison, "~> 0.9.0"},
       {:httpotion, "~> 2.0"},
       {:ibrowse, "~> 4.2", override: true},
       {:jsx, "~> 2.8.0", override: true},
