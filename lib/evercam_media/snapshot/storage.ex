@@ -238,7 +238,7 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   defp delete_directory(camera_exid, url) do
-    hackney = [pool: :seaweedfs_download_pool]
+    hackney = [pool: :seaweedfs_download_pool, recv_timeout: 300_000]
     date = extract_date_from_url(url, camera_exid)
     Logger.info "[#{camera_exid}] [storage_delete] [#{date}]"
     HTTPoison.delete!("#{url}?recursive=true", [], hackney: hackney)
