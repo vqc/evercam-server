@@ -209,6 +209,59 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
+  def cleanup_all do
+    CloudRecording.get_all_ephemeral
+    |> Enum.map(fn(cloud_recording) -> cleanup(cloud_recording) end)
+  end
+
+  def cleanup(%CloudRecording{storage_duration: -1}), do: :noop
+  def cleanup(cloud_recording) do
+    camera_exid = cloud_recording.camera.exid
+
+    recordings_url = "#{@seaweedfs}/#{camera_exid}/snapshots/recordings/"
+
+    recordings_url
+    |> request_from_seaweedfs("Subdirectories", "Name")
+    |> Enum.map(fn(year) -> "#{recordings_url}#{year}/" end)
+    |> Enum.flat_map(fn(year_url) ->
+      year_url
+      |> request_from_seaweedfs("Subdirectories", "Name")
+      |> Enum.map(fn(month) -> "#{year_url}#{month}/" end)
+    end)
+    |> Enum.flat_map(fn(month_url) ->
+      month_url
+      |> request_from_seaweedfs("Subdirectories", "Name")
+      |> Enum.map(fn(month) -> "#{month_url}#{month}/" end)
+    end)
+    |> Enum.filter(fn(day_url) ->
+      expired?(camera_exid, cloud_recording, day_url)
+    end)
+    |> Enum.sort
+    |> Enum.each(fn(day_url) ->
+      delete_directory(camera_exid, day_url)
+    end)
+  end
+
+  defp delete_directory(camera_exid, url) do
+    hackney = [pool: :seaweedfs_download_pool]
+    date =
+      url
+      |> String.replace_leading("#{@seaweedfs}/#{camera_exid}/snapshots/recordings/", "")
+      |> String.replace_trailing("/", "")
+    Logger.info "[#{camera_exid}] [storage_delete] [#{date}]"
+    HTTPoison.delete!("#{url}?recursive=true", [], hackney: hackney)
+  end
+
+  def expired?(camera_exid, cloud_recording, url) do
+    seconds_to_day_before_expiry = (cloud_recording.storage_duration) * (24 * 60 * 60) * (-1)
+    day_before_expiry =
+      Calendar.DateTime.now_utc
+      |> Calendar.DateTime.advance!(seconds_to_day_before_expiry)
+      |> Calendar.DateTime.to_date
+    url_date = parse_url_date(camera_exid, url)
+    Calendar.Date.diff(url_date, day_before_expiry) < 0
+  end
+
   def construct_directory_path(camera_exid, timestamp, app_dir, root_dir \\ @root_dir) do
     timestamp
     |> DateTime.Parse.unix!
@@ -247,6 +300,14 @@ defmodule EvercamMedia.Snapshot.Storage do
     |> Calendar.DateTime.Parse.rfc3339_utc
     |> elem(1)
     |> Calendar.DateTime.shift_zone!(timezone)
+  end
+
+  defp parse_url_date(camera_exid, url) do
+    url
+    |> String.replace_leading("#{@seaweedfs}/#{camera_exid}/snapshots/recordings/", "")
+    |> String.replace_trailing("/", "")
+    |> String.replace("/", "-")
+    |> Calendar.Date.Parse.iso8601!
   end
 
   defp format_file_name(<<file_name::bytes-size(6)>>) do
