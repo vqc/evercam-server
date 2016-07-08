@@ -216,30 +216,25 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   def cleanup(%CloudRecording{storage_duration: -1}), do: :noop
   def cleanup(cloud_recording) do
-    camera_exid = cloud_recording.camera.exid
+    cloud_recording.camera.exid
+    |> list_expired_days_for_camera(cloud_recording)
+    |> Enum.each(fn(day_url) -> delete_directory(cloud_recording.camera.exid, day_url) end)
+  end
 
-    recordings_url = "#{@seaweedfs}/#{camera_exid}/snapshots/recordings/"
-
-    recordings_url
-    |> request_from_seaweedfs("Subdirectories", "Name")
-    |> Enum.map(fn(year) -> "#{recordings_url}#{year}/" end)
-    |> Enum.flat_map(fn(year_url) ->
-      year_url
-      |> request_from_seaweedfs("Subdirectories", "Name")
-      |> Enum.map(fn(month) -> "#{year_url}#{month}/" end)
-    end)
-    |> Enum.flat_map(fn(month_url) ->
-      month_url
-      |> request_from_seaweedfs("Subdirectories", "Name")
-      |> Enum.map(fn(month) -> "#{month_url}#{month}/" end)
-    end)
-    |> Enum.filter(fn(day_url) ->
-      expired?(camera_exid, cloud_recording, day_url)
-    end)
+  defp list_expired_days_for_camera(camera_exid, cloud_recording) do
+    ["#{@seaweedfs}/#{camera_exid}/snapshots/recordings/"]
+    |> list_stored_days_for_camera(["year", "month", "day"])
+    |> Enum.filter(fn(day_url) -> expired?(camera_exid, cloud_recording, day_url) end)
     |> Enum.sort
-    |> Enum.each(fn(day_url) ->
-      delete_directory(camera_exid, day_url)
+  end
+
+  defp list_stored_days_for_camera(urls, []), do: urls
+  defp list_stored_days_for_camera(urls, [_current|rest]) do
+    Enum.flat_map(urls, fn(url) ->
+      request_from_seaweedfs(url, "Subdirectories", "Name")
+      |> Enum.map(fn(path) -> "#{url}#{path}/" end)
     end)
+    |> list_stored_days_for_camera(rest)
   end
 
   defp delete_directory(camera_exid, url) do
