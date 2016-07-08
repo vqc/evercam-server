@@ -244,10 +244,7 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   defp delete_directory(camera_exid, url) do
     hackney = [pool: :seaweedfs_download_pool]
-    date =
-      url
-      |> String.replace_leading("#{@seaweedfs}/#{camera_exid}/snapshots/recordings/", "")
-      |> String.replace_trailing("/", "")
+    date = extract_date_from_url(url, camera_exid)
     Logger.info "[#{camera_exid}] [storage_delete] [#{date}]"
     HTTPoison.delete!("#{url}?recursive=true", [], hackney: hackney)
   end
@@ -258,7 +255,7 @@ defmodule EvercamMedia.Snapshot.Storage do
       Calendar.DateTime.now_utc
       |> Calendar.DateTime.advance!(seconds_to_day_before_expiry)
       |> Calendar.DateTime.to_date
-    url_date = parse_url_date(camera_exid, url)
+    url_date = parse_url_date(url, camera_exid)
     Calendar.Date.diff(url_date, day_before_expiry) < 0
   end
 
@@ -302,12 +299,17 @@ defmodule EvercamMedia.Snapshot.Storage do
     |> Calendar.DateTime.shift_zone!(timezone)
   end
 
-  defp parse_url_date(camera_exid, url) do
+  defp parse_url_date(url, camera_exid) do
+    url
+    |> extract_date_from_url(camera_exid)
+    |> String.replace("/", "-")
+    |> Calendar.Date.Parse.iso8601!
+  end
+
+  defp extract_date_from_url(url, camera_exid) do
     url
     |> String.replace_leading("#{@seaweedfs}/#{camera_exid}/snapshots/recordings/", "")
     |> String.replace_trailing("/", "")
-    |> String.replace("/", "-")
-    |> Calendar.Date.Parse.iso8601!
   end
 
   defp format_file_name(<<file_name::bytes-size(6)>>) do
