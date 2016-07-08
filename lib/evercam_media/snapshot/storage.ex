@@ -209,35 +209,6 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
-  def cleanup(cloud_recording) do
-    unless cloud_recording.storage_duration == -1 do
-      camera_exid = cloud_recording.camera.exid
-      seconds_to_day_before_expiry = (cloud_recording.storage_duration) * (24 * 60 * 60) * (-1)
-      day_before_expiry =
-        DateTime.now_utc
-        |> DateTime.advance!(seconds_to_day_before_expiry)
-        |> DateTime.to_date
-
-      Logger.info "[#{camera_exid}] [snapshot_delete_disk]"
-      Path.wildcard("#{@root_dir}/#{camera_exid}/snapshots/recordings/????/??/??/")
-      |> Enum.each(fn(path) -> delete_if_expired(camera_exid, path, day_before_expiry) end)
-    end
-  end
-
-  defp delete_if_expired(camera_exid, path, day_before_expiry) do
-    date =
-      path
-      |> String.replace_leading("#{@root_dir}/#{camera_exid}/snapshots/recordings/", "")
-      |> String.replace("/", "-")
-      |> Date.Parse.iso8601!
-
-    if Calendar.Date.before?(date, day_before_expiry) do
-      Logger.info "[#{camera_exid}] [snapshot_delete_disk] [#{Date.Format.iso8601(date)}]"
-      dir_path = Strftime.strftime!(date, "#{@root_dir}/#{camera_exid}/snapshots/recordings/%Y/%m/%d")
-      Porcelain.shell("ionice -c 3 find '#{dir_path}' -exec sleep 0.01 \\; -delete")
-    end
-  end
-
   def construct_directory_path(camera_exid, timestamp, app_dir, root_dir \\ @root_dir) do
     timestamp
     |> DateTime.Parse.unix!
