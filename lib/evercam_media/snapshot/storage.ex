@@ -278,19 +278,19 @@ defmodule EvercamMedia.Snapshot.Storage do
     |> Calendar.DateTime.shift_zone!(timezone)
   end
 
-  def format_file_name(<<file_name::bytes-size(6)>>) do
+  defp format_file_name(<<file_name::bytes-size(6)>>) do
     "#{file_name}000" <> ".jpg"
   end
 
-  def format_file_name(<<file_name::bytes-size(7)>>) do
+  defp format_file_name(<<file_name::bytes-size(7)>>) do
     "#{file_name}00" <> ".jpg"
   end
 
-  def format_file_name(<<file_name::bytes-size(9), _rest :: binary>>) do
+  defp format_file_name(<<file_name::bytes-size(9), _rest :: binary>>) do
     "#{file_name}" <> ".jpg"
   end
 
-  def lookup_dir_paths(camera_exid, apps_list, datetime) do
+  defp lookup_dir_paths(camera_exid, apps_list, datetime) do
     timestamp = DateTime.Format.unix(datetime)
 
     Enum.reduce(apps_list, %{}, fn(app_name, map) ->
@@ -299,7 +299,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     end)
   end
 
-  def app_name_to_notes(name) do
+  defp app_name_to_notes(name) do
     case name do
       "recordings" -> "Evercam Proxy"
       "thumbnail" -> "Evercam Thumbnail"
@@ -309,7 +309,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
-  def notes_to_app_name(notes) do
+  defp notes_to_app_name(notes) do
     case notes do
       "Evercam Proxy" -> "recordings"
       "Evercam Thumbnail" -> "thumbnail"
