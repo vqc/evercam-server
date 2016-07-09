@@ -5,7 +5,6 @@ defmodule CameraShare do
 
   @required_fields ~w(camera_id user_id kind)
   @optional_fields ~w(sharer_id message updated_at created_at)
-  @kind %{private: "private", public: "public"}
 
   schema "camera_shares" do
     belongs_to :camera, Camera
@@ -20,13 +19,13 @@ defmodule CameraShare do
   def rights_list("full"), do: ["snapshot", "view", "edit", "list"]
   def rights_list(_), do: ["snapshot", "list"]
 
-  def create_share(camera, sharee, sharer, rights, message \\ nil) do
+  def create_share(camera, sharee, sharer, rights, message, kind \\ "private") do
     share_params =
       %{
         camera_id: camera.id,
         user_id: sharee.id,
         sharer_id: sharer.id,
-        kind: @kind.private,
+        kind: kind,
         message: message,
         rights: rights,
         owner: camera.owner.id

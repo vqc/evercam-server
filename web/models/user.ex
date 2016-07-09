@@ -90,6 +90,7 @@ defmodule User do
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:username, [name: :user_username_unique_index])
     |> unique_constraint(:email, [name: :user_email_unique_index])
-    |> validate_format(:email, @email_regex)
+    |> validate_format(:username, ~r/^[a-z]+[\w-]+$/)
+    |> validate_format(:email, @email_regex, [message: "Email format isn't valid!"])
   end
 end

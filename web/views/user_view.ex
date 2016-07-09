@@ -20,4 +20,11 @@ defmodule EvercamMedia.UserView do
       ]
     }
   end
+
+  def render("credentials.json", %{user: user}) do
+    %{
+      api_id: user.api_id,
+      api_key: user.api_key
+    }
+  end
 end

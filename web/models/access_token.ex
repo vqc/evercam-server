@@ -4,8 +4,8 @@ defmodule AccessToken do
   import Ecto.Query
   alias EvercamMedia.Repo
 
-  @required_fields ~w(grantor_id is_revoked expires_at request)
-  @optional_fields ~w(grantee_id refresh)
+  @required_fields ~w(is_revoked expires_at request)
+  @optional_fields ~w(grantor_id user_id refresh)
 
   schema "access_tokens" do
     belongs_to :user, User, foreign_key: :user_id

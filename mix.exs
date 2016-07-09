@@ -27,6 +27,7 @@ defmodule EvercamMedia.Mixfile do
   defp app_list, do: [
     :calendar,
     :cf,
+    :comeonin,
     :con_cache,
     :connection,
     :cors_plug,
@@ -61,6 +62,7 @@ defmodule EvercamMedia.Mixfile do
   defp deps do
     [
       {:calendar, "~> 0.16.0"},
+      {:comeonin, "~> 2.4"},
       {:con_cache, "~> 0.11.1"},
       {:cors_plug, "~> 1.1"},
       {:cowboy, "~> 1.0"},

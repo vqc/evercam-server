@@ -4,6 +4,7 @@
   "certifi": {:hex, :certifi, "0.4.0", "a7966efb868b179023618d29a407548f70c52466bf1849b9e8ebd0e34b7ea11f", [:rebar3], []},
   "cf": {:hex, :cf, "0.2.1", "69d0b1349fd4d7d4dc55b7f407d29d7a840bf9a1ef5af529f1ebe0ce153fc2ab", [:rebar3], []},
   "combine": {:hex, :combine, "0.9.1", "5fd778ee77032ae593bf79aedb8519d9e36283e4f869abd98c2d6029ca476db8", [:mix], []},
+  "comeonin": {:hex, :comeonin, "2.5.1", "b39cc11fa7fde5c4498dc822ddf8db9319921ea29286784cd499c4d2618018e1", [:mix, :make, :make], []},
   "con_cache": {:hex, :con_cache, "0.11.1", "acbe5a1d10c47faba30d9629c9121e1ef9bca0aa5eddbb86f4e777bd9f9f9b6f", [:mix], [{:exactor, "~> 2.2.0", [hex: :exactor, optional: false]}]},
   "connection": {:hex, :connection, "1.0.3", "3145f7416be3df248a4935f24e3221dc467c1e3a158d62015b35bd54da365786", [:mix], []},
   "cors_plug": {:hex, :cors_plug, "1.1.1", "cf900be8f6cb11d608fbf9defb2bf3bee1451027cef47b8ff078c244c4e94d76", [:mix], [{:plug, "> 0.8.0", [hex: :plug, optional: false]}, {:cowboy, "~> 1.0.0", [hex: :cowboy, optional: false]}]},

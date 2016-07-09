@@ -46,10 +46,15 @@ defmodule EvercamMedia.Router do
     get "/vendors/:id", VendorController, :show
     get "/vendors", VendorController, :index
 
+    post "/users", UserController, :create
+
     scope "/" do
       pipe_through :auth
 
       get "/users/:id", UserController, :get
+      get "/users/:id/credentials", UserController, :credentials
+      patch "/users/:id", UserController, :update
+      options "/users/:id", UserController, :nothing
       delete "/users/:id", UserController, :delete
 
       get "/cameras", CameraController, :index

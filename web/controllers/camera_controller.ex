@@ -83,7 +83,7 @@ defmodule EvercamMedia.CameraController do
       CameraShare.delete_share(user, camera)
       camera = change_camera_owner(user, camera)
       rights = CameraShare.rights_list("full") |> Enum.join(",")
-      CameraShare.create_share(camera, old_owner, user, rights)
+      CameraShare.create_share(camera, old_owner, user, rights, "")
       update_camera_worker(camera.exid)
       conn
       |> render("show.json", %{camera: camera, user: current_user})
