@@ -229,9 +229,9 @@ defmodule EvercamMedia.UserController do
 
   defp share_default_camera(user) do
     evercam_user = User.by_username("evercam")
-    remembrance_camera = Camera.get_remembrance_camera(evercam_user.id)
-
+    remembrance_camera = Camera.get_remembrance_camera
     rights = CameraShare.rights_list("public")
+
     CameraShare.create_share(remembrance_camera, user, evercam_user, rights, "public")
   end
 

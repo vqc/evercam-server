@@ -324,9 +324,8 @@ defmodule Camera do
     && Schedule.scheduled_now?(camera_full) == {:ok, true}
   end
 
-  def get_remembrance_camera(user_id) do
+  def get_remembrance_camera do
     Camera
-    |> where(owner_id: ^user_id)
     |> where(exid: "evercam-remembrance-camera")
     |> Repo.one
   end
