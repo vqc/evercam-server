@@ -4,7 +4,9 @@ defmodule EvercamMedia.Intercom do
   @intercom_auth {System.get_env["INTERCOM_ID"], System.get_env["INTERCOM_KEY"]}
 
   def get_user(user) do
-    intercom_user = HTTPotion.get "#{System.get_env["INTERCOM_URL"]}?user_id=#{user.username}", [basic_auth: @intercom_auth, headers: ["Accept": "Accept:application/json"]]
+    url = "#{System.get_env["INTERCOM_URL"]}?user_id=#{user.username}"
+    headers = ["Accept": "Accept:application/json"]
+    intercom_user = HTTPotion.get(url, [basic_auth: @intercom_auth, headers: headers])
     case HTTPotion.Response.success?(intercom_user) do
       true -> {:ok, intercom_user}
       false -> {:error, intercom_user}
@@ -12,6 +14,7 @@ defmodule EvercamMedia.Intercom do
   end
 
   def create_user(user, user_agent, requester_ip) do
+    headers = ["Accept": "Accept:application/json", "Content-Type": "application/json"]
     intercom_new_user = %{
       "email": user.email,
       "user_id": user.username,
@@ -22,10 +25,10 @@ defmodule EvercamMedia.Intercom do
       "signed_up_at": user.created_at |> Util.ecto_datetime_to_unix
     }
     json =
-      case Poison.encode intercom_new_user do
+      case Poison.encode(intercom_new_user) do
         {:ok, json} -> json
         _ -> nil
       end
-    HTTPotion.post "#{System.get_env["INTERCOM_URL"]}", [body: json, basic_auth: @intercom_auth, headers: ["Accept": "Accept:application/json", "Content-Type": "application/json"]]
+    HTTPotion.post(System.get_env["INTERCOM_URL"], [body: json, basic_auth: @intercom_auth, headers: headers])
   end
 end
