@@ -67,6 +67,32 @@ defmodule VendorModel do
     end
   end
 
+  def get_models_count(query) do
+    query
+    |> select([vm], count(vm.id))
+    |> Repo.all
+    |> List.first
+  end
+
+  def get_all(query \\ VendorModel) do
+    query
+    |> Repo.all
+    |> Repo.preload(:vendor)
+  end
+
+  def check_vendor_in_query(query, vendor) when vendor in [nil, ""], do: query
+  def check_vendor_in_query(query, vendor), do: query |> where([vm], vm.vendor_id == ^vendor.id)
+
+  def check_name_in_query(query, name) when name in [nil, ""], do: query
+  def check_name_in_query(query, name), do: query |> where([vm], like(fragment("lower(?)", vm.name), ^("%#{String.downcase(name)}%")))
+
+  def add_limit_and_offset(query, limit, page) do
+    query
+    |> order_by([vm], desc: vm.name)
+    |> limit(^limit)
+    |> offset(^(page * limit))
+  end
+
   def get_url(model, attr \\ "jpg") do
     "#{model.config["snapshots"]["#{attr}"]}"
   end

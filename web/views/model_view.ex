@@ -1,6 +1,10 @@
 defmodule EvercamMedia.ModelView do
   use EvercamMedia.Web, :view
 
+  def render("index.json", %{models: models}) do
+    %{models: render_many(models, __MODULE__, "model.json")}
+  end
+
   def render("show.json", %{model: model}) do
     %{models: render_many([model], __MODULE__, "model.json")}
   end
