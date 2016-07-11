@@ -1,6 +1,6 @@
-defmodule EvercamMedia.ModelController do
+defmodule EvercamMedia.VendorModelController do
   use EvercamMedia.Web, :controller
-  alias EvercamMedia.ModelView
+  alias EvercamMedia.VendorModelView
   import String, only: [to_integer: 1]
 
   @default_limit 25
@@ -25,7 +25,7 @@ defmodule EvercamMedia.ModelController do
         |> VendorModel.get_all
 
       conn
-      |> render(ModelView, "index.json", %{models: models, pages: total_pages, records: total_models})
+      |> render(VendorModelView, "index.json", %{vendor_models: models, pages: total_pages, records: total_models})
     end
   end
 
@@ -35,7 +35,7 @@ defmodule EvercamMedia.ModelController do
         render_error(conn, 404, "Model Not found.")
       model ->
         conn
-        |> render(ModelView, "show.json", %{model: model})
+        |> render(VendorModelView, "show.json", %{vendor_model: model})
     end
   end
 

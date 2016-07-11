@@ -1,6 +1,6 @@
-defmodule EvercamMedia.ModelControllerTest do
+defmodule EvercamMedia.VendorModelControllerTest do
   use EvercamMedia.ConnCase
-  import EvercamMedia.ModelView, only: [render: 2]
+  import EvercamMedia.VendorModelView, only: [render: 2]
 
   setup do
     vendor = Repo.insert!(%Vendor{exid: "vendor0", name: "Vendor XYZ", known_macs: []})
@@ -15,7 +15,7 @@ defmodule EvercamMedia.ModelControllerTest do
   test "GET /v1/models/:id", %{model: model} do
     response = build_conn |> get("/v1/models/model0")
 
-    model_json = render("show.json", %{model: VendorModel.by_exid(model.exid)})
+    model_json = render("show.json", %{vendor_model: VendorModel.by_exid(model.exid)})
 
     assert response.status == 200
     assert response.resp_body == Poison.encode!(model_json)
