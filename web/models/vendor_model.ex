@@ -2,6 +2,7 @@ defmodule VendorModel do
   use EvercamMedia.Web, :model
   import Ecto.Query
   alias EvercamMedia.Repo
+  alias EvercamMedia.Util
 
   schema "vendor_models" do
     belongs_to :vendor, Vendor, foreign_key: :vendor_id
@@ -81,10 +82,16 @@ defmodule VendorModel do
   end
 
   def check_vendor_in_query(query, vendor) when vendor in [nil, ""], do: query
-  def check_vendor_in_query(query, vendor), do: query |> where([vm], vm.vendor_id == ^vendor.id)
+  def check_vendor_in_query(query, vendor) do
+    query
+    |> where([vm], vm.vendor_id == ^vendor.id)
+  end
 
   def check_name_in_query(query, name) when name in [nil, ""], do: query
-  def check_name_in_query(query, name), do: query |> where([vm], like(fragment("lower(?)", vm.name), ^("%#{String.downcase(name)}%")))
+  def check_name_in_query(query, name) do
+    query
+    |> where([vm], like(fragment("lower(?)", vm.name), ^("%#{String.downcase(name)}%")))
+  end
 
   def add_limit_and_offset(query, limit, page) do
     query
@@ -94,7 +101,7 @@ defmodule VendorModel do
   end
 
   def get_url(model, attr \\ "jpg") do
-    "#{model.config["snapshots"]["#{attr}"]}"
+    Util.deep_get(model.config, ["snapshots", "#{attr}"], "")
   end
 
   def get_image_url(model_full, type \\ "original") do
