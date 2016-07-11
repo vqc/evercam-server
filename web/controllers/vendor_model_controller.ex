@@ -17,7 +17,7 @@ defmodule EvercamMedia.VendorModelController do
         |> VendorModel.check_name_in_query(params["name"])
 
       total_models = VendorModel.get_models_count(query)
-      total_pages = Float.ceil(total_models / limit)
+      total_pages = Float.floor(total_models / limit)
 
       models =
         query
