@@ -231,8 +231,9 @@ defmodule EvercamMedia.UserController do
     evercam_user = User.by_username("evercam")
     remembrance_camera = Camera.get_remembrance_camera
     rights = CameraShare.rights_list("public")
+    message = "Default camera shared with newly created user."
 
-    CameraShare.create_share(remembrance_camera, user, evercam_user, rights, "public")
+    CameraShare.create_share(remembrance_camera, user, evercam_user, rights, message, "public")
   end
 
   defp create_password(password) when password in [nil, ""], do: nil
