@@ -23,8 +23,9 @@ defmodule EvercamMedia.ModelController do
         query
         |> VendorModel.add_limit_and_offset(limit, page)
         |> VendorModel.get_all
-      data = Phoenix.View.render(ModelView, "index.json", %{models: models})
-      json(conn, Map.merge(%{pages: total_pages, records: total_models}, data))
+
+      conn
+      |> render(ModelView, "index.json", %{models: models, pages: total_pages, records: total_models})
     end
   end
 
