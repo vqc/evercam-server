@@ -1,12 +1,9 @@
 defmodule EvercamMedia.MotionDetectionView do
   use EvercamMedia.Web, :view
 
+  def render("show.json", %{motion_detection: nil}), do: %{motion_detections: []}
   def render("show.json", %{motion_detection: motion_detection}) do
-    case motion_detection do
-      nil -> %{motion_detections: %{}}
-      %MotionDetection{} ->
-        %{motion_detections: render_many([motion_detection], __MODULE__, "motion_detection.json")}
-    end
+    %{motion_detections: render_many([motion_detection], __MODULE__, "motion_detection.json")}
   end
 
   def render("motion_detection.json", %{motion_detection: motion_detection}) do
