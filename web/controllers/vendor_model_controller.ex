@@ -45,7 +45,7 @@ defmodule EvercamMedia.VendorModelController do
   defp get_page(page) when page in [nil, ""], do: 0
   defp get_page(page), do: if to_integer(page) < 0, do: 0, else: to_integer(page)
 
-  defp vendor_exists(conn, vendor_id) when vendor_id in [nil, ""], do: {:ok, nil}
+  defp vendor_exists(_conn, vendor_id) when vendor_id in [nil, ""], do: {:ok, nil}
   defp vendor_exists(conn, vendor_id) do
     case Vendor.by_exid(vendor_id) do
       nil -> render_error(conn, 404, "model vendor not found.")
