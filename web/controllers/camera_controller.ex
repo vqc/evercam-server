@@ -4,6 +4,7 @@ defmodule EvercamMedia.CameraController do
   alias EvercamMedia.ErrorView
   alias EvercamMedia.Snapshot.Storage
   alias EvercamMedia.Snapshot.WorkerSupervisor
+  alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Util
   require Logger
   import String, only: [to_integer: 1]
@@ -156,7 +157,10 @@ defmodule EvercamMedia.CameraController do
             |> Repo.preload(:vendor_model, force: true)
             |> Repo.preload([vendor_model: :vendor], force: true)
           CameraActivity.log_activity(caller, camera, "created")
-
+          spawn fn ->
+            create_thumbnail(full_camera)
+            EvercamMedia.UserMailer.camera_create_notification(caller, full_camera)
+          end
           conn
           |> render("show.json", %{camera: full_camera, user: caller})
         {:error, changeset} ->
@@ -360,6 +364,12 @@ defmodule EvercamMedia.CameraController do
     put_in(params, [:config, "snapshots", key], value)
   end
   defp add_parameter(params, "auth", key, value) do
+    params =
+      if is_nil(params[:config]["auth"]) do
+        put_in(params, [:config, "auth"], %{"basic" => %{}})
+      else
+        params
+      end
     put_in(params, [:config, "auth", "basic", key], value)
   end
 
@@ -375,5 +385,38 @@ defmodule EvercamMedia.CameraController do
     CameraActivity.delete_by_camera_id(camera_id)
     Snapshot.delete_by_camera_id(camera_id)
     # TODO Seaweedfs Deletion
+  end
+
+  #######################
+  ## Create thumbnail functions ##
+  #######################
+
+  defp create_thumbnail(camera) do
+    args = %{
+      camera_exid: camera.exid,
+      url: Camera.snapshot_url(camera),
+      username: Camera.username(camera),
+      password: Camera.password(camera),
+      vendor_exid: Camera.get_vendor_attr(camera, :exid),
+      timestamp: Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc),
+      notes: "Evercam Thumbnail"
+    }
+    response = CamClient.fetch_snapshot(args)
+    timestamp = Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
+    args = Map.put(args, :timestamp, timestamp)
+
+    case response do
+      {:error, error} ->
+        Logger.error "[#{camera.exid}] [createthumbnail] [error] [#{inspect error}]"
+      _ ->
+        handle_camera_response(args, response)
+    end
+  end
+
+  defp handle_camera_response(args, {:ok, data}) do
+    spawn fn ->
+      Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
+      Storage.save(args[:camera_exid], args[:timestamp], data, args[:notes])
+    end
   end
 end

@@ -48,6 +48,17 @@ defmodule EvercamMedia.UserMailer do
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "sign_up_to_share_email.txt", user: user, camera: camera, message: message, key: key)
   end
 
+  def camera_create_notification(user, camera) do
+    thumbnail = get_thumbnail(camera)
+    Mailgun.Client.send_email @config,
+      to: user.email,
+      subject: "A new camera has been added to your account",
+      from: @from,
+      attachments: get_attachments(thumbnail),
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "camera_create_notification.html", user: user, camera: camera, thumbnail_available: !!thumbnail, year: @year),
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "camera_create_notification.txt", user: user, camera: camera)
+  end
+
   defp get_thumbnail(camera) do
     case Storage.thumbnail_load(camera.exid) do
       {:ok, image} -> image
