@@ -55,8 +55,8 @@ defmodule EvercamMedia.CameraShareControllerTest do
       build_conn()
       |> get("/v1/cameras/austin/shares")
 
-    assert response.status == 401
-    assert Poison.decode!(response.resp_body)["message"] == "Unauthorized."
+    assert response.status == 200
+    assert Poison.decode!(response.resp_body)["shares"] == []
   end
 
   test "POST /v1/cameras/:id/shares, return share when sharee exists", context do

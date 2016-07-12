@@ -9,18 +9,22 @@ defmodule EvercamMedia.CameraShareController do
     user = User.by_username_or_email(params["user_id"])
 
     with :ok <- camera_exists(conn, exid, camera),
-         :ok <- caller_has_permission(conn, current_user, camera),
          :ok <- user_exists(conn, params["user_id"], user),
          :ok <- user_can_list(conn, current_user, camera, params["user_id"])
     do
-      shares =
-        if user do
-          CameraShare.user_camera_share(camera, user)
-        else
-          CameraShare.camera_shares(camera)
-        end
-      conn
-      |> render(CameraShareView, "index.json", %{camera_shares: shares, camera: camera, user: current_user})
+      if current_user do
+        shares =
+          if user do
+            CameraShare.user_camera_share(camera, user)
+          else
+            CameraShare.camera_shares(camera)
+          end
+        conn
+        |> render(CameraShareView, "index.json", %{camera_shares: shares, camera: camera, user: current_user})
+      else
+        conn
+        |> render(CameraShareView, "index.json", %{camera_shares: [], camera: camera, user: current_user})
+      end
     end
   end
 
