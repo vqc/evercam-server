@@ -42,10 +42,14 @@ defmodule EvercamMedia.Router do
     get "/cameras/:id/thumbnail/:timestamp", CameraController, :thumbnail
 
     get "/models", VendorModelController, :index
+    options "/models", VendorModelController, :index
     get "/models/:id", VendorModelController, :show
+    options "/models/:id", VendorModelController, :show
 
-    get "/vendors/:id", VendorController, :show
     get "/vendors", VendorController, :index
+    options "/vendors", VendorController, :index
+    get "/vendors/:id", VendorController, :show
+    options "/vendors/:id", VendorController, :show
 
     post "/users", UserController, :create
 
