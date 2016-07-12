@@ -113,6 +113,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
   end
 
+  def save_snapshot_record(_camera, _timestamp, _motion_level, "Evercam Thumbnail"), do: :noop
   def save_snapshot_record(camera, timestamp, motion_level, notes) do
     datetime =
       timestamp
