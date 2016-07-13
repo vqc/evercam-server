@@ -8,9 +8,15 @@ defmodule EvercamMedia.CameraShareRequestController do
     status = parse_status(params["status"])
 
     with :ok <- camera_exists(conn, exid, camera),
-         :ok <- caller_has_permission(conn, caller, camera)
+         :ok <- user_can_list(conn, caller, camera)
     do
-      share_requests = CameraShareRequest.by_camera_and_status(camera, status)
+     share_requests =
+       if caller != nil && Permission.Camera.can_edit?(caller, camera) do
+         CameraShareRequest.by_camera_and_status(camera, status)
+       else
+         []
+       end
+
       conn
       |> render(CameraShareRequestView, "index.json", %{camera_share_requests: share_requests})
     end
@@ -69,6 +75,10 @@ defmodule EvercamMedia.CameraShareRequestController do
       nil -> render_error(conn, 404, "Share request not found.")
       %CameraShareRequest{} = camera_share_request -> {:ok, camera_share_request}
     end
+  end
+
+  defp user_can_list(conn, user, camera) do
+    if Permission.Camera.can_list?(user, camera), do: :ok, else: render_error(conn, 401, "Unauthorized.")
   end
 
   defp camera_exists(conn, camera_exid, nil), do: render_error(conn, 404, "The #{camera_exid} camera does not exist.")
