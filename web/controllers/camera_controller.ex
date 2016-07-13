@@ -348,8 +348,11 @@ defmodule EvercamMedia.CameraController do
     |> add_parameter("auth", "password", params["cam_password"])
   end
 
-  defp add_parameter(params, "is_public", _key, value) when value in [nil, ""] do
-    Map.merge(%{:is_public => "false"}, params)
+  defp add_parameter(params, "is_public", _key, value) when value in [nil, "", "false"] do
+    Map.merge(%{:is_public => false}, params)
+  end
+  defp add_parameter(params, "is_public", _key, value) when value in [true, "true"] do
+    Map.merge(%{:is_public => true}, params)
   end
   defp add_parameter(params, "is_public", _key, _value), do: params
   defp add_parameter(params, _field, _key, value) when value in [nil, ""], do: params
