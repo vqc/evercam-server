@@ -23,7 +23,8 @@ defmodule EvercamMedia.ArchiveView do
       requester_name: User.get_fullname(archive.user),
       requester_email: Util.deep_get(archive, [:user, :email], ""),
       embed_time: archive.embed_time,
-      frames: archive.frames
+      frames: archive.frames,
+      public: archive.public
     }
   end
 
