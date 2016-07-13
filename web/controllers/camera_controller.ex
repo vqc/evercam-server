@@ -41,7 +41,9 @@ defmodule EvercamMedia.CameraController do
         end
 
       data = ConCache.get_or_store(:cameras, "#{requested_user.username}_#{include_shared?}", fn() ->
-        cameras = Camera.for(requested_user, include_shared?)
+        cameras =
+          Camera.for(requested_user, include_shared?)
+          |> Enum.sort_by(fn(camera) -> String.downcase(camera.name) end)
         Phoenix.View.render(CameraView, "index.json", %{cameras: cameras, user: requester})
       end)
 
