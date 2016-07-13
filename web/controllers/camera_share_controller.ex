@@ -16,7 +16,7 @@ defmodule EvercamMedia.CameraShareController do
         cond do
           user != nil && current_user != nil ->
             CameraShare.user_camera_share(camera, user)
-          current_user != nil ->
+          current_user != nil && Permission.Camera.can_edit?(current_user, camera) ->
             CameraShare.camera_shares(camera)
           true ->
             []
