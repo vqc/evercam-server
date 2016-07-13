@@ -329,6 +329,7 @@ defmodule Camera do
   def get_remembrance_camera do
     Camera
     |> where(exid: "evercam-remembrance-camera")
+    |> preload(:owner)
     |> Repo.one
   end
 

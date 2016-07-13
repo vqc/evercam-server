@@ -1,5 +1,6 @@
 defmodule EvercamMedia.Intercom do
   alias EvercamMedia.Util
+  require Logger
 
   @intercom_auth {System.get_env["INTERCOM_ID"], System.get_env["INTERCOM_KEY"]}
 
@@ -29,6 +30,7 @@ defmodule EvercamMedia.Intercom do
         {:ok, json} -> json
         _ -> nil
       end
-    HTTPotion.post(System.get_env["INTERCOM_URL"], [body: json, basic_auth: @intercom_auth, headers: headers])
+    HTTPotion.post(System.get_env["INTERCOM_URL"], [body: json, basic_auth: @intercom_auth, headers: headers, timeout: 4000])
+    Logger.info "Intercom user has been created"
   end
 end

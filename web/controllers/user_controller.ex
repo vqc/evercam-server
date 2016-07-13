@@ -47,7 +47,7 @@ defmodule EvercamMedia.UserController do
   end
 
   def create(conn, params) do
-    with :ok <- ensure_country(params["country_id"], conn)
+    with :ok <- ensure_country(params["country"], conn)
     do
       [user_agent|rest] = get_req_header(conn, "user-agent")
       requester_ip = parse_requester_ip(conn.remote_ip)
@@ -58,9 +58,9 @@ defmodule EvercamMedia.UserController do
       password = create_password(params["password"])
 
       params =
-        case Country.get_by_code(params["country_id"]) do
-          {:ok, country} -> Map.merge(params, %{"country_id" => country.id})
-          {:error, nil} -> Map.delete(params, "country_id")
+        case Country.get_by_code(params["country"]) do
+          {:ok, country} -> Map.merge(params, %{"country_id" => country.id}) |> Map.delete("country")
+          {:error, nil} -> Map.delete(params, "country")
         end
 
       params = Map.merge(params, %{"password" => password, "api_id" => api_id, "api_key" => api_key})
@@ -128,16 +128,16 @@ defmodule EvercamMedia.UserController do
 
     with :ok <- ensure_user_exists(user, username, conn),
          :ok <- ensure_can_view(current_user, user, conn),
-         :ok <- ensure_country(params["country_id"], conn)
+         :ok <- ensure_country(params["country"], conn)
     do
       user_params = %{
         firstname: firstname(params["firstname"], user),
         lastname: lastname(params["lastname"], user),
         email: email(params["email"], user)
       }
-      user_params = case country(params["country_id"], user) do
-        nil -> Map.delete(user_params, "country_id")
-        country_id -> Map.merge(user_params, %{country_id: country_id})
+      user_params = case country(params["country"], user) do
+        nil -> Map.delete(user_params, "country")
+        country_id -> Map.merge(user_params, %{country_id: country_id}) |> Map.delete("country")
       end
       changeset = User.changeset(user, user_params)
       case Repo.update(changeset) do
@@ -238,14 +238,14 @@ defmodule EvercamMedia.UserController do
   defp share_default_camera(user) do
     evercam_user = User.by_username("evercam")
     remembrance_camera = Camera.get_remembrance_camera
-    rights = CameraShare.rights_list("public")
+    rights = CameraShare.get_rights("public", evercam_user, remembrance_camera)
     message = "Default camera shared with newly created user."
 
     CameraShare.create_share(remembrance_camera, user, evercam_user, rights, message, "public")
   end
 
   defp create_password(password) when password in [nil, ""], do: nil
-  defp create_password(password), do: Comeonin.Bcrypt.hashpwsalt(password)
+  defp create_password(password), do: Comeonin.Bcrypt.hashpass(password, Comeonin.Bcrypt.gen_salt(12, true))
 
   defp create_share_for_request(nil, _user, conn), do: render_error(conn, 400, "Camera share request does not exist.")
   defp create_share_for_request(share_request, user, conn) do

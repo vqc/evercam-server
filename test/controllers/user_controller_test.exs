@@ -35,7 +35,7 @@ defmodule EvercamMedia.UserControllerTest do
 
   test "POST /v1/users/ when country is invalid!" do
     params = %{
-      country_id: "pki"
+      country: "pki"
     }
     response =
       build_conn()
