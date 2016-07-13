@@ -299,6 +299,8 @@ defmodule Camera do
 
   def get_rights(camera, user) do
     cond do
+      user == nil && camera.is_public ->
+        "snapshot,list"
       is_owner?(user, camera) ->
         "snapshot,list,edit,delete,view,grant~snapshot,grant~view,grant~edit,grant~delete,grant~list"
       camera.access_rights == [] ->
