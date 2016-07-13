@@ -19,7 +19,7 @@ defmodule EvercamMedia.CameraShareView do
     %{
       id: camera_share.id,
       kind: camera_share.kind,
-      email: camera_share.user.email,
+      email: Util.deep_get(camera_share, [:user, :email], ""),
       camera_id: camera_share.camera.exid,
       fullname: User.get_fullname(camera_share.user),
       sharer_name: User.get_fullname(camera_share.sharer),
