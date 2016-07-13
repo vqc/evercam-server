@@ -387,10 +387,6 @@ defmodule EvercamMedia.CameraController do
     # TODO Seaweedfs Deletion
   end
 
-  #######################
-  ## Create thumbnail functions ##
-  #######################
-
   defp create_thumbnail(camera) do
     args = %{
       camera_exid: camera.exid,
@@ -401,22 +397,15 @@ defmodule EvercamMedia.CameraController do
       timestamp: Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc),
       notes: "Evercam Thumbnail"
     }
-    response = CamClient.fetch_snapshot(args)
     timestamp = Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
-    args = Map.put(args, :timestamp, timestamp)
+    response = CamClient.fetch_snapshot(args)
 
     case response do
+      {:ok, data} ->
+        Util.broadcast_snapshot(args[:camera_exid], data, timestamp)
+        Storage.save(args[:camera_exid], args[:timestamp], data, args[:notes])
       {:error, error} ->
-        Logger.error "[#{camera.exid}] [createthumbnail] [error] [#{inspect error}]"
-      _ ->
-        handle_camera_response(args, response)
-    end
-  end
-
-  defp handle_camera_response(args, {:ok, data}) do
-    spawn fn ->
-      Util.broadcast_snapshot(args[:camera_exid], data, args[:timestamp])
-      Storage.save(args[:camera_exid], args[:timestamp], data, args[:notes])
+        Logger.error "[#{camera.exid}] [create_thumbnail] [error] [#{inspect error}]"
     end
   end
 end
