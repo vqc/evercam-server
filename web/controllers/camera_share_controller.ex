@@ -86,8 +86,8 @@ defmodule EvercamMedia.CameraShareController do
     sharee = email |> String.downcase |> User.by_username_or_email
 
     with :ok <- camera_exists(conn, exid, camera),
-         :ok <- caller_has_permission(conn, caller, camera),
          :ok <- sharee_exists(conn, email, sharee),
+         :ok <- caller_can_delete_share(conn, caller, sharee, camera),
          {:ok, _share} <- share_exists(conn, sharee, camera)
     do
       CameraShare.delete_share(sharee, camera)
@@ -117,6 +117,14 @@ defmodule EvercamMedia.CameraShareController do
       render_error(conn, 401, "Unauthorized.")
     else
       :ok
+    end
+  end
+
+  defp caller_can_delete_share(conn, caller, sharee, camera) do
+    cond do
+      Permission.Camera.can_edit?(caller, camera) -> :ok
+      caller == sharee -> :ok
+      true -> render_error(conn, 401, "Unauthorized.")
     end
   end
 
