@@ -20,11 +20,11 @@ defmodule CameraActivity do
   end
 
   def log_activity(user, camera, action, extra \\ nil) do
-    access_token = AccessToken.active_token_for(user.id)
+    access_token_id = AccessToken.active_token_id_for(user.id)
     params = %{
       camera_id: camera.id,
       camera_exid: camera.exid,
-      access_token_id: Util.deep_get(access_token, [:id], nil),
+      access_token_id: access_token_id,
       name: User.get_fullname(user),
       action: action,
       extra: extra,

@@ -23,11 +23,11 @@ defmodule AccessRight do
   end
 
   def allows?(requester, resource, right, scope) do
-    token = AccessToken.active_token_for(requester.id)
+    token_id = AccessToken.active_token_id_for(requester.id)
 
     access_rights =
       AccessRight
-      |> where([ar], ar.token_id == ^token.id)
+      |> where([ar], ar.token_id == ^token_id)
       |> where(account_id: ^resource.id)
       |> where(status: 1)
       |> where(right: ^right)
@@ -49,13 +49,13 @@ defmodule AccessRight do
   end
 
   def grant(user, camera, rights) do
-    token = AccessToken.active_token_for(user.id)
+    token_id = AccessToken.active_token_id_for(user.id)
     saved_rights = recorded_rights(user, camera)
     rights
     |> Enum.reject(fn(right) -> Enum.member?(saved_rights, right) end)
     |> Enum.each(fn(right) ->
       unless Camera.is_owner?(user, camera) do
-        right_params = %{token_id: token.id, camera_id: camera.id, right: right, status: @status.active}
+        right_params = %{token_id: token_id, camera_id: camera.id, right: right, status: @status.active}
         %AccessRight{}
         |> changeset(right_params)
         |> Repo.insert
@@ -64,9 +64,9 @@ defmodule AccessRight do
   end
 
   def recorded_rights(user, camera) do
-    token = AccessToken.active_token_for(user.id)
+    token_id = AccessToken.active_token_id_for(user.id)
     AccessRight
-    |> where(token_id: ^token.id)
+    |> where(token_id: ^token_id)
     |> where(camera_id: ^camera.id)
     |> where(status: ^@status.active)
     |> Repo.all
@@ -75,10 +75,10 @@ defmodule AccessRight do
   end
 
   def revoke(user, camera, rights) do
-    token = AccessToken.active_token_for(user.id)
+    token_id = AccessToken.active_token_id_for(user.id)
     if !Camera.is_owner?(user, camera) do
       AccessRight
-      |> where(token_id: ^token.id)
+      |> where(token_id: ^token_id)
       |> where(camera_id: ^camera.id)
       |> where(status: ^@status.active)
       |> where([r], r.right in ^rights)
