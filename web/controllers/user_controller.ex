@@ -6,6 +6,7 @@ defmodule EvercamMedia.UserController do
   alias EvercamMedia.Repo
   alias EvercamMedia.Util
   alias EvercamMedia.Intercom
+  require Logger
 
   def get(conn, params) do
     caller = conn.assigns[:current_user]
@@ -95,7 +96,14 @@ defmodule EvercamMedia.UserController do
 
             share_default_camera(user)
             EvercamMedia.UserMailer.confirm(user, code)
+          else
+            share_request = CameraShareRequest.by_key_and_status(share_request_key)
+            create_share_for_request(share_request, user, conn)
+
+            share_requests = CameraShareRequest.by_email(user.email)
+            multiple_share_create(share_requests, user, conn)
           end
+
           if user |> Intercom.get_user |> intercom_user? do
             render_error(conn, 400, "User already present at intercom.")
           else
@@ -238,4 +246,28 @@ defmodule EvercamMedia.UserController do
 
   defp create_password(password) when password in [nil, ""], do: nil
   defp create_password(password), do: Comeonin.Bcrypt.hashpwsalt(password)
+
+  defp create_share_for_request(nil, _user, conn), do: render_error(conn, 400, "Camera share request does not exist.")
+  defp create_share_for_request(share_request, user, conn) do
+    if share_request.email != user.email do
+      render_error(conn, 400, "The email address specified does not match the share request email.")
+    else
+      param = %{
+        status: 1
+      }
+      changeset = CameraShareRequest.changeset(share_request, param)
+
+      case Repo.update(changeset) do
+        {:ok, share_request} ->
+          CameraShare.create_share(share_request.user, user, share_request.camera, share_request.rights, share_request.message)
+        {:error, changeset} ->
+          render_error(conn, 400, Util.parse_changeset(changeset))
+      end
+    end
+  end
+
+  defp multiple_share_create(nil, _user, _conn), do: Logger.info "No share request found."
+  defp multiple_share_create(share_requests, user, conn) do
+    Enum.each(share_requests, fn(share_request) -> create_share_for_request(share_request, user, conn) end)
+  end
 end

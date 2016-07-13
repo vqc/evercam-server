@@ -39,6 +39,23 @@ defmodule CameraShareRequest do
     |> Repo.all
   end
 
+  def by_key_and_status(key, status \\ @status.pending) do
+    CameraShareRequest
+    |> where(status: ^status)
+    |> where(key: ^key)
+    |> preload(:camera)
+    |> preload(:user)
+    |> Repo.one
+  end
+
+  def by_email(email) do
+    CameraShareRequest
+    |> where(email: ^email)
+    |> preload(:camera)
+    |> preload(:user)
+    |> Repo.all
+  end
+
   def get_pending_request(camera_id, email) do
     CameraShareRequest
     |> where(camera_id: ^camera_id)
