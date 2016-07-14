@@ -28,6 +28,10 @@ defmodule User do
     timestamps(inserted_at: :created_at, type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
 
+  def invalidate_auth(api_id, api_key) do
+    ConCache.delete(:users, "#{api_id}_#{api_key}")
+  end
+
   def get_by_api_keys("", ""), do: nil
   def get_by_api_keys(nil, _api_key), do: nil
   def get_by_api_keys(_api_id, nil), do: nil
