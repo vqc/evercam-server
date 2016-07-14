@@ -1,5 +1,6 @@
 defmodule Permission.Camera do
   import Camera, only: [is_owner?: 2]
+  alias EvercamMedia.Util
 
   def can_edit?(requester, camera) do
     can_access?("edit", requester, camera)
@@ -34,7 +35,7 @@ defmodule Permission.Camera do
 
   defp has_right?(right, %User{} = user, camera) do
     Enum.any?(camera.access_rights, fn(ar) ->
-      ar.access_token.user_id == user.id &&
+      Util.deep_get(ar, [:access_token, :user_id], 0) == user.id &&
       (ar.right == right || ar.right == "grant~#{right}") &&
       ar.status == 1
     end)

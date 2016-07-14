@@ -303,7 +303,7 @@ defmodule Camera do
         "snapshot,list"
       true ->
         camera.access_rights
-        |> Enum.filter(fn(ar) -> ar.access_token.user_id == user.id end)
+        |> Enum.filter(fn(ar) -> Util.deep_get(ar, [:access_token, :user_id], 0) == user.id && ar.status == 1 end)
         |> Enum.map(fn(ar) -> ar.right end)
         |> Enum.into(["snapshot", "list"])
         |> Enum.uniq
