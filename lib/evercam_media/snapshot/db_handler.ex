@@ -26,8 +26,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     {camera_exid, timestamp, image} = data
     Logger.debug "[#{camera_exid}] [snapshot_success]"
     notes = "Evercam Proxy"
-    camera = Camera.get_full("#{camera_exid}")
-    spawn fn -> save_snapshot_record(camera, timestamp, nil, notes) end
     spawn fn -> update_camera_status("#{camera_exid}", timestamp, true) end
     ConCache.put(:cache, camera_exid, %{image: image, timestamp: timestamp, notes: notes})
     {:ok, state}
@@ -113,30 +111,10 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     end
   end
 
-  def save_snapshot_record(_camera, _timestamp, _motion_level, "Evercam Thumbnail"), do: :noop
-  def save_snapshot_record(camera, timestamp, motion_level, notes) do
-    datetime =
-      timestamp
-      |> DateTime.Parse.unix!
-      |> DateTime.to_erl
-      |> Ecto.DateTime.cast!
-    snapshot_timestamp =
-      timestamp
-      |> DateTime.Parse.unix!
-      |> Strftime.strftime!("%Y%m%d%H%M%S%f")
-
-    snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
-    parameters = %{camera_id: camera.id, notes: notes, motionlevel: motion_level, snapshot_id: snapshot_id, created_at: datetime}
-    changeset = Snapshot.changeset(%Snapshot{}, parameters)
-    SnapshotRepo.insert(changeset)
-  end
-
   defp construct_camera(datetime, online_status, online_status_unchanged)
-
   defp construct_camera(datetime, false, false) do
     %{last_polled_at: datetime, is_online: false, last_online_at: datetime}
   end
-
   defp construct_camera(datetime, status, _) do
     %{last_polled_at: datetime, is_online: status}
   end
