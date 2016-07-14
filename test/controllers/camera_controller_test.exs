@@ -1,6 +1,5 @@
 defmodule EvercamMedia.CameraControllerTest do
   use EvercamMedia.ConnCase
-  alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.Storage
 
@@ -20,12 +19,6 @@ defmodule EvercamMedia.CameraControllerTest do
     now = Calendar.DateTime.now!("UTC")
     if context[:thumbnail] do
       timestamp = now |> Calendar.DateTime.Format.unix
-      datetime = now |> Calendar.Ecto.DateTime.cast!
-      snapshot_timestamp = now |> Calendar.Strftime.strftime!("%Y%m%d%H%M%S%f")
-      snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
-      %Snapshot{}
-      |> Snapshot.changeset(%{camera_id: camera.id, notes: "", motionlevel: 0, created_at: datetime, snapshot_id: snapshot_id})
-      |> SnapshotRepo.insert
 
       Storage.save(camera.exid, timestamp, "test_content", "Test Note")
     end
