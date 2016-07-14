@@ -81,7 +81,7 @@ defmodule EvercamMedia.Mixfile do
       {:phoenix_ecto, "~> 3.0.0"},
       {:phoenix_html, "~> 2.6"},
       {:poison, "~> 1.5"},
-      {:porcelain, "~> 2.0.1"},
+      {:porcelain, github: "alco/porcelain"},
       {:postgrex, ">= 0.11.2"},
       {:quantum, github: "c-rack/quantum-elixir"},
       {:uuid, "~> 1.1"},
