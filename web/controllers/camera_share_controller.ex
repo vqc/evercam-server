@@ -71,6 +71,8 @@ defmodule EvercamMedia.CameraShareController do
       if share_changeset.valid? do
         CameraShare.update_share(sharee, camera, rights)
         CameraActivity.log_activity(caller, camera, "updated share", %{with: caller.email})
+        Camera.invalidate_user(sharee)
+        Camera.invalidate_camera(camera)
         camera_share =
           camera_share
           |> Repo.preload([camera: :access_rights], force: true)
