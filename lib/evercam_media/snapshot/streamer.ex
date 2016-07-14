@@ -3,7 +3,6 @@ defmodule EvercamMedia.Snapshot.Streamer do
   TODO
   """
 
-  use Calendar
   use GenServer
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.CamClient
@@ -71,7 +70,7 @@ defmodule EvercamMedia.Snapshot.Streamer do
   end
 
   def stream(camera) do
-    timestamp = DateTime.now_utc |> DateTime.Format.unix
+    timestamp = Calendar.DateTime.now_utc |> Calendar.DateTime.Format.unix
     response = camera |> construct_args |> CamClient.fetch_snapshot
 
     case response do

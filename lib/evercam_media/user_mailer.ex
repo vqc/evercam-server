@@ -1,10 +1,9 @@
 defmodule EvercamMedia.UserMailer do
-  use Calendar
   alias EvercamMedia.Snapshot.Storage
 
   @config Application.get_env(:evercam_media, :mailgun)
   @from Application.get_env(:evercam_media, EvercamMedia.Endpoint)[:email]
-  @year DateTime.now_utc |> Strftime.strftime!("%Y")
+  @year Calendar.DateTime.now_utc |> Calendar.Strftime.strftime!("%Y")
 
   def confirm(user, code) do
     Mailgun.Client.send_email @config,

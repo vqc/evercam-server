@@ -1,5 +1,4 @@
 defmodule EvercamMedia.Util do
-  use Calendar
   require Logger
   import String, only: [to_integer: 1]
 
@@ -118,10 +117,10 @@ defmodule EvercamMedia.Util do
 
   def snapshot_timestamp_to_unix(timestamp) do
     timestamp
-    |> NaiveDateTime.Parse.asn1_generalized
+    |> Calendar.NaiveDateTime.Parse.asn1_generalized
     |> elem(1)
-    |> NaiveDateTime.to_date_time_utc
-    |> DateTime.Format.unix
+    |> Calendar.NaiveDateTime.to_date_time_utc
+    |> Calendar.DateTime.Format.unix
   end
 
   def ecto_datetime_to_unix(nil), do: nil

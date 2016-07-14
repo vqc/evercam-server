@@ -5,7 +5,6 @@ defmodule EvercamMedia.Snapshot.Worker do
   Functions can be called from other places to get snapshots manually.
   """
 
-  use Calendar
   use GenServer
   alias EvercamMedia.Snapshot.CamClient
 
@@ -63,7 +62,7 @@ defmodule EvercamMedia.Snapshot.Worker do
     GenServer.cast(cam_server, {:get_camera_snapshot, timestamp})
   end
   def get_snapshot(cam_server, reply_to) do
-    timestamp = DateTime.Format.unix(DateTime.now_utc)
+    timestamp = Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
     GenServer.cast(cam_server, {:get_camera_snapshot, timestamp, reply_to})
   end
 
@@ -183,7 +182,7 @@ defmodule EvercamMedia.Snapshot.Worker do
 
   defp try_snapshot(_state, config, camera_exid, _timestamp, reply_to, worker, 3) do
     spawn fn ->
-      timestamp = DateTime.Format.unix(DateTime.now_utc)
+      timestamp = Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
       result = CamClient.fetch_snapshot(config)
       ConCache.delete(:camera_lock, camera_exid)
       send worker, {:camera_reply, result, timestamp, reply_to}

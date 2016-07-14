@@ -1,6 +1,5 @@
 defmodule EvercamMedia.UserController do
   use EvercamMedia.Web, :controller
-  use Calendar
   alias EvercamMedia.UserView
   alias EvercamMedia.ErrorView
   alias EvercamMedia.Repo
@@ -67,15 +66,18 @@ defmodule EvercamMedia.UserController do
 
       params =
         case has_share_request_key?(share_request_key) do
-          true -> Map.merge(params, %{"confirmed_at" => DateTime.now_utc |> DateTime.to_erl}) |> Map.delete("share_request_key")
-          false -> Map.delete(params, "share_request_key")
+          true ->
+            Map.merge(params, %{"confirmed_at" => Calendar.DateTime.to_erl(Calendar.DateTime.now_utc)})
+            |> Map.delete("share_request_key")
+          false ->
+            Map.delete(params, "share_request_key")
         end
 
       changeset = User.changeset(%User{}, params)
       case Repo.insert(changeset) do
         {:ok, user} ->
-          {:ok, exp_date} = DateTime.now!("UTC") |> DateTime.advance(3600)
-          {:ok, expiry_date} = DateTime.to_erl(exp_date) |> Ecto.DateTime.cast
+          {:ok, exp_date} = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.advance(3600)
+          {:ok, expiry_date} = Calendar.DateTime.to_erl(exp_date) |> Ecto.DateTime.cast
           token = Ecto.build_assoc(user, :access_tokens, is_revoked: false,
             request: UUID.uuid4(:hex) |> String.slice(0..15), expires_at: expiry_date)
 
@@ -87,7 +89,7 @@ defmodule EvercamMedia.UserController do
             created_at =
               user.created_at
               |> Ecto.DateTime.to_erl
-              |> Strftime.strftime!("%Y-%m-%d %T UTC")
+              |> Calendar.Strftime.strftime!("%Y-%m-%d %T UTC")
 
             code =
               :crypto.hash(:sha, user.username <> created_at)

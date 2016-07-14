@@ -3,7 +3,6 @@ defmodule CameraActivity do
   import Ecto.Changeset
   import Ecto.Query
   alias EvercamMedia.SnapshotRepo
-  alias EvercamMedia.Util
 
   @required_fields ~w(camera_id action)
   @optional_fields ~w(access_token_id camera_exid name action extra done_at)

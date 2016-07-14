@@ -14,7 +14,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     version and not now. This update can be avoided if thumbnails can be dynamically
     served.
   """
-  use Calendar
   use GenEvent
   require Logger
   alias EvercamMedia.Repo
@@ -73,8 +72,8 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       task = Task.async(fn() ->
         datetime =
           timestamp
-          |> DateTime.Parse.unix!
-          |> DateTime.to_erl
+          |> Calendar.DateTime.Parse.unix!
+          |> Calendar.DateTime.to_erl
           |> Ecto.DateTime.cast!
         params = construct_camera(datetime, status, camera.is_online == status)
         changeset = Camera.changeset(camera, params)

@@ -1,5 +1,4 @@
 defmodule EvercamMedia.Snapshot.BroadcastHandler do
-  use Calendar
   use GenEvent
   alias EvercamMedia.Util
 
