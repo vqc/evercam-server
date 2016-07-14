@@ -8,7 +8,7 @@ defmodule EvercamMedia.ArchiveController do
     status = params["status"]
 
     with :ok <- ensure_camera_exists(camera, exid, conn),
-         :ok <- ensure_can_view(current_user, camera, conn)
+         :ok <- ensure_can_list(current_user, camera, conn)
     do
       archives =
         Archive
@@ -27,7 +27,7 @@ defmodule EvercamMedia.ArchiveController do
 
     with :ok <- valid_params(conn, params),
          :ok <- ensure_camera_exists(camera, exid, conn),
-         :ok <- ensure_can_view(current_user, camera, conn)
+         :ok <- ensure_can_list(current_user, camera, conn)
     do
       archive = Archive.by_exid(archive_id)
 
@@ -63,8 +63,8 @@ defmodule EvercamMedia.ArchiveController do
   end
   defp ensure_camera_exists(_camera, _exid, _conn), do: :ok
 
-  defp ensure_can_view(current_user, camera, conn) do
-    if current_user && Permission.Camera.can_edit?(current_user, camera) do
+  defp ensure_can_list(current_user, camera, conn) do
+    if current_user && Permission.Camera.can_list?(current_user, camera) do
       :ok
     else
       render_error(conn, 401, "Unauthorized.")
