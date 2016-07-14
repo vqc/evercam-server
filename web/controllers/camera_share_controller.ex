@@ -91,6 +91,7 @@ defmodule EvercamMedia.CameraShareController do
          {:ok, _share} <- share_exists(conn, sharee, camera)
     do
       CameraShare.delete_share(sharee, camera)
+      Camera.invalidate_user(sharee)
       CameraActivity.log_activity(caller, camera, "stopped sharing", %{with: caller.email})
       json(conn, %{})
     end
