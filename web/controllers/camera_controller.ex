@@ -388,7 +388,6 @@ defmodule EvercamMedia.CameraController do
 
   defp delete_snapshot_worker(camera_id) do
     CameraActivity.delete_by_camera_id(camera_id)
-    Snapshot.delete_by_camera_id(camera_id)
     # TODO Seaweedfs Deletion
   end
 
