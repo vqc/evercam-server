@@ -76,7 +76,7 @@ defmodule EvercamMedia.Mixfile do
       {:httpotion, "~> 2.0"},
       {:ibrowse, "~> 4.2", override: true},
       {:jsx, "~> 2.8.0", override: true},
-      {:mailgun, github: "mosic/mailgun"},
+      {:mailgun, github: "evercam/mailgun"},
       {:phoenix, "~> 1.2.0-rc.1"},
       {:phoenix_ecto, "~> 3.0.0"},
       {:phoenix_html, "~> 2.6"},

@@ -30,7 +30,7 @@
   "ibrowse": {:hex, :ibrowse, "4.2.2", "b32b5bafcc77b7277eff030ed32e1acc3f610c64e9f6aea19822abcadf681b4b", [:rebar3], []},
   "idna": {:hex, :idna, "1.2.0", "ac62ee99da068f43c50dc69acf700e03a62a348360126260e87f2b54eced86b2", [:rebar3], []},
   "jsx": {:hex, :jsx, "2.8.0", "749bec6d205c694ae1786d62cea6cc45a390437e24835fd16d12d74f07097727", [:mix, :rebar], []},
-  "mailgun": {:git, "https://github.com/mosic/mailgun.git", "8c73ada08137ce875b487949167d60fecb1715dc", []},
+  "mailgun": {:git, "https://github.com/evercam/mailgun.git", "8631d603e3df694b0418920e8a31904cba617be3", []},
   "meck": {:hex, :meck, "0.8.4", "59ca1cd971372aa223138efcf9b29475bde299e1953046a0c727184790ab1520", [:rebar, :make], []},
   "metrics": {:hex, :metrics, "1.0.1", "25f094dea2cda98213cecc3aeff09e940299d950904393b2a29d191c346a8486", [:rebar3], []},
   "mime": {:hex, :mime, "1.0.0", "b63027733bba00b1013bad14e25dc8b6629ecb817731544a88a0fd14f2a55685", [:mix], []},
