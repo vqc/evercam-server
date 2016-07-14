@@ -21,7 +21,7 @@ defmodule EvercamMedia.UserController do
         conn
         |> put_status(404)
         |> render(ErrorView, "error.json", %{message: "User does not exist."})
-      !caller || !Permissions.User.can_view?(caller, user) ->
+      !caller || !Permission.User.can_view?(caller, user) ->
         conn
         |> put_status(401)
         |> render(ErrorView, "error.json", %{message: "Unauthorized."})
@@ -199,7 +199,7 @@ defmodule EvercamMedia.UserController do
   defp ensure_user_exists(_user, _id, _conn), do: :ok
 
   defp ensure_can_view(current_user, user, conn) do
-    if current_user && Permissions.User.can_view?(current_user, user) do
+    if current_user && Permission.User.can_view?(current_user, user) do
       :ok
     else
       render_error(conn, 403, "Unauthorized.")

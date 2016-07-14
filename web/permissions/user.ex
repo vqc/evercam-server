@@ -1,4 +1,4 @@
-defmodule Permissions.User do
+defmodule Permission.User do
   def can_view?(requester, user) do
     can_access?("view", requester, user)
   end
