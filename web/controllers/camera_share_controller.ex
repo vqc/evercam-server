@@ -37,7 +37,9 @@ defmodule EvercamMedia.CameraShareController do
       if sharee do
         case CameraShare.create_share(camera, sharee, caller, params["rights"], params["message"]) do
           {:ok, camera_share} ->
-            EvercamMedia.UserMailer.camera_shared_notification(caller, camera, sharee.email, params["message"])
+            unless caller == sharee do
+              EvercamMedia.UserMailer.camera_shared_notification(caller, camera, sharee.email, params["message"])
+            end
             conn |> render(CameraShareView, "show.json", %{camera_share: camera_share})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
