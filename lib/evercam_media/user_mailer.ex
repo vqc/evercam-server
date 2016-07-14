@@ -27,7 +27,7 @@ defmodule EvercamMedia.UserMailer do
   end
 
   def camera_shared_notification(user, camera, sharee_email, message) do
-    thumbnail = get_thumbnail(camera)
+    thumbnail = nil
     Mailgun.Client.send_email @config,
       to: sharee_email,
       subject: "#{User.get_fullname(user)} has shared a camera with you",
@@ -38,7 +38,7 @@ defmodule EvercamMedia.UserMailer do
   end
 
   def camera_share_request_notification(user, camera, email, message, key) do
-    thumbnail = get_thumbnail(camera)
+    thumbnail = nil
     Mailgun.Client.send_email @config,
       to: email,
       subject: "#{User.get_fullname(user)} has shared a camera with you",
@@ -49,7 +49,7 @@ defmodule EvercamMedia.UserMailer do
   end
 
   def camera_create_notification(user, camera) do
-    thumbnail = get_thumbnail(camera)
+    thumbnail = nil
     Mailgun.Client.send_email @config,
       to: user.email,
       subject: "A new camera has been added to your account",
