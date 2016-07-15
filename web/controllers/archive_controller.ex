@@ -73,7 +73,6 @@ defmodule EvercamMedia.ArchiveController do
   end
 
   defp create_clip(params, camera, conn) do
-    params = Map.delete(params, "api_key") |> Map.delete("api_id") |> Map.delete("id")
 
     offset = offset(camera.timezone)
     from_date = clip_date(params["from_date"], offset)
@@ -81,13 +80,18 @@ defmodule EvercamMedia.ArchiveController do
     current_date_time = Calendar.DateTime.now_utc |> Calendar.DateTime.to_erl
     clip_exid = generate_exid(params["title"])
 
-    params = Map.merge(params, %{
-      "camera_id" => camera.id,
-      "title" => params["title"],
-      "from_date" => from_date,
-      "to_date" => to_date,
-      "status" => @status.pending,
-      "exid" => clip_exid
+    params =
+      params
+      |> Map.delete("id")
+      |> Map.delete("api_id")
+      |> Map.delete("api_key")
+      |> Map.merge(%{
+        "camera_id" => camera.id,
+        "title" => params["title"],
+        "from_date" => from_date,
+        "to_date" => to_date,
+        "status" => @status.pending,
+        "exid" => clip_exid
       })
 
     changeset = Archive.changeset(%Archive{}, params)
