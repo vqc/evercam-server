@@ -2,7 +2,6 @@ defmodule EvercamMedia.ArchiveController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.ArchiveView
   alias EvercamMedia.Util
-  use Calendar
 
   @status %{pending: 0, processing: 1, completed: 2, failed: 3}
 
@@ -51,7 +50,7 @@ defmodule EvercamMedia.ArchiveController do
     camera = Camera.by_exid_with_associations(exid)
 
     with :ok <- ensure_camera_exists(camera, exid, conn),
-         :ok <- ensure_can_view(current_user, camera, conn)
+         :ok <- ensure_can_list(current_user, camera, conn)
     do
       create_clip(params, camera, conn)
     end
@@ -79,7 +78,7 @@ defmodule EvercamMedia.ArchiveController do
     offset = offset(camera.timezone)
     from_date = clip_date(params["from_date"], offset)
     to_date = clip_date(params["to_date"], offset)
-    current_date_time = DateTime.now_utc |> DateTime.to_erl
+    current_date_time = Calendar.DateTime.now_utc |> Calendar.DateTime.to_erl
     clip_exid = generate_exid(params["title"])
 
     params = Map.merge(params, %{
@@ -158,21 +157,24 @@ defmodule EvercamMedia.ArchiveController do
 
   defp offset(nil), do: offset("Etc/UTC")
   defp offset(timezone) do
-    timestamp = DateTime.now! timezone
-    timestamp.utc_offset
+    timezone
+    |> Calendar.DateTime.now!
+    |> Map.get(:utc_offset)
   end
 
   defp clip_date(unix_timestamp, _offset) when unix_timestamp in ["", nil], do: nil
   defp clip_date(unix_timestamp, offset) do
     unix_timestamp
-    |> DateTime.Parse.unix!
-    |> DateTime.advance(offset)
+    |> Calendar.DateTime.Parse.unix!
+    |> Calendar.DateTime.advance(offset)
     |> elem(1)
-    |> DateTime.to_erl
+    |> Calendar.DateTime.to_erl
   end
 
   defp date_difference(from_date, to_date) do
-    case DateTime.diff(DateTime.from_erl!(to_date, "Etc/UTC"), DateTime.from_erl!(from_date, "Etc/UTC")) do
+    from = Calendar.DateTime.from_erl!(to_date, "Etc/UTC")
+    to = Calendar.DateTime.from_erl!(from_date, "Etc/UTC")
+    case Calendar.DateTime.diff(from, to) do
       {:ok, seconds, _, :after} -> seconds
       _ -> 1
     end
