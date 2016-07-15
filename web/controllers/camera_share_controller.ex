@@ -41,6 +41,7 @@ defmodule EvercamMedia.CameraShareController do
               EvercamMedia.UserMailer.camera_shared_notification(caller, camera, sharee.email, params["message"])
             end
             Camera.invalidate_user(sharee)
+            Camera.invalidate_camera(camera)
             conn |> render(CameraShareView, "show.json", %{camera_share: camera_share})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
@@ -97,6 +98,7 @@ defmodule EvercamMedia.CameraShareController do
     do
       CameraShare.delete_share(sharee, camera)
       Camera.invalidate_user(sharee)
+      Camera.invalidate_camera(camera)
       CameraActivity.log_activity(caller, camera, "stopped sharing", %{with: caller.email})
       json(conn, %{})
     end
