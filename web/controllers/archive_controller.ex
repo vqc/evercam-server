@@ -79,6 +79,10 @@ defmodule EvercamMedia.ArchiveController do
     to_date = clip_date(params["to_date"], offset)
     current_date_time = Calendar.DateTime.now_utc |> Calendar.DateTime.to_erl
     clip_exid = generate_exid(params["title"])
+    user_id =
+      params["requested_by"]
+      |> User.by_username
+      |> Util.deep_get([:id], "")
 
     params =
       params
@@ -86,6 +90,7 @@ defmodule EvercamMedia.ArchiveController do
       |> Map.delete("api_id")
       |> Map.delete("api_key")
       |> Map.merge(%{
+        "requested_by" => user_id,
         "camera_id" => camera.id,
         "title" => params["title"],
         "from_date" => from_date,
