@@ -31,6 +31,7 @@ defmodule EvercamMedia.UserMailer do
       to: sharee_email,
       subject: "#{User.get_fullname(user)} has shared a camera with you",
       from: @from,
+      bcc: user.email,
       attachments: get_attachments(thumbnail),
       html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "camera_shared_notification.html", user: user, camera: camera, message: message, thumbnail_available: !!thumbnail, year: @year),
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "camera_shared_notification.txt", user: user, camera: camera, message: message)
@@ -42,6 +43,7 @@ defmodule EvercamMedia.UserMailer do
       to: email,
       subject: "#{User.get_fullname(user)} has shared a camera with you",
       from: @from,
+      bcc: user.email,
       attachments: get_attachments(thumbnail),
       html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "sign_up_to_share_email.html", user: user, camera: camera, message: message, key: key, thumbnail_available: !!thumbnail, year: @year),
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "sign_up_to_share_email.txt", user: user, camera: camera, message: message, key: key)
@@ -53,6 +55,7 @@ defmodule EvercamMedia.UserMailer do
       to: user.email,
       subject: "A new camera has been added to your account",
       from: @from,
+      bcc: "marco@evercam.io,vinnie@evercam.io",
       attachments: get_attachments(thumbnail),
       html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "camera_create_notification.html", user: user, camera: camera, thumbnail_available: !!thumbnail, year: @year),
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "camera_create_notification.txt", user: user, camera: camera)
