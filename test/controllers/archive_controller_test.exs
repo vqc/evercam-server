@@ -11,7 +11,7 @@ defmodule EvercamMedia.ArchiveControllerTest do
       title: "Testing",
       public: "truthy",
       camera_id: camera.id,
-      requested_by: "#{user.id}",
+      requested_by: "#{user.username}",
       from_date: "1467193560",
       to_date: "1467197160",
       status: 0
