@@ -82,7 +82,10 @@ defmodule EvercamMedia.ArchiveController do
   end
 
   defp create_clip(params, camera, conn) do
-    offset = offset(camera.timezone)
+    offset =
+      camera
+      |> Camera.get_timezone
+      |> get_offset
     from_date = clip_date(params["from_date"], offset)
     to_date = clip_date(params["to_date"], offset)
     clip_exid = generate_exid(params["title"])
@@ -209,8 +212,7 @@ defmodule EvercamMedia.ArchiveController do
     end
   end
 
-  defp offset(nil), do: offset("Etc/UTC")
-  defp offset(timezone) do
+  defp get_offset(timezone) do
     timezone
     |> Calendar.DateTime.now!
     |> Map.get(:utc_offset)
