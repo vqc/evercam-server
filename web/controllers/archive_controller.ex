@@ -7,7 +7,7 @@ defmodule EvercamMedia.ArchiveController do
 
   def index(conn, %{"id" => exid} = params) do
     current_user = conn.assigns[:current_user]
-    camera = Camera.by_exid_with_associations(exid)
+    camera = Camera.get_full(exid)
     status = params["status"]
 
     with :ok <- ensure_camera_exists(camera, exid, conn),
@@ -47,7 +47,7 @@ defmodule EvercamMedia.ArchiveController do
 
   def create(conn, %{"id" => exid} = params) do
     current_user = conn.assigns[:current_user]
-    camera = Camera.by_exid_with_associations(exid)
+    camera = Camera.get_full(exid)
 
     with :ok <- ensure_camera_exists(camera, exid, conn),
          :ok <- ensure_can_list(current_user, camera, conn)
@@ -58,7 +58,7 @@ defmodule EvercamMedia.ArchiveController do
 
   def delete(conn, %{"id" => exid, "archive_id" => archive_id} = params) do
     current_user = conn.assigns[:current_user]
-    camera = Camera.by_exid_with_associations(exid)
+    camera = Camera.get_full(exid)
 
     with :ok <- valid_params(conn, params),
          :ok <- ensure_camera_exists(camera, exid, conn),
