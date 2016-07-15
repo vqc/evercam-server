@@ -93,7 +93,7 @@
   </tr>
   <tr style="margin: 0; padding: 0;"><td style="font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0;"></td>
     <td class="container" style="text-align:center; display: block !important; max-width: 600px !important; clear: both !important; margin: 0 auto; padding: 0;">
-      <p style="color:#aaaaaa; font-family: Arial, Helvetica, sans-serif; font-weight: normal; font-size: 12px; line-height: 1.0; margin: 10px 0 40px; padding: 0;">© 2015    <a href="http://www.evercam.io" style="color:#428bca;text-decoration: none;">www.evercam.io</a></p>
+      <p style="color:#aaaaaa; font-family: Arial, Helvetica, sans-serif; font-weight: normal; font-size: 12px; line-height: 1.0; margin: 10px 0 40px; padding: 0;">&copy; <%= @year %> <a href="http://www.evercam.io" style="color:#428bca;text-decoration: none;">www.evercam.io</a></p>
     </td>
   </tr>
 </table>
