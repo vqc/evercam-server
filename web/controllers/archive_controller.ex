@@ -20,14 +20,13 @@ defmodule EvercamMedia.ArchiveController do
         |> Archive.with_status_if_given(status)
         |> Archive.get_all_with_associations
 
-      conn
-      |> render(ArchiveView, "index.json", %{archives: archives})
+      render(conn, ArchiveView, "index.json", %{archives: archives})
     end
   end
 
   def show(conn, %{"id" => exid, "archive_id" => archive_id} = params) do
     current_user = conn.assigns[:current_user]
-    camera = Camera.by_exid_with_associations(exid)
+    camera = Camera.get_full(exid)
 
     with :ok <- valid_params(conn, params),
          :ok <- ensure_camera_exists(camera, exid, conn),
@@ -37,11 +36,9 @@ defmodule EvercamMedia.ArchiveController do
 
       case archive do
         nil ->
-          conn
-          |> render_error(404, "Archive '#{archive_id}' not found!")
+          render_error(conn, 404, "Archive '#{archive_id}' not found!")
         _ ->
-          conn
-          |> render(ArchiveView, "show.json", %{archive: archive})
+          render(conn, ArchiveView, "show.json", %{archive: archive})
       end
     end
   end
@@ -59,7 +56,7 @@ defmodule EvercamMedia.ArchiveController do
 
   def update(conn, %{"id" => exid, "archive_id" => archive_id} = params) do
     current_user = conn.assigns[:current_user]
-    camera = Camera.by_exid_with_associations(exid)
+    camera = Camera.get_full(exid)
 
     with :ok <- valid_params(conn, params),
          :ok <- ensure_camera_exists(camera, exid, conn),
@@ -80,8 +77,7 @@ defmodule EvercamMedia.ArchiveController do
     do
       Archive.delete_by_exid(archive_id)
 
-      conn
-      |> json(%{message: "Archive has been deleted!"})
+      json(conn, %{message: "Archive has been deleted!"})
     end
   end
 
@@ -133,15 +129,14 @@ defmodule EvercamMedia.ArchiveController do
       true ->
         case Repo.insert(changeset) do
           {:ok, archive} ->
-            conn
-            |> render(ArchiveView, "show.json", %{archive: archive |> Repo.preload(:camera) |> Repo.preload(:user)})
+            render(conn, ArchiveView, "show.json", %{archive: archive |> Repo.preload(:camera) |> Repo.preload(:user)})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
         end
     end
   end
 
-  defp update_clip(conn, camera, params, archive_id) do
+  defp update_clip(conn, _camera, params, archive_id) do
     case Archive.by_exid(archive_id) do
       nil ->
         render_error(conn, 404, "Archive '#{archive_id}' not found!")
@@ -150,11 +145,15 @@ defmodule EvercamMedia.ArchiveController do
         title = parse_title(params["title"], archive)
         public = parse_public(params["public"], archive)
 
-        params = Map.delete(params, "api_key") |> Map.delete("api_id") |> Map.delete("id")
-        params = Map.merge(params, %{
-          "status" => status,
-          "title" => title,
-          "public" => public
+        params =
+          params
+          |> Map.delete("id")
+          |> Map.delete("api_id")
+          |> Map.delete("api_key")
+          |> Map.merge(%{
+            "status" => status,
+            "title" => title,
+            "public" => public
           })
 
         changeset = Archive.changeset(archive, params)
@@ -163,8 +162,8 @@ defmodule EvercamMedia.ArchiveController do
           {:ok, archive} ->
             updated_archive = archive |> Repo.preload(:camera) |> Repo.preload(:user)
             send_archive_email(updated_archive.status, updated_archive)
-            conn
-            |> render(ArchiveView, "show.json", %{archive: updated_archive})
+
+            render(conn, ArchiveView, "show.json", %{archive: updated_archive})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
         end
