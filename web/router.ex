@@ -53,6 +53,8 @@ defmodule EvercamMedia.Router do
 
     post "/users", UserController, :create
 
+    get "/public/cameras", PublicController, :index
+
     scope "/" do
       pipe_through :auth
 

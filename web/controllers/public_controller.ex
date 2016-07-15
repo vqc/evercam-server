@@ -1,0 +1,96 @@
+defmodule EvercamMedia.PublicController do
+  use EvercamMedia.Web, :controller
+  alias EvercamMedia.PublicView
+  import Ecto.Query
+
+  @default_distance 1000
+  @default_offset 0
+  @default_limit 100
+  @maximum_limit 1000
+
+  def index(conn, params) do
+    id_starts_with = params["id_starts_with"]
+    id_ends_with = params["id_ends_with"]
+    id_includes = params["id_includes"]
+    case_sensitive = params["case_sensitive"]
+    is_near_to = params["is_near_to"]
+    within_distance = parse_distance(params["within_distance"])
+    limit = parse_limit(params["limit"])
+    offset = parse_offset(params["offset"])
+
+    public_cameras =
+      Camera
+      |> Camera.where_public_and_discoverable
+      |> Camera.where_id_starts_with(id_starts_with, case_sensitive)
+      |> Camera.where_id_ends_with(id_ends_with, case_sensitive)
+      |> Camera.where_id_includes(id_includes, case_sensitive)
+      |> Camera.by_distance(is_near_to, within_distance)
+
+    case geojson?(params["geojson"]) do
+      false ->
+        count = Camera.count(public_cameras)
+
+        total_pages =
+          count
+          |> Kernel./(limit)
+          |> Float.floor
+          |> round
+          |> if_zero
+
+        cameras =
+          public_cameras
+          |> Camera.get_association
+          |> limit(^limit)
+          |> offset(^offset)
+          |> Repo.all
+
+        conn
+        |> render(PublicView, "index.json", %{cameras: cameras, total_pages: total_pages, count: count})
+      true ->
+        geojson_cameras =
+          public_cameras
+          |> Camera.where_location_is_not_nil
+          |> Camera.get_association
+          |> Repo.all
+
+        conn
+        |> render(PublicView, "cameras.json", %{geojson_cameras: geojson_cameras})
+    end
+  end
+
+  defp parse_distance(nil), do: @default_distance
+  defp parse_distance(distance) do
+    Float.parse(distance) |> elem(0)
+  end
+
+  defp parse_offset(nil), do: @default_offset
+  defp parse_offset(offset) do
+    offset = String.to_integer(offset)
+    if offset >= 0 do
+      offset
+    else
+      @default_offset
+    end
+  end
+
+  defp parse_limit(nil), do: @default_limit
+  defp parse_limit(limit) do
+    limit = String.to_integer(limit)
+    if limit > @maximum_limit do
+      @maximum_limit
+    else
+      limit
+    end
+  end
+
+  defp if_zero(total_pages) when total_pages <= 0, do: 1
+  defp if_zero(total_pages), do: total_pages
+
+  defp geojson?(nil), do: false
+  defp geojson?(geojson) do
+    case String.equivalent?(geojson, "true") do
+      true -> true
+      false -> false
+    end
+  end
+end

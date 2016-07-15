@@ -2,6 +2,7 @@ defmodule Camera do
   use EvercamMedia.Web, :model
   import Ecto.Changeset
   import Ecto.Query
+  import EvercamMedia.Geocode
   alias EvercamMedia.Repo
   alias EvercamMedia.Schedule
   alias EvercamMedia.Util
@@ -387,6 +388,84 @@ defmodule Camera do
         put_change(changeset, :exid, "#{camera_id}-#{Enum.take_random(?a..?z, 5)}")
     end
   end
+
+  def count(query \\ Camera) do
+    from(cam in query)
+    |> select([cam], count(cam.id))
+    |> Repo.one
+  end
+
+  def where_public_and_discoverable(query \\ Camera) do
+    query
+    |> where([cam], cam.is_public == true )
+    |> where([cam], cam.discoverable == true)
+  end
+
+  def where_id_starts_with(query \\ Camera, id_starts_with, _)
+  def where_id_starts_with(query, nil , _), do: query
+  def where_id_starts_with(query, id_starts_with, case_sensitive) do
+    case case_sensitive do
+      "true" ->
+        query
+        |> where([cam], ilike(fragment("lower(?)", cam.exid), ^("%#{id_starts_with}%")))
+      _ ->
+        query
+        |> where([cam], like(fragment("lower(?)", cam.exid), ^("%#{String.downcase(id_starts_with)}%")))
+    end
+  end
+
+  def where_id_ends_with(query \\ Camera, id_ends_with, _)
+  def where_id_ends_with(query, nil, _), do: query
+  def where_id_ends_with(query, id_ends_with, case_sensitive) do
+    case case_sensitive do
+      "true" ->
+        query
+        |> where([cam], ilike(fragment("lower(?)", cam.exid), ^("%#{id_ends_with}%")))
+      _ ->
+        query
+        |> where([cam], like(fragment("lower(?)", cam.exid), ^("%#{String.downcase(id_ends_with)}%")))
+    end
+  end
+
+  def where_id_includes(query \\ Camera, id_includes, _)
+  def where_id_includes(query, nil, _), do: query
+  def where_id_includes(query, id_includes, case_sensitive) do
+    case case_sensitive do
+      "true" ->
+        query
+        |> where([cam], ilike(fragment("lower(?)", cam.exid), ^("%#{id_includes}%")))
+      _ ->
+        query
+        |> where([cam], like(fragment("lower(?)", cam.exid), ^("%#{String.downcase(id_includes)}%")))
+    end
+  end
+
+  def by_distance(query \\ Camera, is_near_to, _within_distance)
+  def by_distance(query, nil, _within_distance), do: query
+  def by_distance(query, is_near_to, within_distance) do
+    case String.contains?(is_near_to, ",") do
+      true ->
+        [lat, lng] = String.trim(is_near_to) |> String.split(",") |> Enum.map(&string_to_float/1)
+      _ ->
+        %{"lat" => lat, "lng" => lng} = fetch(is_near_to)
+    end
+    query
+    |> where([cam], fragment("ST_DWithin(?, ST_SetSRID(ST_Point(?, ?), 4326)::geography, CAST(? AS float8))", cam.location, ^lng, ^lat, ^within_distance))
+  end
+
+  def where_location_is_not_nil(query \\ Camera) do
+    query
+    |> where([cam], not(is_nil(cam.location)))
+  end
+
+  def get_association(query \\ Camera) do
+    query
+    |> preload(:owner)
+    |> preload(:vendor_model)
+    |> preload([vendor_model: :vendor])
+  end
+
+  defp string_to_float(string), do: string |> Float.parse |> elem(0)
 
   def changeset(camera, params \\ :invalid) do
     camera
