@@ -73,12 +73,15 @@ defmodule EvercamMedia.ArchiveController do
   end
 
   defp create_clip(params, camera, conn) do
-
     offset = offset(camera.timezone)
     from_date = clip_date(params["from_date"], offset)
     to_date = clip_date(params["to_date"], offset)
-    current_date_time = Calendar.DateTime.now_utc |> Calendar.DateTime.to_erl
     clip_exid = generate_exid(params["title"])
+    current_date_time =
+      camera
+      |> Camera.get_timezone
+      |> Calendar.DateTime.now!
+      |> Calendar.DateTime.to_erl
     user_id =
       params["requested_by"]
       |> User.by_username
