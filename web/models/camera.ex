@@ -37,8 +37,6 @@ defmodule Camera do
 
   def all do
     Camera
-    |> join(:full, [c], vm in assoc(c, :vendor_model))
-    |> join(:full, [c, vm], v in assoc(vm, :vendor))
     |> preload(:cloud_recordings)
     |> preload(:motion_detections)
     |> preload(:vendor_model)
