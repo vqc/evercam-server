@@ -4,10 +4,10 @@ defmodule EvercamMedia.Util do
 
   def deep_get(map, keys, default \\ nil), do: do_deep_get(map, keys, default)
 
-  def do_deep_get(nil, _, default), do: default
-  def do_deep_get(%{}, [], default), do: default
-  def do_deep_get(value, [], _default), do: value
-  def do_deep_get(map, [key|rest], default) do
+  defp do_deep_get(nil, _, default), do: default
+  defp do_deep_get(%{}, [], default), do: default
+  defp do_deep_get(value, [], _default), do: value
+  defp do_deep_get(map, [key|rest], default) do
     map
     |> Map.get(key, %{})
     |> deep_get(rest, default)

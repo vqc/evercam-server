@@ -55,6 +55,10 @@ defmodule Camera do
   def invalidate_camera(nil), do: :noop
   def invalidate_camera(%Camera{} = camera) do
     ConCache.delete(:camera_full, camera.exid)
+    invalidate_shares(camera)
+  end
+
+  defp invalidate_shares(%Camera{} = camera) do
     CameraShare
     |> where(camera_id: ^camera.id)
     |> preload(:user)
@@ -135,11 +139,11 @@ defmodule Camera do
   end
 
   def username(camera) do
-    "#{camera.config["auth"]["basic"]["username"]}"
+    Util.deep_get(camera, [:config, "auth", "basic", "username"], "")
   end
 
   def password(camera) do
-    "#{camera.config["auth"]["basic"]["password"]}"
+    Util.deep_get(camera, [:config, "auth", "basic", "password"], "")
   end
 
   def snapshot_url(camera, type \\ "jpg") do
@@ -181,7 +185,7 @@ defmodule Camera do
   end
 
   def res_url(camera, type \\ "jpg") do
-    url = Util.deep_get(camera.config, ["snapshots", "#{type}"], "")
+    url = Util.deep_get(camera, [:config, "snapshots", "#{type}"], "")
     case String.starts_with?(url, "/") || url == "" do
       true -> "#{url}"
       false -> "/#{url}"
@@ -278,12 +282,12 @@ defmodule Camera do
   end
 
   def get_location(camera) do
-    {lng, lat} =
-      case camera.location do
-        %Geo.Point{} -> camera.location.coordinates
-        _nil -> {0, 0}
-      end
-    %{lng: lng, lat: lat}
+    case camera.location do
+      %Geo.Point{coordinates: {lng, lat}} ->
+        %{lng: lng, lat: lat}
+      _nil ->
+        %{lng: 0, lat: 0}
+    end
   end
 
   def get_camera_info(exid) do
