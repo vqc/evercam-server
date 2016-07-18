@@ -87,7 +87,7 @@ defmodule EvercamMedia.Snapshot.Storage.Export do
     file = File.open(file_path, [:read, :binary, :raw], fn(pid) -> IO.binread(pid, :all) end)
 
     with {:ok, image} <- file,
-         true <- Util.is_jpeg(image)
+         true <- Util.jpeg?(image)
     do
       HTTPoison.post!("#{@seaweedfs}#{url_path}", {:multipart, [{url_path, image, []}]}, [], hackney: @hackney_opts)
       File.rm!(file_path)

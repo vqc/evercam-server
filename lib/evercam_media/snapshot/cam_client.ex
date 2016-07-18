@@ -31,7 +31,7 @@ defmodule EvercamMedia.Snapshot.CamClient do
   ## Private functions
 
   defp parse_snapshot_response({:ok, response}) do
-    case Util.is_jpeg(response.body) do
+    case Util.jpeg?(response.body) do
       true -> {:ok, response.body}
       _ -> {:error, %{reason: parse_reason(response.body), response: parse_response(response.body)}}
     end

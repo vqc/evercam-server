@@ -29,12 +29,8 @@ defmodule EvercamMedia.Util do
     end)
   end
 
-  def is_jpeg(data) do
-    case data do
-      <<0xFF,0xD8, _data :: binary>> -> true
-      _ -> false
-    end
-  end
+  def jpeg?(<<0xFF, 0xD8, _ :: binary>>), do: true
+  def jpeg?(_), do: false
 
   def port_open?(address, port) do
     case :gen_tcp.connect(to_char_list(address), to_integer(port), [:binary, active: false], 500) do
