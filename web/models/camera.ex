@@ -401,45 +401,6 @@ defmodule Camera do
     |> where([cam], cam.discoverable == true)
   end
 
-  def where_id_starts_with(query \\ Camera, id_starts_with, _)
-  def where_id_starts_with(query, nil , _), do: query
-  def where_id_starts_with(query, id_starts_with, case_sensitive) do
-    case case_sensitive do
-      "true" ->
-        query
-        |> where([cam], ilike(fragment("lower(?)", cam.exid), ^("%#{id_starts_with}%")))
-      _ ->
-        query
-        |> where([cam], like(fragment("lower(?)", cam.exid), ^("%#{String.downcase(id_starts_with)}%")))
-    end
-  end
-
-  def where_id_ends_with(query \\ Camera, id_ends_with, _)
-  def where_id_ends_with(query, nil, _), do: query
-  def where_id_ends_with(query, id_ends_with, case_sensitive) do
-    case case_sensitive do
-      "true" ->
-        query
-        |> where([cam], ilike(fragment("lower(?)", cam.exid), ^("%#{id_ends_with}%")))
-      _ ->
-        query
-        |> where([cam], like(fragment("lower(?)", cam.exid), ^("%#{String.downcase(id_ends_with)}%")))
-    end
-  end
-
-  def where_id_includes(query \\ Camera, id_includes, _)
-  def where_id_includes(query, nil, _), do: query
-  def where_id_includes(query, id_includes, case_sensitive) do
-    case case_sensitive do
-      "true" ->
-        query
-        |> where([cam], ilike(fragment("lower(?)", cam.exid), ^("%#{id_includes}%")))
-      _ ->
-        query
-        |> where([cam], like(fragment("lower(?)", cam.exid), ^("%#{String.downcase(id_includes)}%")))
-    end
-  end
-
   def by_distance(query \\ Camera, is_near_to, _within_distance)
   def by_distance(query, nil, _within_distance), do: query
   def by_distance(query, is_near_to, within_distance) do

@@ -21,9 +21,6 @@ defmodule EvercamMedia.PublicController do
     public_cameras =
       Camera
       |> Camera.where_public_and_discoverable
-      |> Camera.where_id_starts_with(id_starts_with, case_sensitive)
-      |> Camera.where_id_ends_with(id_ends_with, case_sensitive)
-      |> Camera.where_id_includes(id_includes, case_sensitive)
       |> Camera.by_distance(is_near_to, within_distance)
 
     case geojson?(params["geojson"]) do
