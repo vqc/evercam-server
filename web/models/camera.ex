@@ -69,31 +69,24 @@ defmodule Camera do
   def for(user, true), do: owned_by(user) |> Enum.into(shared_with(user))
   def for(user, false), do: owned_by(user)
 
-  def owned_by(user) do
+  defp owned_by(user) do
     Camera
     |> where([cam], cam.owner_id == ^user.id)
     |> preload(:owner)
-    |> preload([access_rights: :access_token])
-    |> preload(:vendor_model)
-    |> preload([vendor_model: :vendor])
     |> preload(:cloud_recordings)
+    |> preload([vendor_model: :vendor])
     |> Repo.all
   end
 
-  def shared_with(user) do
-    token_id = AccessToken.active_token_id_for(user.id)
-    access_rights_query = AccessRight |> where([ar], ar.token_id == ^token_id)
-
+  defp shared_with(user) do
     Camera
     |> join(:left, [u], cs in CameraShare)
     |> where([cam, cs], cs.user_id == ^user.id)
     |> where([cam, cs], cam.id == cs.camera_id)
     |> preload(:owner)
-    |> preload(access_rights: ^access_rights_query)
-    |> preload([access_rights: :access_token])
-    |> preload(:vendor_model)
-    |> preload([vendor_model: :vendor])
     |> preload(:cloud_recordings)
+    |> preload([vendor_model: :vendor])
+    |> preload([access_rights: :access_token])
     |> Repo.all
   end
 
@@ -118,12 +111,10 @@ defmodule Camera do
   def by_exid_with_associations(exid) do
     Camera
     |> where([cam], cam.exid == ^exid)
+    |> preload(:owner)
     |> preload(:cloud_recordings)
     |> preload(:motion_detections)
-    |> preload(:owner)
-    |> preload(:vendor_model)
     |> preload([vendor_model: :vendor])
-    |> preload(:access_rights)
     |> preload([access_rights: :access_token])
     |> Repo.one
   end
