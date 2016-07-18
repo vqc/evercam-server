@@ -66,12 +66,8 @@ defmodule Camera do
     |> Enum.each(fn(user) -> invalidate_user(user) end)
   end
 
-  def for(user, include_shared? \\ true) do
-    case include_shared? do
-      true -> owned_by(user) |> Enum.into(shared_with(user))
-      false -> owned_by(user)
-    end
-  end
+  def for(user, true), do: owned_by(user) |> Enum.into(shared_with(user))
+  def for(user, false), do: owned_by(user)
 
   def owned_by(user) do
     Camera
