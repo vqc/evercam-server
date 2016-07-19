@@ -2,7 +2,6 @@ defmodule EvercamMedia.PublicController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.PublicView
   import Ecto.Query
-  import EvercamMedia.Geocode
 
   @default_distance 1000
   @default_offset 0
@@ -66,8 +65,8 @@ defmodule EvercamMedia.PublicController do
         |> Enum.map(fn(x) -> string_to_float(x) end)
         |> List.to_tuple
       _ ->
-        %{"lat" => lat, "lng" => lng} = fetch(near_to)
-        {lat, lng}
+        near_to
+        |> fetch
     end
   end
 
@@ -107,5 +106,15 @@ defmodule EvercamMedia.PublicController do
       true -> true
       false -> false
     end
+  end
+
+  def fetch(address) do
+    "http://maps.googleapis.com/maps/api/geocode/json?address=" <> URI.encode(address)
+    |> HTTPotion.get
+    |> Map.get(:body)
+    |> Poison.decode!
+    |> get_in(["results", Access.at(0), "geometry", "location"])
+    |> Enum.map(fn({_coordinate, value}) -> value end)
+    |> List.to_tuple
   end
 end
