@@ -2,7 +2,6 @@ defmodule Camera do
   use EvercamMedia.Web, :model
   import Ecto.Changeset
   import Ecto.Query
-  import EvercamMedia.Geocode
   alias EvercamMedia.Repo
   alias EvercamMedia.Schedule
   alias EvercamMedia.Util
@@ -401,15 +400,9 @@ defmodule Camera do
     |> where([cam], cam.discoverable == true)
   end
 
-  def by_distance(query \\ Camera, is_near_to, _within_distance)
-  def by_distance(query, nil, _within_distance), do: query
-  def by_distance(query, is_near_to, within_distance) do
-    case String.contains?(is_near_to, ",") do
-      true ->
-        [lat, lng] = String.trim(is_near_to) |> String.split(",") |> Enum.map(&string_to_float/1)
-      _ ->
-        %{"lat" => lat, "lng" => lng} = fetch(is_near_to)
-    end
+  def by_distance(query \\ Camera, _coordinates, _within_distance)
+  def by_distance(query, {0, 0}, _within_distance), do: query
+  def by_distance(query, {lng, lat}, within_distance) do
     query
     |> where([cam], fragment("ST_DWithin(?, ST_SetSRID(ST_Point(?, ?), 4326)::geography, CAST(? AS float8))", cam.location, ^lng, ^lat, ^within_distance))
   end
@@ -425,8 +418,6 @@ defmodule Camera do
     |> preload(:vendor_model)
     |> preload([vendor_model: :vendor])
   end
-
-  defp string_to_float(string), do: string |> Float.parse |> elem(0)
 
   def changeset(camera, params \\ :invalid) do
     camera

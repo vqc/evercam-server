@@ -2,6 +2,7 @@ defmodule EvercamMedia.PublicController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.PublicView
   import Ecto.Query
+  import EvercamMedia.Geocode
 
   @default_distance 1000
   @default_offset 0
@@ -13,7 +14,7 @@ defmodule EvercamMedia.PublicController do
     id_ends_with = params["id_ends_with"]
     id_includes = params["id_includes"]
     case_sensitive = params["case_sensitive"]
-    is_near_to = params["is_near_to"]
+    coordinates = parse_near_to(params["is_near_to"])
     within_distance = parse_distance(params["within_distance"])
     limit = parse_limit(params["limit"])
     offset = parse_offset(params["offset"])
@@ -21,7 +22,7 @@ defmodule EvercamMedia.PublicController do
     public_cameras =
       Camera
       |> Camera.where_public_and_discoverable
-      |> Camera.by_distance(is_near_to, within_distance)
+      |> Camera.by_distance(coordinates, within_distance)
 
     case geojson?(params["geojson"]) do
       false ->
@@ -55,6 +56,21 @@ defmodule EvercamMedia.PublicController do
     end
   end
 
+  defp parse_near_to(nil), do: {0, 0}
+  defp parse_near_to(near_to) do
+    case String.contains?(near_to, ",") do
+      true ->
+        near_to
+        |> String.trim
+        |> String.split(",")
+        |> Enum.map(fn(x) -> string_to_float(x) end)
+        |> List.to_tuple
+      _ ->
+        %{"lat" => lat, "lng" => lng} = fetch(near_to)
+        {lat, lng}
+    end
+  end
+
   defp parse_distance(nil), do: @default_distance
   defp parse_distance(distance) do
     Float.parse(distance) |> elem(0)
@@ -82,6 +98,8 @@ defmodule EvercamMedia.PublicController do
 
   defp if_zero(total_pages) when total_pages <= 0, do: 1
   defp if_zero(total_pages), do: total_pages
+
+  defp string_to_float(string), do: string |> Float.parse |> elem(0)
 
   defp geojson?(nil), do: false
   defp geojson?(geojson) do
