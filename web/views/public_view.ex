@@ -35,11 +35,11 @@ defmodule EvercamMedia.PublicView do
     }
   end
 
-  def render("cameras.json", %{geojson_cameras: geojson_cameras}) do
+  def render("geojson.json", %{cameras: cameras}) do
     %{
       "type": "FeatureCollection",
       "features": [
-        Enum.map(geojson_cameras, fn(camera) ->
+        Enum.map(cameras, fn(camera) ->
           %{
             "type": "Feature",
             "properties": %{

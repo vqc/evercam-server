@@ -7,6 +7,19 @@ defmodule EvercamMedia.PublicController do
   @default_limit 100
   @maximum_limit 1000
 
+  def index(conn, %{"geojson" => "true"} = params) do
+    coordinates = parse_near_to(params["is_near_to"])
+    within_distance = parse_distance(params["within_distance"])
+
+    cameras =
+      Camera.public_cameras_query(coordinates, within_distance)
+      |> Camera.where_location_is_not_nil
+      |> Camera.get_query_with_associations
+
+    conn
+    |> render(PublicView, "geojson.json", %{cameras: cameras})
+  end
+
   def index(conn, params) do
     coordinates = parse_near_to(params["is_near_to"])
     within_distance = parse_distance(params["within_distance"])
@@ -15,30 +28,19 @@ defmodule EvercamMedia.PublicController do
 
     public_cameras_query = Camera.public_cameras_query(coordinates, within_distance)
 
-    case geojson?(params["geojson"]) do
-      false ->
-        count = Camera.count(public_cameras_query)
+    count = Camera.count(public_cameras_query)
 
-        total_pages =
-          count
-          |> Kernel./(limit)
-          |> Float.floor
-          |> round
-          |> if_zero
+    total_pages =
+      count
+      |> Kernel./(limit)
+      |> Float.floor
+      |> round
+      |> if_zero
 
-        cameras = Camera.get_query_with_associations(public_cameras_query, limit, offset)
+    cameras = Camera.get_query_with_associations(public_cameras_query, limit, offset)
 
-        conn
-        |> render(PublicView, "index.json", %{cameras: cameras, total_pages: total_pages, count: count})
-      true ->
-        geojson_cameras =
-          public_cameras_query
-          |> Camera.where_location_is_not_nil
-          |> Camera.get_query_with_associations(limit, offset)
-
-        conn
-        |> render(PublicView, "cameras.json", %{geojson_cameras: geojson_cameras})
-    end
+    conn
+    |> render(PublicView, "index.json", %{cameras: cameras, total_pages: total_pages, count: count})
   end
 
   defp parse_near_to(nil), do: {0, 0}
@@ -86,15 +88,7 @@ defmodule EvercamMedia.PublicController do
 
   defp string_to_float(string), do: string |> Float.parse |> elem(0)
 
-  defp geojson?(nil), do: false
-  defp geojson?(geojson) do
-    case String.equivalent?(geojson, "true") do
-      true -> true
-      false -> false
-    end
-  end
-
-  def fetch(address) do
+  defp fetch(address) do
     "http://maps.googleapis.com/maps/api/geocode/json?address=" <> URI.encode(address)
     |> HTTPotion.get
     |> Map.get(:body)
