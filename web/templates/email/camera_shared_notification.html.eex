@@ -56,7 +56,7 @@
             <p class="lead" style="line-height: 1.6; margin: 0 0 10px; padding: 0;">Hello from Evercam,</p>
             <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;"><strong><%= full_name(@user) %></strong> has shared the camera <strong><%= @camera.name %></strong> with you.</p>
 
-            <% if @message do %>
+            <%= if @message do %>
               <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;"><%= @user.firstname %>'s message for you: <%= @message %></p>
             <% end %>
 

@@ -2,7 +2,9 @@ Hello from Evercam,
 
 <%= full_name(@user) %> has shared the camera <%= @camera.name %> with you.
 
-<%= @user.firstname %>'s message for you: <%= @message %>
+<%= if @message do %>
+  <%= @user.firstname %>'s message for you: <%= @message %>
+<% end %>
 
 To access this camera, you will need to click on the link below and create an account with Evercam.
 
