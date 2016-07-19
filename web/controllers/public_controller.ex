@@ -1,7 +1,6 @@
 defmodule EvercamMedia.PublicController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.PublicView
-  import Ecto.Query
 
   @default_distance 1000
   @default_offset 0
@@ -14,14 +13,11 @@ defmodule EvercamMedia.PublicController do
     limit = parse_limit(params["limit"])
     offset = parse_offset(params["offset"])
 
-    public_cameras =
-      Camera
-      |> Camera.where_public_and_discoverable
-      |> Camera.by_distance(coordinates, within_distance)
+    public_cameras_query = Camera.public_cameras_query(coordinates, within_distance)
 
     case geojson?(params["geojson"]) do
       false ->
-        count = Camera.count(public_cameras)
+        count = Camera.count(public_cameras_query)
 
         total_pages =
           count
@@ -30,21 +26,15 @@ defmodule EvercamMedia.PublicController do
           |> round
           |> if_zero
 
-        cameras =
-          public_cameras
-          |> Camera.get_association
-          |> limit(^limit)
-          |> offset(^offset)
-          |> Repo.all
+        cameras = Camera.get_query_with_associations(public_cameras_query, limit, offset)
 
         conn
         |> render(PublicView, "index.json", %{cameras: cameras, total_pages: total_pages, count: count})
       true ->
         geojson_cameras =
-          public_cameras
+          public_cameras_query
           |> Camera.where_location_is_not_nil
-          |> Camera.get_association
-          |> Repo.all
+          |> Camera.get_query_with_associations(limit, offset)
 
         conn
         |> render(PublicView, "cameras.json", %{geojson_cameras: geojson_cameras})

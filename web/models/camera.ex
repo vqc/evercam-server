@@ -389,9 +389,33 @@ defmodule Camera do
   end
 
   def count(query \\ Camera) do
-    from(cam in query)
+    query
     |> select([cam], count(cam.id))
     |> Repo.one
+  end
+
+  def public_cameras_query(coordinates, within_distance) do
+    Camera
+    |> Camera.where_public_and_discoverable
+    |> Camera.by_distance(coordinates, within_distance)
+  end
+
+  def get_query_with_associations(query) do
+    query
+    |> preload(:owner)
+    |> preload(:vendor_model)
+    |> preload([vendor_model: :vendor])
+    |> Repo.all
+  end
+
+  def get_query_with_associations(query, limit, offset) do
+    query
+    |> limit(^limit)
+    |> offset(^offset)
+    |> preload(:owner)
+    |> preload(:vendor_model)
+    |> preload([vendor_model: :vendor])
+    |> Repo.all
   end
 
   def where_public_and_discoverable(query \\ Camera) do
@@ -410,13 +434,6 @@ defmodule Camera do
   def where_location_is_not_nil(query \\ Camera) do
     query
     |> where([cam], not(is_nil(cam.location)))
-  end
-
-  def get_association(query \\ Camera) do
-    query
-    |> preload(:owner)
-    |> preload(:vendor_model)
-    |> preload([vendor_model: :vendor])
   end
 
   def changeset(camera, params \\ :invalid) do
