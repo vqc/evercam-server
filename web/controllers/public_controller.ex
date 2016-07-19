@@ -9,10 +9,6 @@ defmodule EvercamMedia.PublicController do
   @maximum_limit 1000
 
   def index(conn, params) do
-    id_starts_with = params["id_starts_with"]
-    id_ends_with = params["id_ends_with"]
-    id_includes = params["id_includes"]
-    case_sensitive = params["case_sensitive"]
     coordinates = parse_near_to(params["is_near_to"])
     within_distance = parse_distance(params["within_distance"])
     limit = parse_limit(params["limit"])
