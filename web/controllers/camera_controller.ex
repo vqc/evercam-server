@@ -159,6 +159,7 @@ defmodule EvercamMedia.CameraController do
             |> Repo.preload(:vendor_model, force: true)
             |> Repo.preload([vendor_model: :vendor], force: true)
           CameraActivity.log_activity(caller, camera, "created")
+          Camera.invalidate_user(caller)
           spawn fn ->
             create_thumbnail(full_camera)
             EvercamMedia.UserMailer.camera_create_notification(caller, full_camera)
