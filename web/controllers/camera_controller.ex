@@ -75,7 +75,7 @@ defmodule EvercamMedia.CameraController do
   def transfer(conn, %{"id" => exid, "user_id" => user_id}) do
     current_user = conn.assigns[:current_user]
     camera = Camera.get_full(exid)
-    user = User.by_username(user_id)
+    user = User.by_username_or_email(user_id)
 
     with :ok <- is_authorized(conn, current_user),
          :ok <- camera_exists(conn, exid, camera),
@@ -124,7 +124,7 @@ defmodule EvercamMedia.CameraController do
     with :ok <- camera_exists(conn, exid, camera),
          true <- user_has_delete_rights(conn, caller, camera)
     do
-      admin_user = User.by_username_or_email("admin@evercam.io")
+      admin_user = User.by_username("evercam")
       camera_params = %{
         owner_id: admin_user.id,
         discoverable: false,

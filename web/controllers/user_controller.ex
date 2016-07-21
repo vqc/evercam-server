@@ -13,7 +13,7 @@ defmodule EvercamMedia.UserController do
       params["id"]
       |> String.replace_trailing(".json", "")
       |> String.downcase
-      |> User.by_username
+      |> User.by_username_or_email
 
     cond do
       !user ->
@@ -35,7 +35,7 @@ defmodule EvercamMedia.UserController do
       params["id"]
       |> String.replace_trailing(".json", "")
       |> String.downcase
-      |> User.by_username
+      |> User.by_username_or_email
 
     with :ok <- ensure_user_exists(user, username, conn),
          :ok <- password(params["password"], user, conn)
@@ -126,7 +126,7 @@ defmodule EvercamMedia.UserController do
       params["id"]
       |> String.replace_trailing(".json", "")
       |> String.downcase
-      |> User.by_username
+      |> User.by_username_or_email
 
     with :ok <- ensure_user_exists(user, username, conn),
          :ok <- ensure_can_view(current_user, user, conn),
@@ -158,7 +158,7 @@ defmodule EvercamMedia.UserController do
       username
       |> String.replace_trailing(".json", "")
       |> String.downcase
-      |> User.by_username
+      |> User.by_username_or_email
 
     with :ok <- ensure_user_exists(user, username, conn),
          :ok <- ensure_can_view(current_user, user, conn)
