@@ -314,7 +314,6 @@ defmodule EvercamMedia.CameraController do
     camera_params =
       %{config: %{"snapshots" => %{}}}
       |> add_parameter("field", :owner_id, params["owner_id"])
-      |> add_parameter("is_public", :is_public, params["is_public"])
       |> construct_camera_parameters(params)
 
     Camera.changeset(%Camera{}, camera_params)
@@ -333,6 +332,7 @@ defmodule EvercamMedia.CameraController do
     |> add_parameter("field", :is_online_email_owner_notification, params["is_online_email_owner_notification"])
     |> add_parameter("field", :location_lng, params["location_lng"])
     |> add_parameter("field", :location_lat, params["location_lat"])
+    |> add_parameter("is_public", :is_public, params["is_public"])
     |> add_parameter("model", :model_id, model)
     |> add_parameter("host", "external_host", params["external_host"])
     |> add_parameter("host", "external_http_port", params["external_http_port"])
