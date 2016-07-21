@@ -57,7 +57,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   def thumbnail(conn, %{"id" => camera_exid}) do
-    case snapshot_thumbnail(camera_exid, conn.assigns[:current_user]) do
+    case snapshot_thumbnail(camera_exid, conn.assigns[:current_user], true) do
       {200, response} ->
         conn
         |> put_resp_header("content-type", "image/jpeg")
@@ -67,6 +67,20 @@ defmodule EvercamMedia.SnapshotController do
         |> put_status(code)
         |> put_resp_header("content-type", "image/jpeg")
         |> text(response[:image])
+    end
+  end
+
+  def latest(conn, %{"id" => camera_exid} = _params) do
+    case snapshot_thumbnail(camera_exid, conn.assigns[:current_user], false) do
+      {200, response} ->
+        data = "data:image/jpeg;base64,#{Base.encode64(response[:image])}"
+
+        conn
+        |> json(%{data: data, status: "ok"})
+      {code, response} ->
+        conn
+        |> put_status(code)
+        |> json(response)
     end
   end
 
@@ -286,9 +300,9 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  defp snapshot_thumbnail(camera_exid, user) do
+  defp snapshot_thumbnail(camera_exid, user, update_thumbnail?) do
     camera = Camera.get_full(camera_exid)
-    spawn fn -> update_thumbnail(camera) end
+    if update_thumbnail?, do: spawn(fn -> update_thumbnail(camera) end)
     with true <- Permission.Camera.can_snapshot?(user, camera),
          {:ok, image} <- Storage.thumbnail_load(camera_exid)
     do
