@@ -257,12 +257,10 @@ defmodule EvercamMedia.UserController do
     if share_request.email != user.email do
       render_error(conn, 400, "The email address specified does not match the share request email.")
     else
-      param = %{
-        status: 1
-      }
-      changeset = CameraShareRequest.changeset(share_request, param)
-
-      case Repo.update(changeset) do
+      share_request
+      |> CameraShareRequest.changeset(%{status: 1})
+      |> Repo.update
+      |> case do
         {:ok, share_request} ->
           CameraShare.create_share(share_request.camera, share_request.user, user, share_request.rights, share_request.message)
         {:error, changeset} ->
