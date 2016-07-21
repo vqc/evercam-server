@@ -116,12 +116,10 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def seaweedfs_load_range(camera_exid, from) do
-    snapshots =
-      camera_exid
-      |> get_camera_apps_list
-      |> Enum.flat_map(fn(app) -> do_seaweedfs_load_range(camera_exid, from, app) end)
-      |> Enum.sort_by(fn(snapshot) -> snapshot.created_at end)
-    {:ok, snapshots}
+    camera_exid
+    |> get_camera_apps_list
+    |> Enum.flat_map(fn(app) -> do_seaweedfs_load_range(camera_exid, from, app) end)
+    |> Enum.sort_by(fn(snapshot) -> snapshot.created_at end)
   end
 
   defp do_seaweedfs_load_range(camera_exid, from, app_name) do

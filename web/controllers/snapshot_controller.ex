@@ -105,18 +105,12 @@ defmodule EvercamMedia.SnapshotController do
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
          true <- String.match?(offset, ~r/.+00/) do
-      Storage.seaweedfs_load_range(camera_exid, from)
-    end
-    |> case do
-      {:ok, snapshots} when snapshots != [] ->
-        conn
-        |> json(%{snapshots: snapshots})
-      _ ->
-        conn
-        |> proxy_api_data
+      snapshots = Storage.seaweedfs_load_range(camera_exid, from)
+
+      conn
+      |> json(%{snapshots: snapshots})
     end
   end
-  def index(conn, _params), do: proxy_api_data(conn)
 
   def show(conn, %{"id" => camera_exid, "timestamp" => timestamp, "with_data" => "true", "notes" => notes, "range" => _}) do
     timestamp = String.to_integer(timestamp)
@@ -127,20 +121,26 @@ defmodule EvercamMedia.SnapshotController do
       |> Calendar.Strftime.strftime!("%Y%m%d%H%M%S%f")
     snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
 
-    with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera) do
-      Storage.load(camera_exid, snapshot_id, notes)
-    end
-    |> case do
-      {:ok, image} ->
-        data = "data:image/jpeg;base64,#{Base.encode64(image)}"
+    with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
+        {:ok, image} <- Storage.load(camera_exid, snapshot_id, notes) do
+      data = "data:image/jpeg;base64,#{Base.encode64(image)}"
+
+      conn
+      |> json(%{snapshots: [%{created_at: timestamp, notes: notes, data: data}]})
+    else
+      {:error, :enoent} ->
         conn
-        |> json(%{snapshots: [%{created_at: timestamp, notes: notes, data: data}]})
-      _ ->
+        |> put_status(404)
+        |> json(%{message: "Snapshot not found."})
+
+      {:error, error} ->
+        Logger.error "[#{camera_exid}] [show_snapshot] [error] [#{inspect error}]"
+
         conn
-        |> proxy_api_data
+        |> put_status(500)
+        |> json(%{message: "We dropped the ball."})
     end
   end
-  def show(conn, _params), do: proxy_api_data(conn)
 
   def days(conn, %{"id" => camera_exid, "year" => year, "month" => month}) do
     current_user = conn.assigns[:current_user]
@@ -162,15 +162,10 @@ defmodule EvercamMedia.SnapshotController do
         from
         |> Calendar.DateTime.add!(number_of_days_in_month * 86400)
         |> Calendar.DateTime.subtract!(1)
-      Storage.days(camera_exid, from, to, timezone)
-    end
-    |> case do
-      days when days != [] ->
-        conn
-        |> json(%{days: days})
-      _ ->
-        conn
-        |> proxy_api_data
+      days = Storage.days(camera_exid, from, to, timezone)
+
+      conn
+      |> json(%{days: days})
     end
   end
 
@@ -188,10 +183,8 @@ defmodule EvercamMedia.SnapshotController do
       to = construct_timestamp(year, month, day, "23:59:59", offset)
       exists? = Storage.exists_for_day?(camera_exid, from, to, timezone)
 
-      case exists? do
-        true -> json(conn, %{exists: true})
-        false -> proxy_api_data(conn)
-      end
+      conn
+      |> json(%{exists: exists?})
     end
   end
 
@@ -207,15 +200,10 @@ defmodule EvercamMedia.SnapshotController do
       offset = Camera.get_offset(camera)
       from = construct_timestamp(year, month, day, "00:00:00", offset)
       to = construct_timestamp(year, month, day, "23:59:59", offset)
-      Storage.hours(camera_exid, from, to, timezone)
-    end
-    |> case do
-      hours when hours != [] ->
-        conn
-        |> json(%{hours: hours})
-      _ ->
-        conn
-        |> proxy_api_data
+      hours = Storage.hours(camera_exid, from, to, timezone)
+
+      conn
+      |> json(%{hours: hours})
     end
   end
 
@@ -391,21 +379,6 @@ defmodule EvercamMedia.SnapshotController do
     catch _type, error ->
         Util.error_handler(error)
       {504, %{message: "Request timed out."}}
-    end
-  end
-
-  defp proxy_api_data(conn) do
-    url = "https://api.evercam.io#{conn.request_path}?#{conn.query_string}"
-
-    case HTTPoison.get(url, [], [recv_timeout: 25_000]) do
-      {:ok, %HTTPoison.Response{body: body}} ->
-        {:ok, data} = Poison.decode(body)
-        conn
-        |> json(data)
-      {:error, %HTTPoison.Error{}} ->
-        conn
-        |> put_status(500)
-        |> json(%{message: "Sorry, we dropped the ball."})
     end
   end
 
