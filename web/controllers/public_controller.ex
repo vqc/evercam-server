@@ -51,6 +51,7 @@ defmodule EvercamMedia.PublicController do
         |> String.trim
         |> String.split(",")
         |> Enum.map(fn(x) -> string_to_float(x) end)
+        |> Enum.reverse
         |> List.to_tuple
       _ ->
         near_to
