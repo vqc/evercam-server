@@ -6,7 +6,7 @@ defmodule EvercamMedia.PublicView do
     %{
       cameras: Enum.map(cameras, fn(camera) ->
         %{
-          id: camera.id,
+          id: camera.exid,
           name: camera.name,
           owner: Util.deep_get(camera, [:owner, :username], ""),
           vendor_id: Camera.get_vendor_attr(camera, :exid),
