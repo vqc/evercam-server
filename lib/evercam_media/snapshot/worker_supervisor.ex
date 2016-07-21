@@ -60,7 +60,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   def update_worker(worker, camera) do
     case get_config(camera) do
       {:ok, settings} ->
-        Logger.info "Updating worker for #{settings.config.camera_exid}"
+        Logger.debug "Updating worker for #{settings.config.camera_exid}"
         StreamerSupervisor.restart_streamer(camera.exid)
         Worker.update_config(worker, settings)
       {:error, _message} ->

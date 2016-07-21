@@ -33,6 +33,6 @@ defmodule EvercamMedia.Intercom do
         _ -> nil
       end
     HTTPoison.post(@intercom_url, json, headers, hackney: @hackney)
-    Logger.info "Intercom user has been created"
+    Logger.debug "Intercom user has been created"
   end
 end
