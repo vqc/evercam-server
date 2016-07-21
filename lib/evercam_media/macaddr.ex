@@ -3,8 +3,6 @@ defmodule EvercamMedia.Types.MACADDR do
 
   def type, do: :macaddr
 
-  defdelegate blank?, to: Ecto.Type
-
   def cast(nil), do: :error
   def cast(mac), do: {:ok, to_string(mac)}
 
