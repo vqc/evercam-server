@@ -264,7 +264,7 @@ defmodule EvercamMedia.UserController do
 
       case Repo.update(changeset) do
         {:ok, share_request} ->
-          CameraShare.create_share(share_request.user, user, share_request.camera, share_request.rights, share_request.message)
+          CameraShare.create_share(share_request.camera, share_request.user, user, share_request.rights, share_request.message)
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))
       end
