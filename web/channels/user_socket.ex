@@ -1,5 +1,6 @@
 defmodule EvercamMedia.UserSocket do
   use Phoenix.Socket
+  alias EvercamMedia.Auth
 
   ## Channels
   channel "users:*", EvercamMedia.UserChannel
@@ -20,8 +21,13 @@ defmodule EvercamMedia.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(_params, socket) do
-    {:ok, socket}
+  def connect(params, socket) do
+    case Auth.validate(params["api_id"], params["api_key"], "") do
+      {:valid, user} ->
+        {:ok, assign(socket, :current_user, user)}
+      _ ->
+        {:ok, socket}
+    end
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:
