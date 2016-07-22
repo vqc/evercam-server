@@ -64,6 +64,11 @@ config :quantum,
       task: {"EvercamMedia.Snapshot.Storage.Export", "init"},
       schedule: "@reboot",
       overlap: false
+    ],
+    snapshot_cleanup: [
+      task: {"EvercamMedia.Snapshot.Storage", "cleanup_all"},
+      schedule: "@daily",
+      overlap: false
     ]
   ]
 
