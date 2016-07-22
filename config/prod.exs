@@ -65,6 +65,15 @@ config :exq,
   namespace: "sidekiq",
   queues: ["export_dir_day", "export_dir_hour"]
 
+config :quantum,
+  cron: [
+    snapshot_export: [
+      task: {"EvercamMedia.Snapshot.Storage.Export", "init"},
+      schedule: "@reboot",
+      overlap: false
+    ]
+  ]
+
 config :evercam_media, :mailgun,
   domain: System.get_env("MAILGUN_DOMAIN"),
   key: System.get_env("MAILGUN_KEY"),

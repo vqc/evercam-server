@@ -82,6 +82,15 @@ defmodule EvercamMedia.Snapshot.Storage.Export do
     {:reply, :ok, state}
   end
 
+  def init do
+    File.ls!("/storage")
+    |> Enum.sort
+    |> Enum.reverse
+    |> Enum.each(fn(camera_exid) ->
+      EvercamMedia.Snapshot.Storage.Export.export(camera_exid)
+    end)
+  end
+
   def export_snapshot(camera_exid, file_path) do
     url_path = String.replace(file_path, @root_dir, "")
     file = File.open(file_path, [:read, :binary, :raw], fn(pid) -> IO.binread(pid, :all) end)
