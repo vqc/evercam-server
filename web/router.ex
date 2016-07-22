@@ -65,7 +65,9 @@ defmodule EvercamMedia.Router do
       delete "/users/:id", UserController, :delete
 
       get "/cameras", CameraController, :index
+      options "/cameras", CameraController, :nothing
       get "/cameras.json", CameraController, :index
+      options "/cameras.json", CameraController, :nothing
       get "/cameras/:id", CameraController, :show
       patch "/cameras/:id", CameraController, :update
       options "/cameras/:id", CameraController, :nothing
