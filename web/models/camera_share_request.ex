@@ -44,6 +44,7 @@ defmodule CameraShareRequest do
     |> where(status: ^status)
     |> where(key: ^key)
     |> preload(:camera)
+    |> preload([camera: :owner])
     |> preload(:user)
     |> Repo.one
   end
@@ -52,6 +53,7 @@ defmodule CameraShareRequest do
     CameraShareRequest
     |> where(email: ^email)
     |> preload(:camera)
+    |> preload([camera: :owner])
     |> preload(:user)
     |> Repo.all
   end

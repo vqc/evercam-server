@@ -107,7 +107,7 @@ defmodule EvercamMedia.UserController do
           end
 
           if user |> Intercom.get_user |> intercom_user? do
-            render_error(conn, 400, "User already present at intercom.")
+            Logger.info "User already present at Intercom."
           else
             Task.start(fn -> Intercom.create_user(user, user_agent, requester_ip) end)
             conn
@@ -262,7 +262,7 @@ defmodule EvercamMedia.UserController do
       |> Repo.update
       |> case do
         {:ok, share_request} ->
-          CameraShare.create_share(share_request.camera, share_request.user, user, share_request.rights, share_request.message)
+          CameraShare.create_share(share_request.camera, user, share_request.camera.owner, share_request.rights, share_request.message)
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))
       end
