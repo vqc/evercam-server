@@ -83,6 +83,8 @@ defmodule EvercamMedia.Snapshot.Storage.Export do
   end
 
   def init do
+    :timer.sleep(:timer.seconds(10))
+
     File.ls!("/storage")
     |> Enum.sort
     |> Enum.reverse
