@@ -49,13 +49,13 @@ defmodule VendorModel do
     |> Repo.one
   end
 
-  def get_model(vendor_exid, model_exid) do
+  def get_model(action, vendor_exid, model_exid) do
     vendor_exid = String.downcase("#{vendor_exid}")
     model_exid = String.downcase("#{model_exid}")
 
     case {vendor_exid, model_exid} do
       {"", ""} ->
-        nil
+        if action == "update", do: nil, else: by_exid("other_default")
       {"", model_exid} ->
         by_exid(model_exid)
       {vendor_exid, ""} ->
@@ -64,7 +64,7 @@ defmodule VendorModel do
         |> get_vendor_default_model
       {vendor_exid, model_exid} ->
         model = by_exid(model_exid)
-        if model, do: model, else: get_model(vendor_exid, "")
+        if model, do: model, else: get_model(action, vendor_exid, "")
     end
   end
 

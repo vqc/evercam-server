@@ -305,7 +305,7 @@ defmodule EvercamMedia.CameraController do
   defp camera_update_changeset(camera, params) do
     camera_params =
       %{config: Map.get(camera, :config)}
-      |> construct_camera_parameters(params)
+      |> construct_camera_parameters("update", params)
 
     Camera.changeset(camera, camera_params)
   end
@@ -314,13 +314,13 @@ defmodule EvercamMedia.CameraController do
     camera_params =
       %{config: %{"snapshots" => %{}}}
       |> add_parameter("field", :owner_id, params["owner_id"])
-      |> construct_camera_parameters(params)
+      |> construct_camera_parameters("create", params)
 
     Camera.changeset(%Camera{}, camera_params)
   end
 
-  defp construct_camera_parameters(camera, params) do
-    model = VendorModel.get_model(params["vendor"], params["model"])
+  defp construct_camera_parameters(camera, action, params) do
+    model = VendorModel.get_model(action, params["vendor"], params["model"])
 
     camera
     |> add_parameter("field", :name, params["name"])
