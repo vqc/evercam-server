@@ -89,6 +89,19 @@ defmodule User do
     |> Repo.delete_all
   end
 
+  defp encrypt_password(changeset) do
+    case changeset do
+      %Ecto.Changeset{valid?: true, changes: %{password: password}} ->
+        put_change(changeset, :encrypted_password, hash_password(password))
+      _ ->
+        changeset
+    end
+  end
+
+  def hash_password(password) do
+    Comeonin.Bcrypt.hashpass(password, Comeonin.Bcrypt.gen_salt(12, true))
+  end
+
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
@@ -96,5 +109,7 @@ defmodule User do
     |> unique_constraint(:email, [name: :user_email_unique_index])
     |> validate_format(:username, ~r/^[a-z]+[\w-]+$/)
     |> validate_format(:email, @email_regex, [message: "Email format isn't valid!"])
+    |> validate_length(:password, min: 6)
+    |> encrypt_password
   end
 end

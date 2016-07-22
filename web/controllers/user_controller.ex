@@ -54,7 +54,6 @@ defmodule EvercamMedia.UserController do
       share_request_key = params["share_request_key"]
       api_id = UUID.uuid4(:hex) |> String.slice(0..7)
       api_key = UUID.uuid4(:hex)
-      password = create_password(params["password"])
 
       params =
         case Country.get_by_code(params["country"]) do
@@ -62,7 +61,7 @@ defmodule EvercamMedia.UserController do
           {:error, nil} -> Map.delete(params, "country")
         end
 
-      params = Map.merge(params, %{"password" => password, "api_id" => api_id, "api_key" => api_key})
+      params = Map.merge(params, %{"api_id" => api_id, "api_key" => api_key})
 
       params =
         case has_share_request_key?(share_request_key) do
@@ -247,9 +246,6 @@ defmodule EvercamMedia.UserController do
 
     CameraShare.create_share(remembrance_camera, user, evercam_user, rights, message, "public")
   end
-
-  defp create_password(password) when password in [nil, ""], do: nil
-  defp create_password(password), do: Comeonin.Bcrypt.hashpass(password, Comeonin.Bcrypt.gen_salt(12, true))
 
   defp create_share_for_request(nil, _user, conn), do: render_error(conn, 400, "Camera share request does not exist.")
   defp create_share_for_request(share_request, user, conn) do
