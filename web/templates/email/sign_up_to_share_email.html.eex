@@ -57,7 +57,7 @@
             <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;"><strong><%= full_name(@user) %></strong> has shared the camera <strong><%= @camera.name %></strong> with you.</p>
 
             <%= if @message do %>
-              <p class="callout" style=" line-height: 1.6; font-family: serif; background: #f5f5f5;  margin: 0 0 10px; padding: 10px;"><%= @user.firstname %>'s message for you: <%= @message %></p>
+              <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;"><%= @user.firstname %>'s message for you: <%= @message %></p>
             <% end %>
 
             <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">To access this camera, you will need to click on the link below and create an account with Evercam.</p>
