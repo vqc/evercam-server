@@ -79,7 +79,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         changeset = Camera.changeset(camera, params)
         Repo.update!(changeset)
         Camera.invalidate_camera(camera)
-        invalidate_camera_cache(camera)
         broadcast_change_to_users(camera)
         log_camera_status(camera, status, datetime)
       end)
@@ -87,10 +86,6 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     catch _type, error ->
       Util.error_handler(error)
     end
-  end
-
-  def invalidate_camera_cache(camera) do
-    Exq.enqueue(Exq, "cache", "Evercam::CacheInvalidationWorker", camera.exid)
   end
 
   def broadcast_change_to_users(camera) do

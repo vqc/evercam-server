@@ -44,12 +44,6 @@ config :evercam_media,
 config :evercam_media,
   seaweedfs_url: "http://localhost:8888"
 
-config :exq,
-  host: '127.0.0.1',
-  port: 6379,
-  namespace: "sidekiq",
-  queues: ["export_dir_day", "export_dir_hour"]
-
 config :evercam_media, :mailgun,
   domain: "sandbox",
   key: "sandbox",
