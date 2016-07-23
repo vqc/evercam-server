@@ -106,7 +106,7 @@ defmodule EvercamMedia.UserController do
           end
 
           if user |> Intercom.get_user |> intercom_user? do
-            Logger.info "User already present at Intercom."
+            Logger.info "User '#{user.username}' already present at Intercom."
           else
             Task.start(fn -> Intercom.create_user(user, user_agent, requester_ip) end)
           end
