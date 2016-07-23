@@ -214,6 +214,7 @@ defmodule EvercamMedia.Snapshot.Storage do
   end
 
   def cleanup(%CloudRecording{storage_duration: -1}), do: :noop
+  def cleanup(%CloudRecording{camera: nil}), do: :noop
   def cleanup(cloud_recording) do
     cloud_recording.camera.exid
     |> list_expired_days_for_camera(cloud_recording)
