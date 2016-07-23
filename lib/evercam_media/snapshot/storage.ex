@@ -254,6 +254,14 @@ defmodule EvercamMedia.Snapshot.Storage do
     Calendar.Date.diff(url_date, day_before_expiry) < 0
   end
 
+  def delete_everything_for(camera_exid) do
+    camera_exid
+    |> get_camera_apps_list
+    |> Enum.map(fn(app_name) -> "#{@seaweedfs}/#{camera_exid}/snapshots/#{app_name}/" end)
+    |> list_stored_days_for_camera(["year", "month", "day"])
+    |> Enum.each(fn(day_url) -> delete_directory(camera_exid, day_url) end)
+  end
+
   def construct_directory_path(camera_exid, timestamp, app_dir, root_dir \\ @root_dir) do
     timestamp
     |> Calendar.DateTime.Parse.unix!
@@ -304,7 +312,7 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   defp extract_date_from_url(url, camera_exid) do
     url
-    |> String.replace_leading("#{@seaweedfs}/#{camera_exid}/snapshots/recordings/", "")
+    |> String.replace_leading("#{@seaweedfs}/#{camera_exid}/snapshots/", "")
     |> String.replace_trailing("/", "")
   end
 

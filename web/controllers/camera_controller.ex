@@ -2,6 +2,7 @@ defmodule EvercamMedia.CameraController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.CameraView
   alias EvercamMedia.ErrorView
+  alias EvercamMedia.Repo
   alias EvercamMedia.Snapshot.Storage
   alias EvercamMedia.Snapshot.WorkerSupervisor
   alias EvercamMedia.Snapshot.CamClient
@@ -135,8 +136,8 @@ defmodule EvercamMedia.CameraController do
       |> Repo.update!
       |> Camera.invalidate_camera
 
-      spawn(fn -> delete_camera_worker(camera.id) end)
-      spawn(fn -> delete_snapshot_worker(camera.id) end)
+      spawn(fn -> delete_snapshot_worker(camera) end)
+      spawn(fn -> delete_camera_worker(camera) end)
       json(conn, %{})
     end
   end
@@ -379,17 +380,17 @@ defmodule EvercamMedia.CameraController do
     put_in(params, [:config, "auth", "basic", key], value)
   end
 
-  defp delete_camera_worker(camera_id) do
-    CloudRecording.delete_by_camera_id(camera_id)
-    MotionDetection.delete_by_camera_id(camera_id)
-    CameraShare.delete_by_camera_id(camera_id)
-    CameraShareRequest.delete_by_camera_id(camera_id)
-    Camera.delete_by_id(camera_id)
+  defp delete_camera_worker(camera) do
+    CloudRecording.delete_by_camera_id(camera.id)
+    MotionDetection.delete_by_camera_id(camera.id)
+    CameraShare.delete_by_camera_id(camera.id)
+    CameraShareRequest.delete_by_camera_id(camera.id)
+    Camera.delete_by_id(camera.id)
   end
 
-  defp delete_snapshot_worker(camera_id) do
-    CameraActivity.delete_by_camera_id(camera_id)
-    # TODO Seaweedfs Deletion
+  defp delete_snapshot_worker(camera) do
+    Storage.delete_everything_for(camera.exid)
+    CameraActivity.delete_by_camera_id(camera.id)
   end
 
   defp create_thumbnail(camera) do

@@ -21,6 +21,18 @@ defmodule CloudRecording do
     |> Repo.all
   end
 
+  def by_camera_id(camera_id) do
+    CloudRecording
+    |> where(camera_id: ^camera_id)
+    |> Repo.one
+  end
+
+  def delete_by_camera_id(camera_id) do
+    CloudRecording
+    |> where(camera_id: ^camera_id)
+    |> Repo.delete_all
+  end
+
   def schedule(cloud_recording) do
     if cloud_recording == nil || cloud_recording.status == "off" do
       %{}
@@ -43,12 +55,6 @@ defmodule CloudRecording do
     else
       div(60_000, cloud_recording.frequency)
     end
-  end
-
-  def delete_by_camera_id(camera_id) do
-    CloudRecording
-    |> where(camera_id: ^camera_id)
-    |> Repo.delete_all
   end
 
   def changeset(model, params \\ :invalid) do
