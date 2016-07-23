@@ -67,7 +67,7 @@ config :quantum,
     ],
     snapshot_cleanup: [
       task: {"EvercamMedia.Snapshot.Storage", "cleanup_all"},
-      schedule: "@daily",
+      schedule: "@hourly",
       overlap: false
     ]
   ]
