@@ -110,10 +110,9 @@ defmodule EvercamMedia.UserController do
             Logger.info "User already present at Intercom."
           else
             Task.start(fn -> Intercom.create_user(user, user_agent, requester_ip) end)
-            conn
-            |> put_status(200)
-            |> render(UserView, "show.json", %{user: user |> Repo.preload(:country, force: true)})
           end
+          conn
+          |> render(UserView, "show.json", %{user: user |> Repo.preload(:country, force: true)})
         {:error, changeset} ->
           render_error(conn, 404, Util.parse_changeset(changeset))
       end
