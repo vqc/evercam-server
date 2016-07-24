@@ -95,30 +95,6 @@ defmodule EvercamMedia.Util do
     end
   end
 
-  def format_snapshot_id(camera_id, snapshot_timestamp) do
-    "#{camera_id}_#{format_snapshot_timestamp(snapshot_timestamp)}"
-  end
-
-  def format_snapshot_timestamp(<<snapshot_timestamp::bytes-size(14)>>) do
-    "#{snapshot_timestamp}000"
-  end
-
-  def format_snapshot_timestamp(<<snapshot_timestamp::bytes-size(15)>>) do
-    "#{snapshot_timestamp}00"
-  end
-
-  def format_snapshot_timestamp(<<snapshot_timestamp::bytes-size(17), _rest :: binary>>) do
-    snapshot_timestamp
-  end
-
-  def snapshot_timestamp_to_unix(timestamp) do
-    timestamp
-    |> Calendar.NaiveDateTime.Parse.asn1_generalized
-    |> elem(1)
-    |> Calendar.NaiveDateTime.to_date_time_utc
-    |> Calendar.DateTime.Format.unix
-  end
-
   def ecto_datetime_to_unix(nil), do: nil
   def ecto_datetime_to_unix(ecto_datetime) do
     ecto_datetime
