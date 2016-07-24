@@ -84,20 +84,6 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  def data(conn, %{"id" => camera_exid, "snapshot_id" => snapshot_id, "notes" => notes}) do
-    case snapshot_data(camera_exid, snapshot_id, notes) do
-      {200, response} ->
-        conn
-        |> put_resp_header("content-type", "image/jpeg")
-        |> text(response)
-      {code, _response} ->
-        conn
-        |> put_status(code)
-        |> put_resp_header("content-type", "image/jpeg")
-        |> text(Util.storage_unavailable)
-    end
-  end
-
   def index(conn, %{"id" => camera_exid, "from" => from, "to" => _to, "limit" => "3600", "page" => _page}) do
     camera = Camera.get_full(camera_exid)
     offset = Camera.get_offset(camera)
@@ -277,15 +263,6 @@ defmodule EvercamMedia.SnapshotController do
     construct_args(params)
     |> CamClient.fetch_snapshot
     |> handle_test_response
-  end
-
-  defp snapshot_data(camera_exid, snapshot_id, notes) do
-    case Storage.load(camera_exid, snapshot_id, notes) do
-      {:ok, snapshot} ->
-        {200, snapshot}
-      _ ->
-        {404, %{message: "Snapshot not found"}}
-    end
   end
 
   defp snapshot_thumbnail(camera_exid, user, update_thumbnail?) do

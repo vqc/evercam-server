@@ -36,7 +36,6 @@ defmodule EvercamMedia.Router do
 
     get "/cameras/port-check", CameraController, :port_check
     post "/cameras/test", SnapshotController, :test
-    get "/cameras/:id/recordings/snapshots/data/:snapshot_id", SnapshotController, :data
 
     get "/cameras/:id/touch", CameraController, :touch
     get "/cameras/:id/thumbnail/:timestamp", CameraController, :thumbnail
