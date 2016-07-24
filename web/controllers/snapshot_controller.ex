@@ -101,20 +101,15 @@ defmodule EvercamMedia.SnapshotController do
   def show(conn, %{"id" => camera_exid, "timestamp" => timestamp, "with_data" => "true", "notes" => notes, "range" => _}) do
     timestamp = String.to_integer(timestamp)
     camera = Camera.get_full(camera_exid)
-    snapshot_timestamp =
-      timestamp
-      |> Calendar.DateTime.Parse.unix!
-      |> Calendar.Strftime.strftime!("%Y%m%d%H%M%S%f")
-    snapshot_id = Util.format_snapshot_id(camera.id, snapshot_timestamp)
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
-        {:ok, image} <- Storage.load(camera_exid, snapshot_id, notes) do
+        {:ok, image} <- Storage.load(camera_exid, timestamp, notes) do
       data = "data:image/jpeg;base64,#{Base.encode64(image)}"
 
       conn
       |> json(%{snapshots: [%{created_at: timestamp, notes: notes, data: data}]})
     else
-      {:error, :enoent} ->
+      {:error, :not_found} ->
         conn
         |> put_status(404)
         |> json(%{message: "Snapshot not found."})

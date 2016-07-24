@@ -175,32 +175,13 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
-  def load(camera_exid, snapshot_id, notes) do
+  def load(camera_exid, timestamp, notes) do
     app_name = notes_to_app_name(notes)
-    timestamp =
-      snapshot_id
-      |> String.split("_")
-      |> List.last
-      |> Util.snapshot_timestamp_to_unix
-    case seaweedfs_load(camera_exid, timestamp, app_name) do
-      {:ok, snapshot} -> {:ok, snapshot}
-      {:error, :not_found} -> disk_load(camera_exid, timestamp, app_name)
-    end
-  end
-
-  defp disk_load(camera_exid, timestamp, app_name) do
-    directory_path = construct_directory_path(camera_exid, timestamp, app_name)
-    file_name = construct_file_name(timestamp)
-    File.open("#{directory_path}#{file_name}", [:read, :binary, :raw], fn(file) ->
-      IO.binread(file, :all)
-    end)
-  end
-
-  defp seaweedfs_load(camera_exid, timestamp, app_name) do
     directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
     file_name = construct_file_name(timestamp)
-    file_path = directory_path <> file_name
-    case HTTPoison.get("#{@seaweedfs}#{file_path}", [], hackney: [pool: :seaweedfs_download_pool]) do
+    url = @seaweedfs <> directory_path <> file_name
+
+    case HTTPoison.get(url, [], hackney: [pool: :seaweedfs_download_pool]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: snapshot}} ->
         {:ok, snapshot}
       _error ->
