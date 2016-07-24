@@ -1,6 +1,5 @@
 defmodule EvercamMedia.CameraControllerTest do
   use EvercamMedia.ConnCase
-  alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.Storage
 
   setup context do
@@ -24,25 +23,6 @@ defmodule EvercamMedia.CameraControllerTest do
     end
 
     {:ok, datetime: now, user: user, camera: camera, user_b: user_b}
-  end
-
-  @tag :skip
-  @tag :thumbnail
-  test "GET /v1/cameras/:id/thumbnail", %{datetime: datetime} do
-    camera_exid = "austin"
-    iso_timestamp =
-      datetime
-      |> Calendar.Strftime.strftime!("%Y-%m-%dT%H:%M:%S.%f")
-      |> String.slice(0, 23)
-      |> String.ljust(24, ?Z)
-    token = Util.encode([camera_exid, iso_timestamp])
-
-    response =
-      build_conn()
-      |> get("/v1/cameras/#{camera_exid}/thumbnail/#{iso_timestamp}?token=#{token}")
-      |> response(200)
-
-    assert "test_content" == response
   end
 
   test 'PUT /v1/cameras/:id, returns success and the camera details when given valid parameters', context do

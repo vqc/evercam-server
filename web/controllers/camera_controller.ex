@@ -173,30 +173,6 @@ defmodule EvercamMedia.CameraController do
     end
   end
 
-  def thumbnail(conn, %{"id" => exid, "timestamp" => iso_timestamp, "token" => token}) do
-    try do
-      [token_exid, token_timestamp] = Util.decode(token)
-      if exid != token_exid, do: raise "Invalid token."
-      if iso_timestamp != token_timestamp, do: raise "Invalid token."
-
-      case Storage.thumbnail_load(exid) do
-        {:ok, snapshot} ->
-          conn
-          |> put_resp_header("content-type", "image/jpeg")
-          |> text(snapshot)
-        {:error, error_image} ->
-          conn
-          |> put_status(404)
-          |> put_resp_header("content-type", "image/jpeg")
-          |> text(error_image)
-      end
-    rescue
-      error ->
-        Logger.error "[#{exid}] [thumbnail] [error] [#{inspect error}]"
-        send_resp(conn, 500, "Invalid token.")
-    end
-  end
-
   def touch(conn, %{"id" => exid, "token" => token}) do
     try do
       [token_exid, _timestamp] = Util.decode(token)
