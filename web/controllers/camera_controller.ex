@@ -89,6 +89,7 @@ defmodule EvercamMedia.CameraController do
       rights = CameraShare.rights_list("full") |> Enum.join(",")
       CameraShare.create_share(camera, old_owner, user, rights, "")
       update_camera_worker(camera.exid)
+
       conn
       |> render("show.json", %{camera: camera, user: current_user})
     end
@@ -170,21 +171,6 @@ defmodule EvercamMedia.CameraController do
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))
       end
-    end
-  end
-
-  def touch(conn, %{"id" => exid, "token" => token}) do
-    try do
-      [token_exid, _timestamp] = Util.decode(token)
-      if exid != token_exid, do: raise "Invalid token."
-
-      Logger.info "Camera update for #{exid}"
-      update_camera_worker(exid)
-      send_resp(conn, 200, "Camera update request received.")
-    rescue
-      error ->
-        Logger.error "Camera update for #{exid} with error: #{inspect error}"
-        send_resp(conn, 500, "Invalid token.")
     end
   end
 

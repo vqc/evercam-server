@@ -37,8 +37,6 @@ defmodule EvercamMedia.Router do
     get "/cameras/port-check", CameraController, :port_check
     post "/cameras/test", SnapshotController, :test
 
-    get "/cameras/:id/touch", CameraController, :touch
-
     get "/models", VendorModelController, :index
     options "/models", VendorModelController, :index
     get "/models/:id", VendorModelController, :show
