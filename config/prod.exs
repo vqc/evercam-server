@@ -60,11 +60,6 @@ config :evercam_media,
 
 config :quantum,
   cron: [
-    snapshot_export: [
-      task: {"EvercamMedia.Snapshot.Storage.Export", "init"},
-      schedule: "@reboot",
-      overlap: false
-    ],
     snapshot_cleanup: [
       task: {"EvercamMedia.Snapshot.Storage", "cleanup_all"},
       schedule: "@hourly",
