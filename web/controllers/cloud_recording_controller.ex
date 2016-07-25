@@ -32,6 +32,7 @@ defmodule EvercamMedia.CloudRecordingController do
       cloud_recording = camera.cloud_recordings || %CloudRecording{}
       case cloud_recording |> CloudRecording.changeset(cr_params) |> Repo.insert_or_update do
         {:ok, cloud_recording} ->
+          Camera.invalidate_camera(camera)
           exid
           |> String.to_atom
           |> Process.whereis
