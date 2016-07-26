@@ -93,7 +93,7 @@ defmodule EvercamMedia.ArchiveController do
     do
       Archive.delete_by_exid(archive_id)
 
-      json(conn, %{message: "Archive has been deleted!"})
+      json(conn, %{})
     end
   end
 
