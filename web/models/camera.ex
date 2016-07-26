@@ -24,7 +24,7 @@ defmodule Camera do
     field :timezone, :string
     field :thumbnail_url, :string
     field :is_online, :boolean
-    field :is_public, :boolean
+    field :is_public, :boolean, default: false
     field :is_online_email_owner_notification, :boolean, default: false
     field :discoverable, :boolean, default: false
     field :config, EvercamMedia.Types.JSON
