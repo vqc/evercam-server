@@ -45,6 +45,7 @@ defmodule User do
   def by_username_or_email(login) do
     User
     |> where([u], u.username == ^login or u.email == ^login)
+    |> preload(:country)
     |> Repo.one
   end
 
