@@ -75,10 +75,10 @@ defmodule EvercamMedia.UserController do
       changeset = User.changeset(%User{}, params)
       case Repo.insert(changeset) do
         {:ok, user} ->
-          {:ok, exp_date} = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.advance(3600)
+          {:ok, exp_date} = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.advance(3600 * 24 * 365 * 22)
           {:ok, expiry_date} = Calendar.DateTime.to_erl(exp_date) |> Ecto.DateTime.cast
           token = Ecto.build_assoc(user, :access_tokens, is_revoked: false,
-            request: UUID.uuid4(:hex) |> String.slice(0..15), expires_at: expiry_date)
+            request: UUID.uuid4(:hex) |> String.slice(0..31), expires_at: expiry_date)
 
           case Repo.insert(token) do
             {:ok, token} -> {:success, user, token}
