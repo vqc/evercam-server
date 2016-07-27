@@ -94,6 +94,8 @@ defmodule EvercamMedia.SnapshotController do
 
       conn
       |> json(%{snapshots: snapshots})
+    else
+      false -> render_error(conn, 403, "Forbidden.")
     end
   end
 
