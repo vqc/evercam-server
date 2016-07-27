@@ -4,6 +4,7 @@ defmodule User do
   alias EvercamMedia.Repo
 
   @email_regex ~r/^\S+@\S+$/
+  @name_regex ~r/^[\p{Xwd}\s,.']+$/
 
   @required_fields ~w(username password firstname lastname email)
   @optional_fields ~w(api_id api_key country_id confirmed_at updated_at created_at)
@@ -108,6 +109,8 @@ defmodule User do
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:username, [name: :user_username_unique_index])
     |> unique_constraint(:email, [name: :user_email_unique_index])
+    |> validate_format(:firstname, @name_regex)
+    |> validate_format(:lastname, @name_regex)
     |> validate_format(:username, ~r/^[a-z]+[\w-]+$/)
     |> validate_format(:email, @email_regex, [message: "Email format isn't valid!"])
     |> validate_length(:password, min: 6)
