@@ -93,6 +93,6 @@ config :evercam_media, EvercamMedia.SnapshotRepo,
   socket_options: [keepalive: true],
   timeout: 60_000,
   pool_timeout: 60_000,
-  pool_size: 200,
+  pool_size: 100,
   lazy: false,
   ssl: true
