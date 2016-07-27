@@ -89,8 +89,7 @@ defmodule EvercamMedia.SnapshotController do
     offset = Camera.get_offset(camera)
     from = convert_to_camera_timestamp(from, offset)
 
-    with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
-         true <- String.match?(offset, ~r/.+00/) do
+    with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera) do
       snapshots = Storage.seaweedfs_load_range(camera_exid, from)
 
       conn
