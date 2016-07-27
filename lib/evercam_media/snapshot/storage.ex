@@ -18,13 +18,48 @@ defmodule EvercamMedia.Snapshot.Storage do
     end)
   end
 
-  def seaweedfs_save(camera_exid, timestamp, image, notes) do
+  def seaweedfs_save(camera_exid, timestamp, image, notes, metadata \\ %{motion_level: nil}) do
     hackney = [pool: :seaweedfs_upload_pool]
     app_name = notes_to_app_name(notes)
     directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
     file_name = construct_file_name(timestamp)
     file_path = directory_path <> file_name
     HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], hackney: hackney)
+    metadata_save(directory_path, file_name, metadata)
+  end
+
+  defp metadata_save(_directory_path, _file_name, %{motion_level: 0}), do: :noop
+  defp metadata_save(_directory_path, _file_name, %{motion_level: nil}), do: :noop
+  defp metadata_save(directory_path, file_name, metadata) do
+    hackney = [pool: :seaweedfs_upload_pool]
+    file_path = directory_path <> "metadata.json"
+    url = @seaweedfs <> file_path
+
+    data =
+      case HTTPoison.get(url, [], hackney: hackney) do
+        {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+          body
+          |> Poison.decode!
+          |> Map.put_new(file_name, metadata)
+          |> Poison.encode!
+        {:ok, %HTTPoison.Response{status_code: 404}} ->
+          Poison.encode!(%{file_name => metadata})
+        error ->
+          raise "Metadata upload at '#{file_path}' failed with: #{inspect error}"
+      end
+    HTTPoison.post!(url, {:multipart, [{file_path, data, []}]}, [], hackney: hackney)
+  end
+
+  defp metadata_load(url) do
+    hackney = [pool: :seaweedfs_download_pool]
+    case HTTPoison.get(url, [], hackney: hackney) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        Poison.decode!(body)
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        %{}
+      error ->
+        raise "Metadata download from '#{url}' failed with: #{inspect error}"
+    end
   end
 
   def seaweedfs_thumbnail_export(file_path, image) do
@@ -108,9 +143,15 @@ defmodule EvercamMedia.Snapshot.Storage do
     end)
     |> Enum.reject(fn({_app_name, files}) -> files == [] end)
     |> Enum.flat_map(fn({app_name, files}) ->
-      Enum.map(files, fn(file_path) ->
+      hour_metadata = metadata_load("#{url_base}/#{app_name}/#{hour_datetime}/metadata.json")
+
+      files
+      |> Enum.reject(fn(file_name) -> file_name == "metadata.json" end)
+      |> Enum.map(fn(file_name) ->
+        metadata = Util.deep_get(hour_metadata, [file_name, "motion_level"], nil)
+
         Map.get(dir_paths, app_name)
-        |> construct_snapshot_record(file_path, app_name)
+        |> construct_snapshot_record(file_name, app_name, metadata)
       end)
     end)
   end
@@ -124,9 +165,14 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   defp do_seaweedfs_load_range(camera_exid, from, app_name) do
     directory_path = construct_directory_path(camera_exid, from, app_name, "")
+    hour_metadata = metadata_load("#{@seaweedfs}#{directory_path}metadata.json")
 
     request_from_seaweedfs("#{@seaweedfs}#{directory_path}?limit=3600", "Files", "name")
-    |> Enum.map(fn(file_path) -> construct_snapshot_record(directory_path, file_path, app_name) end)
+    |> Enum.reject(fn(file_name) -> file_name == "metadata.json" end)
+    |> Enum.map(fn(file_name) ->
+      metadata = Util.deep_get(hour_metadata, [file_name, "motion_level"], nil)
+      construct_snapshot_record(directory_path, file_name, app_name, metadata)
+    end)
   end
 
   defp get_camera_apps_list(camera_exid) do
@@ -256,11 +302,11 @@ defmodule EvercamMedia.Snapshot.Storage do
     |> format_file_name
   end
 
-  defp construct_snapshot_record(directory_path, file_path, app_name) do
+  defp construct_snapshot_record(directory_path, file_name, app_name, motion_level) do
     %{
-      created_at: parse_file_timestamp(directory_path, file_path),
+      created_at: parse_file_timestamp(directory_path, file_name),
       notes: app_name_to_notes(app_name),
-      motion_level: nil
+      motion_level: motion_level
     }
   end
 
