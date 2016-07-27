@@ -6,6 +6,7 @@ defmodule EvercamMedia.ArchiveView do
     %{archives: render_many(archives, __MODULE__, "archive.json")}
   end
 
+  def render("show.json", %{archive: nil}), do: %{archives: []}
   def render("show.json", %{archive: archive}) do
     %{archives: render_many([archive], __MODULE__, "archive.json")}
   end
