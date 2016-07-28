@@ -11,7 +11,7 @@ erl_crash.dump
 /node_modules
 
 # Ignore compiled code for motion detection
-/priv_dir/lib_elixir_motiondetection.so
+/priv_dir/*.so
 
 # Ignore mailgun emails made in dev/test environment
 /priv_dir/mailgun_test.json
