@@ -22,11 +22,9 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   alias EvercamMedia.Snapshot.Error
 
   def handle_event({:got_snapshot, data}, state) do
-    {camera_exid, timestamp, image} = data
+    {camera_exid, timestamp, _image} = data
     Logger.debug "[#{camera_exid}] [snapshot_success]"
-    notes = "Evercam Proxy"
     spawn fn -> update_camera_status("#{camera_exid}", timestamp, true) end
-    ConCache.put(:cache, camera_exid, %{image: image, timestamp: timestamp, notes: notes})
     {:ok, state}
   end
 
