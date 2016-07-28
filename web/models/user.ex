@@ -22,7 +22,6 @@ defmodule User do
     field :email, :string
     field :api_id, :string
     field :api_key, :string
-    field :billing_id, :string
     field :token_expires_at, Ecto.DateTime
     field :stripe_customer_id, :string
     field :confirmed_at, Ecto.DateTime

@@ -795,12 +795,11 @@ CREATE TABLE users (
     token_expires_at timestamp without time zone,
     api_id text,
     api_key text,
-    is_admin boolean DEFAULT false NOT NULL,
     stripe_customer_id text,
-    billing_id text,
     last_login_at timestamp with time zone,
     vat_number text,
-    payment_method integer DEFAULT 0
+    payment_method integer DEFAULT 0,
+    insight_id text
 );
 
 
@@ -1368,5 +1367,5 @@ ALTER TABLE ONLY snapshots
 -- PostgreSQL database dump complete
 --
 
-INSERT INTO "schema_migrations" (version) VALUES (20160616160229);
+INSERT INTO "schema_migrations" (version) VALUES (20160616160229), (20160712101523), (20160720125939), (20160727112052);
 
