@@ -7,7 +7,7 @@ defmodule EvercamMedia do
     import Supervisor.Spec, warn: false
 
     children = [
-      worker(ConCache, [[ttl_check: :timer.seconds(0.1), ttl: :timer.seconds(1.3)], [name: :cache]]),
+      worker(ConCache, [[ttl_check: :timer.seconds(0.1), ttl: :timer.seconds(2.5)], [name: :cache]]),
       worker(ConCache, [[ttl_check: :timer.seconds(0.1), ttl: :timer.seconds(1.5)], [name: :snapshot_schedule]], id: :snapshot_schedule),
       worker(ConCache, [[ttl_check: :timer.seconds(0.1), ttl: :timer.minutes(1)], [name: :camera_lock]], id: :camera_lock),
       worker(ConCache, [[ttl_check: :timer.seconds(1), ttl: :timer.hours(1)], [name: :users]], id: :users),
