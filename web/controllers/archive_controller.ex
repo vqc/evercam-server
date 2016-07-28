@@ -98,17 +98,13 @@ defmodule EvercamMedia.ArchiveController do
   end
 
   defp create_clip(params, camera, conn) do
-    offset =
-      camera
-      |> Camera.get_timezone
-      |> get_offset
-    from_date = clip_date(params["from_date"], offset)
-    to_date = clip_date(params["to_date"], offset)
+    timezone = camera |> Camera.get_timezone
+    from_date = clip_date(params["from_date"], timezone)
+    to_date = clip_date(params["to_date"], timezone)
     clip_exid = generate_exid(params["title"])
+
     current_date_time =
-      camera
-      |> Camera.get_timezone
-      |> Calendar.DateTime.now!
+      Calendar.DateTime.now_utc
       |> Calendar.DateTime.to_erl
     user_id =
       params["requested_by"]
@@ -228,18 +224,18 @@ defmodule EvercamMedia.ArchiveController do
     end
   end
 
-  defp get_offset(timezone) do
-    timezone
-    |> Calendar.DateTime.now!
-    |> Map.get(:utc_offset)
-  end
-
-  defp clip_date(unix_timestamp, _offset) when unix_timestamp in ["", nil], do: nil
-  defp clip_date(unix_timestamp, offset) do
+  defp clip_date(unix_timestamp, _timezone) when unix_timestamp in ["", nil], do: nil
+  defp clip_date(unix_timestamp, "Etc/UTC") do
     unix_timestamp
     |> Calendar.DateTime.Parse.unix!
-    |> Calendar.DateTime.advance(offset)
-    |> elem(1)
+    |> Calendar.DateTime.to_erl
+  end
+  defp clip_date(unix_timestamp, timezone) do
+    unix_timestamp
+    |> Calendar.DateTime.Parse.unix!
+    |> Calendar.DateTime.to_erl
+    |> Calendar.DateTime.from_erl!(timezone)
+    |> Calendar.DateTime.shift_zone!("Etc/UTC")
     |> Calendar.DateTime.to_erl
   end
 
