@@ -18,18 +18,24 @@ defmodule EvercamMedia.Snapshot.Storage do
     end)
   end
 
-  def seaweedfs_save(camera_exid, timestamp, image, notes, metadata \\ %{motion_level: nil}) do
+  def seaweedfs_save(camera_exid, timestamp, image, notes) do
     hackney = [pool: :seaweedfs_upload_pool]
     app_name = notes_to_app_name(notes)
     directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
     file_name = construct_file_name(timestamp)
     file_path = directory_path <> file_name
     HTTPoison.post!("#{@seaweedfs}#{file_path}", {:multipart, [{file_path, image, []}]}, [], hackney: hackney)
-    metadata_save(directory_path, file_name, metadata)
   end
 
-  defp metadata_save(_directory_path, _file_name, %{motion_level: 0}), do: :noop
-  defp metadata_save(_directory_path, _file_name, %{motion_level: nil}), do: :noop
+  def motion_level_save(_camera_exid, _timestamp, _notes, 0), do: :noop
+  def motion_level_save(_camera_exid, _timestamp, _notes, nil), do: :noop
+  def motion_level_save(camera_exid, timestamp, notes, motion_level) do
+    app_name = notes_to_app_name(notes)
+    directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
+    file_name = construct_file_name(timestamp)
+    metadata_save(directory_path, file_name, %{motion_level: motion_level})
+  end
+
   defp metadata_save(directory_path, file_name, metadata) do
     hackney = [pool: :seaweedfs_upload_pool]
     file_path = directory_path <> "metadata.json"
