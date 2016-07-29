@@ -198,8 +198,9 @@ defmodule EvercamMedia.SnapshotController do
          :ok <- ensure_authorized(conn, current_user, camera)
     do
       offset = Camera.get_offset(camera)
-      hour = construct_timestamp(year, month, day, "#{hour}:00:00", offset)
-      snapshots = Storage.hour(camera_exid, hour)
+      hour = String.rjust(hour, 2, ?0)
+      hour_datetime = construct_timestamp(year, month, day, "#{hour}:00:00", offset)
+      snapshots = Storage.hour(camera_exid, hour_datetime)
 
       conn
       |> json(%{snapshots: snapshots})
