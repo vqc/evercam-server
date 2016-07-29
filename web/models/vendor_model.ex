@@ -36,7 +36,7 @@ defmodule VendorModel do
 
   def by_exid(exid) do
     VendorModel
-    |> where(exid: ^exid)
+    |> where(exid: ^String.downcase(exid))
     |> preload(:vendor)
     |> Repo.one
   end

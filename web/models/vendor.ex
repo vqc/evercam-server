@@ -13,7 +13,7 @@ defmodule Vendor do
 
   def by_exid(exid) do
     Vendor
-    |> where(exid: ^exid)
+    |> where(exid: ^String.downcase(exid))
     |> preload(:vendor_models)
     |> Repo.one
   end
@@ -34,7 +34,7 @@ defmodule Vendor do
   def with_exid_if_given(query, nil), do: query
   def with_exid_if_given(query, exid) do
     query
-    |> where([v], v.exid == ^exid)
+    |> where([v], v.exid == ^String.downcase(exid))
   end
 
   def with_name_if_given(query, nil), do: query

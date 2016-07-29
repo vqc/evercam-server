@@ -97,10 +97,7 @@ defmodule EvercamMedia.CameraController do
 
   def update(conn, %{"id" => exid} = params) do
     caller = conn.assigns[:current_user]
-    camera =
-      exid
-      |> String.downcase
-      |> Camera.get_full
+    camera = Camera.get_full(exid)
 
     with :ok <- camera_exists(conn, exid, camera),
          :ok <- user_has_rights(conn, caller, camera)
@@ -121,7 +118,7 @@ defmodule EvercamMedia.CameraController do
 
   def delete(conn, %{"id" => exid}) do
     caller = conn.assigns[:current_user]
-    camera = exid |> String.downcase |> Camera.get_full
+    camera = Camera.get_full(exid)
 
     with :ok <- camera_exists(conn, exid, camera),
          true <- user_has_delete_rights(conn, caller, camera)

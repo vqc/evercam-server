@@ -24,7 +24,7 @@ defmodule Archive do
 
   def by_exid(exid) do
     Archive
-    |> where(exid: ^exid)
+    |> where(exid: ^String.downcase(exid))
     |> preload(:camera)
     |> preload(:user)
     |> Repo.one

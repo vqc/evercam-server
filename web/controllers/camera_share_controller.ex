@@ -60,8 +60,8 @@ defmodule EvercamMedia.CameraShareController do
 
   def update(conn, %{"id" => exid, "email" => email, "rights" => rights}) do
     caller = conn.assigns[:current_user]
-    camera = exid |> String.downcase |> Camera.get_full
-    sharee = email |> String.downcase |> User.by_username_or_email
+    camera = Camera.get_full(exid)
+    sharee = User.by_username_or_email(email)
 
     with :ok <- camera_exists(conn, exid, camera),
          :ok <- caller_has_permission(conn, caller, camera),
@@ -88,8 +88,8 @@ defmodule EvercamMedia.CameraShareController do
 
   def delete(conn, %{"id" => exid, "email" => email}) do
     caller = conn.assigns[:current_user]
-    camera = exid |> String.downcase |> Camera.get_full
-    sharee = email |> String.downcase |> User.by_username_or_email
+    camera = Camera.get_full(exid)
+    sharee = User.by_username_or_email(email)
 
     with :ok <- camera_exists(conn, exid, camera),
          :ok <- sharee_exists(conn, email, sharee),
@@ -121,6 +121,8 @@ defmodule EvercamMedia.CameraShareController do
 
   defp user_can_list(_conn, _user, _camera, nil), do: :ok
   defp user_can_list(conn, user, camera, user_id) do
+    user_id = String.downcase(user_id)
+
     if !Permission.Camera.can_list?(user, camera) && (user.email != user_id && user.username != user_id) do
       render_error(conn, 401, "Unauthorized.")
     else

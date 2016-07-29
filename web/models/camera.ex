@@ -97,6 +97,8 @@ defmodule Camera do
   end
 
   def get_full(exid) do
+    exid = String.downcase(exid)
+
     ConCache.dirty_get_or_store(:camera_full, exid, fn() ->
       Camera.by_exid_with_associations(exid)
     end)
@@ -110,7 +112,7 @@ defmodule Camera do
 
   def by_exid_with_associations(exid) do
     Camera
-    |> where([cam], cam.exid == ^exid)
+    |> where([cam], cam.exid == ^String.downcase(exid))
     |> preload(:owner)
     |> preload(:cloud_recordings)
     |> preload(:motion_detections)
@@ -369,7 +371,7 @@ defmodule Camera do
   defp validate_exid(changeset) do
     case get_field(changeset, :exid) do
       nil -> auto_generate_camera_id(changeset)
-      _exid -> changeset
+      _exid -> changeset |> update_change(:exid, &String.downcase/1)
     end
   end
 

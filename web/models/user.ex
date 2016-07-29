@@ -43,6 +43,8 @@ defmodule User do
 
   def by_username_or_email(login) when login in["", nil], do: nil
   def by_username_or_email(login) do
+    login = String.downcase(login)
+
     User
     |> where([u], u.username == ^login or u.email == ^login)
     |> preload(:country)
@@ -51,7 +53,7 @@ defmodule User do
 
   def by_username(username) do
     User
-    |> where(username: ^username)
+    |> where(username: ^String.downcase(username))
     |> preload(:country)
     |> Repo.one
   end
@@ -114,5 +116,6 @@ defmodule User do
     |> validate_format(:email, @email_regex, [message: "Email format isn't valid!"])
     |> validate_length(:password, min: 6)
     |> encrypt_password
+    |> update_change(:username, &String.downcase/1)
   end
 end

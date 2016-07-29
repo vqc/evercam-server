@@ -4,7 +4,7 @@ defmodule EvercamMedia.CameraShareRequestController do
 
   def show(conn, %{"id" => exid} = params) do
     caller = conn.assigns[:current_user]
-    camera = exid |> String.downcase |> Camera.get_full
+    camera = Camera.get_full(exid)
     status = parse_status(params["status"])
 
     with :ok <- camera_exists(conn, exid, camera),
@@ -24,7 +24,7 @@ defmodule EvercamMedia.CameraShareRequestController do
 
   def update(conn, %{"id" => exid, "email" => email, "rights" => rights}) do
     caller = conn.assigns[:current_user]
-    camera = exid |> String.downcase |> Camera.get_full
+    camera = Camera.get_full(exid)
 
     with :ok <- camera_exists(conn, exid, camera),
          :ok <- caller_has_permission(conn, caller, camera),
@@ -46,7 +46,7 @@ defmodule EvercamMedia.CameraShareRequestController do
 
   def cancel(conn, %{"id" => exid, "email" => email}) do
     caller = conn.assigns[:current_user]
-    camera = exid |> String.downcase |> Camera.get_full
+    camera = Camera.get_full(exid)
 
     with :ok <- camera_exists(conn, exid, camera),
          :ok <- caller_has_permission(conn, caller, camera),

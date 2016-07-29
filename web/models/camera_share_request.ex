@@ -62,7 +62,7 @@ defmodule CameraShareRequest do
     CameraShareRequest
     |> where(camera_id: ^camera_id)
     |> where(status: ^@status.pending)
-    |> where(email: ^email)
+    |> where(email: ^String.downcase(email))
     |> preload(:camera)
     |> preload(:user)
     |> Repo.one
@@ -131,6 +131,7 @@ defmodule CameraShareRequest do
     |> cast(params, @required_fields, @optional_fields)
     |> validate_required(:email)
     |> validate_format(:email, ~r/^\S+@\S+$/, [message: "You've entered an invalid email address."])
+    |> update_change(:email, &String.downcase/1)
     |> validate_rights
   end
 end

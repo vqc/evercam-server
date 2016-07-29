@@ -3,7 +3,7 @@ defmodule EvercamMedia.MotionDetectionController do
 
   def show(conn, %{"id" => camera_exid}) do
     caller = conn.assigns[:current_user]
-    camera = camera_exid |> String.downcase |> Camera.get_full
+    camera = Camera.get_full(camera_exid)
 
     with :ok <- camera_exists(camera),
          :ok <- ensure_authorized(caller, camera)
