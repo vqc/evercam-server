@@ -1,6 +1,6 @@
 # Evercam Media [![Build Status][travis-image]][travis-url] [![Deps Status][hex-image]][hex-url]
 
-Evercam Media is the component that is responsible for talking  to the camera. Consider it as a "proxy" for all commands. Processes here request either snapshots or streams and then send them to the API, Storage, or to any of the clients (e.g. Evercam-Dashboard, Evercam-Android, Evercam-iOS).
+Evercam Media is the component that is responsible for talking  to the camera. Consider it as a "proxy" for all commands. Processes here request either snapshots or streams and then send them to storage, or to any of the clients (e.g. Evercam-Dashboard, Evercam-Android, Evercam-iOS).
 
 | Name   | Evercam Media  |
 | --- | --- |
