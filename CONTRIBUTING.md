@@ -1,1 +1,1 @@
-To get started, <a href="https://www.clahub.com/agreements/evercam/evercam-media">sign the Contributor License Agreement</a>.
+We'd love to help you get started. The easiest method is probably to contact Marco via https://www.evercam.io/contact and we'll take it from there.
