@@ -119,8 +119,8 @@ defmodule User do
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
-    |> unique_constraint(:username, [name: :user_username_unique_index])
-    |> unique_constraint(:email, [name: :user_email_unique_index])
+    |> unique_constraint(:username, [name: :user_username_unique_index, message: "Username has already been taken."])
+    |> unique_constraint(:email, [name: :user_email_unique_index, message: "Email has already been taken."])
     |> validate_format(:firstname, @name_regex)
     |> validate_format(:lastname, @name_regex)
     |> validate_format(:username, ~r/^[a-z]+[\w-]+$/)
