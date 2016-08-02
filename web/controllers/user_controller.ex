@@ -158,8 +158,7 @@ defmodule EvercamMedia.UserController do
          :ok <- ensure_can_view(current_user, user, conn)
     do
       spawn(fn -> delete_user(user) end)
-      conn
-      |> json(%{message: "User has been deleted!"})
+      json(conn, %{})
     end
   end
 
