@@ -164,9 +164,9 @@ defmodule EvercamMedia.UserController do
   end
 
   defp delete_user(user) do
-    # TODO: invalidate all users with whom this user has shared a camera
     User.invalidate_auth(user.api_id, user.api_key)
     Camera.invalidate_user(user)
+    User.invalidate_share_users(user)
     Camera.delete_by_owner(user.id)
     CameraShare.delete_by_user(user.id)
     User.delete_by_id(user.id)

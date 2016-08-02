@@ -32,6 +32,17 @@ defmodule User do
     ConCache.delete(:users, "#{api_id}_#{api_key}")
   end
 
+  def invalidate_share_users(%User{} = user) do
+    CameraShare
+    |> where([cs], cs.user_id == ^user.id or cs.sharer_id == ^user.id)
+    |> preload(:camera)
+    |> preload([camera: :owner])
+    |> Repo.all
+    |> Enum.map(fn(cs) -> cs.camera.owner end)
+    |> Enum.uniq
+    |> Enum.each(fn(user) -> Camera.invalidate_user(user) end)
+  end
+
   def get_by_api_keys("", ""), do: nil
   def get_by_api_keys(nil, _api_key), do: nil
   def get_by_api_keys(_api_id, nil), do: nil
