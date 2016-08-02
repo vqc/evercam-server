@@ -12,7 +12,7 @@ defmodule EvercamMedia.UserController do
     user =
       params["id"]
       |> String.replace_trailing(".json", "")
-      |> User.by_username
+      |> User.by_username_or_email
 
     cond do
       !user ->
