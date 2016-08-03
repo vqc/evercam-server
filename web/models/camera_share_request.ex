@@ -49,9 +49,10 @@ defmodule CameraShareRequest do
     |> Repo.one
   end
 
-  def by_email(email) do
+  def by_email(email, status \\ @status.pending) do
     CameraShareRequest
     |> where(email: ^email)
+    |> where(status: ^status)
     |> preload(:camera)
     |> preload([camera: :owner])
     |> preload(:user)
