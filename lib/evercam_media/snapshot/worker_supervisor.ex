@@ -24,7 +24,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
     EvercamMedia.Snapshot.PollHandler,
     EvercamMedia.Snapshot.StorageHandler,
     # EvercamMedia.Snapshot.StatsHandler
-    EvercamMedia.Snapshot.MotionDetectionHandler
+    # EvercamMedia.MotionDetection.ComparatorHandler
   ]
 
   def start_link() do

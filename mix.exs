@@ -8,7 +8,7 @@ defmodule EvercamMedia.Mixfile do
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     compilers: [:elixir_make, :phoenix] ++ Mix.compilers,
+     compilers: [:phoenix] ++ Mix.compilers,
      aliases: aliases,
      deps: deps]
   end
@@ -32,7 +32,6 @@ defmodule EvercamMedia.Mixfile do
     :connection,
     :cors_plug,
     :cowboy,
-    :elixir_make,
     :ecto,
     :geo,
     :httpoison,
@@ -69,7 +68,6 @@ defmodule EvercamMedia.Mixfile do
       {:credo, github: "rrrene/credo", only: :dev},
       {:dotenv, "~> 2.1.0", only: :dev},
       {:ecto, "~> 2.0.2"},
-      {:elixir_make, "~> 0.3.0"},
       {:exrm, github: "bitwalker/exrm"},
       {:geo, "~> 1.1"},
       {:httpoison, "~> 0.9.0"},
