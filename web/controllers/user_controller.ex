@@ -102,7 +102,13 @@ defmodule EvercamMedia.UserController do
             share_requests = CameraShareRequest.by_email(user.email)
             multiple_share_create(share_requests, user, conn)
           end
-          intercom_activity(Mix.env, user, user_agent, requester_ip)
+          Task.start(fn ->
+            if user |> Intercom.get_user |> intercom_user? do
+              Logger.info "User '#{user.username}' already present at Intercom."
+            else
+              Intercom.create_user(user, user_agent, requester_ip)
+            end
+          end)
           conn
           |> render(UserView, "show.json", %{user: user |> Repo.preload(:country, force: true)})
         {:error, changeset} ->
@@ -258,16 +264,5 @@ defmodule EvercamMedia.UserController do
   defp multiple_share_create(nil, _user, _conn), do: Logger.info "No share request found."
   defp multiple_share_create(share_requests, user, conn) do
     Enum.each(share_requests, fn(share_request) -> create_share_for_request(share_request, user, conn) end)
-  end
-
-  defp intercom_activity(:dev, _user, _user_agent, _requester_ip), do: Logger.info "Development ENV"
-  defp intercom_activity(:prod, user, user_agent, requester_ip) do
-    Task.start(fn ->
-      if user |> Intercom.get_user |> intercom_user? do
-        Logger.info "User '#{user.username}' already present at Intercom."
-      else
-        Intercom.create_user(user, user_agent, requester_ip)
-      end
-    end)
   end
 end
