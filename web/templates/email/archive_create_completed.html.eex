@@ -63,7 +63,7 @@
                 https://dash.evercam.io/v1/cameras/<%= @archive.camera.exid %>/archives
               </a>
             </p><!-- /Callout Panel -->
-            <% if @thumbnail_available do %>
+            <%= if @thumbnail_available do %>
               <br>
               <img src="cid:snapshot.jpg" alt='Camera Preview' style="max-width: 550px; display:block; margin:0 auto;" >
             <% end %>
