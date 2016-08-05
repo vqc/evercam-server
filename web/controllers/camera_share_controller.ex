@@ -38,7 +38,7 @@ defmodule EvercamMedia.CameraShareController do
         case CameraShare.create_share(camera, sharee, caller, params["rights"], params["message"]) do
           {:ok, camera_share} ->
             unless caller == sharee do
-              EvercamMedia.UserMailer.camera_shared_notification(caller, camera, sharee.email, params["message"])
+              send_email_notification(caller, camera, sharee.email, params["message"])
             end
             Camera.invalidate_user(sharee)
             Camera.invalidate_camera(camera)
@@ -49,7 +49,7 @@ defmodule EvercamMedia.CameraShareController do
       else
         case CameraShareRequest.create_share_request(camera, params["email"], caller, params["rights"], params["message"]) do
           {:ok, camera_share_request} ->
-            EvercamMedia.UserMailer.camera_share_request_notification(caller, camera, params["email"], params["message"], camera_share_request.key)
+            send_email_notification(caller, camera, params["email"], params["message"], camera_share_request.key)
             conn |> render(CameraShareRequestView, "show.json", %{camera_share_requests: camera_share_request})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
@@ -149,6 +149,26 @@ defmodule EvercamMedia.CameraShareController do
     case CameraShare.by_user_and_camera(camera.id, sharee.id) do
       nil -> render_error(conn, 404, "Share not found.")
       %CameraShare{} = camera_share -> {:ok, camera_share}
+    end
+  end
+
+  defp send_email_notification(user, camera, to_email, message) do
+    try do
+      Task.start(fn ->
+        EvercamMedia.UserMailer.camera_shared_notification(user, camera, to_email, message)
+      end)
+    catch _type, error ->
+      Util.error_handler(error)
+    end
+  end
+
+  defp send_email_notification(user, camera, to_email, message, share_request_key) do
+    try do
+      Task.start(fn ->
+        EvercamMedia.UserMailer.camera_share_request_notification(user, camera, to_email, message, share_request_key)
+      end)
+    catch _type, error ->
+      Util.error_handler(error)
     end
   end
 end

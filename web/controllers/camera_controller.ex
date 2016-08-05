@@ -159,10 +159,7 @@ defmodule EvercamMedia.CameraController do
             |> Repo.preload([vendor_model: :vendor], force: true)
           CameraActivity.log_activity(caller, camera, "created")
           Camera.invalidate_user(caller)
-          spawn fn ->
-            create_thumbnail(full_camera)
-            EvercamMedia.UserMailer.camera_create_notification(caller, full_camera)
-          end
+          send_email_notification(caller, full_camera)
           conn
           |> render("show.json", %{camera: full_camera, user: caller})
         {:error, changeset} ->
@@ -371,6 +368,17 @@ defmodule EvercamMedia.CameraController do
         Storage.save(args[:camera_exid], args[:timestamp], data, args[:notes])
       {:error, error} ->
         Logger.error "[#{camera.exid}] [create_thumbnail] [error] [#{inspect error}]"
+    end
+  end
+
+  defp send_email_notification(user, camera) do
+    try do
+      spawn fn ->
+        create_thumbnail(camera)
+        EvercamMedia.UserMailer.camera_create_notification(user, camera)
+      end
+    catch _type, error ->
+      Util.error_handler(error)
     end
   end
 end
