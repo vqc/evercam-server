@@ -43,7 +43,7 @@ defmodule EvercamMedia.UserControllerTest do
 
     response_body = %{"message" => "Country isn't valid!"}
 
-    assert response.status == 404
+    assert response.status == 400
     assert Poison.decode!(response.resp_body) == response_body
   end
 

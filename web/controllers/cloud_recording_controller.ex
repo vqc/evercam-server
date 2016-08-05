@@ -41,9 +41,7 @@ defmodule EvercamMedia.CloudRecordingController do
           conn
           |> render("cloud_recording.json", %{cloud_recording: cloud_recording})
         {:error, changeset} ->
-          conn
-          |> put_status(404)
-          |> render(ErrorView, "error.json", %{message: changeset})
+          render_error(conn, 400, changeset)
       end
     end
   end

@@ -112,7 +112,7 @@ defmodule EvercamMedia.UserController do
           conn
           |> render(UserView, "show.json", %{user: user |> Repo.preload(:country, force: true)})
         {:error, changeset} ->
-          render_error(conn, 404, Util.parse_changeset(changeset))
+          render_error(conn, 400, Util.parse_changeset(changeset))
       end
     end
   end
@@ -143,7 +143,7 @@ defmodule EvercamMedia.UserController do
           updated_user = user |> Repo.preload(:country, force: true)
           conn |> render(UserView, "show.json", %{user: updated_user})
         {:error, changeset} ->
-          render_error(conn, 404, Util.parse_changeset(changeset))
+          render_error(conn, 400, Util.parse_changeset(changeset))
       end
     end
   end
@@ -209,7 +209,7 @@ defmodule EvercamMedia.UserController do
     if Comeonin.Bcrypt.checkpw(password, user.password) do
       :ok
     else
-      render_error(conn, 404, "Invalid password.")
+      render_error(conn, 400, "Invalid password.")
     end
   end
 
@@ -217,7 +217,7 @@ defmodule EvercamMedia.UserController do
   defp ensure_country(country_id, conn) do
     country = Country.by_iso3166(country_id)
     case country do
-      nil -> render_error(conn, 404, "Country isn't valid!")
+      nil -> render_error(conn, 400, "Country isn't valid!")
       _ -> :ok
     end
   end
