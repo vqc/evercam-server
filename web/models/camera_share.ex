@@ -134,7 +134,7 @@ defmodule CameraShare do
   def validate_rights(changeset, rights) do
     with true <- rights != nil,
          access_rights = rights |> CameraShare.to_rights_list |> Enum.join(","),
-         true <- rights == access_rights
+         true <- String.downcase(rights) == access_rights
     do
       changeset
     else

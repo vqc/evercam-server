@@ -134,5 +134,6 @@ defmodule CameraShareRequest do
     |> validate_format(:email, ~r/^\S+@\S+$/, [message: "You've entered an invalid email address."])
     |> update_change(:email, &String.downcase/1)
     |> validate_rights
+    |> update_change(:rights, &String.downcase/1)
   end
 end
