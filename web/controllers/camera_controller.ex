@@ -132,7 +132,6 @@ defmodule EvercamMedia.CameraController do
       camera
       |> Camera.changeset(camera_params)
       |> Repo.update!
-      |> Camera.invalidate_camera
 
       spawn(fn -> delete_snapshot_worker(camera) end)
       spawn(fn -> delete_camera_worker(camera) end)
@@ -345,6 +344,7 @@ defmodule EvercamMedia.CameraController do
   end
 
   defp delete_snapshot_worker(camera) do
+    Camera.invalidate_camera(camera)
     Storage.delete_everything_for(camera.exid)
     CameraActivity.delete_by_camera_id(camera.id)
   end
