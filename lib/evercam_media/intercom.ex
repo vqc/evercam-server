@@ -35,4 +35,18 @@ defmodule EvercamMedia.Intercom do
     HTTPoison.post(@intercom_url, json, headers, hackney: @hackney)
     Logger.debug "Intercom user has been created"
   end
+
+  def delete_user(user, tries \\ 1)
+  def delete_user(user, 3), do: Logger.debug "Something went worng while deleting user '#{user.username}' from Intercom."
+  def delete_user(user, tries) do
+    url = "#{@intercom_url}?user_id=#{user.username}"
+    headers = ["Accept": "Accept:application/json"]
+
+    case HTTPoison.delete(url, headers, hackney: @hackney) do
+      {:ok, _response} ->
+        Logger.debug "#{user.username} has been deleted from Intercom."
+      {:error, _reason} ->
+        delete_user(user, tries + 1)
+    end
+  end
 end

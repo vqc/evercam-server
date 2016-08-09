@@ -170,6 +170,7 @@ defmodule EvercamMedia.UserController do
     Camera.delete_by_owner(user.id)
     CameraShare.delete_by_user(user.id)
     User.delete_by_id(user.id)
+    Intercom.delete_user(user)
   end
 
   defp firstname(firstname, user) when firstname in [nil, ""], do: user.firstname
