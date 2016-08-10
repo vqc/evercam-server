@@ -84,13 +84,14 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  def index(conn, %{"id" => camera_exid, "from" => from, "to" => _to, "limit" => "3600", "page" => _page}) do
+  def index(conn, %{"id" => camera_exid, "from" => from, "to" => to, "limit" => "3600", "page" => _page}) do
     camera = Camera.get_full(camera_exid)
     offset = Camera.get_offset(camera)
     from = convert_to_camera_timestamp(from, offset)
+    to = convert_to_camera_timestamp(to, offset)
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera) do
-      snapshots = Storage.seaweedfs_load_range(camera_exid, from)
+      snapshots = Storage.seaweedfs_load_range(camera_exid, from, to)
 
       conn
       |> json(%{snapshots: snapshots})

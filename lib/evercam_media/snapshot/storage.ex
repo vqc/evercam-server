@@ -156,10 +156,13 @@ defmodule EvercamMedia.Snapshot.Storage do
     end)
   end
 
-  def seaweedfs_load_range(camera_exid, from) do
+  def seaweedfs_load_range(camera_exid, from, to) do
+    from_date = parse_timestamp(from)
+    to_date = parse_timestamp(to)
     camera_exid
     |> get_camera_apps_list
     |> Enum.flat_map(fn(app) -> do_seaweedfs_load_range(camera_exid, from, app) end)
+    |> Enum.reject(fn(snapshot) -> not_is_between?(snapshot.created_at, from_date, to_date) end)
     |> Enum.sort_by(fn(snapshot) -> snapshot.created_at end)
   end
 
@@ -381,6 +384,32 @@ defmodule EvercamMedia.Snapshot.Storage do
       "Evercam Timelapse" -> "timelapse"
       "Evercam SnapMail" -> "snapmail"
       _ -> "archives"
+    end
+  end
+
+  defp parse_timestamp(unix_timestamp) do
+    unix_timestamp
+    |> Calendar.DateTime.Parse.unix!
+    |> Calendar.DateTime.to_erl
+    |> Calendar.DateTime.from_erl!("Etc/UTC")
+  end
+
+  defp not_is_between?(snapshot_date, from, to) do
+    snapshot_date = parse_timestamp(snapshot_date)
+    !is_after_from?(snapshot_date, from) || !is_before_to?(snapshot_date, to)
+  end
+
+  defp is_after_from?(snapshot_date, from) do
+    case Calendar.DateTime.diff(snapshot_date, from) do
+      {:ok, _seconds, _, :after} -> true
+      _ -> false
+    end
+  end
+
+  defp is_before_to?(snapshot_date, to) do
+    case Calendar.DateTime.diff(snapshot_date, to) do
+      {:ok, _seconds, _, :before} -> true
+      _ -> false
     end
   end
 end
