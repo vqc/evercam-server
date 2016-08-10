@@ -10,6 +10,9 @@ config :evercam_media, EvercamMedia.Endpoint,
   server: false,
   email: "evercam.io <env.test@evercam.io>"
 
+# Do not create intercom user in test mode
+config :evercam_media, :create_intercom_user, false
+
 # Print only warnings and errors during test
 config :logger, level: :warn
 
