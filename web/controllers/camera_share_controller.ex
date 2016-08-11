@@ -42,6 +42,7 @@ defmodule EvercamMedia.CameraShareController do
             end
             Camera.invalidate_user(sharee)
             Camera.invalidate_camera(camera)
+            CameraActivity.log_activity(caller, camera, "shared", %{with: sharee.email})
             conn |> render(CameraShareView, "show.json", %{camera_share: camera_share})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
@@ -50,6 +51,7 @@ defmodule EvercamMedia.CameraShareController do
         case CameraShareRequest.create_share_request(camera, params["email"], caller, params["rights"], params["message"]) do
           {:ok, camera_share_request} ->
             send_email_notification(caller, camera, params["email"], params["message"], camera_share_request.key)
+            CameraActivity.log_activity(caller, camera, "shared", %{with: params["email"]})
             conn |> render(CameraShareRequestView, "show.json", %{camera_share_requests: camera_share_request})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
@@ -71,7 +73,7 @@ defmodule EvercamMedia.CameraShareController do
       share_changeset = CameraShare.changeset(camera_share, %{rights: rights})
       if share_changeset.valid? do
         CameraShare.update_share(sharee, camera, rights)
-        CameraActivity.log_activity(caller, camera, "updated share", %{with: caller.email})
+        CameraActivity.log_activity(caller, camera, "updated share", %{with: sharee.email})
         Camera.invalidate_user(sharee)
         Camera.invalidate_camera(camera)
         camera_share =
@@ -99,7 +101,7 @@ defmodule EvercamMedia.CameraShareController do
       CameraShare.delete_share(sharee, camera)
       Camera.invalidate_user(sharee)
       Camera.invalidate_camera(camera)
-      CameraActivity.log_activity(caller, camera, "stopped sharing", %{with: caller.email})
+      CameraActivity.log_activity(caller, camera, "stopped sharing", %{with: sharee.email})
       json(conn, %{})
     end
   end
