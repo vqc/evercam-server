@@ -53,7 +53,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       status == true ->
         ConCache.dirty_put(:snapshot_error, camera.exid, 0)
       status == false && camera.is_online != status && error_total >= 100 ->
-        change_camera_status(camera, timestamp, false)
+        change_camera_status(camera, timestamp, false, error_code)
         Logger.info "[#{camera_exid}] [update_status] [offline] [#{error_code}]"
       status == false && camera.is_online != status ->
         ConCache.dirty_put(:snapshot_error, camera.exid, error_total)
@@ -65,7 +65,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     Camera.get_full(camera_exid)
   end
 
-  def change_camera_status(camera, timestamp, status) do
+  def change_camera_status(camera, timestamp, status, error_code \\ nil) do
     try do
       task = Task.async(fn() ->
         datetime =
@@ -78,7 +78,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         Repo.update!(changeset)
         Camera.invalidate_camera(camera)
         broadcast_change_to_users(camera)
-        log_camera_status(camera, status, datetime)
+        log_camera_status(camera, status, datetime, error_code)
       end)
       Task.await(task, :timer.seconds(1))
     catch _type, error ->
@@ -91,11 +91,11 @@ defmodule EvercamMedia.Snapshot.DBHandler do
     |> Enum.each(fn(user) -> Util.broadcast_camera_status(camera.exid, camera.is_online, user.username) end)
   end
 
-  def log_camera_status(camera, true, datetime), do: do_log_camera_status(camera, "online", datetime)
-  def log_camera_status(camera, false, datetime), do: do_log_camera_status(camera, "offline", datetime)
+  def log_camera_status(camera, true, datetime, nil), do: do_log_camera_status(camera, "online", datetime)
+  def log_camera_status(camera, false, datetime, error_code), do: do_log_camera_status(camera, "offline", datetime, %{reason: error_code})
 
-  defp do_log_camera_status(camera, status, datetime) do
-    parameters = %{camera_id: camera.id, action: status, done_at: datetime}
+  defp do_log_camera_status(camera, status, datetime, extra \\ nil) do
+    parameters = %{camera_id: camera.id, camera_exid: camera.exid, action: status, done_at: datetime, extra: extra}
     changeset = CameraActivity.changeset(%CameraActivity{}, parameters)
     SnapshotRepo.insert(changeset)
     if camera.is_online_email_owner_notification do
