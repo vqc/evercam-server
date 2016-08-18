@@ -288,7 +288,7 @@ defmodule EvercamMedia.CameraController do
     |> add_parameter("field", :is_online_email_owner_notification, params["is_online_email_owner_notification"])
     |> add_parameter("field", :location_lng, params["location_lng"])
     |> add_parameter("field", :location_lat, params["location_lat"])
-    |> add_parameter("is_public", :is_public, params["is_public"])
+    |> add_parameter("field", :is_public, params["is_public"])
     |> add_parameter("model", :model_id, model)
     |> add_parameter("host", "external_host", params["external_host"])
     |> add_parameter("host", "external_http_port", params["external_http_port"])
@@ -305,13 +305,6 @@ defmodule EvercamMedia.CameraController do
     |> add_parameter("auth", "password", params["cam_password"])
   end
 
-  defp add_parameter(params, "is_public", _key, value) when value in ["", "false"] do
-    Map.merge(%{:is_public => false}, params)
-  end
-  defp add_parameter(params, "is_public", _key, value) when value in ["true"] do
-    Map.merge(%{:is_public => true}, params)
-  end
-  defp add_parameter(params, "is_public", _key, _value), do: params
   defp add_parameter(params, _field, _key, nil), do: params
   defp add_parameter(params, "field", key, value) do
     Map.put(params, key, value)
