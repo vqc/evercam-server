@@ -91,7 +91,8 @@ defmodule EvercamMedia.PublicController do
 
   defp fetch(address) do
     "http://maps.googleapis.com/maps/api/geocode/json?address=" <> URI.encode(address)
-    |> HTTPotion.get
+    |> HTTPoison.get
+    |> elem(1)
     |> Map.get(:body)
     |> Poison.decode!
     |> get_in(["results", Access.at(0), "geometry", "location"])
