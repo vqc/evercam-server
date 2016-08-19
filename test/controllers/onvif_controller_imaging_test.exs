@@ -5,6 +5,7 @@ defmodule EvercamMedia.ONVIFControllerImagingTest do
   @moduletag :onvif
   @access_params "url=http://recorded_response&auth=admin:mehcam"
 
+  @tag :skip
   test "GET /v1/onvif/v20/DeviceIO/GetImagingSettings" do
     use_cassette "get_imaging_settings" do
       conn = get build_conn(), "/v1/onvif/v20/Imaging/GetImagingSettings?#{@access_params}&VideoSourceToken=VideoSource_1"
@@ -13,6 +14,7 @@ defmodule EvercamMedia.ONVIFControllerImagingTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/onvif/v20/DeviceIO/GetServiceCapabilities" do
     use_cassette "img_get_service_capabilities" do
       conn = get build_conn(), "/v1/onvif/v20/Imaging/GetServiceCapabilities?#{@access_params}"

@@ -5,6 +5,7 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
   @moduletag :onvif
   @access_params "url=http://recorded_response&auth=admin:mehcam"
 
+  @tag :skip
   test "GET /v1/onvif/v20/Media/GetProfiles, returns profile information" do
     use_cassette "get_profiles" do
       conn = get build_conn(), "/v1/onvif/v20/Media/GetProfiles?#{@access_params}"
@@ -13,6 +14,7 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/onvif/v20/Media/GetServiceCapabilities, returns profile information" do
     use_cassette "media_get_service_capabilities" do
       conn = get build_conn(), "/v1/onvif/v20/Media/GetServiceCapabilities?#{@access_params}"
@@ -21,6 +23,7 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/onvif/v20/Media/GetSnapshotUri, returns snapshot uri" do
     use_cassette "get_snapshot_uri" do
       conn = get build_conn(), "/v1/onvif/v20/Media/GetSnapshotUri?#{@access_params}&ProfileToken=Profile_1"
@@ -29,6 +32,7 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/onvif/v20/Media/GetVideoAnalyticsConfigurations" do
     use_cassette "get_video_analytics_configuration" do
       conn = get build_conn(), "/v1/onvif/v20/Media/GetVideoAnalyticsConfigurations?#{@access_params}"
@@ -37,6 +41,7 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/onvif/v20/Media/GetVideoSources" do
     use_cassette "get_video_sources" do
       conn = get build_conn(), "/v1/onvif/v20/Media/GetVideoSources?#{@access_params}"
@@ -45,6 +50,7 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/onvif/v20/Media/GetSnapshotUri using camera_id" do
     use_cassette "get_snapshot_uri_from_db" do
       conn = get build_conn(), "/v1/onvif/v20/Media/GetSnapshotUri?id=recorded-response&ProfileToken=Profile_1"

@@ -5,6 +5,7 @@ defmodule EvercamMedia.ONVIFControllerAnalyticsTest do
   @moduletag :onvif
   @access_params "url=http://recorded_response&auth=admin:mehcam"
 
+  @tag :skip
   test "GET /v1/onvif/v20/Analytics/GetServiceCapabilities" do
     use_cassette "get_service_capabilities" do
       conn = get build_conn(), "/v1/onvif/v20/Analytics/GetServiceCapabilities?#{@access_params}"
@@ -13,6 +14,7 @@ defmodule EvercamMedia.ONVIFControllerAnalyticsTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/onvif/v20/Analytics/GetAnalyticsModules" do
     use_cassette "get_analytics_modules" do
       conn = get build_conn(), "/v1/onvif/v20/Analytics/GetAnalyticsModules?#{@access_params}&ConfigurationToken=VideoAnalyticsToken"

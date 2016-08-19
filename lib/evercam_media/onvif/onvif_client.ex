@@ -36,14 +36,14 @@ defmodule EvercamMedia.ONVIFClient do
     [username, password] = auth |> String.split(":")
     onvif_request = gen_onvif_request(namespace, operation, username, password, parameters)
     try do
-      response = HTTPotion.post url, [body: onvif_request, headers: ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]]
+      {:ok, response} = HTTPoison.post(url, onvif_request, ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"])
       {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
       soap_ns = case elem(xml, 3) do
                   {ns, _} -> ns
                   _ -> "env"
                 end
 
-      if HTTPotion.Response.success?(response) do
+      if response.status_code == 200 do
         case "/#{soap_ns}:Envelope/#{soap_ns}:Body/#{namespace}:#{operation}Response" |> to_char_list |> :xmerl_xpath.string(xml) do
           [] -> {:error, 405, "/#{soap_ns}:Envelope/#{soap_ns}:Body" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
           xpath_string -> {:ok, parse_elements xpath_string}
@@ -56,7 +56,7 @@ defmodule EvercamMedia.ONVIFClient do
         end
       end
     rescue
-      error in HTTPotion.HTTPError -> {:error, 500, %{"message" => error.message}}
+      error in HTTPoison.Error -> {:error, 500, %{"message" => error.message}}
     end
   end
 

@@ -5,6 +5,7 @@ defmodule EvercamMedia.ONVIFPTZControllerTest do
 
   @moduletag :onvif
 
+  @tag :skip
   test "GET /v1/cameras/:id/ptz/presets, gives something" do
     use_cassette "ptz_presets" do
       conn = get build_conn(), "/v1/cameras/recorded-response/ptz/presets"
@@ -23,6 +24,7 @@ defmodule EvercamMedia.ONVIFPTZControllerTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/cameras/:id/ptz/status, gives something" do
     use_cassette "ptz_status" do
       conn = get build_conn(), "/v1/cameras/recorded-response/ptz/status"

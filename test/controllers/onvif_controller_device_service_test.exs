@@ -5,6 +5,7 @@ defmodule EvercamMedia.ONVIFControllerDeviceServiceTest do
   @moduletag :onvif
   @access_params "url=http://recorded_response&auth=admin:mehcam"
 
+  @tag :skip
   test "GET /v1/onvif/v20/device_service/GetDeviceInformation, returns meaningful info" do
     use_cassette "get_device_information" do
       conn = get build_conn(), "/v1/onvif/v20/device_service/GetDeviceInformation?#{@access_params}"
@@ -13,6 +14,7 @@ defmodule EvercamMedia.ONVIFControllerDeviceServiceTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/onvif/v20/device_service/GetNetworkInterfaces, returns meaningful info" do
     use_cassette "get_network_interfaces" do
       conn = get build_conn(), "/v1/onvif/v20/device_service/GetNetworkInterfaces?#{@access_params}"
@@ -21,6 +23,7 @@ defmodule EvercamMedia.ONVIFControllerDeviceServiceTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/onvif/v20/device_service/GetCapabilities, returns meaningful info" do
     use_cassette "get_capabilities" do
       conn = get build_conn(), "/v1/onvif/v20/device_service/GetCapabilities?#{@access_params}"

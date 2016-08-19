@@ -6,6 +6,7 @@ defmodule PTZTest do
 
   @access_info %{"url" => "http://recorded_response", "auth" => "admin:mehcam"}
 
+  @tag :skip
   test "get_nodes method on hikvision camera" do
     use_cassette "get_nodes" do
       {:ok, response} = ONVIFPTZ.get_nodes @access_info
@@ -14,6 +15,7 @@ defmodule PTZTest do
     end
   end
 
+  @tag :skip
   test "get_configurations method on hikvision camera" do
     use_cassette "get_configurations" do
       {:ok, response} = ONVIFPTZ.get_configurations @access_info
@@ -22,6 +24,7 @@ defmodule PTZTest do
     end
   end
 
+  @tag :skip
   test "get_presets method on hikvision camera" do
     use_cassette "get_presets" do
       {:ok, response} = ONVIFPTZ.get_presets(@access_info, "Profile_1")
@@ -31,6 +34,7 @@ defmodule PTZTest do
     end
   end
 
+  @tag :skip
   @tag :capture_log
   test "get_presets method returns error" do
     use_cassette "get_presets_with_error" do
@@ -40,30 +44,35 @@ defmodule PTZTest do
     end
   end
 
+  @tag :skip
   test "pan_tilt coordinates available" do
     response = ONVIFPTZ.pan_tilt_zoom_vector [x: 0.5671, y: 0.9919]
     assert String.contains? response, "PanTilt"
     assert not String.contains? response, "Zoom"
   end
 
+  @tag :skip
   test "pan_tilt coordinates and zoom available" do
     response = ONVIFPTZ.pan_tilt_zoom_vector [x: 0.5671, y: 0.9919, zoom: 1.0]
     assert String.contains? response, "Zoom"
     assert String.contains? response, "PanTilt"
   end
 
+  @tag :skip
   test "pan_tilt coordinates available broken but zoom ok" do
     response = ONVIFPTZ.pan_tilt_zoom_vector [x: 0.5671, zoom: 0.9919]
     assert String.contains? response, "Zoom"
     assert not String.contains? response, "PanTilt"
   end
 
+  @tag :skip
   test "pan_tilt_zoom only zoom available" do
     response = ONVIFPTZ.pan_tilt_zoom_vector [zoom: 0.5671]
     assert String.contains? response, "Zoom"
     assert not String.contains? response, "PanTilt"
   end
 
+  @tag :skip
   test "pan_tilt_zoom empty" do
     response = ONVIFPTZ.pan_tilt_zoom_vector []
     assert not String.contains? response, "Zoom"

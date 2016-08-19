@@ -6,6 +6,7 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
   @moduletag :onvif
   @access_params "url=http://recorded_response&auth=admin:mehcam"
 
+  @tag :skip
   @tag :capture_log
   test "GET /v1/onvif/v20/DeviceIO/GetUnknownAction" do
     use_cassette "error_unknown_action" do
@@ -15,6 +16,7 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
     end
   end
 
+  @tag :skip
   @tag :capture_log
   test "bad credentials" do
     use_cassette "error_bad_credentials" do
@@ -24,6 +26,7 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
     end
   end
 
+  @tag :skip
   @tag :capture_log
   test "Service not available" do
     use_cassette "error_service_not_available" do
@@ -33,6 +36,7 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
     end
   end
 
+  @tag :skip
   @tag :capture_log
   test "bad parameter" do
     use_cassette "error_bad_parameter" do
@@ -42,6 +46,7 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
     end
   end
 
+  @tag :skip
   @tag :capture_log
   test "request timeout" do
     use_cassette "error_request_timeout" do
@@ -51,6 +56,7 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
     end
   end
 
+  @tag :skip
   @tag :capture_log
   test "bad url" do
     use_cassette "error_bad_url" do

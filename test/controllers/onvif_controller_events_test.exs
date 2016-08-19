@@ -5,6 +5,7 @@ defmodule EvercamMedia.ONVIFControllerEventsTest do
   @moduletag :onvif
   @access_params "url=http://recorded_response&auth=admin:mehcam"
 
+  @tag :skip
   test "GET /v1/onvif/v20/Events/GetServiceCapabilities, returns something" do
     use_cassette "ev_get_service_capabilities" do
       conn = get build_conn(), "/v1/onvif/v20/Events/GetServiceCapabilities?#{@access_params}"
@@ -13,6 +14,7 @@ defmodule EvercamMedia.ONVIFControllerEventsTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/onvif/v20/Events/GetEventProperties, returns something" do
     use_cassette "get_event_properties" do
       conn = get build_conn(), "/v1/onvif/v20/Events/GetEventProperties?#{@access_params}"
