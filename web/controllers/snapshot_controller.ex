@@ -100,7 +100,7 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  def show(conn, %{"id" => camera_exid, "timestamp" => timestamp, "with_data" => "true", "notes" => notes, "range" => _}) do
+  def show(conn, %{"id" => camera_exid, "timestamp" => timestamp, "notes" => notes} = params) do
     timestamp = String.to_integer(timestamp)
     camera = Camera.get_full(camera_exid)
 
