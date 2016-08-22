@@ -76,7 +76,7 @@ defmodule EvercamMedia.Snapshot.Error do
       :not_found ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [not_found]"
         update_camera_status("#{camera_exid}", timestamp, false, "not_found", 100)
-        {504, %{message: "Camera url is not found.", response: error[:response]}}
+        {504, %{message: "Camera snapshot url is not found.", response: error[:response]}}
       :forbidden ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [forbidden]"
         update_camera_status("#{camera_exid}", timestamp, false, "forbidden", 100)
