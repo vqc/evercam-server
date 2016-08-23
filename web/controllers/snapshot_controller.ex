@@ -100,28 +100,28 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  def show(conn, %{"id" => camera_exid, "timestamp" => timestamp, "notes" => notes} = params) do
-    timestamp = String.to_integer(timestamp)
+  def show(conn, %{"id" => camera_exid, "timestamp" => timestamp} = params) do
+    timestamp =
+      case Calendar.DateTime.Parse.rfc3339_utc(timestamp) do
+        {:ok, datetime} ->
+          datetime |> Calendar.DateTime.Format.unix
+        {:bad_format, nil} ->
+          String.to_integer(timestamp)
+      end
     camera = Camera.get_full(camera_exid)
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
-        {:ok, image} <- Storage.load(camera_exid, timestamp, notes) do
+        {:ok, image, notes} <- Storage.load(camera_exid, timestamp, params["notes"]) do
       data = "data:image/jpeg;base64,#{Base.encode64(image)}"
 
       conn
       |> json(%{snapshots: [%{created_at: timestamp, notes: notes, data: data}]})
     else
-      {:error, :not_found} ->
-        conn
-        |> put_status(404)
-        |> json(%{message: "Snapshot not found."})
-
+      false -> render_error(conn, 403, "Forbidden.")
+      {:error, :not_found} -> render_error(conn, 404, "Snapshot not found.")
       {:error, error} ->
         Logger.error "[#{camera_exid}] [show_snapshot] [error] [#{inspect error}]"
-
-        conn
-        |> put_status(500)
-        |> json(%{message: "We dropped the ball."})
+        render_error(conn, 500, "We dropped the ball.")
     end
   end
 

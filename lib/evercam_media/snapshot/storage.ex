@@ -224,6 +224,16 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
+  def load(camera_exid, timestamp, notes) when notes in [nil, ""] do
+    with {:error, _error} <- load(camera_exid, timestamp, "Evercam Proxy"),
+         {:error, _error} <- load(camera_exid, timestamp, "Evercam Timelapse"),
+         {:error, _error} <- load(camera_exid, timestamp, "Evercam SnapMail"),
+         {:error, error} <- load(camera_exid, timestamp, "Evercam Thumbnail") do
+      {:error, error}
+    else
+      {:ok, image, notes} -> {:ok, image, notes}
+    end
+  end
   def load(camera_exid, timestamp, notes) do
     app_name = notes_to_app_name(notes)
     directory_path = construct_directory_path(camera_exid, timestamp, app_name, "")
@@ -232,7 +242,7 @@ defmodule EvercamMedia.Snapshot.Storage do
 
     case HTTPoison.get(url, [], hackney: [pool: :seaweedfs_download_pool]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: snapshot}} ->
-        {:ok, snapshot}
+        {:ok, snapshot, notes}
       _error ->
         {:error, :not_found}
     end
