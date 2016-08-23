@@ -50,7 +50,7 @@ defmodule EvercamMedia.ArchiveController do
     with :ok <- ensure_camera_exists(camera, exid, conn),
          :ok <- ensure_can_list(current_user, camera, conn)
     do
-      create_clip(params, camera, conn)
+      create_clip(params, camera, conn, current_user)
     end
   end
 
@@ -93,11 +93,12 @@ defmodule EvercamMedia.ArchiveController do
     do
       Archive.delete_by_exid(archive_id)
 
+      CameraActivity.log_activity(current_user, camera, "archive deleted", %{ip: get_requester_ip(conn.remote_ip)})
       json(conn, %{})
     end
   end
 
-  defp create_clip(params, camera, conn) do
+  defp create_clip(params, camera, conn, current_user) do
     timezone = camera |> Camera.get_timezone
     from_date = clip_date(params["from_date"], timezone)
     to_date = clip_date(params["to_date"], timezone)
@@ -144,6 +145,7 @@ defmodule EvercamMedia.ArchiveController do
       true ->
         case Repo.insert(changeset) do
           {:ok, archive} ->
+            CameraActivity.log_activity(current_user, camera, "archive created", %{ip: get_requester_ip(conn.remote_ip)})
             render(conn, ArchiveView, "show.json", %{archive: archive |> Repo.preload(:camera) |> Repo.preload(:user)})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))

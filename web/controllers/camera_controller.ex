@@ -107,7 +107,7 @@ defmodule EvercamMedia.CameraController do
         {:ok, camera} ->
           Camera.invalidate_camera(camera)
           camera = Camera.get_full(camera.exid)
-          CameraActivity.log_activity(caller, camera, "edited")
+          CameraActivity.log_activity(caller, camera, "edited", %{ip: get_requester_ip(conn.remote_ip)})
           conn
           |> render("show.json", %{camera: camera, user: caller})
         {:error, changeset} ->
@@ -156,7 +156,7 @@ defmodule EvercamMedia.CameraController do
             |> Repo.preload(:cloud_recordings, force: true)
             |> Repo.preload(:vendor_model, force: true)
             |> Repo.preload([vendor_model: :vendor], force: true)
-          CameraActivity.log_activity(caller, camera, "created")
+          CameraActivity.log_activity(caller, camera, "created", %{ip: get_requester_ip(conn.remote_ip)})
           Camera.invalidate_user(caller)
           send_email_notification(caller, full_camera)
           conn
