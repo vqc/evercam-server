@@ -23,8 +23,8 @@ defmodule EvercamMedia.HTTPClient do
   end
 
   def get(:basic_auth_android, url, username, password) do
-    response = HTTPotion.get url, [basic_auth: {username, password}, timeout: 15_000]
-    {:ok, response}
+    hackney = [basic_auth: {username, password}, timeout: 15_000]
+    {:ok, response} = HTTPoison.get url, [], hackney: hackney
   end
 
   def get(:digest_auth, url, username, password) do
