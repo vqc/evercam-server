@@ -10,6 +10,8 @@ defmodule EvercamMedia.Snapshot.Error do
     case error do
       %CaseClauseError{} ->
         :bad_request
+      %HTTPotion.HTTPError{} ->
+        Map.get(error, :message) |> String.to_atom
       error when is_map(error) ->
         if is_tuple(Map.get(error, :reason)) do
           Map.get(error, :reason) |> elem(0)
