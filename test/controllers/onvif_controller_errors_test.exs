@@ -3,8 +3,10 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
   use ExVCR.Mock, options: [clear_mock: true]
   import EvercamMedia.ConnCase ,only: [parse_onvif_error_type: 1]
 
+  @auth System.get_env["ONVIF_AUTH"]
+
   @moduletag :onvif
-  @access_params "url=http://recorded_response&auth=admin:mehcam"
+  @access_params "url=http://recorded_response&auth=#{@auth}"
 
   @tag :skip
   @tag :capture_log

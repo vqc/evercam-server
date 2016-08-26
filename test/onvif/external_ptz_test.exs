@@ -2,8 +2,11 @@ defmodule ExternalPTZTest do
   use ExUnit.Case
   alias EvercamMedia.ONVIFPTZ
 
+  @camera_url System.get_env["ONVIF_CAM_URL"]
+  @auth System.get_env["ONVIF_AUTH"]
+
   @moduletag :external
-  @access_info %{"url" => "http://149.13.244.32:8100", "auth" => "admin:mehcam"}
+  @access_info %{"url" => @camera_url, "auth" => @auth}
 
   test "goto_preset method on hikvision camera" do
     {:ok, response} = ONVIFPTZ.goto_preset(@access_info, "Profile_1", "6")

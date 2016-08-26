@@ -2,8 +2,10 @@ defmodule EvercamMedia.ONVIFControllerMediaTest do
   use EvercamMedia.ConnCase
   use ExVCR.Mock, options: [clear_mock: true]
 
+  @auth System.get_env["ONVIF_AUTH"]
+
   @moduletag :onvif
-  @access_params "url=http://recorded_response&auth=admin:mehcam"
+  @access_params "url=http://recorded_response&auth=#{@auth}"
 
   @tag :skip
   test "GET /v1/onvif/v20/Media/GetProfiles, returns profile information" do

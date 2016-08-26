@@ -4,7 +4,9 @@ defmodule PTZTest do
   import EvercamMedia.ConnCase ,only: [parse_onvif_error_type: 1]
   alias EvercamMedia.ONVIFPTZ
 
-  @access_info %{"url" => "http://recorded_response", "auth" => "admin:mehcam"}
+  @auth System.get_env["ONVIF_AUTH"]
+
+  @access_info %{"url" => "http://recorded_response", "auth" => @auth}
 
   @tag :skip
   test "get_nodes method on hikvision camera" do

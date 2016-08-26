@@ -23,6 +23,7 @@ defmodule EvercamMedia.Mixfile do
   end
 
   defp app_list(:dev), do: [:dotenv, :credo | app_list]
+  defp app_list(:test), do: [:dotenv | app_list]
   defp app_list(_), do: app_list
   defp app_list, do: [
     :calendar,
@@ -65,7 +66,7 @@ defmodule EvercamMedia.Mixfile do
       {:cors_plug, "~> 1.1"},
       {:cowboy, "~> 1.0"},
       {:credo, github: "rrrene/credo", only: :dev},
-      {:dotenv, "~> 2.1.0", only: :dev},
+      {:dotenv, "~> 2.1.0", only: [:dev, :test]},
       {:ecto, "~> 2.0.2"},
       {:exrm, github: "bitwalker/exrm"},
       {:geo, "~> 1.1"},
