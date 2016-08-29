@@ -138,7 +138,7 @@ defmodule EvercamMedia.CameraShareController do
 
   defp user_can_delete_share(conn, caller, sharee, camera) do
     cond do
-      Permission.Camera.can_edit?(caller, camera) -> :ok
+      Permission.Camera.can_list?(caller, camera) -> :ok
       caller == sharee -> :ok
       true -> render_error(conn, 401, "Unauthorized.")
     end
