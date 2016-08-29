@@ -30,7 +30,7 @@ defmodule EvercamMedia.CloudRecordingController do
       }
 
       cloud_recording = camera.cloud_recordings || %CloudRecording{}
-      action_log = get_action_log(cloud_recording)
+      action_log = get_action_log(camera.cloud_recordings)
       case cloud_recording |> CloudRecording.changeset(cr_params) |> Repo.insert_or_update do
         {:ok, cloud_recording} ->
           Camera.invalidate_camera(camera)
@@ -39,7 +39,7 @@ defmodule EvercamMedia.CloudRecordingController do
           |> Process.whereis
           |> WorkerSupervisor.update_worker(camera)
 
-          CameraActivity.log_activity(current_user, camera, "cloud recordings #{action_log}", %{ip: user_request_ip(conn)})
+          CameraActivity.log_activity(current_user, camera, "cloud recordings #{action_log}", %{ip: user_request_ip(conn), status: cloud_recording.status, storage_duration: cloud_recording.storage_duration, frequency: cloud_recording.frequency})
           conn
           |> render("cloud_recording.json", %{cloud_recording: cloud_recording})
         {:error, changeset} ->
@@ -77,6 +77,6 @@ defmodule EvercamMedia.CloudRecordingController do
   defp render_cloud_recording(nil, conn), do: conn |> render("show.json", %{cloud_recording: []})
   defp render_cloud_recording(cl, conn), do: conn |> render("cloud_recording.json", %{cloud_recording: cl})
 
-  defp get_action_log(%CloudRecording{}), do: "created"
+  defp get_action_log(nil), do: "created"
   defp get_action_log(_cloud_recording), do: "updated"
 end
