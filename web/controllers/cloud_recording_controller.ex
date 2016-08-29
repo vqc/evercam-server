@@ -81,7 +81,7 @@ defmodule EvercamMedia.CloudRecordingController do
   defp get_action_log(_cloud_recording), do: "updated"
 
   defp user_request_ip(conn) do
-    remote_ips = Plug.Conn.get_req_header(conn, "x-forwarded-for")
+    remote_ips = Plug.Conn.get_req_header(conn, "x-real-ip")
     remote_ip = List.first(remote_ips)
 
     unless remote_ip do
