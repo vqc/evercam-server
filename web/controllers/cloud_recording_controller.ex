@@ -79,15 +79,4 @@ defmodule EvercamMedia.CloudRecordingController do
 
   defp get_action_log(%CloudRecording{}), do: "created"
   defp get_action_log(_cloud_recording), do: "updated"
-
-  defp user_request_ip(conn) do
-    remote_ips = Plug.Conn.get_req_header(conn, "x-real-ip")
-    remote_ip = List.first(remote_ips)
-
-    unless remote_ip do
-      remote_ip_as_tuple = conn.remote_ip
-      remote_ip = Enum.join(Tuple.to_list(remote_ip_as_tuple), ".")
-    end
-    remote_ip
-  end
 end

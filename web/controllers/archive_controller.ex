@@ -93,7 +93,7 @@ defmodule EvercamMedia.ArchiveController do
     do
       Archive.delete_by_exid(archive_id)
 
-      CameraActivity.log_activity(current_user, camera, "archive deleted", %{ip: get_requester_ip(conn.remote_ip)})
+      CameraActivity.log_activity(current_user, camera, "archive deleted", %{ip: user_request_ip(conn)})
       json(conn, %{})
     end
   end
@@ -145,7 +145,7 @@ defmodule EvercamMedia.ArchiveController do
       true ->
         case Repo.insert(changeset) do
           {:ok, archive} ->
-            CameraActivity.log_activity(current_user, camera, "archive created", %{ip: get_requester_ip(conn.remote_ip)})
+            CameraActivity.log_activity(current_user, camera, "archive created", %{ip: user_request_ip(conn)})
             render(conn, ArchiveView, "show.json", %{archive: archive |> Repo.preload(:camera) |> Repo.preload(:user)})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))

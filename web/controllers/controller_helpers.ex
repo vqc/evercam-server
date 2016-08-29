@@ -9,6 +9,11 @@ defmodule EvercamMedia.ControllerHelpers do
     |> render(ErrorView, "error.json", %{message: message})
   end
 
-  def get_requester_ip(nil), do: "0.0.0.0"
-  def get_requester_ip(remote_ip), do: remote_ip |> Tuple.to_list |> Enum.join(".")
+  def user_request_ip(conn) do
+    x_real_ip = Plug.Conn.get_req_header(conn, "x-real-ip")
+    x_real_ip |> List.first |> get_ip(conn)
+  end
+
+  defp get_ip(nil, conn), do: conn.remote_ip |> Tuple.to_list |> Enum.join(".")
+  defp get_ip(user_ip, _conn), do: user_ip
 end

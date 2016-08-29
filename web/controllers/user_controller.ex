@@ -47,7 +47,7 @@ defmodule EvercamMedia.UserController do
     with :ok <- ensure_country(params["country"], conn)
     do
       [user_agent|rest] = get_req_header(conn, "user-agent")
-      requester_ip = parse_requester_ip(conn.remote_ip)
+      requester_ip = user_request_ip(conn)
       user_agent = parse_user_agent(user_agent)
       share_request_key = params["share_request_key"]
       api_id = UUID.uuid4(:hex) |> String.slice(0..7)
@@ -216,9 +216,6 @@ defmodule EvercamMedia.UserController do
       _ -> :ok
     end
   end
-
-  defp parse_requester_ip(nil), do: "0.0.0.0"
-  defp parse_requester_ip(remote_ip), do: remote_ip |> Tuple.to_list |> Enum.join(".")
 
   defp parse_user_agent(nil), do: "chrome"
   defp parse_user_agent(user_agent), do: user_agent
