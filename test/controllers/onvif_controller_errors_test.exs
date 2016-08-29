@@ -1,6 +1,6 @@
 defmodule EvercamMedia.ONVIFControllerErrorsTest do
   use EvercamMedia.ConnCase
-  use ExVCR.Mock, options: [clear_mock: true]
+  use ExVCR.Mock, adapter: ExVCR.Adapter.Hackney, options: [clear_mock: true]
   import EvercamMedia.ConnCase ,only: [parse_onvif_error_type: 1]
 
   @auth System.get_env["ONVIF_AUTH"]
@@ -8,7 +8,6 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
   @moduletag :onvif
   @access_params "url=http://recorded_response&auth=#{@auth}"
 
-  @tag :skip
   @tag :capture_log
   test "GET /v1/onvif/v20/DeviceIO/GetUnknownAction" do
     use_cassette "error_unknown_action" do
@@ -18,7 +17,6 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
     end
   end
 
-  @tag :skip
   @tag :capture_log
   test "bad credentials" do
     use_cassette "error_bad_credentials" do
@@ -28,7 +26,6 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
     end
   end
 
-  @tag :skip
   @tag :capture_log
   test "Service not available" do
     use_cassette "error_service_not_available" do
@@ -38,7 +35,6 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
     end
   end
 
-  @tag :skip
   @tag :capture_log
   test "bad parameter" do
     use_cassette "error_bad_parameter" do

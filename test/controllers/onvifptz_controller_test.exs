@@ -1,11 +1,9 @@
 defmodule EvercamMedia.ONVIFPTZControllerTest do
   use EvercamMedia.ConnCase
-  use ExVCR.Mock, options: [clear_mock: true]
-  import EvercamMedia.ConnCase ,only: [parse_onvif_error_type: 1]
+  use ExVCR.Mock, adapter: ExVCR.Adapter.Hackney, options: [clear_mock: true]
 
   @moduletag :onvif
 
-  @tag :skip
   test "GET /v1/cameras/:id/ptz/presets, gives something" do
     use_cassette "ptz_presets" do
       conn = get build_conn(), "/v1/cameras/recorded-response/ptz/presets"
@@ -14,17 +12,15 @@ defmodule EvercamMedia.ONVIFPTZControllerTest do
     end
   end
 
-  @tag :skip
   @tag :capture_log
-  test "GET /v1/cameras/:id/ptz/presets, returns error" do
+  test "GET /v1/cameras/:id/ptz/presets, when error, returns empty set" do
     use_cassette "ptz_presets_with_error" do
       conn = get build_conn(), "/v1/cameras/recorded-response/ptz/presets"
-      response = conn |> json_response(400)
-      assert parse_onvif_error_type(response) == "ter:NotAuthorized"
+      presets = conn |> json_response(200) |> Map.get("Presets")
+      assert presets == []
     end
   end
 
-  @tag :skip
   test "GET /v1/cameras/:id/ptz/status, gives something" do
     use_cassette "ptz_status" do
       conn = get build_conn(), "/v1/cameras/recorded-response/ptz/status"
