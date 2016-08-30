@@ -5,7 +5,7 @@ defmodule AccessToken do
   alias EvercamMedia.Repo
   alias EvercamMedia.Util
 
-  @required_fields ~w(is_revoked request)
+  @required_fields ~w(is_revoked expires_at request)
   @optional_fields ~w(grantor_id user_id refresh)
 
   schema "access_tokens" do
@@ -15,6 +15,7 @@ defmodule AccessToken do
     has_many :rights, AccessRight
 
     field :is_revoked, :boolean, null: false
+    field :expires_at, Ecto.DateTime
     field :request, :string, null: false
     field :refresh, :string
     timestamps(inserted_at: :created_at, type: Ecto.DateTime, default: Ecto.DateTime.utc)
@@ -24,6 +25,7 @@ defmodule AccessToken do
     AccessToken
     |> where([t], t.user_id == ^user_id)
     |> where([t], t.is_revoked == false)
+    |> where([t], t.expires_at > ^Ecto.DateTime.utc)
     |> Repo.one
     |> Util.deep_get([:id], 0)
   end

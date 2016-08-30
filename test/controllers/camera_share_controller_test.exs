@@ -2,12 +2,14 @@ defmodule EvercamMedia.CameraShareControllerTest do
   use EvercamMedia.ConnCase
 
   setup do
+    expire_at = {{2032, 1, 1}, {0, 0, 0}} |> Ecto.DateTime.from_erl
+
     country = Repo.insert!(%Country{name: "Something", iso3166_a2: "PK"})
     user = Repo.insert!(%User{firstname: "John", lastname: "Doe", username: "johndoe", email: "john@doe.com", password: "password123", country_id: country.id, api_id: UUID.uuid4(:hex), api_key: UUID.uuid4(:hex)})
     user2 = Repo.insert!(%User{firstname: "Smith", lastname: "Marc", username: "smithmarc", email: "smith@dmarc.com", password: "password456", country_id: country.id, api_id: UUID.uuid4(:hex), api_key: UUID.uuid4(:hex)})
     user3 = Repo.insert!(%User{firstname: "ABC", lastname: "XYZ", username: "abcxyz", email: "abc@xyz.com", password: "password456", country_id: country.id})
-    _access_token1 = Repo.insert!(%AccessToken{user_id: user3.id, request: UUID.uuid4(:hex), is_revoked: false})
-    _access_token2 = Repo.insert!(%AccessToken{user_id: user2.id, request: UUID.uuid4(:hex), is_revoked: false})
+    _access_token1 = Repo.insert!(%AccessToken{user_id: user3.id, request: UUID.uuid4(:hex), expires_at: expire_at, is_revoked: false})
+    _access_token2 = Repo.insert!(%AccessToken{user_id: user2.id, request: UUID.uuid4(:hex), expires_at: expire_at, is_revoked: false})
     camera = Repo.insert!(%Camera{owner_id: user.id, name: "Austin", exid: "austin", is_public: false, config: ""})
     share = Repo.insert!(%CameraShare{camera_id: camera.id, user_id: user2.id, sharer_id: user.id, kind: "private"})
     _share_request = Repo.insert!(%CameraShareRequest{camera_id: camera.id, user_id: user.id, email: "share_request@xyz.com", status: -1, rights: "snapshot,list", key: UUID.uuid4(:hex)})
