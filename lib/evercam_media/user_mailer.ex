@@ -17,7 +17,7 @@ defmodule EvercamMedia.UserMailer do
   def camera_status(status, user, camera) do
     timezone = camera |> Camera.get_timezone
     current_time = Calendar.DateTime.now_utc |> Calendar.DateTime.shift_zone!(timezone) |> Calendar.Strftime.strftime!("%A, %d %b %Y %l:%M %p")
-    thumbnail = nil
+    thumbnail = get_thumbnail(camera)
     Mailgun.Client.send_email @config,
       to: user.email,
       subject: "\"#{camera.name}\" camera is now #{status}",
