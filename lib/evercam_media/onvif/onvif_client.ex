@@ -35,28 +35,26 @@ defmodule EvercamMedia.ONVIFClient do
 
     [username, password] = auth |> String.split(":")
     onvif_request = gen_onvif_request(namespace, operation, username, password, parameters)
-    try do
-      {:ok, response} = HTTPoison.post(url, onvif_request, ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"])
-      {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
-      soap_ns = case elem(xml, 3) do
-                  {ns, _} -> ns
+    case HTTPoison.post(url, onvif_request, ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]) do
+      {:ok, response} -> 
+        {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
+        soap_ns = case elem(xml, 3) do
+                {ns, _} -> ns
                   _ -> "env"
                 end
-
-      if response.status_code == 200 do
-        case "/#{soap_ns}:Envelope/#{soap_ns}:Body/#{namespace}:#{operation}Response" |> to_char_list |> :xmerl_xpath.string(xml) do
-          [] -> {:error, 405, "/#{soap_ns}:Envelope/#{soap_ns}:Body" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
-          xpath_string -> {:ok, parse_elements xpath_string}
+        if response.status_code == 200 do
+          case "/#{soap_ns}:Envelope/#{soap_ns}:Body/#{namespace}:#{operation}Response" |> to_char_list |> :xmerl_xpath.string(xml) do
+            [] -> {:error, 405, "/#{soap_ns}:Envelope/#{soap_ns}:Body" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
+            xpath_string -> {:ok, parse_elements xpath_string}
+          end
+        else
+          Logger.error "Error invoking #{operation}. URL: #{url} auth: #{auth}. Request: #{inspect onvif_request}. Response #{inspect response}."
+          case "/html" |> to_char_list |> :xmerl_xpath.string(xml) do
+            [] ->  {:error, response.status_code, "/#{soap_ns}:Envelope/#{soap_ns}:Body" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
+            contents -> {:error, response.status_code, contents |> parse_elements}
+          end
         end
-      else
-        Logger.error "Error invoking #{operation}. URL: #{url} auth: #{auth}. Request: #{inspect onvif_request}. Response #{inspect response}."
-        case "/html" |> to_char_list |> :xmerl_xpath.string(xml) do
-          [] ->  {:error, response.status_code, "/#{soap_ns}:Envelope/#{soap_ns}:Body" |> to_char_list |> :xmerl_xpath.string(xml) |> parse_elements}
-          contents -> {:error, response.status_code, contents |> parse_elements}
-        end
-      end
-    rescue
-      error in HTTPoison.Error -> {:error, 500, %{"message" => error.message}}
+      {:error, %HTTPoison.Error{reason: reason}} -> {:error, 500, reason}
     end
   end
 

@@ -44,23 +44,24 @@ defmodule EvercamMedia.ONVIFControllerErrorsTest do
     end
   end
 
-  @tag :skip
-  @tag :capture_log
+
+
+@tag :capture_log
   test "request timeout" do
     use_cassette "error_request_timeout" do
       conn = get build_conn(), "/v1/onvif/v20/device_service/GetNetworkInterfaces?url=http://192.10.20.30:8100&auth=foo:bar"
-      error_message = json_response(conn, 500) |> Map.get("message")
-      assert error_message == "req_timedout"
+      [timeout_message] = json_response(conn, 500) 
+      assert timeout_message == "req_timedout"
     end
   end
 
-  @tag :skip
   @tag :capture_log
   test "bad url" do
     use_cassette "error_bad_url" do
       conn = get build_conn(), "/v1/onvif/v20/device_service/GetNetworkInterfaces?url=abcde&auth=foo:bar"
-      error_message = json_response(conn, 500) |> Map.get("message")
-      assert error_message == "nxdomain"
+      [_ , ["error", error]] = json_response(conn, 500) 
+      assert error == "nxdomain"
     end
   end
+
 end
