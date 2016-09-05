@@ -128,5 +128,6 @@ defmodule User do
     |> validate_length(:password, min: 6)
     |> encrypt_password
     |> update_change(:username, &String.downcase/1)
+    |> update_change(:email, &String.downcase/1)
   end
 end
