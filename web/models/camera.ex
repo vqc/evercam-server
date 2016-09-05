@@ -204,7 +204,7 @@ defmodule Camera do
     host = host(camera)
     port = port(camera, network, "rtsp")
 
-    case path != "" && host != "" && "#{port}" != "" && "#{port}" != 0 && Util.port_open?(host, "#{port}") do
+    case path != "" && host != "" && "#{port}" != "" && "#{port}" != 0 do
       true -> "rtsp://#{auth}#{host}:#{port}#{path}"
       false -> ""
     end
