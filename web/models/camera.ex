@@ -438,6 +438,11 @@ defmodule Camera do
     |> where([cam], not(is_nil(cam.location)))
   end
 
+  def delete_changeset(camera, params \\ :invalid) do
+    camera
+    |> cast(params, @required_fields, @optional_fields)
+  end
+
   def changeset(camera, params \\ :invalid) do
     camera
     |> cast(params, @required_fields, @optional_fields)

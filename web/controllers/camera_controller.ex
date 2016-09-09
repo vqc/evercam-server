@@ -130,7 +130,7 @@ defmodule EvercamMedia.CameraController do
         is_public: false
       }
       camera
-      |> Camera.changeset(camera_params)
+      |> Camera.delete_changeset(camera_params)
       |> Repo.update!
 
       spawn(fn -> delete_snapshot_worker(camera) end)
