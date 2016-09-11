@@ -20,11 +20,11 @@ Evercam Media is the component that is responsible for talking  to the camera. C
 
 To setup the development environment follow the instructions at: [evercam-devops](https://github.com/evercam/evercam-devops)
 
-The Evercam codebase is open source, see details: https://www.evercam.io/open-source
+The Evercam codebase is open source, see details: https://evercam.io/blog/evercam-goes-open-source/
 
-Documentation about Evercam can be found here: https://github.com/evercam/evercam-api/wiki
+Documentation about Evercam can be found here: https://github.com/evercam/evercam-media/wiki
 
-Any questions or suggestions, drop us a line: https://www.evercam.io/contact
+Any questions or suggestions, drop us a line: https://evercam.io/contact
 
 [travis-url]: https://travis-ci.org/evercam/evercam-media
 [travis-image]: https://travis-ci.org/evercam/evercam-media.svg?branch=master
