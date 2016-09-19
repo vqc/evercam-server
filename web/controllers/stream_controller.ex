@@ -36,12 +36,21 @@ defmodule EvercamMedia.StreamController do
       [username, password, rtsp_url] = Util.decode(token)
       camera = Camera.get(camera_exid)
       check_auth(camera, username, password)
+      check_port(camera)
       stream(rtsp_url, token, command)
       200
     rescue
       error ->
         Util.error_handler(error)
         401
+    end
+  end
+
+  defp check_port(camera) do
+    host = Camera.host(camera)
+    port = Camera.port(camera, "external", "rtsp")
+    if !Util.port_open?(host, "#{port}") do
+      raise "Invalid RTSP port to request the video stream"
     end
   end
 
