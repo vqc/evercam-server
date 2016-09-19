@@ -321,6 +321,12 @@ defmodule Camera do
     |> Repo.one
   end
 
+  def update_status(camera, status) do
+    changeset = changeset(camera, %{is_online: status})
+    Repo.update!(changeset)
+    invalidate_camera(camera)
+  end
+
   def delete_by_owner(owner_id) do
     Camera
     |> where([cam], cam.owner_id == ^owner_id)
