@@ -107,7 +107,7 @@ defmodule EvercamMedia.CameraController do
         {:ok, camera} ->
           Camera.invalidate_camera(camera)
           camera = Camera.get_full(camera.exid)
-          CameraActivity.log_activity(caller, camera, "edited", %{ip: user_request_ip(conn)})
+          CameraActivity.log_activity(caller, camera, "edited", %{ip: user_request_ip(conn), agent: get_user_agent(conn)})
           conn
           |> render("show.json", %{camera: camera, user: caller})
         {:error, changeset} ->
@@ -156,7 +156,7 @@ defmodule EvercamMedia.CameraController do
             |> Repo.preload(:cloud_recordings, force: true)
             |> Repo.preload(:vendor_model, force: true)
             |> Repo.preload([vendor_model: :vendor], force: true)
-          CameraActivity.log_activity(caller, camera, "created", %{ip: user_request_ip(conn)})
+          CameraActivity.log_activity(caller, camera, "created", %{ip: user_request_ip(conn), agent: get_user_agent(conn)})
           Camera.invalidate_user(caller)
           send_email_notification(caller, full_camera)
           conn
@@ -376,4 +376,14 @@ defmodule EvercamMedia.CameraController do
       Util.error_handler(error)
     end
   end
+
+  defp get_user_agent(conn) do
+    case get_req_header(conn, "user-agent") do
+      [] -> ""
+      [user_agent|rest] -> parse_user_agent(user_agent)
+    end
+  end
+
+  defp parse_user_agent(nil), do: ""
+  defp parse_user_agent(user_agent), do: user_agent
 end
