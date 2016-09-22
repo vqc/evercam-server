@@ -3,11 +3,13 @@ defmodule EvercamMedia.UserControllerTest do
   use EvercamMedia.ConnCase
 
   setup do
-    country = Repo.insert!(%Country{name: "Something", iso3166_a2: "SMT"})
+    country = Repo.insert!(%Country{name: "Something", iso3166_a2: "smt"})
     user = Repo.insert!(%User{firstname: "John", lastname: "Doe", username: "johndoe", email: "john@doe.com", password: Comeonin.Bcrypt.hashpwsalt("password123"), api_id: UUID.uuid4(:hex) |> String.slice(0..8), api_key: UUID.uuid4(:hex), country_id: country.id})
+    user_evercam = Repo.insert!(%User{firstname: "Evercam", lastname: "Admin", username: "evercam", email: "admin@evercam.io", password: Comeonin.Bcrypt.hashpwsalt("password123"), api_id: UUID.uuid4(:hex) |> String.slice(0..8), api_key: UUID.uuid4(:hex), country_id: country.id})
+    _camera = Repo.insert!(%Camera{owner_id: user_evercam.id, name: "Herbst Wicklow Camera", exid: "evercam-remembrance-camera", is_public: false, config: %{"external_host" => "192.168.1.100", "external_http_port" => "80"}})
 
     params = %{
-      username: "johndoe",
+      username: "johndoee",
       email: "legend@john.com",
       firstname: "John",
       lastname: "Legend",
@@ -56,5 +58,14 @@ defmodule EvercamMedia.UserControllerTest do
     error = Util.parse_changeset(changeset)
 
     assert error == expected_error
+  end
+
+  test "POST /v1/users when user created successfully!", context do
+    params = Map.merge(context[:params], %{country: "smt"})
+    response =
+      build_conn()
+      |> post("/v1/users", params)
+
+    assert response.status == 200
   end
 end

@@ -376,14 +376,4 @@ defmodule EvercamMedia.CameraController do
       Util.error_handler(error)
     end
   end
-
-  defp get_user_agent(conn) do
-    case get_req_header(conn, "user-agent") do
-      [] -> ""
-      [user_agent|rest] -> parse_user_agent(user_agent)
-    end
-  end
-
-  defp parse_user_agent(nil), do: ""
-  defp parse_user_agent(user_agent), do: user_agent
 end

@@ -46,9 +46,8 @@ defmodule EvercamMedia.UserController do
   def create(conn, params) do
     with :ok <- ensure_country(params["country"], conn)
     do
-      [user_agent|rest] = get_req_header(conn, "user-agent")
       requester_ip = user_request_ip(conn)
-      user_agent = parse_user_agent(user_agent)
+      user_agent = get_user_agent(conn)
       share_request_key = params["share_request_key"]
       api_id = UUID.uuid4(:hex) |> String.slice(0..7)
       api_key = UUID.uuid4(:hex)
@@ -215,9 +214,6 @@ defmodule EvercamMedia.UserController do
       _ -> :ok
     end
   end
-
-  defp parse_user_agent(nil), do: "chrome"
-  defp parse_user_agent(user_agent), do: user_agent
 
   defp has_share_request_key?(value) when value in [nil, ""], do: false
   defp has_share_request_key?(_value), do: true
