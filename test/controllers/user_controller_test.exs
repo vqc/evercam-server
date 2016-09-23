@@ -108,4 +108,22 @@ defmodule EvercamMedia.UserControllerTest do
     assert error["password"] == ["Password should be at least 6 character(s)."]
     assert response.status == 400
   end
+
+  test "PATCH /v1/users/:username when user updated successfully!", context do
+    updated_params = %{email: "doe@john.com", firstname: "Doe", lastname: "John"}
+    response =
+      build_conn()
+      |> patch("/v1/users/#{context[:user].username}?api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}", updated_params)
+
+    updated_user =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("users")
+      |> List.first
+
+    assert response.status == 200
+    assert updated_user["email"] == "doe@john.com"
+    assert updated_user["firstname"] == "Doe"
+    assert updated_user["lastname"] == "John"
+  end
 end
