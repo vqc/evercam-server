@@ -55,6 +55,8 @@ defmodule EvercamMedia.Snapshot.CamClient do
         :device_busy
       String.contains?(response_text, "Device Error") ->
         :device_error
+      String.contains?(response_text, "Invalid Operation") ->
+        :invalid_operation
       String.contains?(response_text, "Moved Permanently") ->
         :moved
       String.contains?(response_text, "The document has moved") ->
