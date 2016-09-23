@@ -6,17 +6,19 @@ defmodule EvercamMedia.UserControllerTest do
     country = Repo.insert!(%Country{name: "Something", iso3166_a2: "smt"})
     user = Repo.insert!(%User{firstname: "John", lastname: "Doe", username: "johndoe", email: "john@doe.com", password: Comeonin.Bcrypt.hashpwsalt("password123"), api_id: UUID.uuid4(:hex) |> String.slice(0..8), api_key: UUID.uuid4(:hex), country_id: country.id})
     user_evercam = Repo.insert!(%User{firstname: "Evercam", lastname: "Admin", username: "evercam", email: "admin@evercam.io", password: Comeonin.Bcrypt.hashpwsalt("password123"), api_id: UUID.uuid4(:hex) |> String.slice(0..8), api_key: UUID.uuid4(:hex), country_id: country.id})
-    _camera = Repo.insert!(%Camera{owner_id: user_evercam.id, name: "Herbst Wicklow Camera", exid: "evercam-remembrance-camera", is_public: false, config: %{"external_host" => "192.168.1.100", "external_http_port" => "80"}})
+    camera = Repo.insert!(%Camera{owner_id: user_evercam.id, name: "Herbst Wicklow Camera", exid: "evercam-remembrance-camera", is_public: false, config: %{"external_host" => "192.168.1.100", "external_http_port" => "80"}})
+    share_request = Repo.insert!(%CameraShareRequest{camera_id: camera.id, user_id: user.id, key: UUID.uuid4(:hex), email: "legend@john.com", status: -1, rights: "list,snapshot"})
 
     params = %{
       username: "johndoee",
       email: "legend@john.com",
       firstname: "John",
       lastname: "Legend",
-      password: "johnlegend123"
+      password: "johnlegend123",
+      country: "smt"
     }
 
-    {:ok, user: user, params: params}
+    {:ok, user: user, params: params, share_request: share_request}
   end
 
   test "GET /v1/users/:id when user not found!", context do
@@ -61,11 +63,26 @@ defmodule EvercamMedia.UserControllerTest do
   end
 
   test "POST /v1/users when user created successfully!", context do
-    params = Map.merge(context[:params], %{country: "smt"})
+    response =
+      build_conn()
+      |> post("/v1/users", context[:params])
+
+    assert response.status == 200
+  end
+
+  test "POST /v1/users when user is being created from share request key!", context do
+    params = Map.merge(context[:params], %{share_request_key: context[:share_request].key})
     response =
       build_conn()
       |> post("/v1/users", params)
 
+    signed_up_user =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("users")
+      |> List.first
+
     assert response.status == 200
+    assert signed_up_user["confirmed_at"] != nil
   end
 end
