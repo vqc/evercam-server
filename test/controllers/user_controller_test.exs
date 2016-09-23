@@ -85,4 +85,27 @@ defmodule EvercamMedia.UserControllerTest do
     assert response.status == 200
     assert signed_up_user["confirmed_at"] != nil
   end
+
+  test "POST /v1/users/:username when user's password is not valid!" do
+    user_params =
+      %{
+          username: "testuser",
+          email: "test@email.com",
+          firstname: "test",
+          lastname: "user",
+          password: "123"
+      }
+
+    response =
+      build_conn()
+      |> post("/v1/users/", user_params)
+
+    error =
+      response.resp_body
+      |> Poison.decode!
+      |> Map.get("message")
+
+    assert error["password"] == ["Password should be at least 6 character(s)."]
+    assert response.status == 400
+  end
 end
