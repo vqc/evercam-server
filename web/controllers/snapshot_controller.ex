@@ -6,6 +6,7 @@ defmodule EvercamMedia.SnapshotController do
   alias EvercamMedia.Snapshot.Storage
   alias EvercamMedia.Validation
   alias EvercamMedia.Util
+  alias EvercamMedia.Snapshot.WorkerSupervisor
 
   @optional_params %{"notes" => nil, "with_data" => false}
 
@@ -46,7 +47,7 @@ defmodule EvercamMedia.SnapshotController do
     case exec_with_timeout(function, 15) do
       {200, response} ->
         data = "data:image/jpeg;base64,#{Base.encode64(response[:image])}"
-
+        update_camera_status_online(params["camera_exid"])
         conn
         |> json(%{data: data, status: "ok"})
       {code, response} ->
@@ -374,5 +375,23 @@ defmodule EvercamMedia.SnapshotController do
     |> Calendar.DateTime.Parse.rfc3339_utc
     |> elem(1)
     |> Calendar.DateTime.Format.unix
+  end
+
+  defp update_camera_status_online(camera_exid) when camera_exid in [nil, ""], do: :noop
+  defp update_camera_status_online(camera_exid) do
+    camera = Camera.get_full(camera_exid)
+    if camera do
+      case camera.is_online do
+        false ->
+          timestamp = Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
+          DBHandler.update_camera_status(camera.exid, timestamp, true)
+          Camera.invalidate_camera(camera)
+          camera.exid
+          |> String.to_atom
+          |> Process.whereis
+          |> WorkerSupervisor.update_worker(camera)
+        true -> ""
+      end
+    end
   end
 end
