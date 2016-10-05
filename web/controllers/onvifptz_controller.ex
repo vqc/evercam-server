@@ -3,23 +3,23 @@ defmodule EvercamMedia.ONVIFPTZController do
   alias EvercamMedia.ONVIFPTZ
 
   def status(conn, _params) do
-    conn.assigns.onvif_access_info |> ONVIFPTZ.get_status("Profile_1") |> respond(conn)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.get_status("Profile_1") |> respond_default(conn)
   end
 
   def nodes(conn, _params) do
-    conn.assigns.onvif_access_info |> ONVIFPTZ.get_nodes |> respond(conn)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.get_nodes |> respond_default(conn)
   end
 
   def configurations(conn, _params) do
-    conn.assigns.onvif_access_info |> ONVIFPTZ.get_configurations |> respond(conn)
+    conn.assigns.onvif_access_info |> ONVIFPTZ.get_configurations |> respond_default(conn)
   end
 
   def presets(conn, _params) do
     conn.assigns.onvif_access_info
     |> ONVIFPTZ.get_presets("Profile_1")
     |> case do
-      {:ok, response} -> respond({:ok, response}, conn)
-      _ -> respond({:ok, %{"Presets" => []}}, conn)
+      {:ok, response} -> respond_default({:ok, response}, conn)
+      _ -> respond_default({:ok, %{"Presets" => []}}, conn)
     end
   end
 
@@ -90,12 +90,18 @@ defmodule EvercamMedia.ONVIFPTZController do
 
   defp respond({:ok, response}, conn) do
     conn
+    |> put_status(:created)
     |> json(response)
   end
 
   defp respond({:error, code, response}, conn) do
     conn
     |> put_status(code)
+    |> json(response)
+  end
+
+  defp respond_default({:ok, response}, conn) do
+    conn
     |> json(response)
   end
 end

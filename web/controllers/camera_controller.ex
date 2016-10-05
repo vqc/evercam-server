@@ -160,6 +160,7 @@ defmodule EvercamMedia.CameraController do
           Camera.invalidate_user(caller)
           send_email_notification(caller, full_camera)
           conn
+          |> put_status(:created)
           |> render("show.json", %{camera: full_camera, user: caller})
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))

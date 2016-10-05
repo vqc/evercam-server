@@ -67,7 +67,7 @@ defmodule EvercamMedia.UserControllerTest do
       build_conn()
       |> post("/v1/users", context[:params])
 
-    assert response.status == 200
+    assert response.status == 201
   end
 
   test "POST /v1/users when user is being created from share request key!", context do
@@ -82,7 +82,7 @@ defmodule EvercamMedia.UserControllerTest do
       |> Map.get("users")
       |> List.first
 
-    assert response.status == 200
+    assert response.status == 201
     assert signed_up_user["confirmed_at"] != nil
   end
 

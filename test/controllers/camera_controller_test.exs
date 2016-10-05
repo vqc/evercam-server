@@ -231,7 +231,7 @@ defmodule EvercamMedia.CameraControllerTest do
       |> Map.get("cameras")
       |> List.first
 
-    assert response.status == 200
+    assert response.status == 201
     assert camera != nil
     assert camera["name"] == camera_params[:name]
     assert camera["external"]["host"] == camera_params[:external_host]

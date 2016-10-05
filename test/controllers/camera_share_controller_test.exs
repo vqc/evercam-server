@@ -72,7 +72,7 @@ defmodule EvercamMedia.CameraShareControllerTest do
       |> Map.get("shares")
       |> List.first
 
-    assert response.status == 200
+    assert response.status == 201
     assert Map.get(share, "camera_id") == context[:camera].exid
     assert Map.get(share, "sharer_id") == context[:user].username
   end
@@ -92,7 +92,7 @@ defmodule EvercamMedia.CameraShareControllerTest do
       |> Map.get("share_requests")
       |> List.first
 
-    assert response.status == 200
+    assert response.status == 201
     assert Map.get(share, "camera_id") == context[:camera].exid
     assert Map.get(share, "email") == params[:email]
   end

@@ -7,7 +7,7 @@ defmodule EvercamMedia.ONVIFPTZControllerExternalTest do
   test "POST /v1/cameras/:id/ptz/relative?left=0&right=10&up=0&down=10&zoom=0 moves right and down" do
     # get home first
     conn = post build_conn(), "/v1/cameras/mobile-mast-test/ptz/home"
-    assert json_response(conn, 200) == "ok"
+    assert json_response(conn, 201) == "ok"
     # give time to the camera to move
     :timer.sleep(3000)
     conn = get build_conn(), "/v1/cameras/mobile-mast-test/ptz/status"
@@ -19,7 +19,7 @@ defmodule EvercamMedia.ONVIFPTZControllerExternalTest do
       "/v1/cameras/mobile-mast-test/ptz/relative",
       %{"left" => "0", "right" => "10", "up" => "0", "down" => "10", "zoom" => "0"}
     )
-    assert json_response(conn, 200) == "ok"
+    assert json_response(conn, 201) == "ok"
     # give time to the camera to move
     :timer.sleep(3000)
     conn = get build_conn(), "/v1/cameras/mobile-mast-test/ptz/status"
@@ -33,7 +33,7 @@ defmodule EvercamMedia.ONVIFPTZControllerExternalTest do
   test "POST /v1/cameras/:id/ptz/relative?left=10&right=0&up=10&down=0&zoom=0 moves left and up" do
     # get home first
     conn = post build_conn(), "/v1/cameras/mobile-mast-test/ptz/home"
-    assert json_response(conn, 200) == "ok"
+    assert json_response(conn, 201) == "ok"
     # give time to the camera to move
     :timer.sleep(3000)
     conn = get build_conn(), "/v1/cameras/mobile-mast-test/ptz/status"
@@ -45,7 +45,7 @@ defmodule EvercamMedia.ONVIFPTZControllerExternalTest do
       "/v1/cameras/mobile-mast-test/ptz/relative",
       %{"left" => "10", "right" => "0", "up" => "10", "down" => "0", "zoom" => "0"}
     )
-    assert json_response(conn, 200) == "ok"
+    assert json_response(conn, 201) == "ok"
     # give time to the camera to move
     :timer.sleep(3000)
     conn = get build_conn(), "/v1/cameras/mobile-mast-test/ptz/status"

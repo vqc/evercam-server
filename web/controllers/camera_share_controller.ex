@@ -43,7 +43,7 @@ defmodule EvercamMedia.CameraShareController do
             Camera.invalidate_user(sharee)
             Camera.invalidate_camera(camera)
             CameraActivity.log_activity(caller, camera, "shared", %{with: sharee.email, ip: user_request_ip(conn)})
-            conn |> render(CameraShareView, "show.json", %{camera_share: camera_share})
+            conn |> put_status(:created) |> render(CameraShareView, "show.json", %{camera_share: camera_share})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
         end
@@ -52,7 +52,7 @@ defmodule EvercamMedia.CameraShareController do
           {:ok, camera_share_request} ->
             send_email_notification(caller, camera, params["email"], params["message"], camera_share_request.key)
             CameraActivity.log_activity(caller, camera, "shared", %{with: params["email"], ip: user_request_ip(conn)})
-            conn |> render(CameraShareRequestView, "show.json", %{camera_share_requests: camera_share_request})
+            conn |> put_status(:created) |> render(CameraShareRequestView, "show.json", %{camera_share_requests: camera_share_request})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
         end

@@ -102,6 +102,7 @@ defmodule EvercamMedia.UserController do
           end
           intercom_activity(Application.get_env(:evercam_media, :create_intercom_user), user, user_agent, requester_ip)
           conn
+          |> put_status(:created)
           |> render(UserView, "show.json", %{user: user |> Repo.preload(:country, force: true)})
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))

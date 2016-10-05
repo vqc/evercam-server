@@ -146,7 +146,7 @@ defmodule EvercamMedia.ArchiveController do
         case Repo.insert(changeset) do
           {:ok, archive} ->
             CameraActivity.log_activity(current_user, camera, "archive created", %{ip: user_request_ip(conn)})
-            render(conn, ArchiveView, "show.json", %{archive: archive |> Repo.preload(:camera) |> Repo.preload(:user)})
+            render(conn |> put_status(:created), ArchiveView, "show.json", %{archive: archive |> Repo.preload(:camera) |> Repo.preload(:user)})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
         end

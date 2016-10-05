@@ -51,6 +51,6 @@ defmodule EvercamMedia.ArchiveControllerTest do
       build_conn()
       |> post("/v1/cameras/#{context[:camera].exid}/archives?api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}", params)
 
-    assert response.status == 200
+    assert response.status == 201
   end
 end
