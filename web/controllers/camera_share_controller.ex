@@ -14,6 +14,8 @@ defmodule EvercamMedia.CameraShareController do
     do
       shares =
         cond do
+          exid == "evercam-remembrance-camera" ->
+            []
           user != nil && current_user != nil ->
             CameraShare.user_camera_share(camera, user)
           current_user != nil && Permission.Camera.can_edit?(current_user, camera) ->
