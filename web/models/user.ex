@@ -129,5 +129,9 @@ defmodule User do
     |> encrypt_password
     |> update_change(:username, &String.downcase/1)
     |> update_change(:email, &String.downcase/1)
+    |> update_change(:firstname, &String.trim/1)
+    |> update_change(:lastname, &String.trim/1)
+    |> validate_length(:firstname, [min: 2, message: "Firstname should be at least 2 character(s)."])
+    |> validate_length(:lastname, [min: 2, message: "Lastname should be at least 2 character(s)."])
   end
 end
