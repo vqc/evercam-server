@@ -49,11 +49,11 @@ defmodule EvercamMedia.Snapshot.Error do
         {504, %{message: "Non-existant domain."}}
       :ehostunreach ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [ehostunreach]"
-        update_camera_status("#{camera_exid}", timestamp, false, "ehostunreach", 20)
+        update_camera_status("#{camera_exid}", timestamp, false, "ehostunreach", 10)
         {504, %{message: "No route to host."}}
       :enetunreach ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [enetunreach]"
-        update_camera_status("#{camera_exid}", timestamp, false, "enetunreach", 10)
+        update_camera_status("#{camera_exid}", timestamp, false, "enetunreach", 5)
         {504, %{message: "Network unreachable."}}
       :req_timedout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [req_timedout]"
