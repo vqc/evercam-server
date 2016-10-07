@@ -140,8 +140,8 @@ defmodule EvercamMedia.ArchiveController do
         render_error(conn, 400, "To date cannot be greater than current time.")
       to_date == from_date ->
         render_error(conn, 400, "To date and from date cannot be same.")
-      date_difference(from_date, to_date) > 7200 ->
-        render_error(conn, 400, "Clip duration cannot be greater than 2 hours.")
+      date_difference(from_date, to_date) > 1800 ->
+        render_error(conn, 400, "Clip duration cannot be greater than 30 minutes.")
       true ->
         case Repo.insert(changeset) do
           {:ok, archive} ->
