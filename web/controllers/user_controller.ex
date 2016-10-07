@@ -101,6 +101,7 @@ defmodule EvercamMedia.UserController do
             multiple_share_create(share_requests, user, conn)
           end
           intercom_activity(Application.get_env(:evercam_media, :create_intercom_user), user, user_agent, requester_ip)
+          Logger.info "[POST v1/users] [#{user_agent}] [#{requester_ip}] [#{user.username}] [#{user.email}]"
           conn
           |> put_status(:created)
           |> render(UserView, "show.json", %{user: user |> Repo.preload(:country, force: true)})
