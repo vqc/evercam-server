@@ -60,7 +60,7 @@ defmodule EvercamMedia.Snapshot.Poller do
   """
   def init(args) do
     args = Map.merge args, %{
-      timer: start_timer(args.config.sleep, :poll)
+      timer: start_timer(args.config.sleep, :poll, args.config.is_paused)
     }
     {:ok, args}
   end
@@ -89,7 +89,7 @@ defmodule EvercamMedia.Snapshot.Poller do
   def handle_cast({:update_camera_config, new_config}, state) do
     {:ok, timer} = Map.fetch(state, :timer)
     :erlang.cancel_timer(timer)
-    new_timer = start_timer(new_config.config.sleep, :poll)
+    new_timer = start_timer(new_config.config.sleep, :poll, new_config.config.is_paused)
     new_config = Map.merge new_config, %{
       timer: new_timer
     }
@@ -100,6 +100,7 @@ defmodule EvercamMedia.Snapshot.Poller do
   Server callback for polling
   """
   def handle_info(:poll, state) do
+    state = put_in(state, [:config, :is_paused], false)
     {:ok, timer} = Map.fetch(state, :timer)
     :erlang.cancel_timer(timer)
     timestamp = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.unix
@@ -115,7 +116,7 @@ defmodule EvercamMedia.Snapshot.Poller do
         # update_scheduler_log(state.name, {:error, timestamp, message})
         Logger.error "Error getting scheduler information for #{inspect state.name}"
     end
-    timer = start_timer(state.config.sleep, :poll)
+    timer = start_timer(state.config.sleep, :poll, state.config.is_paused)
     {:noreply, Map.put(state, :timer, timer)}
   end
 
@@ -130,7 +131,11 @@ defmodule EvercamMedia.Snapshot.Poller do
   ## Private functions ##
   #######################
 
-  defp start_timer(sleep, message) do
+  defp start_timer(sleep, message, false) do
     Process.send_after(self, message, sleep)
+  end
+
+  defp start_timer(_sleep, message, true) do
+    Process.send_after(self, message, 5000)
   end
 end

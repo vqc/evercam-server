@@ -20,6 +20,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   alias EvercamMedia.SnapshotRepo
   alias EvercamMedia.Util
   alias EvercamMedia.Snapshot.Error
+  alias EvercamMedia.Snapshot.WorkerSupervisor
 
   def handle_event({:got_snapshot, data}, state) do
     {camera_exid, timestamp, _image} = data
@@ -58,11 +59,24 @@ defmodule EvercamMedia.Snapshot.DBHandler do
       status == false && camera.is_online != status ->
         ConCache.dirty_put(:snapshot_error, camera.exid, error_total)
         Logger.info "[#{camera_exid}] [update_status] [error] [#{error_code}] [#{error_total}]"
+        pause_camera_requests(camera, error_code, rem(error_total, 5))
       status == false ->
         ConCache.dirty_put(:snapshot_error, camera.exid, error_total)
       true -> :noop
     end
     Camera.get_full(camera_exid)
+  end
+
+  defp pause_camera_requests(camera, "econnrefused", 0), do: do_pause_camera(camera)
+  defp pause_camera_requests(camera, "device_error", 0), do: do_pause_camera(camera)
+  defp pause_camera_requests(_camera, _error_code, _reminder), do: :noop
+
+  defp do_pause_camera(camera) do
+    Logger.debug("Pause camera requests for #{camera.exid}")
+    camera.exid
+    |> String.to_atom
+    |> Process.whereis
+    |> WorkerSupervisor.pause_worker(camera, true)
   end
 
   def change_camera_status(camera, timestamp, status, error_code \\ nil) do
