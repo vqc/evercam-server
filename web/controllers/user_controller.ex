@@ -1,10 +1,12 @@
 defmodule EvercamMedia.UserController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.UserView
+  alias EvercamMedia.LogView
   alias EvercamMedia.ErrorView
   alias EvercamMedia.Repo
   alias EvercamMedia.Util
   alias EvercamMedia.Intercom
+  import EvercamMedia.Validation.Log
   require Logger
 
   def get(conn, params) do
@@ -157,6 +159,30 @@ defmodule EvercamMedia.UserController do
     end
   end
 
+  def user_activities(conn, %{"id" => username} = params) do
+    current_user = conn.assigns[:current_user]
+    from = parse_from(params["from"])
+    to = parse_to(params["to"])
+    types = parse_types(params["types"])
+
+    user =
+      username
+      |> String.replace_trailing(".json", "")
+      |> User.by_username
+
+    full_name = user |> User.get_fullname
+
+    with :ok <- ensure_user_exists(user, username, conn),
+         :ok <- ensure_can_view(current_user, user, conn),
+         :ok <- params |> validate_params |> ensure_params(conn)
+    do
+      user_logs = CameraActivity.for_a_user(full_name, from, to, types)
+
+      conn
+      |> render(LogView, "user_logs.json", %{user_logs: user_logs})
+    end
+  end
+
   defp delete_user(user) do
     User.invalidate_auth(user.api_id, user.api_key)
     Camera.invalidate_user(user)
@@ -265,4 +291,16 @@ defmodule EvercamMedia.UserController do
       end
     end)
   end
+
+  defp parse_to(to) when to in [nil, ""], do: Calendar.DateTime.now_utc |> Calendar.DateTime.to_erl
+  defp parse_to(to), do: to |> Calendar.DateTime.Parse.unix! |> Calendar.DateTime.to_erl
+
+  defp parse_from(from) when from in [nil, ""], do: "2014-01-01T14:00:00Z" |> Ecto.DateTime.cast! |> Ecto.DateTime.to_erl
+  defp parse_from(from), do: from |> Calendar.DateTime.Parse.unix! |> Calendar.DateTime.to_erl
+
+  defp parse_types(types) when types in [nil, ""], do: nil
+  defp parse_types(types), do: types |> String.split(",", trim: true) |> Enum.map(&String.strip/1)
+
+  defp ensure_params(:ok, _conn), do: :ok
+  defp ensure_params({:invalid, message}, conn), do: render_error(conn, 400, message)
 end

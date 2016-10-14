@@ -40,6 +40,23 @@ defmodule CameraActivity do
     |> SnapshotRepo.delete_all
   end
 
+  def for_a_user(full_name, from, to, types) do
+    CameraActivity
+    |> where(name: ^full_name)
+    |> where([c], c.done_at >= ^from and c.done_at <= ^to)
+    |> with_types_if_specified(types)
+    |> order_by([c], desc: c.done_at)
+    |> SnapshotRepo.all
+  end
+
+  def with_types_if_specified(query, nil) do
+    query
+  end
+  def with_types_if_specified(query, types) do
+    query
+    |> where([c], c.action in ^types)
+  end
+
   def changeset(camera_activity, params \\ :invalid) do
     camera_activity
     |> cast(params, @required_fields, @optional_fields)

@@ -59,6 +59,7 @@ defmodule EvercamMedia.Router do
       patch "/users/:id", UserController, :update
       options "/users/:id", UserController, :nothing
       delete "/users/:id", UserController, :delete
+      get "/users/:id/activities", UserController, :user_activities
 
       get "/cameras", CameraController, :index
       options "/cameras", CameraController, :nothing
