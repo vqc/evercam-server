@@ -51,6 +51,7 @@ defmodule EvercamMedia.SnapshotController do
         conn
         |> json(%{data: data, status: "ok"})
       {code, response} ->
+        Logger.error "[test-snapshot] [#{params["external_url"]}] [#{params["jpg_url"]}] [#{response.message}]"
         conn
         |> put_status(code)
         |> json(response)
