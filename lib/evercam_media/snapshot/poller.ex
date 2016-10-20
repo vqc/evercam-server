@@ -106,14 +106,11 @@ defmodule EvercamMedia.Snapshot.Poller do
     timestamp = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.unix
     case scheduled_now?(state.config.schedule, state.config.timezone) do
       {:ok, true} ->
-        # update_scheduler_log(state.name, {true, timestamp, nil})
         Logger.debug "Polling camera: #{state.name} for snapshot"
         Worker.get_snapshot(state.name, {:poll, timestamp})
       {:ok, false} ->
-        # update_scheduler_log(state.name, {false, timestamp, nil})
         Logger.debug "Not Scheduled. Skip fetching snapshot from #{inspect state.name}"
       {:error, _message} ->
-        # update_scheduler_log(state.name, {:error, timestamp, message})
         Logger.error "Error getting scheduler information for #{inspect state.name}"
     end
     timer = start_timer(state.config.sleep, :poll, state.config.is_paused)
@@ -123,7 +120,8 @@ defmodule EvercamMedia.Snapshot.Poller do
   @doc """
   Take care of unknown messages which otherwise would trigger function clause mismatch error.
   """
-  def handle_info(_msg, state) do
+  def handle_info(msg, state) do
+    Logger.info "[handle_info] [#{msg}] [#{state.name}] [unknown messages]"
     {:noreply, state}
   end
 
