@@ -1,25 +1,20 @@
 defmodule EvercamMedia.Schedule do
   def scheduled_now?(camera) do
     if camera.cloud_recordings == nil do
-      scheduled_now?(nil, "off", camera.timezone)
+      scheduled_now?(nil, camera.timezone)
     else
-      scheduled_now?(camera.cloud_recordings.schedule, camera.cloud_recordings.status, camera.timezone)
+      scheduled_now?(camera.cloud_recordings.schedule, camera.timezone)
     end
   end
 
-  def scheduled_now?(schedule, status, timezone) do
-    case status do
-      "on" -> {:ok, true}
-      "off" -> {:ok, false}
-      "on-scheduled" ->
-        timezone =
-          case timezone do
-            nil -> "UTC"
-            _ -> timezone
-          end
-        now = Calendar.DateTime.now!(timezone)
-        scheduled?(schedule, now, timezone)
-    end
+  def scheduled_now?(schedule, timezone) do
+    timezone =
+      case timezone do
+        nil -> "UTC"
+        _ -> timezone
+      end
+    now = Calendar.DateTime.now!(timezone)
+    scheduled?(schedule, now, timezone)
   end
 
   def scheduled?(schedule, check_time, timezone \\ nil) do

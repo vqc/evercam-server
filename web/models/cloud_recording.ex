@@ -41,14 +41,6 @@ defmodule CloudRecording do
     end
   end
 
-  def recording(cloud_recording) do
-    if cloud_recording == nil do
-      "off"
-    else
-      cloud_recording.status
-    end
-  end
-
   def initial_sleep(cloud_recording) do
     if cloud_recording == nil || cloud_recording.frequency == 1 || cloud_recording.status == "off" do
       :crypto.rand_uniform(1, 60) * 1000

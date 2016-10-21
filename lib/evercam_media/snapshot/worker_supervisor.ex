@@ -107,7 +107,6 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
           camera_exid: camera.exid,
           vendor_exid: Camera.get_vendor_attr(camera, :exid),
           schedule: CloudRecording.schedule(camera.cloud_recordings),
-          recording: CloudRecording.recording(camera.cloud_recordings),
           timezone: camera.timezone,
           url: Camera.snapshot_url(camera),
           auth: Camera.auth(camera),
