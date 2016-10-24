@@ -163,7 +163,7 @@ defmodule EvercamMedia.CameraController do
           |> put_status(:created)
           |> render("show.json", %{camera: full_camera, user: caller})
         {:error, changeset} ->
-          Logger.error "[camera-create] [#{inspect Util.parse_changeset(changeset)}]"
+          Logger.error "[camera-create] [#{inspect params}] [#{inspect Util.parse_changeset(changeset)}]"
           render_error(conn, 400, Util.parse_changeset(changeset))
       end
     end
