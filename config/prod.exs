@@ -66,6 +66,11 @@ config :quantum,
       task: {"EvercamMedia.Snapshot.Storage", "cleanup_all"},
       schedule: "@hourly",
       overlap: false
+    ],
+    shared_reminder: [
+      task: {"EvercamMedia.ShareRequestReminder", "check_share_requests"},
+      schedule: "@daily",
+      overlap: false
     ]
   ]
 

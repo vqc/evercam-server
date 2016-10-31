@@ -69,6 +69,14 @@ defmodule CameraShareRequest do
     |> Repo.one
   end
 
+  def get_all_pending_requests do
+    CameraShareRequest
+    |> where(status: ^@status.pending)
+    |> preload(:camera)
+    |> preload(:user)
+    |> Repo.all
+  end
+
   def get_status(status) do
     case status do
       "used" -> @status.used
