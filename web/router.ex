@@ -127,10 +127,10 @@ defmodule EvercamMedia.Router do
       options "/cameras/:id/ptz/home", ONVIFPTZController, :nothing
       post "/cameras/:id/ptz/home/set", ONVIFPTZController, :sethome
       options "/cameras/:id/ptz/home/set", ONVIFPTZController, :nothing
-      post "/cameras/:id/ptz/presets/:preset_token", ONVIFPTZController, :setpreset
-      options "/cameras/:id/ptz/presets/:preset_token", ONVIFPTZController, :nothing
-      post "/cameras/:id/ptz/presets/create/:preset_name", ONVIFPTZController, :createpreset
-      options "/cameras/:id/ptz/presets/create/:preset_name", ONVIFPTZController, :nothing
+      post "/cameras/:id/ptz/presets/:preset_token/set", ONVIFPTZController, :setpreset
+      options "/cameras/:id/ptz/presets/:preset_token/set", ONVIFPTZController, :nothing
+      post "/cameras/:id/ptz/presets/create", ONVIFPTZController, :createpreset
+      options "/cameras/:id/ptz/presets/create", ONVIFPTZController, :nothing
       post "/cameras/:id/ptz/presets/go/:preset_token", ONVIFPTZController, :gotopreset
       options "/cameras/:id/ptz/presets/go/:preset_token", ONVIFPTZController, :nothing
       post "/cameras/:id/ptz/continuous/start/:direction", ONVIFPTZController, :continuousmove
