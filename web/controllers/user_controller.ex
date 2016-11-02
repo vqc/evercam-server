@@ -270,6 +270,7 @@ defmodule EvercamMedia.UserController do
         {:ok, share_request} ->
           CameraShare.create_share(share_request.camera, user, share_request.user, share_request.rights, share_request.message)
           Camera.invalidate_camera(share_request.camera)
+          accepted_request_notification(share_request)
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))
       end
@@ -303,4 +304,14 @@ defmodule EvercamMedia.UserController do
 
   defp ensure_params(:ok, _conn), do: :ok
   defp ensure_params({:invalid, message}, conn), do: render_error(conn, 400, message)
+
+  defp accepted_request_notification(share_request) do
+    try do
+      Task.start(fn ->
+        EvercamMedia.UserMailer.accepted_share_request_notification(share_request.user, share_request.camera, share_request.email)
+      end)
+    catch _type, error ->
+      Util.error_handler(error)
+    end
+  end
 end
