@@ -44,29 +44,56 @@ defmodule EvercamMedia.CameraShareRequestController do
     end
   end
 
-  def cancel(conn, %{"id" => exid, "email" => email}) do
+  def cancel(conn, %{"id" => exid, "email" => email} = params) do
     caller = conn.assigns[:current_user]
     camera = Camera.get_full(exid)
+    key = params["key"]
 
     with :ok <- camera_exists(conn, exid, camera),
-         :ok <- caller_has_permission(conn, caller, camera),
-         {:ok, share_request} <- share_request_exists(conn, email, camera)
+         :ok <- has_caller(conn, caller, camera, key),
+         {:ok, share_request} <- has_share_request(conn, email, camera, key)
     do
       params = %{rights: share_request.rights, status: CameraShareRequest.status.cancelled}
 
       share_request
       |> CameraShareRequest.update_changeset(params)
-      |> Repo.update
-
+      |> Repo.update!
+      |> revoked_notification(key)
       json(conn, %{})
     end
   end
+
+  defp revoked_notification(_share_request, key) when key in [nil, ""], do: :noop
+  defp revoked_notification(share_request, _key) do
+    try do
+      Task.start(fn ->
+        EvercamMedia.UserMailer.revoked_share_request_notification(share_request.user, share_request.camera, share_request.email)
+      end)
+    catch _type, error ->
+      Util.error_handler(error)
+    end
+  end
+
+  defp has_caller(conn, user, camera, nil) do
+    caller_has_permission(conn, user, camera)
+  end
+  defp has_caller(_conn, _user, _camera, _key), do: :ok
 
   defp caller_has_permission(conn, user, camera) do
     if Permission.Camera.can_edit?(user, camera) do
       :ok
     else
       render_error(conn, 401, "Unauthorized.")
+    end
+  end
+
+  defp has_share_request(conn, email, camera, nil) do
+    share_request_exists(conn, email, camera)
+  end
+  defp has_share_request(conn, email, camera, key) do
+    case CameraShareRequest.by_key_and_email(camera, key, email) do
+      nil -> render_error(conn, 404, "Share request not found.")
+      %CameraShareRequest{} = camera_share_request -> {:ok, camera_share_request}
     end
   end
 

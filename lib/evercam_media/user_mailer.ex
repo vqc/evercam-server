@@ -49,8 +49,20 @@ defmodule EvercamMedia.UserMailer do
       "h:Reply-To": user.email,
       bcc: user.email,
       attachments: get_attachments(thumbnail),
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "sign_up_to_share_email.html", user: user, camera: camera, message: message, key: key, thumbnail_available: !!thumbnail, year: @year),
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "sign_up_to_share_email.html", user: user, camera: camera, message: message, key: key, sharee: email, thumbnail_available: !!thumbnail, year: @year),
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "sign_up_to_share_email.txt", user: user, camera: camera, message: message, key: key)
+  end
+
+  def revoked_share_request_notification(user, camera, email) do
+    thumbnail = get_thumbnail(camera)
+    Mailgun.Client.send_email @config,
+      to: user.email,
+      subject: "#{email} did not accept your request to view your camera",
+      from: @from,
+      bcc: "marco@evercam.io,vinnie@evercam.io",
+      attachments: get_attachments(thumbnail),
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "revoke_share_request.html", user: user, camera: camera, sharee: email, thumbnail_available: !!thumbnail, year: @year),
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "revoke_share_request.txt", user: user, camera: camera, sharee: email)
   end
 
   def camera_create_notification(user, camera) do

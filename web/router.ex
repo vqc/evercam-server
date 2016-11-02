@@ -100,6 +100,7 @@ defmodule EvercamMedia.Router do
       get "/cameras/:id/shares/requests", CameraShareRequestController, :show
       patch "/cameras/:id/shares/requests", CameraShareRequestController, :update
       delete "/cameras/:id/shares/requests", CameraShareRequestController, :cancel
+      options "/cameras/:id/shares/requests", CameraShareRequestController, :nothing
 
       get "/cameras/archives/pending", ArchiveController, :pending_archives
       get "/cameras/:id/archives", ArchiveController, :index
