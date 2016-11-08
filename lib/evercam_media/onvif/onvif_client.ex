@@ -36,7 +36,7 @@ defmodule EvercamMedia.ONVIFClient do
     [username, password] = auth |> String.split(":")
     onvif_request = gen_onvif_request(namespace, operation, username, password, parameters)
     case HTTPoison.post(url, onvif_request, ["Content-Type": "application/soap+xml", "SOAPAction": "http://www.w3.org/2003/05/soap-envelope"]) do
-      {:ok, response} -> 
+      {:ok, response} ->
         {xml, _rest} = response.body |> to_char_list |> :xmerl_scan.string
         soap_ns = case elem(xml, 3) do
                 {ns, _} -> ns
@@ -124,13 +124,19 @@ defmodule EvercamMedia.ONVIFClient do
   #### XML Parsing
 
   defp parse_elements(event_elements) do
-    [response] = Enum.map(event_elements, fn(event_element) ->
-      parse(xmlElement(event_element, :content))
-    end)
-    if Map.size(response) == 0 do
-      :ok
-    else
-      response
+    [response] =
+      case event_elements do
+        [] -> ["No ptz controls found on this Camera!"]
+        _ ->
+          Enum.map(event_elements, fn(event_element) ->
+            parse(xmlElement(event_element, :content))
+          end)
+      end
+
+    cond do
+      is_bitstring(response) == true -> response
+      Map.size(response) == 0 -> :ok
+      true -> response
     end
   end
 
