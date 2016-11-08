@@ -53,6 +53,7 @@ defmodule Camera do
   def invalidate_camera(nil), do: :noop
   def invalidate_camera(%Camera{} = camera) do
     ConCache.delete(:camera_full, camera.exid)
+    ConCache.delete(:camera, camera.exid)
     invalidate_shares(camera)
   end
 

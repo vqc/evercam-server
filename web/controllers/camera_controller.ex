@@ -108,6 +108,7 @@ defmodule EvercamMedia.CameraController do
           Camera.invalidate_camera(camera)
           camera = Camera.get_full(camera.exid)
           CameraActivity.log_activity(caller, camera, "edited", %{ip: user_request_ip(conn), agent: get_user_agent(conn)})
+          spawn(fn -> update_camera_worker(camera.exid) end)
           conn
           |> render("show.json", %{camera: camera, user: caller})
         {:error, changeset} ->

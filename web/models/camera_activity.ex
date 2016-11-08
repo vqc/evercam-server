@@ -34,6 +34,12 @@ defmodule CameraActivity do
     |> SnapshotRepo.insert
   end
 
+  def get_all(query) do
+    query
+    |> order_by([c], desc: c.done_at)
+    |> SnapshotRepo.all
+  end
+
   def delete_by_camera_id(camera_id) do
     CameraActivity
     |> where(camera_id: ^camera_id)

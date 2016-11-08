@@ -4,7 +4,6 @@ defmodule EvercamMedia.LogController do
   import Ecto.Query
   alias EvercamMedia.ErrorView
   alias EvercamMedia.LogView
-  alias EvercamMedia.SnapshotRepo
   import String, only: [to_integer: 1]
 
   @default_limit 50
@@ -43,25 +42,16 @@ defmodule EvercamMedia.LogController do
     page = parse_page(params["page"])
     types = parse_types(params["types"])
 
-    activities_query =
+    all_logs =
       CameraActivity
       |> where(camera_id: ^camera.id)
       |> where([c], c.done_at >= ^from and c.done_at <= ^to)
-      |> with_types_if_specified(types)
+      |> CameraActivity.with_types_if_specified(types)
+      |> CameraActivity.get_all
 
-    total_pages =
-      from(c in activities_query)
-      |> select([c], count(c.id))
-      |> SnapshotRepo.one
-      |> Kernel./(limit)
-      |> Float.floor
-
-    logs =
-      activities_query
-      |> order_by([c], desc: c.done_at)
-      |> limit(^limit)
-      |> offset(^(page * limit))
-      |> SnapshotRepo.all
+    logs_count = Enum.count(all_logs)
+    total_pages = Float.floor(logs_count / limit)
+    logs = Enum.slice(all_logs, page * limit, limit)
 
     conn
     |> render(LogView, "show.json", %{total_pages: total_pages, camera_exid: camera.exid, camera_name: camera.name, logs: logs})
@@ -84,12 +74,4 @@ defmodule EvercamMedia.LogController do
 
   defp ensure_params(:ok, _conn), do: :ok
   defp ensure_params({:invalid, message}, conn), do: render_error(conn, 400, message)
-
-  defp with_types_if_specified(query, nil) do
-    query
-  end
-  defp with_types_if_specified(query, types) do
-    query
-    |> where([c], c.action in ^types)
-  end
 end

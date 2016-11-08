@@ -11,21 +11,18 @@ defmodule EvercamMedia.VendorModelController do
       limit = get_limit(params["limit"])
       page = get_page(params["page"])
 
-      query =
+      models =
         VendorModel
         |> VendorModel.check_vendor_in_query(vendor)
         |> VendorModel.check_name_in_query(params["name"])
-
-      total_models = VendorModel.get_models_count(query)
-      total_pages = Float.floor(total_models / limit)
-
-      models =
-        query
-        |> VendorModel.add_limit_and_offset(limit, page)
         |> VendorModel.get_all
 
+      total_models = Enum.count(models)
+      total_pages = Float.floor(total_models / limit)
+      returned_models = Enum.slice(models, page * limit, limit)
+
       conn
-      |> render(VendorModelView, "index.json", %{vendor_models: models, pages: total_pages, records: total_models})
+      |> render(VendorModelView, "index.json", %{vendor_models: returned_models, pages: total_pages, records: total_models})
     end
   end
 

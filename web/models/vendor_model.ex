@@ -77,6 +77,7 @@ defmodule VendorModel do
 
   def get_all(query \\ VendorModel) do
     query
+    |> order_by([vm], asc: vm.name)
     |> Repo.all
     |> Repo.preload(:vendor)
   end
@@ -91,13 +92,6 @@ defmodule VendorModel do
   def check_name_in_query(query, name) do
     query
     |> where([vm], like(fragment("lower(?)", vm.name), ^("%#{String.downcase(name)}%")))
-  end
-
-  def add_limit_and_offset(query, limit, page) do
-    query
-    |> order_by([vm], desc: vm.name)
-    |> limit(^limit)
-    |> offset(^(page * limit))
   end
 
   def get_url(model, attr \\ "jpg") do
