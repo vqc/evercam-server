@@ -15,8 +15,7 @@ defmodule EvercamMedia.UserControllerTest do
       firstname: "John",
       lastname: "Legend",
       password: "johnlegend123",
-      country: "smt",
-      token: "tokenvalue"
+      country: "smt"
     }
 
     {:ok, user: user, params: params, share_request: share_request}
@@ -40,8 +39,7 @@ defmodule EvercamMedia.UserControllerTest do
 
   test "POST /v1/users/ when country is invalid!" do
     params = %{
-      country: "pki",
-      token: "tokenvalue"
+      country: "pki"
     }
     response =
       build_conn()
@@ -95,8 +93,7 @@ defmodule EvercamMedia.UserControllerTest do
           email: "test@email.com",
           firstname: "test",
           lastname: "user",
-          password: "123",
-          token: "tokenvalue"
+          password: "123"
       }
 
     response =
