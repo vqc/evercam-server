@@ -71,9 +71,9 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   @doc """
   Pause camera worker
   """
-  def pause_worker(nil, _camera, _is_paused), do: :noop
-  def pause_worker(worker, camera, is_paused) do
-    case get_config(camera, is_paused) do
+  def pause_worker(nil, _camera, _is_paused, _pause_seconds), do: :noop
+  def pause_worker(worker, camera, is_paused, pause_seconds) do
+    case get_config(camera, is_paused, pause_seconds) do
       {:ok, settings} ->
         Logger.debug "Paused worker for #{settings.config.camera_exid}"
         Worker.update_config(worker, settings)
@@ -96,7 +96,7 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
   @doc """
   Given a camera, it returns a map of values required for starting a camera worker.
   """
-  def get_config(camera, is_paused \\ false) do
+  def get_config(camera, is_paused \\ false, pause_seconds \\ 5000) do
     {
       :ok,
       %{
@@ -113,7 +113,8 @@ defmodule EvercamMedia.Snapshot.WorkerSupervisor do
           auth: Camera.auth(camera),
           sleep: CloudRecording.sleep(camera.cloud_recordings),
           initial_sleep: CloudRecording.initial_sleep(camera.cloud_recordings),
-          is_paused: is_paused
+          is_paused: is_paused,
+          pause_seconds: pause_seconds
         }
       }
     }

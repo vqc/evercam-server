@@ -75,15 +75,16 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   defp pause_camera_requests(camera, "device_error", 0), do: do_pause_camera(camera)
   defp pause_camera_requests(_camera, _error_code, _reminder), do: :noop
 
-  defp do_pause_camera(camera) do
+  defp do_pause_camera(camera, pause_seconds \\ 5000) do
     Logger.debug("Pause camera requests for #{camera.exid}")
     camera.exid
     |> String.to_atom
     |> Process.whereis
-    |> WorkerSupervisor.pause_worker(camera, true)
+    |> WorkerSupervisor.pause_worker(camera, true, pause_seconds)
   end
 
   def change_camera_status(camera, timestamp, status, error_code \\ nil) do
+    do_pause_camera(camera, 2500)
     try do
       task = Task.async(fn() ->
         datetime =
@@ -98,7 +99,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         broadcast_change_to_users(camera)
         log_camera_status(camera, status, datetime, error_code)
       end)
-      Task.await(task, :timer.seconds(1))
+      Task.await(task, :timer.seconds(2))
     catch _type, error ->
       Util.error_handler(error)
     end
