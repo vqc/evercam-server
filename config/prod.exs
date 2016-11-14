@@ -69,7 +69,7 @@ config :quantum,
     ],
     shared_reminder: [
       task: {"EvercamMedia.ShareRequestReminder", "check_share_requests"},
-      schedule: "@daily",
+      schedule: "@hourly",
       overlap: false
     ],
     offline_reminder: [
