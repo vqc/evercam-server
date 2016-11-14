@@ -81,9 +81,10 @@ defmodule CameraShareRequest do
     |> Repo.one
   end
 
-  def get_all_pending_requests do
+  def get_all_pending_requests(day_before) do
     CameraShareRequest
     |> where(status: ^@status.pending)
+    |> where([csr], csr.created_at >= ^day_before)
     |> preload(:camera)
     |> preload(:user)
     |> Repo.all

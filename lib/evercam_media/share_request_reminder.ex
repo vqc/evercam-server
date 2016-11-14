@@ -9,7 +9,11 @@ defmodule EvercamMedia.ShareRequestReminder do
   alias EvercamMedia.Util
 
   def check_share_requests do
-    CameraShareRequest.get_all_pending_requests |> Enum.map(&(send_reminder &1))
+    seconds_to_day_before = (60 * 60 * 24) * (-22)
+    Calendar.DateTime.now_utc
+    |> Calendar.DateTime.advance!(seconds_to_day_before)
+    |> CameraShareRequest.get_all_pending_requests
+    |> Enum.map(&(send_reminder &1))
   end
 
   defp send_reminder(share_request) do
@@ -19,10 +23,18 @@ defmodule EvercamMedia.ShareRequestReminder do
       |> Ecto.DateTime.to_erl
       |> Calendar.DateTime.from_erl!("UTC")
 
-    case Calendar.DateTime.diff(current_date, created_date) do
-      {:ok, total_seconds, _, :after} ->
-        can_send_reminder(share_request, current_date, total_seconds)
-      _ -> 0
+    camera_time =
+      Calendar.DateTime.now!("UTC")
+      |> Calendar.DateTime.shift_zone!(Camera.get_timezone(share_request.camera))
+      |> Calendar.DateTime.to_erl
+      |> elem(1)
+    {hour, _minute, _second} = camera_time
+    if hour == 9 do
+      case Calendar.DateTime.diff(current_date, created_date) do
+        {:ok, total_seconds, _, :after} ->
+          can_send_reminder(share_request, current_date, total_seconds)
+        _ -> 0
+      end
     end
   end
 
