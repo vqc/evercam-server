@@ -125,7 +125,7 @@ defmodule User do
     |> validate_format(:lastname, @name_regex)
     |> update_change(:username, &String.downcase/1)
     |> update_change(:email, &String.downcase/1)
-    |> validate_format(:username, ~r/^[a-z]+[\w-]+$/)
+    |> validate_format(:username, ~r/^[a-z]+[\w-]+$/, [message: "Username format isn't valid!"])
     |> validate_format(:email, @email_regex, [message: "Email format isn't valid!"])
     |> validate_length(:password, [min: 6, message: "Password should be at least 6 character(s)."])
     |> encrypt_password
