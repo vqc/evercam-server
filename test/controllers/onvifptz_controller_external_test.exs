@@ -4,6 +4,7 @@ defmodule EvercamMedia.ONVIFPTZControllerExternalTest do
   @moduletag :onvif
   @moduletag :external
 
+  @tag :skip
   test "POST /v1/cameras/:id/ptz/relative?left=0&right=10&up=0&down=10&zoom=0 moves right and down" do
     # get home first
     conn = post build_conn(), "/v1/cameras/mobile-mast-test/ptz/home"
@@ -30,6 +31,7 @@ defmodule EvercamMedia.ONVIFPTZControllerExternalTest do
     assert (y_after - y_before) * 100 |> round == -20
   end
 
+  @tag :skip
   test "POST /v1/cameras/:id/ptz/relative?left=10&right=0&up=10&down=0&zoom=0 moves left and up" do
     # get home first
     conn = post build_conn(), "/v1/cameras/mobile-mast-test/ptz/home"

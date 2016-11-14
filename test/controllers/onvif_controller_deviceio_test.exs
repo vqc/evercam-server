@@ -7,6 +7,7 @@ defmodule EvercamMedia.ONVIFControllerDeviceIOTest do
   @moduletag :onvif
   @access_params "url=http://recorded_response&auth=#{@auth}"
 
+  @tag :skip
   test "GET /v1/onvif/v20/DeviceIO/GetAudioOutputs" do
     use_cassette "get_audio_outputs" do
       conn = get build_conn(), "/v1/onvif/v20/DeviceIO/GetAudioOutputs?#{@access_params}"
@@ -15,6 +16,7 @@ defmodule EvercamMedia.ONVIFControllerDeviceIOTest do
     end
   end
 
+  @tag :skip
   test "GET /v1/onvif/v20/DeviceIO/GetAudioOutputConfiguration" do
     use_cassette "get_audio_output_configuration" do
       conn = get build_conn(), "/v1/onvif/v20/DeviceIO/GetAudioOutputConfiguration?#{@access_params}&AudioOutputToken=AudioOutputToken"
