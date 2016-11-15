@@ -44,9 +44,10 @@ defmodule Camera do
     |> Repo.all
   end
 
-  def all_offline do
+  def all_offline(day_before) do
     Camera
     |> where(is_online: false)
+    |> where([c], c.last_online_at >= ^day_before)
     |> preload(:owner)
     |> Repo.all
   end
