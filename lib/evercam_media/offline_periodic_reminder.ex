@@ -7,7 +7,10 @@ defmodule EvercamMedia.OfflinePeriodicReminder do
   require Logger
 
   def offline_cameras_reminder do
-    Camera.all_offline
+    seconds_to_day_before = (60 * 60 * 24) * (-8)
+    Calendar.DateTime.now_utc
+    |> Calendar.DateTime.advance!(seconds_to_day_before)
+    |> Camera.all_offline
     |> Enum.map(&(can_send_reminder &1, &1.is_online_email_owner_notification, &1.last_online_at))
   end
 
