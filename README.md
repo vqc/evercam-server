@@ -26,7 +26,7 @@ Documentation about Evercam can be found here: https://github.com/evercam/everca
 
 Any questions or suggestions, drop us a line: https://evercam.io/contact
 
-[travis-url]: https://travis-ci.org/evercam/evercam-media
-[travis-image]: https://travis-ci.org/evercam/evercam-media.svg?branch=master
+[travis-url]: https://travis-ci.org/evercam/evercam-server
+[travis-image]: https://travis-ci.org/evercam/evercam-server.svg?branch=master
 [hex-url]: https://beta.hexfaktor.org/github/evercam/evercam-media
 [hex-image]: https://beta.hexfaktor.org/badge/all/github/evercam/evercam-media.svg
