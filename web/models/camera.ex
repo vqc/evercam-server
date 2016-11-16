@@ -330,8 +330,14 @@ defmodule Camera do
     |> Repo.one
   end
 
-  def update_status(camera, status) do
-    changeset = changeset(camera, %{is_online: status})
+  def update_status(camera, status, mac_address \\ nil) do
+    params = %{"is_online" => status}
+    params =
+      case mac_address do
+        nil -> params
+        _ -> params |> Map.merge(%{"mac_address" => mac_address})
+      end
+    changeset = changeset(camera, params)
     Repo.update!(changeset)
     invalidate_camera(camera)
   end
