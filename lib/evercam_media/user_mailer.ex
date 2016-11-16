@@ -65,7 +65,7 @@ defmodule EvercamMedia.UserMailer do
       subject: "#{User.get_fullname(user)} has shared a camera with you",
       from: @from,
       "h:Reply-To": user.email,
-      bcc: user.email,
+      bcc: "#{user.email},marco@evercam.io,vinnie@evercam.io",
       attachments: get_attachments(thumbnail),
       html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "sign_up_to_share_email.html", user: user, camera: camera, message: message, key: key, sharee: email, thumbnail_available: !!thumbnail, year: @year),
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "sign_up_to_share_email.txt", user: user, camera: camera, message: message, key: key)
