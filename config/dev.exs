@@ -1,7 +1,7 @@
 use Mix.Config
 
 config :evercam_media,
-  start_camera_workers: System.get_env["START_CAMERA_WORKERS"]
+  start_camera_workers: System.get_env["START_CAMERA_WORKERS"] || true
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
