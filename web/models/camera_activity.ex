@@ -48,7 +48,7 @@ defmodule CameraActivity do
 
   def for_a_user(full_name, from, to, types) do
     CameraActivity
-    |> where([c], fragment("to_tsvector(?) @@ plainto_tsquery(?)", c.name, ^full_name))
+    |> where(name: ^full_name)
     |> where([c], c.done_at >= ^from and c.done_at <= ^to)
     |> with_types_if_specified(types)
     |> order_by([c], desc: c.done_at)
