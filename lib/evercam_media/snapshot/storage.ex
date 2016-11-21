@@ -94,7 +94,6 @@ defmodule EvercamMedia.Snapshot.Storage do
       []
     else
       snapshot ->
-        IO.inspect snapshot
         {:ok, image, notes} = load(camera_exid, snapshot.created_at, snapshot.notes)
         data = "data:image/jpeg;base64,#{Base.encode64(image)}"
         [%{created_at: snapshot.created_at, notes: snapshot.notes, data: data}]
