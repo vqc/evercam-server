@@ -81,6 +81,8 @@ defmodule EvercamMedia.Router do
       options "/cameras/:id/recordings/snapshots/latest", SnapshotController, :nothing
       get "/cameras/:id/recordings/snapshots/:timestamp", SnapshotController, :show
       options "/cameras/:id/recordings/snapshots/:timestamp", SnapshotController, :nothing
+      get "/cameras/:id/recordings/snapshots/:timestamp/nearest", SnapshotController, :nearest
+      options "/cameras/:id/recordings/snapshots/:timestamp/nearest", SnapshotController, :nothing
       post "/cameras/:id/recordings/snapshots", SnapshotController, :create
       get "/cameras/:id/recordings/snapshots/:year/:month/days", SnapshotController, :days
       options "/cameras/:id/recordings/snapshots/:year/:month/days", SnapshotController, :nothing

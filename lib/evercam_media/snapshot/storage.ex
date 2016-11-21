@@ -81,6 +81,44 @@ defmodule EvercamMedia.Snapshot.Storage do
     !Enum.empty?(hours)
   end
 
+  def nearest(camera_exid, timestamp) do
+    list_of_snapshots =
+      camera_exid
+      |> get_camera_apps_list
+      |> Enum.flat_map(fn(app) -> do_seaweedfs_load_range(camera_exid, timestamp, app) end)
+      |> Enum.sort_by(fn(snapshot) -> snapshot.created_at end)
+
+    with nil <- get_snapshot("timestamp", list_of_snapshots, timestamp),
+         nil <- get_snapshot("after", list_of_snapshots, timestamp),
+         nil <- get_snapshot("before", list_of_snapshots, timestamp) do
+      []
+    else
+      snapshot ->
+        IO.inspect snapshot
+        {:ok, image, notes} = load(camera_exid, snapshot.created_at, snapshot.notes)
+        data = "data:image/jpeg;base64,#{Base.encode64(image)}"
+        [%{created_at: snapshot.created_at, notes: snapshot.notes, data: data}]
+    end
+  end
+
+  defp get_snapshot("timestamp", snapshots, timestamp) do
+    snapshots
+    |> Enum.filter(fn(snapshot) -> snapshot.created_at == timestamp end)
+    |> List.first
+  end
+  defp get_snapshot("after", snapshots, timestamp) do
+    from_date = parse_timestamp(timestamp)
+    snapshots
+    |> Enum.reject(fn(snapshot) -> is_before_to?(parse_timestamp(snapshot.created_at), from_date) end)
+    |> List.first
+  end
+  defp get_snapshot("before", snapshots, timestamp) do
+    from_date = parse_timestamp(timestamp)
+    snapshots
+    |> Enum.reject(fn(snapshot) -> is_after_from?(parse_timestamp(snapshot.created_at), from_date) end)
+    |> List.last
+  end
+
   def days(camera_exid, from, to, timezone) do
     url_base = "#{@seaweedfs}/#{camera_exid}/snapshots"
     apps_list = get_camera_apps_list(camera_exid)

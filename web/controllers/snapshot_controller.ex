@@ -86,6 +86,18 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
+  def nearest(conn, %{"id" => camera_exid, "timestamp" => timestamp} = _params) do
+    camera = Camera.get_full(camera_exid)
+    with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera) do
+      offset = Camera.get_offset(camera)
+      datetime = convert_to_camera_timestamp(timestamp, offset)
+      conn
+      |> json(%{snapshots: Storage.nearest(camera_exid, datetime)})
+    else
+      false -> render_error(conn, 403, "Forbidden.")
+    end
+  end
+
   def index(conn, %{"id" => camera_exid, "from" => from, "to" => to, "limit" => "3600", "page" => _page}) do
     camera = Camera.get_full(camera_exid)
     offset = Camera.get_offset(camera)
