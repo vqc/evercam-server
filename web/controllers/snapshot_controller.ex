@@ -87,12 +87,11 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   def nearest(conn, %{"id" => camera_exid, "timestamp" => timestamp} = _params) do
+    timestamp = convert_timestamp(timestamp)
     camera = Camera.get_full(camera_exid)
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera) do
-      offset = Camera.get_offset(camera)
-      datetime = convert_to_camera_timestamp(timestamp, offset)
       conn
-      |> json(%{snapshots: Storage.nearest(camera_exid, datetime)})
+      |> json(%{snapshots: Storage.nearest(camera_exid, timestamp)})
     else
       false -> render_error(conn, 403, "Forbidden.")
     end
@@ -115,13 +114,7 @@ defmodule EvercamMedia.SnapshotController do
   end
 
   def show(conn, %{"id" => camera_exid, "timestamp" => timestamp} = params) do
-    timestamp =
-      case Calendar.DateTime.Parse.rfc3339_utc(timestamp) do
-        {:ok, datetime} ->
-          datetime |> Calendar.DateTime.Format.unix
-        {:bad_format, nil} ->
-          String.to_integer(timestamp)
-      end
+    timestamp = convert_timestamp(timestamp)
     camera = Camera.get_full(camera_exid)
 
     with true <- Permission.Camera.can_list?(conn.assigns[:current_user], camera),
@@ -405,6 +398,15 @@ defmodule EvercamMedia.SnapshotController do
           |> WorkerSupervisor.update_worker(camera)
         true -> ""
       end
+    end
+  end
+
+  defp convert_timestamp(timestamp) do
+    case Calendar.DateTime.Parse.rfc3339_utc(timestamp) do
+      {:ok, datetime} ->
+        datetime |> Calendar.DateTime.Format.unix
+      {:bad_format, nil} ->
+        String.to_integer(timestamp)
     end
   end
 end
