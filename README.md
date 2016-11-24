@@ -1,4 +1,4 @@
-# Evercam Media [![Build Status][travis-image]][travis-url] [![Deps Status][hex-image]][hex-url]
+# Evercam Media [![Build Status][travis-image]][travis-url] [![Deps Status][hex-image]][hex-url] [![Ebert Status][ebert-image]][ebert-url]
 
 Evercam Media is the component that is responsible for talking  to the camera. Consider it as a "proxy" for all commands. Processes here request either snapshots or streams and then send them to storage, or to any of the clients (e.g. Evercam-Dashboard, Evercam-Android, Evercam-iOS).
 
@@ -30,3 +30,5 @@ Any questions or suggestions, drop us a line: https://evercam.io/contact
 [travis-image]: https://travis-ci.org/evercam/evercam-server.svg?branch=master
 [hex-url]: https://beta.hexfaktor.org/github/evercam/evercam-media
 [hex-image]: https://beta.hexfaktor.org/badge/all/github/evercam/evercam-media.svg
+[ebert-url]: https://ebertapp.io/github/evercam/evercam-server
+[ebert-image]: https://ebertapp.io/github/evercam/evercam-server.svg
