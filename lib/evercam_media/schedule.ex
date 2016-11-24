@@ -11,6 +11,7 @@ defmodule EvercamMedia.Schedule do
     case status do
       "on" -> {:ok, true}
       "off" -> {:ok, false}
+      "paused" -> {:ok, false}
       _ ->
         timezone =
           case timezone do

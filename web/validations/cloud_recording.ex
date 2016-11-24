@@ -11,6 +11,7 @@ defmodule EvercamMedia.Validation.CloudRecording do
 
   defp validate(:status, "on"), do: :ok
   defp validate(:status, "off"), do: :ok
+  defp validate(:status, "paused"), do: :ok
   defp validate(:status, "on-scheduled"), do: :ok
   defp validate(:status = key, _value), do: invalid(key)
 

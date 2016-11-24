@@ -58,7 +58,7 @@ defmodule CloudRecording do
   end
 
   def sleep(cloud_recording) do
-    if cloud_recording == nil || cloud_recording.status == "off" do
+    if cloud_recording == nil || cloud_recording.status == "off" || cloud_recording.status == "paused" do
       60_000
     else
       div(60_000, cloud_recording.frequency)
