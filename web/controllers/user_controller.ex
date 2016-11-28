@@ -99,10 +99,9 @@ defmodule EvercamMedia.UserController do
           else
             share_request = CameraShareRequest.by_key_and_status(share_request_key)
             create_share_for_request(share_request, user, conn)
-
-            share_requests = CameraShareRequest.by_email(user.email)
-            multiple_share_create(share_requests, user, conn)
           end
+          share_requests = CameraShareRequest.by_email(user.email)
+          multiple_share_create(share_requests, user, conn)
           intercom_activity(Application.get_env(:evercam_media, :create_intercom_user), user, user_agent, requester_ip)
           Logger.info "[POST v1/users] [#{user_agent}] [#{requester_ip}] [#{user.username}] [#{user.email}] [#{params["token"]}]"
           conn
