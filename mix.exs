@@ -80,8 +80,8 @@ defmodule EvercamMedia.Mixfile do
       {:postgrex, ">= 0.11.2"},
       {:quantum, github: "c-rack/quantum-elixir"},
       {:uuid, "~> 1.1"},
-      {:relx, github: "erlware/relx", override: true}, # <-- depends on erlware_commons-0.18.0
-      {:erlware_commons, "~> 0.19.0", override: true}, # <-- @0.18.0 right now
+      {:relx, github: "erlware/relx", override: true},
+      {:erlware_commons, "~> 0.22.0", override: true},
       {:cf, "~> 0.2.1", override: true},
       {:exvcr, "~> 0.7", only: :test},
       {:meck,  "~> 0.8.4", override: :true},
