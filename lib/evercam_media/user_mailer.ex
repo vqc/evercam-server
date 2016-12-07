@@ -128,6 +128,21 @@ defmodule EvercamMedia.UserMailer do
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "archive_create_failed.txt", archive: archive, thumbnail_available: !!thumbnail, year: @year)
   end
 
+  def snapmail(notify_time, recipients, camera, image) do
+    {thumbnail, create_snapshot} =
+      case image do
+        nil -> {get_thumbnail(camera), false}
+        data -> {data, true}
+      end
+    Mailgun.Client.send_email @config,
+      to: recipients,
+      subject: "Your Scheduled SnapMail @ #{notify_time}",
+      from: @from,
+      attachments: get_attachments(thumbnail),
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.html", notify_time: notify_time, camera: camera, has_latest: create_snapshot, snapshot: !!thumbnail, year: @year),
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.txt", notify_time: notify_time, camera: camera, has_latest: create_snapshot, snapshot: !!thumbnail, year: @year)
+  end
+
   defp get_thumbnail(camera) do
     try_get_thumbnail(camera, 1)
   end

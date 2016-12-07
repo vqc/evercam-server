@@ -1,0 +1,12 @@
+Hello,
+
+Here's the snapshot from your camera.
+
+<%= @camera.name %> (<%= @camera.exid %>) - See the live view on Evercam by clicking here
+
+Thanks,
+
+Evercam.io
+
+If you want to change your Snapmail settings, click here.
+If you would prefer not to receive future emails for this Scheduled SnapMail @ <%= @notify_time %>, you may unsubscribe here.
