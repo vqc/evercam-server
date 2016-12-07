@@ -623,6 +623,45 @@ CREATE TABLE schema_migrations (
 
 
 --
+-- Name: snapmails; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE snapmails (
+    id integer NOT NULL,
+    exid character varying(255) NOT NULL,
+    subject character varying(255) NOT NULL,
+    recipients character varying(255),
+    message character varying(255),
+    notify_days character varying(255),
+    notify_time character varying(255) NOT NULL,
+    is_public boolean DEFAULT false NOT NULL,
+    user_id integer,
+    camera_id integer NOT NULL,
+    inserted_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: snapmails_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE snapmails_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: snapmails_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE snapmails_id_seq OWNED BY snapmails.id;
+
+
+--
 -- Name: snapshot_counts; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -967,6 +1006,13 @@ ALTER TABLE ONLY motion_detections ALTER COLUMN id SET DEFAULT nextval('motion_d
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY snapmails ALTER COLUMN id SET DEFAULT nextval('snapmails_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY snapshot_extractors ALTER COLUMN id SET DEFAULT nextval('snapshot_extractors_id_seq'::regclass);
 
 
@@ -1137,6 +1183,14 @@ ALTER TABLE ONLY schema_migrations
 
 
 --
+-- Name: snapmails_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY snapmails
+    ADD CONSTRAINT snapmails_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: snapshot_counts_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1275,6 +1329,13 @@ CREATE UNIQUE INDEX country_code_unique_index ON countries USING btree (iso3166_
 
 
 --
+-- Name: exid_unique_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX exid_unique_index ON snapmails USING btree (exid);
+
+
+--
 -- Name: ix_access_tokens_grantee_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1339,6 +1400,22 @@ ALTER TABLE ONLY licences
 
 
 --
+-- Name: snapmails_camera_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY snapmails
+    ADD CONSTRAINT snapmails_camera_id_fkey FOREIGN KEY (camera_id) REFERENCES cameras(id);
+
+
+--
+-- Name: snapmails_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY snapmails
+    ADD CONSTRAINT snapmails_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
 -- Name: snapshot_extractors_camera_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1366,5 +1443,5 @@ ALTER TABLE ONLY snapshots
 -- PostgreSQL database dump complete
 --
 
-INSERT INTO "schema_migrations" (version) VALUES (20160616160229), (20160712101523), (20160720125939), (20160727112052), (20160829112743), (20160830055709);
+INSERT INTO "schema_migrations" (version) VALUES (20160616160229), (20160712101523), (20160720125939), (20160727112052), (20160829112743), (20160830055709), (20161202114834);
 
