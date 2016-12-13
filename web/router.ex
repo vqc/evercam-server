@@ -112,6 +112,14 @@ defmodule EvercamMedia.Router do
       patch "/cameras/:id/archives/:archive_id", ArchiveController, :update
       options "/cameras/:id/archives/:archive_id", ArchiveController, :nothing
 
+      get "/snapmails", SnapmailController, :all
+      get "/cameras/:id/snapmails", SnapmailController, :index
+      get "/cameras/:id/snapmails/:snapmail_id", SnapmailController, :show
+      post "/cameras/:id/snapmails", SnapmailController, :create
+      patch "/cameras/:id/snapmails/:snapmail_id", SnapmailController, :update
+      patch "/cameras/:id/snapmails/:snapmail_id/unsubscribe", SnapmailController, :unsubscribe
+      delete "/cameras/:id/snapmails/:snapmail_id", SnapmailController, :delete
+
       get "/cameras/:id/apps/motion-detection", MotionDetectionController, :show
     end
 

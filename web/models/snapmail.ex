@@ -1,7 +1,12 @@
 defmodule Snapmail do
   use EvercamMedia.Web, :model
+  import Ecto.Changeset
   import Ecto.Query
   alias EvercamMedia.Repo
+
+  @email_regex ~r/^\S+@\S+$/
+  @required_fields ~w(camera_id subject notify_time)
+  @optional_fields ~w(exid user_id recipients message notify_days is_public)
 
   schema "snapmails" do
     belongs_to :user, User, foreign_key: :user_id
@@ -26,6 +31,31 @@ defmodule Snapmail do
     |> Repo.all
   end
 
+  def by_camera_id(id) do
+    Snapmail
+    |> where(camera_id: ^id)
+    |> preload(:user)
+    |> preload(:camera)
+    |> Repo.all
+  end
+
+  def camera_and_user_id(camera_id, user_id) do
+    Snapmail
+    |> where(camera_id: ^camera_id)
+    |> where(user_id: ^user_id)
+    |> preload(:user)
+    |> preload(:camera)
+    |> Repo.all
+  end
+
+  def by_user_id(user_id) do
+    Snapmail
+    |> where(user_id: ^user_id)
+    |> preload(:user)
+    |> preload(:camera)
+    |> Repo.all
+  end
+
   def by_exid(exid) do
     Snapmail
     |> where(exid: ^String.downcase(exid))
@@ -34,10 +64,10 @@ defmodule Snapmail do
     |> Repo.one
   end
 
-  def get_camera_ids_list(snapmail) do
-    snapmail.snapmail_cameras
-    |> Enum.map(fn(ar) -> ar.camera.exid end)
-    |> Enum.uniq
+  def delete_by_exid(exid) do
+    Snapmail
+    |> where(exid: ^exid)
+    |> Repo.delete_all
   end
 
   def get_days_list(days) when days in [nil, ""], do: []
@@ -97,5 +127,56 @@ defmodule Snapmail do
       {:ok, seconds, _, :after} -> seconds * 1000
       _ -> raise "Seconds Calculate error"
     end
+  end
+
+  defp validate_exid(changeset) do
+    case get_field(changeset, :exid) do
+      nil -> auto_generate_camera_id(changeset)
+      _exid -> changeset |> update_change(:exid, &String.downcase/1)
+    end
+  end
+
+  defp auto_generate_camera_id(changeset) do
+    case get_field(changeset, :subject) do
+      nil ->
+        changeset
+      subject ->
+        camera_id =
+          subject
+          |> String.replace(" ", "")
+          |> String.replace("-", "")
+          |> String.downcase
+          |> String.slice(0..4)
+        put_change(changeset, :exid, "#{camera_id}-#{Enum.take_random(?a..?z, 5)}")
+    end
+  end
+
+  def clean_recipients(recipients) do
+    recipients
+    |> String.split(",", trim: true)
+    |> Enum.join(",")
+  end
+
+  defp validate_recipients(changeset) do
+    case get_field(changeset, :recipients) do
+      nil -> changeset
+      recipients ->
+        invalid_email =
+          recipients
+          |> String.split(",", trim: true)
+          |> Enum.reject(fn(email) -> Regex.match? @email_regex, email end)
+        case invalid_email do
+          [] -> changeset |> update_change(:recipients, &clean_recipients/1)
+          _ -> add_error(changeset, :recipients, "Invalid recipient email(s) #{invalid_email |> Enum.join(",")}.")
+        end
+    end
+  end
+
+  def changeset(model, params \\ :invalid) do
+    model
+    |> cast(params, @required_fields, @optional_fields)
+    |> validate_exid
+    |> validate_format(:notify_time, ~r/^\d{1,2}:\d{1,2}$/, message: "Notify time is invalid")
+    |> validate_recipients
   end
 end
