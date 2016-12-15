@@ -54,8 +54,8 @@ defmodule EvercamMedia.ArchiveControllerTest do
     assert response.status == 201
   end
 
-  test "POST /v1/cameras/:id/archives when clip duration greater than 30 minutes", context do
-    params = Map.merge(context[:params], %{public: "false", to_date: "1475758769"})
+  test "POST /v1/cameras/:id/archives when clip duration greater than 60 minutes", context do
+    params = Map.merge(context[:params], %{public: "false", to_date: "1475755545"})
     response =
       build_conn()
       |> post("/v1/cameras/#{context[:camera].exid}/archives?api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}", params)
@@ -67,6 +67,6 @@ defmodule EvercamMedia.ArchiveControllerTest do
       |> Map.get("message")
 
     assert response.status == 400
-    assert error_message == "Clip duration cannot be greater than 30 minutes."
+    assert error_message == "Clip duration cannot be greater than 60 minutes."
   end
 end
