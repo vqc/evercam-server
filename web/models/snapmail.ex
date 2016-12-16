@@ -5,12 +5,12 @@ defmodule Snapmail do
   alias EvercamMedia.Repo
 
   @email_regex ~r/^\S+@\S+$/
-  @required_fields ~w(camera_id subject notify_time)
+  @required_fields ~w(subject notify_time)
   @optional_fields ~w(exid user_id recipients message notify_days is_public)
 
   schema "snapmails" do
     belongs_to :user, User, foreign_key: :user_id
-    belongs_to :camera, Camera, foreign_key: :camera_id
+    has_many :snapmail_cameras, SnapmailCamera
 
     field :exid, :string
     field :subject, :string
@@ -25,9 +25,10 @@ defmodule Snapmail do
   def all do
     Snapmail
     |> preload(:user)
-    |> preload(:camera)
-    |> preload([camera: :vendor_model])
-    |> preload([camera: [vendor_model: :vendor]])
+    |> preload(:snapmail_cameras)
+    |> preload([snapmail_cameras: :camera])
+    |> preload([snapmail_cameras: [camera: :vendor_model]])
+    |> preload([snapmail_cameras: [camera: [vendor_model: :vendor]]])
     |> Repo.all
   end
 
@@ -35,7 +36,8 @@ defmodule Snapmail do
     Snapmail
     |> where(camera_id: ^id)
     |> preload(:user)
-    |> preload(:camera)
+    |> preload(:snapmail_cameras)
+    |> preload([snapmail_cameras: :camera])
     |> Repo.all
   end
 
@@ -44,7 +46,8 @@ defmodule Snapmail do
     |> where(camera_id: ^camera_id)
     |> where(user_id: ^user_id)
     |> preload(:user)
-    |> preload(:camera)
+    |> preload(:snapmail_cameras)
+    |> preload([snapmail_cameras: :camera])
     |> Repo.all
   end
 
@@ -52,7 +55,8 @@ defmodule Snapmail do
     Snapmail
     |> where(user_id: ^user_id)
     |> preload(:user)
-    |> preload(:camera)
+    |> preload(:snapmail_cameras)
+    |> preload([snapmail_cameras: :camera])
     |> Repo.all
   end
 
@@ -60,7 +64,8 @@ defmodule Snapmail do
     Snapmail
     |> where(exid: ^String.downcase(exid))
     |> preload(:user)
-    |> preload(:camera)
+    |> preload(:snapmail_cameras)
+    |> preload([snapmail_cameras: :camera])
     |> Repo.one
   end
 
@@ -68,6 +73,20 @@ defmodule Snapmail do
     Snapmail
     |> where(exid: ^exid)
     |> Repo.delete_all
+  end
+
+  def get_camera_ids(snapmail_cameras) do
+    snapmail_cameras
+    |> Enum.map(fn(snapmail_camera) -> snapmail_camera.camera end)
+    |> Enum.map(fn(camera) -> camera.exid end)
+    |> Enum.join(",")
+  end
+
+  def get_camera_names(snapmail_cameras) do
+    snapmail_cameras
+    |> Enum.map(fn(snapmail_camera) -> snapmail_camera.camera end)
+    |> Enum.map(fn(camera) -> camera.name end)
+    |> Enum.join(",")
   end
 
   def get_days_list(days) when days in [nil, ""], do: []

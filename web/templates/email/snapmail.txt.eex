@@ -2,7 +2,9 @@ Hello,
 
 Here's the snapshot from your camera.
 
-<%= @camera.name %> (<%= @camera.exid %>) - See the live view on Evercam by clicking here
+<%= Enum.each(@camera_images, fn(camera_image) -> %>
+  <%= camera_image.name %> (<%= camera_image.exid %>) - See the live view on Evercam by clicking here
+<% end) %>
 
 Thanks,
 

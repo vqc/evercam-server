@@ -14,7 +14,8 @@ defmodule EvercamMedia.SnapmailView do
   def render("snapmail.json", %{snapmail: snapmail}) do
     %{
       id: snapmail.exid,
-      camera_id: snapmail.camera.exid,
+      camera_ids: Snapmail.get_camera_ids(snapmail.snapmail_cameras),
+      camera_names: Snapmail.get_camera_names(snapmail.snapmail_cameras),
       title: snapmail.subject,
       recipients: snapmail.recipients,
       message: snapmail.message,

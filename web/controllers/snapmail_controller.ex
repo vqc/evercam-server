@@ -24,70 +24,74 @@ defmodule EvercamMedia.SnapmailController do
     end
   end
 
-  def show(conn, %{"id" => exid, "snapmail_id" => snapmail_exid}) do
+  def show(conn, %{"id" => exid}) do
     current_user = conn.assigns[:current_user]
-    camera = Camera.get_full(exid)
 
-    with :ok <- ensure_camera_exists(camera, exid, conn),
-         :ok <- ensure_can_list(current_user, camera, conn)
+    with :ok <- authorized(conn, current_user),
+         {:ok, snapmail} <- snapmail_exist(conn, exid)
     do
-      snapmail = Snapmail.by_exid(snapmail_exid)
-
-      case snapmail do
-        nil ->
-          render_error(conn, 404, "Snapmail '#{snapmail_exid}' not found!")
-        _ ->
-          render(conn, SnapmailView, "show.json", %{snapmail: snapmail})
+      if snapmail.user_id == current_user.id do
+        render(conn, SnapmailView, "show.json", %{snapmail: snapmail})
+      else
+        render_error(conn, 401, "Unauthorized.")
       end
     end
   end
 
-  def create(conn, %{"id" => exid} = params) do
+  def create(conn, params) do
     current_user = conn.assigns[:current_user]
-    camera = Camera.get_full(exid)
 
-    with :ok <- ensure_camera_exists(camera, exid, conn)
+    with :ok <- authorized(conn, current_user),
+         {:ok, cameras} <- ensure_cameras_exist("create", conn, params["camera_exids"], current_user)
     do
       changeset =
         params
         |> add_user_id_params(current_user)
-        |> snapmail_create_changeset(camera.id)
+        |> snapmail_create_changeset
 
       case Repo.insert(changeset) do
         {:ok, snapmail} ->
-          render(conn |> put_status(:created), SnapmailView, "show.json", %{snapmail: snapmail |> Repo.preload(:camera) |> Repo.preload(:user)})
+          SnapmailCamera.insert_cameras(snapmail.id, cameras)
+          created_snapmail =
+            snapmail
+            |> Repo.preload(:user)
+            |> Repo.preload(:snapmail_cameras)
+            |> Repo.preload([snapmail_cameras: :camera])
+          render(conn |> put_status(:created), SnapmailView, "show.json", %{snapmail: created_snapmail})
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))
       end
     end
   end
 
-  def update(conn, %{"id" => exid, "snapmail_id" => snapmail_exid} = params) do
+  def update(conn, %{"id" => snapmail_exid} = params) do
     current_user = conn.assigns[:current_user]
-    camera = Camera.get_full(exid)
 
-    with :ok <- ensure_camera_exists(camera, exid, conn),
-         :ok <- ensure_can_edit(current_user, camera, conn),
-         {:ok, snapmail} <- snapmail_exist(conn, snapmail_exid)
+    with :ok <- authorized(conn, current_user),
+         {:ok, cameras} <- ensure_cameras_exist("update", conn, params["camera_exids"], current_user),
+         {:ok, snapmail} <- snapmail_exist(conn, snapmail_exid),
+         true <- snapmail.user_id == current_user.id
     do
       snapmail_params = construct_snapmail_parameters(%{}, params)
       changeset = Snapmail.changeset(snapmail, snapmail_params)
       case Repo.update(changeset) do
         {:ok, snapmail} ->
+          delete_or_update_cameras(cameras, snapmail)
+          snapmail =
+            snapmail
+            |> Repo.preload(:snapmail_cameras, force: true)
+            |> Repo.preload([snapmail_cameras: :camera], force: true)
           render(conn, SnapmailView, "show.json", %{snapmail: snapmail})
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))
       end
+    else
+      false -> render_error(conn, 401, "Unauthorized.")
     end
   end
 
-  def unsubscribe(conn, %{"id" => exid, "snapmail_id" => snapmail_exid, "email" => email}) do
-    current_user = conn.assigns[:current_user]
-    camera = Camera.get_full(exid)
-
-    with :ok <- ensure_camera_exists(camera, exid, conn),
-         :ok <- ensure_can_edit(current_user, camera, conn),
-         {:ok, snapmail} <- snapmail_exist(conn, snapmail_exid)
+  def unsubscribe(conn, %{"id" => snapmail_exid, "email" => email}) do
+    with {:ok, snapmail} <- snapmail_exist(conn, snapmail_exid)
     do
       snapmail_params = %{recipients: remove_email(snapmail.recipients, email)}
       changeset = Snapmail.changeset(snapmail, snapmail_params)
@@ -100,22 +104,26 @@ defmodule EvercamMedia.SnapmailController do
     end
   end
 
-  def delete(conn, %{"id" => exid, "snapmail_id" => snapmail_exid}) do
+  def delete(conn, %{"id" => snapmail_exid}) do
     current_user = conn.assigns[:current_user]
-    camera = Camera.get_full(exid)
 
-    with :ok <- ensure_camera_exists(camera, exid, conn),
-         :ok <- ensure_can_delete(current_user, camera, conn),
-         {:ok, _snapmail} <- snapmail_exist(conn, snapmail_exid)
+    with :ok <- authorized(conn, current_user),
+         {:ok, snapmail} <- snapmail_exist(conn, snapmail_exid)
     do
-      Snapmail.delete_by_exid(snapmail_exid)
-      json(conn, %{})
+      cond do
+        snapmail.user_id != current_user.id ->
+          render_error(conn, 401, "Unauthorized.")
+        true ->
+          SnapmailCamera.delete_by_snapmail(snapmail.id)
+          Snapmail.delete_by_exid(snapmail_exid)
+          json(conn, %{})
+      end
     end
   end
 
-  defp snapmail_create_changeset(params, camera_id) do
+  defp snapmail_create_changeset(params) do
     snapmail_params =
-      %{camera_id: camera_id}
+      %{}
       |> construct_snapmail_parameters(params)
 
     Snapmail.changeset(%Snapmail{}, snapmail_params)
@@ -157,23 +165,6 @@ defmodule EvercamMedia.SnapmailController do
     end
   end
 
-  defp ensure_can_edit(nil, _camera, conn), do: render_error(conn, 401, "Unauthorized.")
-  defp ensure_can_edit(current_user, camera, conn) do
-    if Permission.Camera.can_edit?(current_user, camera) do
-      :ok
-    else
-      render_error(conn, 401, "Unauthorized.")
-    end
-  end
-
-  defp ensure_can_delete(current_user, camera, conn) do
-    if current_user && Permission.Camera.can_delete?(current_user, camera) do
-      :ok
-    else
-      render_error(conn, 401, "Unauthorized.")
-    end
-  end
-
   defp snapmail_exist(conn, snapmail_exid) do
     case Snapmail.by_exid(snapmail_exid) do
       nil -> render_error(conn, 404, "Snapmail not found.")
@@ -190,4 +181,55 @@ defmodule EvercamMedia.SnapmailController do
 
   defp authorized(conn, nil), do: render_error(conn, 401, "Unauthorized.")
   defp authorized(_conn, _current_user), do: :ok
+
+  defp ensure_cameras_exist("update", _conn, camera_exids, _user) when camera_exids in [nil, ""], do: {:ok, nil}
+  defp ensure_cameras_exist("create", conn, camera_exids, _user) when camera_exids in [nil, ""] do
+    render_error(conn, 404, %{"camera_exids": ["can't be blank"]})
+  end
+  defp ensure_cameras_exist(_action, conn, camera_exids, user) do
+    cameras_list =
+      camera_exids
+      |> String.split(",", trim: true)
+      |> Enum.map(fn(exid) -> %{exid: exid, camera: Camera.get_full(exid)} end)
+
+    cameras_list
+    |> Enum.filter(fn(item) -> !Permission.Camera.can_list?(user, item.camera) end)
+    |> Enum.map(fn(item) -> item.exid end)
+    |> Enum.join(",")
+    |> case do
+      "" ->
+        cameras =
+          cameras_list
+          |> Enum.map(fn(item) -> %{id: item.camera.id, exid: item.camera.exid} end)
+        {:ok, cameras}
+      exid ->
+        render_error(conn, 404, "User does not have sufficient rights for following camera(s) (#{exid}).")
+    end
+  end
+
+  defp delete_or_update_cameras(camera_exids, _snapmail) when camera_exids in [nil, ""], do: :noop
+  defp delete_or_update_cameras(camera_exids, snapmail) do
+    old_camera_exids = get_cameras(snapmail.snapmail_cameras)
+    cond do
+      camera_exids != old_camera_exids  ->
+        grant_cameras = refine_cameras(camera_exids, old_camera_exids)
+        remove_cameras = refine_cameras(old_camera_exids, camera_exids)
+        SnapmailCamera.insert_cameras(snapmail.id, grant_cameras)
+        SnapmailCamera.delete_cameras(snapmail.id, remove_cameras)
+      true ->
+        :ok
+    end
+  end
+
+  def get_cameras(snapmail_cameras) do
+    snapmail_cameras
+    |> Enum.map(fn(snapmail_camera) -> snapmail_camera.camera end)
+    |> Enum.map(fn(camera) -> %{id: camera.id, exid: camera.exid} end)
+    |> Enum.sort
+  end
+
+  defp refine_cameras(list1, list2) do
+    list1
+    |> Enum.reject(fn(item) -> Enum.member?(list2, item) end)
+  end
 end

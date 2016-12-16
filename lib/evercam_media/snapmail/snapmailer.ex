@@ -101,8 +101,8 @@ defmodule EvercamMedia.Snapmail.Snapmailer do
   @doc """
   Server callback for camera_reply
   """
-  def handle_info({:camera_reply, image, timestamp}, state) do
-    data = {state.config.camera_exid, timestamp, image}
+  def handle_info({:camera_reply, camera_exid, image, timestamp}, state) do
+    data = {camera_exid, timestamp, image}
     GenEvent.sync_notify(state.event_manager, {:got_snapshot, data})
     {:noreply, state}
   end
@@ -128,21 +128,23 @@ defmodule EvercamMedia.Snapmail.Snapmailer do
 
   defp _get_snapshot(state, timestamp) do
     config = get_config_from_state(:config, state)
-    camera_exid = config.camera_exid
     worker = self
-    try_snapshot(state, config, camera_exid, timestamp, worker)
+    try_snapshot(state, config, timestamp, worker)
   end
 
-  defp try_snapshot(state, config, camera_exid, timestamp, worker) do
-    camera = Camera.get(camera_exid)
+  defp try_snapshot(state, config, timestamp, worker) do
     spawn fn ->
-      case CamClient.fetch_snapshot(config) do
-        {:ok, image} ->
-          EvercamMedia.UserMailer.snapmail(state.config.notify_time, state.config.recipients, camera, image)
-          send worker, {:camera_reply, image, timestamp}
-        {:error, _error} ->
-          EvercamMedia.UserMailer.snapmail(state.config.notify_time, state.config.recipients, camera, nil)
-      end
+      images_list =
+        config.cameras
+        |> Enum.map(fn(camera) ->
+          case CamClient.fetch_snapshot(camera) do
+            {:ok, image} ->
+              send worker, {:camera_reply, camera.camera_exid, image, timestamp}
+              %{exid: camera.camera_exid, name: camera.name, data: image}
+            {:error, _error} -> %{exid: camera.camera_exid, name: camera.name, data: nil}
+          end
+        end)
+      EvercamMedia.UserMailer.snapmail(state.config.notify_time, state.config.recipients, images_list)
     end
   end
 end

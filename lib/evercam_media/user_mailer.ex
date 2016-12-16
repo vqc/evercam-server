@@ -128,19 +128,14 @@ defmodule EvercamMedia.UserMailer do
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "archive_create_failed.txt", archive: archive, thumbnail_available: !!thumbnail, year: @year)
   end
 
-  def snapmail(notify_time, recipients, camera, image) do
-    {thumbnail, create_snapshot} =
-      case image do
-        nil -> {get_thumbnail(camera), false}
-        data -> {data, true}
-      end
+  def snapmail(notify_time, recipients, camera_images) do
     Mailgun.Client.send_email @config,
       to: recipients,
       subject: "Your Scheduled SnapMail @ #{notify_time}",
       from: @from,
-      attachments: get_attachments(thumbnail),
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.html", notify_time: notify_time, camera: camera, has_latest: create_snapshot, snapshot: !!thumbnail, year: @year),
-      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.txt", notify_time: notify_time, camera: camera, has_latest: create_snapshot, snapshot: !!thumbnail, year: @year)
+      attachments: get_multi_attachments(camera_images),
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.html", notify_time: notify_time, camera_images: camera_images, year: @year),
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.txt", notify_time: notify_time, camera_images: camera_images, year: @year)
   end
 
   defp get_thumbnail(camera) do
@@ -164,5 +159,15 @@ defmodule EvercamMedia.UserMailer do
 
   defp get_attachments(thumbnail) do
     if thumbnail, do: [%{content: thumbnail, filename: "snapshot.jpg"}], else: nil
+  end
+
+  defp get_multi_attachments(camera_images) do
+    camera_images
+    |> Enum.map(fn(camera_image) ->
+      if !!camera_image.data do
+        %{content: camera_image.data, filename: "#{camera_image.exid}.jpg"}
+      end
+    end)
+    |> Enum.reject(fn(content) -> content == nil end)
   end
 end
