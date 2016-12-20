@@ -104,7 +104,7 @@ defmodule EvercamMedia.Snapmail.Poller do
       {:ok, true} ->
         Logger.debug "Polling snapmail: #{state.name} for snapmail"
         timestamp = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.unix
-        send_mail(state.name, timestamp, state.config.recipients)
+        send_mail(state.config.is_paused, state.name, timestamp, state.config.recipients)
       {:ok, false} ->
         Logger.debug "Not Scheduled. Skip sending snapmail for #{inspect state.name}"
     end
@@ -129,8 +129,9 @@ defmodule EvercamMedia.Snapmail.Poller do
     Process.send_after(self, message, sleep)
   end
 
-  defp send_mail(_name, _timestamp, recipients) when recipients in [nil, ""], do: :noop
-  defp send_mail(name, timestamp, _recipients) do
+  defp send_mail(true, name, _timestamp, _recipients), do: :noop
+  defp send_mail(false, _name, _timestamp, recipients) when recipients in [nil, ""], do: :noop
+  defp send_mail(false, name, timestamp, _recipients) do
     Snapmailer.get_snapshot(name, {:poll, timestamp})
   end
 end

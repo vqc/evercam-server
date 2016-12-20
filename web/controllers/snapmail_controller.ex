@@ -1,6 +1,7 @@
 defmodule EvercamMedia.SnapmailController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.SnapmailView
+  alias EvercamMedia.Snapmail.SnapmailerSupervisor
 
   def all(conn, _) do
     current_user = conn.assigns[:current_user]
@@ -57,6 +58,7 @@ defmodule EvercamMedia.SnapmailController do
             |> Repo.preload(:user)
             |> Repo.preload(:snapmail_cameras)
             |> Repo.preload([snapmail_cameras: :camera])
+          spawn(fn -> start_snapmail_worker(created_snapmail) end)
           render(conn |> put_status(:created), SnapmailView, "show.json", %{snapmail: created_snapmail})
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))
@@ -81,6 +83,7 @@ defmodule EvercamMedia.SnapmailController do
             snapmail
             |> Repo.preload(:snapmail_cameras, force: true)
             |> Repo.preload([snapmail_cameras: :camera], force: true)
+          spawn(fn -> update_snapmail_worker(snapmail) end)
           render(conn, SnapmailView, "show.json", %{snapmail: snapmail})
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))
@@ -138,6 +141,8 @@ defmodule EvercamMedia.SnapmailController do
     |> add_parameter(:message, params["message"])
     |> add_parameter(:notify_days, params["notify_days"])
     |> add_parameter(:is_public, params["is_public"])
+    |> add_parameter(:timezone, params["timezone"])
+    |> add_parameter(:is_paused, params["is_paused"])
   end
 
   defp add_parameter(params, _key, nil), do: params
@@ -231,5 +236,23 @@ defmodule EvercamMedia.SnapmailController do
   defp refine_cameras(list1, list2) do
     list1
     |> Enum.reject(fn(item) -> Enum.member?(list2, item) end)
+  end
+
+  defp update_snapmail_worker(snapmail) do
+    snapmail =
+      snapmail
+      |> Repo.preload([snapmail_cameras: [camera: :vendor_model]])
+      |> Repo.preload([snapmail_cameras: [camera: [vendor_model: :vendor]]])
+    snapmail.exid
+    |> String.to_atom
+    |> Process.whereis
+    |> SnapmailerSupervisor.update_worker(snapmail)
+  end
+
+  defp start_snapmail_worker(snapmail) do
+    snapmail
+    |> Repo.preload([snapmail_cameras: [camera: :vendor_model]])
+    |> Repo.preload([snapmail_cameras: [camera: [vendor_model: :vendor]]])
+    |> SnapmailerSupervisor.start_snapmailer
   end
 end

@@ -99,6 +99,15 @@ defmodule EvercamMedia.Snapmail.Snapmailer do
   end
 
   @doc """
+  Server callback for updating snapmail config
+  """
+  def handle_cast({:update_snapmail_config, config}, state) do
+    updated_config = Map.merge state, config
+    GenEvent.sync_notify(state.event_manager, {:update_snapmail_config, updated_config})
+    {:noreply, updated_config}
+  end
+
+  @doc """
   Server callback for camera_reply
   """
   def handle_info({:camera_reply, camera_exid, image, timestamp}, state) do

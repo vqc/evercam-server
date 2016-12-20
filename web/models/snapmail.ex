@@ -6,7 +6,7 @@ defmodule Snapmail do
 
   @email_regex ~r/^\S+@\S+$/
   @required_fields ~w(subject notify_time)
-  @optional_fields ~w(exid user_id recipients message notify_days is_public)
+  @optional_fields ~w(exid user_id recipients message notify_days timezone is_paused is_public)
 
   schema "snapmails" do
     belongs_to :user, User, foreign_key: :user_id
@@ -18,6 +18,8 @@ defmodule Snapmail do
     field :message, :string
     field :notify_days, :string
     field :notify_time, :string
+    field :timezone, :string, default: "Etc/UTC"
+    field :is_paused, :boolean, default: false
     field :is_public, :boolean, default: false
     timestamps(type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
@@ -93,6 +95,13 @@ defmodule Snapmail do
   def get_days_list(days) do
     days
     |> String.split(",", trim: true)
+  end
+
+  def get_timezone(snapmail) do
+    case snapmail.timezone do
+      nil -> "Etc/UTC"
+      timezone -> timezone
+    end
   end
 
   def scheduled_now?(days, timezone) do

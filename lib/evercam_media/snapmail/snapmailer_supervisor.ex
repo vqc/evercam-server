@@ -5,6 +5,7 @@ defmodule EvercamMedia.Snapmail.SnapmailerSupervisor do
 
   use Supervisor
   require Logger
+  alias EvercamMedia.Snapmail.Snapmailer
 
   @event_handlers [
     EvercamMedia.Snapmail.PollHandler,
@@ -17,7 +18,7 @@ defmodule EvercamMedia.Snapmail.SnapmailerSupervisor do
 
   def init(:ok) do
     Task.start_link(&initiate_workers/0)
-    children = [worker(EvercamMedia.Snapmail.Snapmailer, [], restart: :permanent)]
+    children = [worker(Snapmailer, [], restart: :permanent)]
     supervise(children, strategy: :simple_one_for_one, max_restarts: 1_000_000)
   end
 
@@ -32,6 +33,20 @@ defmodule EvercamMedia.Snapmail.SnapmailerSupervisor do
         Supervisor.start_child(__MODULE__, [settings])
       {:error, _message, url} ->
         Logger.warn "[#{snapmail.exid}] Skipping snapmail worker as the host is invalid: #{url}"
+    end
+  end
+
+  @doc """
+  Reinitialize snapmail worker with new configuration
+  """
+  def update_worker(nil, _snapmail), do: :noop
+  def update_worker(worker, snapmail) do
+    case get_config(snapmail) do
+      {:ok, settings} ->
+        Logger.debug "Updating worker for #{settings.name}"
+        Snapmailer.update_config(worker, settings)
+      {:error, _message} ->
+        Logger.info "Skipping snapmail worker update as the arguments are invalid"
     end
   end
 
@@ -62,8 +77,9 @@ defmodule EvercamMedia.Snapmail.SnapmailerSupervisor do
           message: snapmail.message,
           days: Snapmail.get_days_list(snapmail.notify_days),
           notify_time: snapmail.notify_time,
-          timezone: get_timezone(snapmail.snapmail_cameras),
-          sleep: Snapmail.sleep(snapmail.notify_time, get_timezone(snapmail.snapmail_cameras)),
+          timezone: Snapmail.get_timezone(snapmail),
+          sleep: Snapmail.sleep(snapmail.notify_time, Snapmail.get_timezone(snapmail)),
+          is_paused: snapmail.is_paused,
           cameras: get_lists(snapmail.snapmail_cameras)
         }
       }
