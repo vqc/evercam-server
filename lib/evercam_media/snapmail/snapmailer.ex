@@ -153,7 +153,7 @@ defmodule EvercamMedia.Snapmail.Snapmailer do
             {:error, _error} -> %{exid: camera.camera_exid, name: camera.name, data: nil}
           end
         end)
-      EvercamMedia.UserMailer.snapmail(state.config.notify_time, state.config.recipients, images_list)
+      EvercamMedia.UserMailer.snapmail(state.name, state.config.notify_time, state.config.recipients, images_list)
     end
   end
 end

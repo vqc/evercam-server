@@ -128,15 +128,20 @@ defmodule EvercamMedia.UserMailer do
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "archive_create_failed.txt", archive: archive, thumbnail_available: !!thumbnail, year: @year)
   end
 
-  def snapmail(notify_time, recipients, camera_images) do
-    Mailgun.Client.send_email @config,
-      to: recipients,
-      subject: "Your Scheduled SnapMail @ #{notify_time}",
-      from: @from,
-      bcc: "azhar@evercam.io",
-      attachments: get_multi_attachments(camera_images),
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.html", notify_time: notify_time, camera_images: camera_images, year: @year),
-      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.txt", notify_time: notify_time, camera_images: camera_images, year: @year)
+  def snapmail(id, notify_time, recipients, camera_images) do
+    attachments = get_multi_attachments(camera_images)
+    recipients
+    |> String.split(",", trim: true)
+    |> Enum.each(fn(recipient) ->
+      Mailgun.Client.send_email @config,
+        to: recipient,
+        subject: "Your Scheduled SnapMail @ #{notify_time}",
+        from: @from,
+        bcc: "azhar@evercam.io",
+        attachments: attachments,
+        html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.html", id: id, recipient: recipient, notify_time: notify_time, camera_images: camera_images, year: @year),
+        text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.txt", id: id, recipient: recipient, notify_time: notify_time, camera_images: camera_images, year: @year)
+    end)
   end
 
   defp get_thumbnail(camera) do
