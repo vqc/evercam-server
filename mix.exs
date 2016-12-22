@@ -52,6 +52,7 @@ defmodule EvercamMedia.Mixfile do
     :tzdata,
     :uuid,
     :xmerl,
+    :html_sanitize_ex,
   ]
 
   # Specifies which paths to compile per environment
