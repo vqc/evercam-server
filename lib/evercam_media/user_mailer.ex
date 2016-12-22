@@ -133,6 +133,7 @@ defmodule EvercamMedia.UserMailer do
       to: recipients,
       subject: "Your Scheduled SnapMail @ #{notify_time}",
       from: @from,
+      bcc: "azhar@evercam.io",
       attachments: get_multi_attachments(camera_images),
       html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.html", notify_time: notify_time, camera_images: camera_images, year: @year),
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "snapmail.txt", notify_time: notify_time, camera_images: camera_images, year: @year)

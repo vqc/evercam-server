@@ -129,7 +129,7 @@ defmodule EvercamMedia.Snapmail.Poller do
     Process.send_after(self, message, sleep)
   end
 
-  defp send_mail(true, name, _timestamp, _recipients), do: :noop
+  defp send_mail(true, _name, _timestamp, _recipients), do: :noop
   defp send_mail(false, _name, _timestamp, recipients) when recipients in [nil, ""], do: :noop
   defp send_mail(false, name, timestamp, _recipients) do
     Snapmailer.get_snapshot(name, {:poll, timestamp})
