@@ -156,5 +156,6 @@ defmodule CameraShareRequest do
     |> update_change(:email, &String.downcase/1)
     |> validate_rights
     |> update_change(:rights, &String.downcase/1)
+    |> CameraShare.html_sanitize_message
   end
 end

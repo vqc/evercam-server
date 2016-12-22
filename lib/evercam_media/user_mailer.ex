@@ -49,7 +49,7 @@ defmodule EvercamMedia.UserMailer do
     thumbnail = get_thumbnail(camera)
     Mailgun.Client.send_email @config,
       to: sharee_email,
-      subject: "#{User.get_fullname(user)} has shared a camera with you",
+      subject: "#{User.get_fullname(user)} has shared the camera #{camera.name} with you.",
       from: @from,
       "h:Reply-To": user.email,
       bcc: user.email,
@@ -62,7 +62,7 @@ defmodule EvercamMedia.UserMailer do
     thumbnail = get_thumbnail(camera)
     Mailgun.Client.send_email @config,
       to: email,
-      subject: "#{User.get_fullname(user)} has shared a camera with you",
+      subject: "#{User.get_fullname(user)} has shared the camera #{camera.name} with you.",
       from: @from,
       "h:Reply-To": user.email,
       bcc: "#{user.email},marco@evercam.io,vinnie@evercam.io",

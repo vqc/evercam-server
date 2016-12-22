@@ -40,7 +40,7 @@ defmodule EvercamMedia.CameraShareController do
         case CameraShare.create_share(camera, sharee, caller, params["rights"], params["message"]) do
           {:ok, camera_share} ->
             unless caller == sharee do
-              send_email_notification(caller, camera, sharee.email, params["message"])
+              send_email_notification(caller, camera, sharee.email, camera_share.message)
             end
             Camera.invalidate_user(sharee)
             Camera.invalidate_camera(camera)
@@ -52,7 +52,7 @@ defmodule EvercamMedia.CameraShareController do
       else
         case CameraShareRequest.create_share_request(camera, params["email"], caller, params["rights"], params["message"]) do
           {:ok, camera_share_request} ->
-            send_email_notification(caller, camera, params["email"], params["message"], camera_share_request.key)
+            send_email_notification(caller, camera, params["email"], camera_share_request.message, camera_share_request.key)
             CameraActivity.log_activity(caller, camera, "shared", %{with: params["email"], ip: user_request_ip(conn)})
             conn |> put_status(:created) |> render(CameraShareRequestView, "show.json", %{camera_share_requests: camera_share_request})
           {:error, changeset} ->

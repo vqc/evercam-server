@@ -142,6 +142,13 @@ defmodule CameraShare do
     end
   end
 
+  def html_sanitize_message(changeset) do
+    case get_field(changeset, :message) do
+      nil -> changeset
+      _message -> changeset |> update_change(:message, &HtmlSanitizeEx.strip_tags/1)
+    end
+  end
+
   defp can_share(changeset, owner) do
     sharee = get_field(changeset, :user_id)
     sharer = get_field(changeset, :sharer_id)
@@ -167,5 +174,6 @@ defmodule CameraShare do
     |> unique_constraint(:share, [name: "camera_shares_camera_id_user_id_index", message: "The camera has already been shared with this user."])
     |> validate_rights(params[:rights])
     |> can_share(params[:owner])
+    |> html_sanitize_message
   end
 end

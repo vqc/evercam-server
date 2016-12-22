@@ -53,28 +53,36 @@
         <table style="font-family: Arial, Helvetica, sans-serif; width: 100%; margin: 0; padding: 0;"><tr style="font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0;">
           <td style="font-family: Arial, Helvetica, sans-serif; font-weight: normal; font-size: 14px; margin: 0; padding: 0;">
 
-            <p class="lead" style="line-height: 1.6; margin: 0 0 10px; padding: 0;">Hello from Evercam,</p>
-            <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;"><strong><%= full_name(@user) %></strong> has shared the camera <strong><%= @camera.name %></strong> with you.</p>
-
             <%= if @message do %>
               <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">
-                <%= @user.firstname %>'s message for you:
-                <p style="line-height: 1.6; margin: 0 0 12px; padding: 0;"><%= @message %></p>
+                <div style="width:180px;height:20px;">
+                  <div style="max-height:0;max-width:0;">
+                    <div style="display: inline-block;background-color: rgb(255, 255, 255);font-weight: bold;top: 17px;width: 180px;height:20px;margin-top:10px;margin-left:5px;"><%= @user.firstname %>'s message for you:</div>
+                  </div>
+                </div>
+
+                <div style="border: solid 1px #e7e7e7;padding:5px;">
+                  <br>
+                  <% message_list = @message |> String.split("\n", trim: true) %>
+                  <%= for message <- message_list do %>
+                    <div style="margin-bottom: 12px;margin-left: 40px;"><%= message %></div>
+                  <% end %>
+                </div>
               </p>
+              <br>
             <% end %>
 
-            <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">To access this camera, you will need to click on the link below and create an account with Evercam.</p>
-            <!-- Callout Panel -->
-            <p class="callout" style="color:#428bca; line-height: 1.6; background: #f5f5f5;  margin: 0 0 15px; padding: 15px;">
-              <a style="color:#428bca; text-decoration:none;" href="https://dash.evercam.io/v1/users/signup?key=<%= @key %>">https://dash.evercam.io/v1/users/signup?key=<%= @key %></a>
-            </p><!-- /Callout Panel -->
+            <p class="callout" style="line-height: 1.6;">
+              <a style="background-color: #fff;border: 1px solid #428bca;border-radius: 30px;color: #428bca;font-size: 16px;padding: 6px 20px;transition: all 0.2s linear 0s;text-decoration: none;" href="https://dash.evercam.io/v1/users/signup?key=<%= @key %>">Create your account & access your camera</a>
+            </p>
             <%= if @thumbnail_available do %>
-            <br>
-            <img src="cid:snapshot.jpg" alt='Camera Preview' style="width: 100%; display:block; margin:0 auto;" >
+              <img src="cid:snapshot.jpg" alt="<%= @camera.name %>" name="<%= @camera.name %>" style="width: 100%; display:block; margin:0 auto;" >
             <% end %>
             <br>
             <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">Your Evercam account will give you access to this camera and a whole world of possibilities for cameras!</p>
+
             <P style="line-height: 1.6; margin: 0 0 10px; padding: 0;">To stop receiving these reminders, please <a style="color:#428bca; text-decoration:none;" href="https://dash.evercam.io/v1/cameras/<%= @camera.exid %>/share/request?key=<%= @key %>&email=<%= @sharee %>">click here</a>. If you have any questions, please contact Vinnie Quinn on +353879871869.</p>
+
             <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">We greatly appreciate any feedback, so if you have any suggestions or if there is anything we can do to improve your Evercam experience, please let us know.</p>
             <p style="line-height: 1.6; margin: 0 0 0px; padding: 0;">The Evercam Team</p>
             <p style="color:#aaaaaa; line-height: 1.0; margin: 0 0 10px; padding: 0;"><a href="#" style="text-decoration:none; color:#aaaaaa;">support@evercam.io</a></p>
