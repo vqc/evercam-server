@@ -144,18 +144,22 @@ defmodule EvercamMedia.Snapmail.Snapmailer do
 
   defp get_snapshots_send_snapmail(state, config, timestamp, worker) do
     spawn fn ->
-      images_list =
-        config.cameras
-        |> Enum.map(fn(camera) ->
-          case try_snapshot(camera, 1) do
-            {:ok, image} ->
-              send worker, {:camera_reply, camera.camera_exid, image, timestamp}
-              %{exid: camera.camera_exid, name: camera.name, data: image}
-            {:error, _error} -> %{exid: camera.camera_exid, name: camera.name, data: nil}
-          end
-        end)
-      EvercamMedia.UserMailer.snapmail(state.name, state.config.notify_time, state.config.recipients, images_list)
+      config.cameras
+      |> Enum.map(fn(camera) ->
+        case try_snapshot(camera, 1) do
+          {:ok, image} ->
+            send worker, {:camera_reply, camera.camera_exid, image, timestamp}
+            %{exid: camera.camera_exid, name: camera.name, data: image}
+          {:error, _error} -> %{exid: camera.camera_exid, name: camera.name, data: nil}
+        end
+      end)
+      |> send_snapmail(state)
     end
+  end
+
+  defp send_snapmail([], _state), do: :noop
+  defp send_snapmail(images_list, state) do
+    EvercamMedia.UserMailer.snapmail(state.name, state.config.notify_time, state.config.recipients, images_list)
   end
 
   defp try_snapshot(camera, 3) do
