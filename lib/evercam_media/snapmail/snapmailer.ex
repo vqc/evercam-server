@@ -5,6 +5,7 @@ defmodule EvercamMedia.Snapmail.Snapmailer do
 
   use GenServer
   alias EvercamMedia.Snapshot.CamClient
+  alias EvercamMedia.Snapshot.Storage
 
   ################
   ## Client API ##
@@ -94,7 +95,7 @@ defmodule EvercamMedia.Snapmail.Snapmailer do
   @doc """
   """
   def handle_cast({:get_camera_snapshot, timestamp}, state) do
-    _get_snapshot(state, timestamp)
+    _get_snapshots_send_snapmail(state, timestamp)
     {:noreply, state}
   end
 
@@ -135,18 +136,18 @@ defmodule EvercamMedia.Snapmail.Snapmailer do
     Map.get(state, :config)
   end
 
-  defp _get_snapshot(state, timestamp) do
+  defp _get_snapshots_send_snapmail(state, timestamp) do
     config = get_config_from_state(:config, state)
     worker = self
-    try_snapshot(state, config, timestamp, worker)
+    get_snapshots_send_snapmail(state, config, timestamp, worker)
   end
 
-  defp try_snapshot(state, config, timestamp, worker) do
+  defp get_snapshots_send_snapmail(state, config, timestamp, worker) do
     spawn fn ->
       images_list =
         config.cameras
         |> Enum.map(fn(camera) ->
-          case CamClient.fetch_snapshot(camera) do
+          case try_snapshot(camera, 1) do
             {:ok, image} ->
               send worker, {:camera_reply, camera.camera_exid, image, timestamp}
               %{exid: camera.camera_exid, name: camera.name, data: image}
@@ -154,6 +155,22 @@ defmodule EvercamMedia.Snapmail.Snapmailer do
           end
         end)
       EvercamMedia.UserMailer.snapmail(state.name, state.config.notify_time, state.config.recipients, images_list)
+    end
+  end
+
+  defp try_snapshot(camera, 3) do
+    case Storage.thumbnail_load(camera.camera_exid) do
+      {:ok, ""} -> {:error, "Failed to get image"}
+      {:ok, image} -> {:ok, image}
+      _ -> {:error, "Failed to get image"}
+    end
+
+  end
+
+  defp try_snapshot(camera, attempt) do
+    case CamClient.fetch_snapshot(camera) do
+      {:ok, image} -> {:ok, image}
+      {:error, _error} -> try_snapshot(camera, attempt + 1)
     end
   end
 end
