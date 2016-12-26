@@ -100,6 +100,7 @@ defmodule EvercamMedia.SnapmailController do
       changeset = Snapmail.changeset(snapmail, snapmail_params)
       case Repo.update(changeset) do
         {:ok, snapmail} ->
+          spawn(fn -> update_snapmail_worker(snapmail) end)
           render(conn, SnapmailView, "show.json", %{snapmail: snapmail})
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))
