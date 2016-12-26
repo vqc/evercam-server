@@ -1,10 +1,10 @@
 # Evercam Media [![Build Status][travis-image]][travis-url] [![Deps Status][hex-image]][hex-url]
 
-Evercam Media is the component that is responsible for talking  to the camera. Consider it as a "proxy" for all commands. Processes here request either snapshots or streams and then send them to storage, or to any of the clients (e.g. Evercam-Dashboard, Evercam-Android, Evercam-iOS).
+Evercam Server is the component that is responsible for talking  to the camera. Consider it as a "proxy" for all commands. Processes here request either snapshots or streams and then send them to storage, or to any of the clients (e.g. Evercam-Dashboard, Evercam-Android, Evercam-iOS).
 
-| Name   | Evercam Media  |
+| Name   | Evercam Server  |
 | --- | --- |
-| Owner   | [@mosic](https://github.com/mosic)   |
+| Owner   | [@azharmalik3](https://github.com/azharmalik3)   |
 | Version  | 1.0 |
 | Evercam API Version  | 1.0  |
 | Licence | [AGPL](https://tldrlegal.com/license/gnu-affero-general-public-license-v3-%28agpl-3.0%29) |
