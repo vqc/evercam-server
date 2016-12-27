@@ -24,8 +24,8 @@ defmodule EvercamMedia.SnapmailView do
       requested_by: Util.deep_get(snapmail, [:user, :username], ""),
       requester_name: User.get_fullname(snapmail.user),
       requester_email: Util.deep_get(snapmail, [:user, :email], ""),
-      public: snapmail.is_public,
-      paused: snapmail.is_paused,
+      is_public: snapmail.is_public,
+      is_paused: snapmail.is_paused,
       timezone: Snapmail.get_timezone(snapmail),
       created_at: Util.ecto_datetime_to_unix(snapmail.inserted_at)
     }
