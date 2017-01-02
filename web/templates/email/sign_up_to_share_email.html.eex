@@ -55,9 +55,9 @@
 
             <%= if @message do %>
               <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">
-                <div style="width:180px;height:20px;">
+                <div style="width:12.5em;height:20px;">
                   <div style="max-height:0;max-width:0;">
-                    <div style="display: inline-block;background-color: rgb(255, 255, 255);font-weight: bold;top: 17px;width: 180px;height:20px;margin-top:10px;margin-left:5px;"><%= @user.firstname %>'s message for you:</div>
+                    <div style="display: inline-block;background-color: rgb(255, 255, 255);font-weight: bold;top: 17px;width: 12.5em;height:20px;margin-top:10px;margin-left:5px;"><%= @user.firstname %>'s message for you:</div>
                   </div>
                 </div>
 
@@ -73,7 +73,7 @@
             <% end %>
 
             <p class="callout" style="line-height: 1.6;">
-              <a style="background-color: #fff;border: 1px solid #428bca;border-radius: 30px;color: #428bca;font-size: 16px;padding: 6px 20px;transition: all 0.2s linear 0s;text-decoration: none;" href="https://dash.evercam.io/v1/users/signup?key=<%= @key %>">Create your account & access your camera</a>
+              <a style="background-color: #fff;border: 1px solid #428bca;border-radius: 30px;color: #428bca;font-size: 14px;padding: 6px 15px;transition: all 0.2s linear 0s;text-decoration: none;" href="https://dash.evercam.io/v1/users/signup?key=<%= @key %>">Create your account & access your camera</a>
             </p>
             <%= if @thumbnail_available do %>
               <img src="cid:snapshot.jpg" alt="<%= @camera.name %>" name="<%= @camera.name %>" style="width: 100%; display:block; margin:0 auto;" >
