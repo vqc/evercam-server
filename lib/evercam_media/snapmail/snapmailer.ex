@@ -165,10 +165,13 @@ defmodule EvercamMedia.Snapmail.Snapmailer do
   defp try_snapshot(camera, 3) do
     case Storage.thumbnail_load(camera.camera_exid) do
       {:ok, ""} -> {:error, "Failed to get image"}
-      {:ok, image} -> {:ok, image}
+      {:ok, image} ->
+        case is_younger_thumbnail(camera.camera_exid) do
+          true -> {:ok, image}
+          false -> {:error, "Failed to get image"}
+        end
       _ -> {:error, "Failed to get image"}
     end
-
   end
 
   defp try_snapshot(camera, attempt) do
@@ -177,4 +180,20 @@ defmodule EvercamMedia.Snapmail.Snapmailer do
       {:error, _error} -> try_snapshot(camera, attempt + 1)
     end
   end
+
+  defp is_younger_thumbnail(camera_exid) do
+    case Storage.thumbnail_options(camera_exid) do
+      {:ok, file_option} ->
+        current_date = Calendar.DateTime.now_utc
+        thumbnail_date = Calendar.DateTime.from_erl!(file_option.mtime, "UTC")
+        case Calendar.DateTime.diff(current_date, thumbnail_date) do
+          {:ok, seconds, _, :after} -> is_younder?(seconds)
+          _ -> false
+        end
+      {:error, _message} -> false
+    end
+  end
+
+  defp is_younder?(seconds) when seconds <= 300, do: true
+  defp is_younder?(seconds) when seconds > 300, do: false
 end

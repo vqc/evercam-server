@@ -244,6 +244,15 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
+  def thumbnail_options(camera_exid) do
+    "#{@root_dir}/#{camera_exid}/snapshots/thumbnail.jpg"
+    |> File.stat
+    |> case do
+      {:ok, file_option} -> {:ok, file_option}
+      {:error, error} -> {:error, error}
+    end
+  end
+
   def save(camera_exid, _timestamp, image, "Evercam Thumbnail"), do: thumbnail_save(camera_exid, image)
   def save(camera_exid, timestamp, image, notes) do
     seaweedfs_save(camera_exid, timestamp, image, notes)
