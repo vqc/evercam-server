@@ -7,6 +7,7 @@ defmodule EvercamMedia.Snapshot.Worker do
 
   use GenServer
   alias EvercamMedia.Snapshot.CamClient
+  require Logger
 
   ################
   ## Client API ##
@@ -142,9 +143,11 @@ defmodule EvercamMedia.Snapshot.Worker do
   def handle_info({:camera_reply, result, timestamp, reply_to}, state) do
     case result do
       {:ok, image} ->
+        Logger.info "[#{state.name}] [camera_reply] [#{timestamp}] [notify_event_got_snapshot]"
         data = {state.name, timestamp, image}
         GenEvent.sync_notify(state.event_manager, {:got_snapshot, data})
       {:error, error} ->
+        Logger.info "[#{state.name}] [camera_reply] [#{timestamp}] [notify_event_snapshot_error]"
         data = {state.name, timestamp, error}
         GenEvent.sync_notify(state.event_manager, {:snapshot_error, data})
     end
