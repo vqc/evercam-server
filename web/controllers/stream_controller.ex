@@ -70,7 +70,7 @@ defmodule EvercamMedia.StreamController do
   end
 
   defp stream(rtsp_url, token, camera_id, ip, :kill) do
-    kill_streams(rtsp_url)
+    kill_streams(rtsp_url, camera_id)
     start_stream(rtsp_url, token, camera_id, ip, "rtmp")
   end
 
@@ -81,11 +81,11 @@ defmodule EvercamMedia.StreamController do
     spawn(fn -> insert_meta_data(rtsp_url, action, camera_id, ip, token) end)
   end
 
-  defp kill_streams(rtsp_url) do
-    process_ids = ffmpeg_pids(rtsp_url)
-    process_ids
+  defp kill_streams(rtsp_url, camera_id) do
+    rtsp_url
+    |> ffmpeg_pids
     |> Enum.each(fn(pid) -> Porcelain.shell("kill -9 #{pid}") end)
-    spawn(fn -> delete_meta_data(process_ids) end)
+    spawn(fn -> MetaData.delete_by_camera_id(camera_id) end)
   end
 
   defp sleep_until_hls_playlist_exists(token, retry \\ 0)
@@ -123,10 +123,5 @@ defmodule EvercamMedia.StreamController do
       process_id: pid,
       extra: %{ip: ip, rtsp_url: rtsp_url, token: token}
     }
-  end
-
-  defp delete_meta_data(process_ids) do
-    process_ids
-    |> Enum.each(fn(pid) -> MetaData.delete_by_process_id(pid) end)
   end
 end
