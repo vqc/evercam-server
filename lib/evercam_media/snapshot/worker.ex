@@ -7,7 +7,6 @@ defmodule EvercamMedia.Snapshot.Worker do
 
   use GenServer
   alias EvercamMedia.Snapshot.CamClient
-  require Logger
 
   ################
   ## Client API ##
@@ -193,13 +192,12 @@ defmodule EvercamMedia.Snapshot.Worker do
   defp try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, attempt) do
     camera = Camera.get(camera_exid)
     spawn fn ->
-      if ConCache.get(:camera_lock, state.config.camera_exid) && attempt == 1 do
-        Process.exit self, :shutdown
-      end
-
       result = CamClient.fetch_snapshot(config)
       case {result, camera.is_online} do
         {{:error, _error}, true} ->
+          if ConCache.get(:camera_lock, state.config.camera_exid) && attempt == 1 do
+            Process.exit self, :shutdown
+          end
           ConCache.put(:camera_lock, camera_exid, camera_exid)
           try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, attempt + 1)
         _ ->
