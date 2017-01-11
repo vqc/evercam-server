@@ -103,6 +103,17 @@ defmodule CameraShare do
     |> Repo.all
   end
 
+  def shared_users(user_id) do
+    CameraShare
+    |> join(:inner, [u], cam in Camera)
+    |> where([cs, cam], cam.id == cs.camera_id)
+    |> where([cs, cam], cam.owner_id == ^user_id)
+    |> join(:inner, [u], user in User)
+    |> where([cs, cam, user], user.id == cs.user_id)
+    |> preload(:user)
+    |> Repo.all
+  end
+
   def by_user_and_camera(camera_id, user_id) do
     CameraShare
     |> where(camera_id: ^camera_id)

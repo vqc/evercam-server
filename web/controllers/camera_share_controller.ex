@@ -108,6 +108,23 @@ defmodule EvercamMedia.CameraShareController do
     end
   end
 
+  def shared_users(conn, _params) do
+    caller = conn.assigns[:current_user]
+
+    cond do
+      !caller ->
+        render_error(conn, 401, "Unauthorized.")
+      true ->
+        shared_users =
+          caller.id
+          |> CameraShare.shared_users
+          |> Enum.map(fn(u) -> %{email: u.user.email, name: User.get_fullname(u.user)} end)
+          |> Enum.sort
+          |> Enum.uniq
+        json(conn, shared_users)
+    end
+  end
+
   defp camera_exists(conn, camera_exid, nil), do: render_error(conn, 404, "The #{camera_exid} camera does not exist.")
   defp camera_exists(_conn, _camera_exid, _camera), do: :ok
 
