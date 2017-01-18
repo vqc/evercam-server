@@ -108,20 +108,73 @@ defmodule EvercamMedia.StreamController do
   end
 
   defp insert_meta_data(rtsp_url, action, camera_id, ip, token) do
-    rtsp_url
-    |> ffmpeg_pids
-    |> Enum.each(fn(pid) ->
-      meta_params = construct_params(camera_id, action, ip, pid, rtsp_url, token)
-      MetaData.insert_meta(meta_params)
-    end)
+    try do
+      output = Porcelain.exec("ffprobe", ["-v", "error", "-show_streams", "#{rtsp_url}"], [err: :out]).out
+      video_params =
+        output
+        |> String.split("\n", trim: true)
+        |> Enum.filter(fn(item) ->
+          contain_attr?(item, "width") ||
+          contain_attr?(item, "height") ||
+          contain_attr?(item, "codec_name") ||
+          contain_attr?(item, "pix_fmt") ||
+          contain_attr?(item, "avg_frame_rate") ||
+          contain_attr?(item, "bit_rate")
+        end)
+        |> Enum.map(fn(item) -> extract_params(item) end)
+        |> List.flatten
+
+      rtsp_url
+      |> ffmpeg_pids
+      |> Enum.each(fn(pid) ->
+        construct_params(camera_id, action, ip, pid, rtsp_url, token, video_params)
+        |> MetaData.insert_meta
+      end)
+    catch _type, error ->
+      Util.error_handler(error)
+    end
   end
 
-  defp construct_params(camera_id, action, ip, pid, rtsp_url, token) do
+  defp construct_params(camera_id, action, ip, pid, rtsp_url, token, video_params) do
+    extra =
+      %{ip: ip, rtsp_url: rtsp_url, token: token}
+      |> add_parameter("field", :width, video_params[:width])
+      |> add_parameter("field", :height, video_params[:height])
+      |> add_parameter("field", :codec, video_params[:codec_name])
+      |> add_parameter("field", :pix_fmt, video_params[:pix_fmt])
+      |> add_parameter("rate", :frame_rate, video_params[:avg_frame_rate])
+      |> add_parameter("field", :bit_rate, video_params[:bit_rate])
     %{
       camera_id: camera_id,
       action: action,
       process_id: pid,
-      extra: %{ip: ip, rtsp_url: rtsp_url, token: token}
+      extra: extra
     }
+  end
+
+  defp contain_attr?(item, attr) do
+    case :binary.match(item, "#{attr}=") do
+      :nomatch -> false
+      {index, count} -> true
+    end
+  end
+
+  defp extract_params(item) do
+    case :binary.match(item, "=") do
+      :nomatch -> ""
+      {index, count} ->
+        key = String.slice(item, 0, index)
+        value = String.slice(item, (index + count), String.length(item))
+        ["#{key}": value]
+    end
+  end
+
+  defp add_parameter(params, field, _key, nil), do: params
+  defp add_parameter(params, "field", key, value) do
+    Map.put(params, key, value)
+  end
+  defp add_parameter(params, "rate", key, value) do
+    framerate = String.split(value, "/", trim: true) |> List.first
+    Map.put(params, key, framerate)
   end
 end
