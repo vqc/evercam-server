@@ -11,7 +11,7 @@ config :evercam_media, EvercamMedia.Endpoint,
   http: [port: 4000],
   url: [host: "media.evercam.io"],
   static_url: [host: "media.evercam.io", port: 443, scheme: "https"],
-  email: "evercam.io <support@evercam.io>"
+  email: "Evercam <support@evercam.io>"
 
 # ## SSL Support
 #

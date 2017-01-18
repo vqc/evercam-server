@@ -10,7 +10,7 @@ config :evercam_media, EvercamMedia.Endpoint,
   debug_errors: true,
   code_reloader: true,
   cache_static_lookup: false,
-  email: "evercam.io <env.dev@evercam.io>"
+  email: "Evercam <env.dev@evercam.io>"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"

@@ -155,7 +155,7 @@ defmodule EvercamMedia.StreamController do
   defp contain_attr?(item, attr) do
     case :binary.match(item, "#{attr}=") do
       :nomatch -> false
-      {index, count} -> true
+      {_index, _count} -> true
     end
   end
 
@@ -169,7 +169,7 @@ defmodule EvercamMedia.StreamController do
     end
   end
 
-  defp add_parameter(params, field, _key, nil), do: params
+  defp add_parameter(params, _field, _key, nil), do: params
   defp add_parameter(params, "field", key, value) do
     Map.put(params, key, value)
   end
