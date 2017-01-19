@@ -108,7 +108,7 @@ defmodule EvercamMedia.CameraShareController do
     end
   end
 
-  def shared_users(conn, _params) do
+  def shared_users(conn, params) do
     caller = conn.assigns[:current_user]
 
     cond do
@@ -117,7 +117,7 @@ defmodule EvercamMedia.CameraShareController do
       true ->
         shared_users =
           caller.id
-          |> CameraShare.shared_users
+          |> CameraShare.shared_users(params["camera_id"])
           |> Enum.map(fn(u) -> %{email: u.user.email, name: User.get_fullname(u.user)} end)
           |> Enum.sort
           |> Enum.uniq

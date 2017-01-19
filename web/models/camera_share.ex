@@ -103,7 +103,7 @@ defmodule CameraShare do
     |> Repo.all
   end
 
-  def shared_users(user_id) do
+  def shared_users(user_id, camera_id) when camera_id in [nil, ""] do
     CameraShare
     |> join(:inner, [u], cam in Camera)
     |> where([cs, cam], cam.id == cs.camera_id)
@@ -112,6 +112,31 @@ defmodule CameraShare do
     |> where([cs, cam, user], user.id == cs.user_id)
     |> preload(:user)
     |> Repo.all
+  end
+  def shared_users(user_id, camera_id) do
+    remove_already_shared =
+      camera_id
+      |> Camera.get
+      |> get_camera_all_shared_user
+
+    CameraShare
+    |> join(:inner, [u], cam in Camera)
+    |> where([cs, cam], cam.id == cs.camera_id)
+    |> where([cs, cam], cam.owner_id == ^user_id)
+    |> join(:inner, [u], user in User)
+    |> where([cs, cam, user], user.id == cs.user_id)
+    |> where([cs, cam, user], not user.id in ^remove_already_shared)
+    |> preload(:user)
+    |> Repo.all
+  end
+
+  def get_camera_all_shared_user(nil), do: []
+  def get_camera_all_shared_user(camera) do
+    CameraShare
+    |> where(camera_id: ^camera.id)
+    |> preload(:user)
+    |> Repo.all
+    |> Enum.map(fn(share) -> share.user.id end)
   end
 
   def by_user_and_camera(camera_id, user_id) do
