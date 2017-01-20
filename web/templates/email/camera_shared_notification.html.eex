@@ -54,10 +54,11 @@
           <td style="font-family: Arial, Helvetica, sans-serif; font-weight: normal; font-size: 14px; margin: 0; padding: 0;">
 
             <%= if @message do %>
+              <% width = (String.length(@user.firstname)*7) + 138 %>
               <p style="line-height: 1.6; margin: 0 0 10px; padding: 0; clear">
-                <div style="width:180px;height:20px;">
+                <div style="width:<%= width %>px;height:20px;">
                   <div style="max-height:0;max-width:0;">
-                    <div style="display: inline-block;background-color: rgb(255, 255, 255);font-weight: bold;top: 17px;width: 180px;height:20px;margin-top:10px;margin-left:5px;"><%= @user.firstname %>'s message for you:</div>
+                    <div style="display: inline-block;background-color: rgb(255, 255, 255);font-weight: bold;top: 17px;width: <%= width %>px;height:20px;margin-top:10px;margin-left:5px;"><%= @user.firstname %>'s message for you:</div>
                   </div>
                 </div>
 
