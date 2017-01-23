@@ -64,6 +64,7 @@ defmodule EvercamMedia.StreamController do
 
   defp stream(rtsp_url, token, camera_id, ip, :check) do
     if length(ffmpeg_pids(rtsp_url)) == 0 do
+      spawn(fn -> MetaData.delete_by_camera_id(camera_id) end)
       start_stream(rtsp_url, token, camera_id, ip, "hls")
     end
     sleep_until_hls_playlist_exists(token)
@@ -109,30 +110,32 @@ defmodule EvercamMedia.StreamController do
 
   defp insert_meta_data(rtsp_url, action, camera_id, ip, token) do
     try do
-      output = Porcelain.exec("ffprobe", ["-v", "error", "-show_streams", "#{rtsp_url}"], [err: :out]).out
-      video_params =
-        output
-        |> String.split("\n", trim: true)
-        |> Enum.filter(fn(item) ->
-          contain_attr?(item, "width") ||
-          contain_attr?(item, "height") ||
-          contain_attr?(item, "codec_name") ||
-          contain_attr?(item, "pix_fmt") ||
-          contain_attr?(item, "avg_frame_rate") ||
-          contain_attr?(item, "bit_rate")
-        end)
-        |> Enum.map(fn(item) -> extract_params(item) end)
-        |> List.flatten
+      stream_in = get_stream_info(rtsp_url)
 
       rtsp_url
       |> ffmpeg_pids
       |> Enum.each(fn(pid) ->
-        construct_params(camera_id, action, ip, pid, rtsp_url, token, video_params)
+        construct_params(camera_id, action, ip, pid, rtsp_url, token, stream_in)
         |> MetaData.insert_meta
       end)
     catch _type, error ->
       Util.error_handler(error)
     end
+  end
+
+  defp get_stream_info(rtsp_url) do
+    Porcelain.exec("ffprobe", ["-v", "error", "-show_streams", "#{rtsp_url}"], [err: :out]).out
+    |> String.split("\n", trim: true)
+    |> Enum.filter(fn(item) ->
+      contain_attr?(item, "width") ||
+      contain_attr?(item, "height") ||
+      contain_attr?(item, "codec_name") ||
+      contain_attr?(item, "pix_fmt") ||
+      contain_attr?(item, "avg_frame_rate") ||
+      contain_attr?(item, "bit_rate")
+    end)
+    |> Enum.map(fn(item) -> extract_params(item) end)
+    |> List.flatten
   end
 
   defp construct_params(camera_id, action, ip, pid, rtsp_url, token, video_params) do
@@ -170,6 +173,8 @@ defmodule EvercamMedia.StreamController do
   end
 
   defp add_parameter(params, _field, _key, nil), do: params
+  defp add_parameter(params, _field, :width, "0"), do: params
+  defp add_parameter(params, _field, :height, "0"), do: params
   defp add_parameter(params, "field", key, value) do
     Map.put(params, key, value)
   end
