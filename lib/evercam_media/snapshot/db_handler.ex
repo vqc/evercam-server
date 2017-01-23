@@ -84,7 +84,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   end
 
   def change_camera_status(camera, timestamp, status, error_code \\ nil) do
-    do_pause_camera(camera, 2500)
+    do_pause_camera(camera, 3000)
     try do
       task = Task.async(fn() ->
         datetime =
@@ -99,7 +99,7 @@ defmodule EvercamMedia.Snapshot.DBHandler do
         broadcast_change_to_users(camera)
         log_camera_status(camera, status, datetime, error_code)
       end)
-      Task.await(task, :timer.seconds(2))
+      Task.await(task, :timer.seconds(3))
     catch _type, error ->
       Util.error_handler(error)
     end
