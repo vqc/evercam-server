@@ -114,6 +114,7 @@ defmodule EvercamMedia.CameraShareController do
     cond do
       !caller ->
         render_error(conn, 401, "Unauthorized.")
+      params["camera_id"] == "evercam-remembrance-camera" -> json(conn, %{})
       true ->
         shared_users =
           caller.id
