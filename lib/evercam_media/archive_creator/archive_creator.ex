@@ -93,9 +93,7 @@ defmodule EvercamMedia.ArchiveCreator.ArchiveCreator do
   defp convert_to_camera_timestamp(timestamp, offset) do
     timestamp
     |> Ecto.DateTime.to_erl
-    |> Calendar.Strftime.strftime!("%Y-%m-%dT%H:%M:%S#{offset}")
-    |> Calendar.DateTime.Parse.rfc3339_utc
-    |> elem(1)
+    |> Calendar.DateTime.from_erl!("Etc/UTC")
     |> Calendar.DateTime.Format.unix
   end
 end
