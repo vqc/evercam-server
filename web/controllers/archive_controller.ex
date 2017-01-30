@@ -43,6 +43,17 @@ defmodule EvercamMedia.ArchiveController do
     end
   end
 
+  def play(conn, %{"id" => exid, "archive_id" => archive_id}) do
+    current_user = conn.assigns[:current_user]
+    camera = Camera.get_full(exid)
+
+    with :ok <- ensure_can_list(current_user, camera, conn) do
+      seaweed_url = Application.get_env(:evercam_media, :seaweedfs_url)
+      conn
+      |> redirect(external: "#{seaweed_url}/#{exid}/clips/#{archive_id}.mp4")
+    end
+  end
+
   def create(conn, %{"id" => exid} = params) do
     current_user = conn.assigns[:current_user]
     camera = Camera.get_full(exid)
@@ -146,6 +157,7 @@ defmodule EvercamMedia.ArchiveController do
         case Repo.insert(changeset) do
           {:ok, archive} ->
             CameraActivity.log_activity(current_user, camera, "archive created", %{ip: user_request_ip(conn)})
+            spawn(fn -> start_archive_creation(archive.exid) end)
             render(conn |> put_status(:created), ArchiveView, "show.json", %{archive: archive |> Repo.preload(:camera) |> Repo.preload(:user)})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
@@ -184,6 +196,16 @@ defmodule EvercamMedia.ArchiveController do
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
         end
+    end
+  end
+
+  defp start_archive_creation(archive_id) do
+    case Process.whereis(:archive_creator) do
+      nil ->
+        {:ok, pid} = GenServer.start_link(EvercamMedia.ArchiveCreator.ArchiveCreator, {}, name: :archive_creator)
+        GenServer.cast(pid, {:create_archive, archive_id})
+      {:ok, pid} ->
+        GenServer.cast(pid, {:create_archive, archive_id})
     end
   end
 

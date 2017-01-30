@@ -7,6 +7,8 @@ defmodule Archive do
   @required_fields ~w(title exid from_date to_date requested_by camera_id)
   @optional_fields ~w(status embed_time public frames)
 
+  @archive_status %{pending: 0, processing: 1, completed: 2, failed: 3}
+
   schema "archives" do
     belongs_to :camera, Camera, foreign_key: :camera_id
     belongs_to :user, User, foreign_key: :requested_by
@@ -61,6 +63,13 @@ defmodule Archive do
     |> order_by(desc: :created_at)
     |> limit(1)
     |> Repo.one
+  end
+
+  def archive_status, do: @archive_status
+
+  def update_status(archive, status) do
+    archive_changeset = changeset(archive, %{status: status})
+    Repo.update(archive_changeset)
   end
 
   def changeset(model, params \\ :invalid) do

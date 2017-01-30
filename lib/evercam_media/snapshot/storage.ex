@@ -270,6 +270,25 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
+  def save_mp4(camera_exid, archive_id, path) do
+    "#{path}/#{archive_id}.mp4"
+    |> File.open([:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
+    |> case do
+      {:ok, content} -> seaweedfs_save_video_file(camera_exid, archive_id, path, content)
+      {:error, _error} -> {:error, "Failed to read video file."}
+    end
+  end
+
+  def seaweedfs_save_video_file(camera_exid, archive_id, path, content) do
+    hackney = [pool: :seaweedfs_upload_pool]
+    file_path = "#{path}/#{archive_id}.mp4"
+    post_url = "#{@seaweedfs}/#{camera_exid}/clips/#{archive_id}.mp4"
+    case HTTPoison.post(post_url, {:multipart, [{file_path, content, []}]}, [], hackney: hackney) do
+      {:ok, response} -> :noop
+      {:error, error} -> Logger.info "[save_video] [#{camera_exid}] [#{archive_id}] [#{inspect error}]"
+    end
+  end
+
   def load(camera_exid, timestamp, notes) when notes in [nil, ""] do
     with {:error, _error} <- load(camera_exid, timestamp, "Evercam Proxy"),
          {:error, _error} <- load(camera_exid, timestamp, "Evercam Timelapse"),

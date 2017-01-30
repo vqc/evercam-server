@@ -108,6 +108,7 @@ defmodule EvercamMedia.Router do
       get "/cameras/archives/pending", ArchiveController, :pending_archives
       get "/cameras/:id/archives", ArchiveController, :index
       get "/cameras/:id/archives/:archive_id", ArchiveController, :show
+      get "/cameras/:id/archives/:archive_id/play", ArchiveController, :play
       delete "/cameras/:id/archives/:archive_id", ArchiveController, :delete
       post "/cameras/:id/archives", ArchiveController, :create
       patch "/cameras/:id/archives/:archive_id", ArchiveController, :update
