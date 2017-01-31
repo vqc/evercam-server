@@ -35,9 +35,8 @@ defmodule EvercamMedia.ArchiveCreator.ArchiveCreator do
       try do
         Archive.update_status(archive, Archive.archive_status.processing)
         camera = archive.camera
-        offset = Camera.get_offset(camera)
-        from = convert_to_camera_timestamp(archive.from_date, offset)
-        to = convert_to_camera_timestamp(archive.to_date, offset)
+        from = convert_to_unix(archive.from_date)
+        to = convert_to_unix(archive.to_date)
         snapshots = Storage.seaweedfs_load_range(camera.exid, from, to)
         total_snapshots = Enum.count(snapshots)
         cond do
@@ -90,7 +89,7 @@ defmodule EvercamMedia.ArchiveCreator.ArchiveCreator do
     EvercamMedia.UserMailer.archive_failed(archive, archive.user.email)
   end
 
-  defp convert_to_camera_timestamp(timestamp, offset) do
+  defp convert_to_unix(timestamp) do
     timestamp
     |> Ecto.DateTime.to_erl
     |> Calendar.DateTime.from_erl!("Etc/UTC")

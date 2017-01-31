@@ -284,7 +284,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     file_path = "#{path}/#{archive_id}.mp4"
     post_url = "#{@seaweedfs}/#{camera_exid}/clips/#{archive_id}.mp4"
     case HTTPoison.post(post_url, {:multipart, [{file_path, content, []}]}, [], hackney: hackney) do
-      {:ok, response} -> :noop
+      {:ok, _response} -> :noop
       {:error, error} -> Logger.info "[save_video] [#{camera_exid}] [#{archive_id}] [#{inspect error}]"
     end
   end

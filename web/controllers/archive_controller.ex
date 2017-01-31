@@ -204,7 +204,7 @@ defmodule EvercamMedia.ArchiveController do
       nil ->
         {:ok, pid} = GenServer.start_link(EvercamMedia.ArchiveCreator.ArchiveCreator, {}, name: :archive_creator)
         GenServer.cast(pid, {:create_archive, archive_id})
-      {:ok, pid} ->
+      pid ->
         GenServer.cast(pid, {:create_archive, archive_id})
     end
   end
