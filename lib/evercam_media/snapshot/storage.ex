@@ -289,6 +289,16 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
+  def delete_archive(camera_exid, archive_id) do
+    hackney = [pool: :seaweedfs_download_pool]
+    archive_url = "#{@seaweedfs}/#{camera_exid}/clips/#{archive_id}.mp4"
+    Logger.info "[#{camera_exid}] [archive_delete] [#{archive_id}]"
+    case HTTPoison.delete("#{archive_url}", [], hackney: hackney) do
+      {:ok, _response} -> :noop
+      {:error, error} -> Logger.info "[archive_delete] [#{camera_exid}] [#{archive_id}] [#{inspect error}]"
+    end
+  end
+
   def load(camera_exid, timestamp, notes) when notes in [nil, ""] do
     with {:error, _error} <- load(camera_exid, timestamp, "Evercam Proxy"),
          {:error, _error} <- load(camera_exid, timestamp, "Evercam Timelapse"),

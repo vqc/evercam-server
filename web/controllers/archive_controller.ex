@@ -2,6 +2,7 @@ defmodule EvercamMedia.ArchiveController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.ArchiveView
   alias EvercamMedia.Util
+  import EvercamMedia.Snapshot.Storage, only: [delete_archive: 2]
   require Logger
 
   @status %{pending: 0, processing: 1, completed: 2, failed: 3}
@@ -103,7 +104,7 @@ defmodule EvercamMedia.ArchiveController do
          :ok <- ensure_archive(conn, archive_id)
     do
       Archive.delete_by_exid(archive_id)
-
+      spawn(fn -> delete_archive(camera.exid, archive_id) end)
       CameraActivity.log_activity(current_user, camera, "archive deleted", %{ip: user_request_ip(conn)})
       json(conn, %{})
     end
