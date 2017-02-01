@@ -75,7 +75,7 @@ defmodule EvercamMedia.ArchiveCreator.ArchiveCreator do
   end
 
   defp create_mp4(id, path) do
-    Porcelain.shell("ffmpeg -r 24 -i #{path}%d.jpg -c:v libx264 -r 24 -profile:v main -preset slow -b:v 1000k -maxrate 1000k -bufsize 1000k -vf scale=-1:720 -pix_fmt yuv420p -y #{path}#{id}.mp4", [err: :out]).out
+    Porcelain.shell("ffmpeg -r 6 -i #{path}%d.jpg -c:v libx264 -r 6 -preset slow -tune stillimage -bufsize 1000k -pix_fmt yuv420p -y #{path}#{id}.mp4", [err: :out]).out
   end
 
   defp update_archive(archive, frames, status) do
