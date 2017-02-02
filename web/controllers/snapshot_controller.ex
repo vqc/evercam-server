@@ -143,7 +143,7 @@ defmodule EvercamMedia.SnapshotController do
       timezone = Camera.get_timezone(camera)
       offset = Camera.get_offset(camera)
 
-      from = construct_timestamp(year, month, "01", "00:00:00", offset)
+      from = construct_timestamp(year, month, "01", "00:00:00", timezone)
       number_of_days_in_month =
         Date.new(String.to_integer(year), String.to_integer(month), 1)
         |> elem(1)
@@ -169,8 +169,8 @@ defmodule EvercamMedia.SnapshotController do
     do
       timezone = Camera.get_timezone(camera)
       offset = Camera.get_offset(camera)
-      from = construct_timestamp(year, month, day, "00:00:00", offset)
-      to = construct_timestamp(year, month, day, "23:59:59", offset)
+      from = construct_timestamp(year, month, day, "00:00:00", timezone)
+      to = construct_timestamp(year, month, day, "23:59:59", timezone)
       exists? = Storage.exists_for_day?(camera_exid, from, to, timezone)
 
       conn
@@ -188,8 +188,8 @@ defmodule EvercamMedia.SnapshotController do
     do
       timezone = Camera.get_timezone(camera)
       offset = Camera.get_offset(camera)
-      from = construct_timestamp(year, month, day, "00:00:00", offset)
-      to = construct_timestamp(year, month, day, "23:59:59", offset)
+      from = construct_timestamp(year, month, day, "00:00:00", timezone)
+      to = construct_timestamp(year, month, day, "23:59:59", timezone)
       hours = Storage.hours(camera_exid, from, to, timezone)
 
       conn
@@ -205,9 +205,10 @@ defmodule EvercamMedia.SnapshotController do
          :ok <- ensure_camera_exists(conn, camera_exid, camera),
          :ok <- ensure_authorized(conn, current_user, camera)
     do
+      timezone = Camera.get_timezone(camera)
       offset = Camera.get_offset(camera)
       hour = String.rjust(hour, 2, ?0)
-      hour_datetime = construct_timestamp(year, month, day, "#{hour}:00:00", offset)
+      hour_datetime = construct_timestamp(year, month, day, "#{hour}:00:00", timezone)
       snapshots = Storage.hour(camera_exid, hour_datetime)
 
       conn
@@ -364,13 +365,17 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
-  defp construct_timestamp(year, month, day, time, offset) do
-    month = String.rjust(month, 2, ?0)
-    day = String.rjust(day, 2, ?0)
+  defp construct_timestamp(year, month, day, time, timezone) do
+    month = String.to_integer(month)
+    day = String.to_integer(day)
+    [hours, minutes, seconds] = String.split(time, ":")
+    year = String.to_integer(year)
+    hours = String.to_integer(hours)
+    minutes = String.to_integer(minutes)
+    seconds = String.to_integer(seconds)
 
-    "#{year}-#{month}-#{day}T#{time}#{offset}"
-    |> Calendar.DateTime.Parse.rfc3339_utc
-    |> elem(1)
+    Calendar.DateTime.from_erl!({{year, month, day}, {hours, minutes, seconds}}, timezone)
+    |> Calendar.DateTime.shift_zone!("Etc/UTC")
   end
 
   defp convert_to_camera_timestamp(timestamp, offset) do
