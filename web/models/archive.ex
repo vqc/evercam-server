@@ -38,6 +38,12 @@ defmodule Archive do
     |> Repo.delete_all
   end
 
+  def delete_by_camera(id) do
+    Archive
+    |> where(camera_id: ^id)
+    |> Repo.delete_all
+  end
+
   def get_all_with_associations(query \\ Archive) do
     query
     |> preload(:camera)

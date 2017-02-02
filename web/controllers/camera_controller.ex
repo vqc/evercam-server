@@ -351,6 +351,7 @@ defmodule EvercamMedia.CameraController do
     MotionDetection.delete_by_camera_id(camera.id)
     CameraShare.delete_by_camera_id(camera.id)
     CameraShareRequest.delete_by_camera_id(camera.id)
+    Archive.delete_by_camera(camera.id)
     Camera.delete_by_id(camera.id)
   end
 
