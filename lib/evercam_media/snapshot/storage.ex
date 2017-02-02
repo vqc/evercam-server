@@ -274,15 +274,15 @@ defmodule EvercamMedia.Snapshot.Storage do
     "#{path}/#{archive_id}.mp4"
     |> File.open([:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
     |> case do
-      {:ok, content} -> seaweedfs_save_video_file(camera_exid, archive_id, path, content)
+      {:ok, content} -> seaweedfs_save_video_file(camera_exid, archive_id, content)
       {:error, _error} -> {:error, "Failed to read video file."}
     end
   end
 
-  def seaweedfs_save_video_file(camera_exid, archive_id, path, content) do
+  def seaweedfs_save_video_file(camera_exid, archive_id, content) do
     hackney = [pool: :seaweedfs_upload_pool]
-    file_path = "#{path}/#{archive_id}.mp4"
-    post_url = "#{@seaweedfs}/#{camera_exid}/clips/#{archive_id}.mp4"
+    file_path = "/#{camera_exid}/clips/#{archive_id}.mp4"
+    post_url = "#{@seaweedfs}#{file_path}"
     case HTTPoison.post(post_url, {:multipart, [{file_path, content, []}]}, [], hackney: hackney) do
       {:ok, _response} -> :noop
       {:error, error} -> Logger.info "[save_video] [#{camera_exid}] [#{archive_id}] [#{inspect error}]"
@@ -297,6 +297,32 @@ defmodule EvercamMedia.Snapshot.Storage do
       {:ok, _response} -> :noop
       {:error, error} -> Logger.info "[archive_delete] [#{camera_exid}] [#{archive_id}] [#{inspect error}]"
     end
+  end
+
+  def import_archive_to_seaweed(max_id) do
+    Archive.get_all_with_associations
+    |> Enum.filter(fn(archive) -> archive.id < max_id end)
+    |> Enum.each(fn(archive) ->
+      mp4_url = "http://timelapse.evercam.io/timelapses/#{archive.camera.exid}/archives/#{archive.exid}.mp4"
+      case HTTPoison.get(mp4_url, [], hackney: [pool: :seaweedfs_download_pool]) do
+        {:ok, %HTTPoison.Response{status_code: 200, body: video}} ->
+          file_path = "/#{archive.camera.exid}/clips/#{archive.exid}.mp4"
+          upload_url = "#{@seaweedfs}#{file_path}"
+          hackney = [pool: :seaweedfs_upload_pool]
+          case HTTPoison.head(upload_url, [], hackney: hackney) do
+            {:ok, %HTTPoison.Response{status_code: 200}} ->
+              HTTPoison.put!(upload_url, {:multipart, [{file_path, video, []}]}, [], hackney: hackney)
+            {:ok, %HTTPoison.Response{status_code: 404}} ->
+              HTTPoison.post!(upload_url, {:multipart, [{file_path, video, []}]}, [], hackney: hackney)
+            _error ->
+              :noop
+          end
+          Logger.info "[archive_import] [success] [#{archive.camera.exid}] [#{archive.exid}]"
+        error ->
+          Logger.info "[archive_import] [error] [#{archive.camera.exid}] [#{archive.exid}] [#{inspect error}]"
+          {:error, :not_found}
+      end
+    end)
   end
 
   def load(camera_exid, timestamp, notes) when notes in [nil, ""] do
