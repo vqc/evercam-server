@@ -86,6 +86,20 @@ defmodule EvercamMedia.SnapshotController do
     end
   end
 
+  def oldest(conn, %{"id" => camera_exid} = _params) do
+    case old_snapshot(camera_exid, conn.assigns[:current_user]) do
+      {200, response} ->
+        data = "data:image/jpeg;base64,#{Base.encode64(response[:image])}"
+
+        conn
+        |> json(%{data: data, status: "ok"})
+      {code, response} ->
+        conn
+        |> put_status(code)
+        |> json(response)
+    end
+  end
+
   def nearest(conn, %{"id" => camera_exid, "timestamp" => timestamp} = _params) do
     timestamp = convert_timestamp(timestamp)
     camera = Camera.get_full(camera_exid)
@@ -242,6 +256,18 @@ defmodule EvercamMedia.SnapshotController do
   ######################
   ## Fetch functions  ##
   ######################
+
+  defp old_snapshot(camera_exid, user) do
+    camera = Camera.get_full(camera_exid)
+    with true <- Permission.Camera.can_snapshot?(user, camera),
+         {:ok, image} <- Storage.oldest_snapshot(camera_exid)
+    do
+      {200, %{image: image}}
+    else
+      {:error, error_image} -> {404, %{image: error_image}}
+      false -> {403, %{message: "Forbidden"}}
+    end
+  end
 
   defp snapshot_with_user(camera_exid, user, store_snapshot, notes \\ "") do
     camera = Camera.get_full(camera_exid)
