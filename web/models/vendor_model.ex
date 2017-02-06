@@ -78,8 +78,8 @@ defmodule VendorModel do
   def get_all(query \\ VendorModel) do
     query
     |> order_by([vm], asc: vm.name)
+    |> preload(:vendor)
     |> Repo.all
-    |> Repo.preload(:vendor)
   end
 
   def check_vendor_in_query(query, vendor) when vendor in [nil, ""], do: query
