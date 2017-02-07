@@ -11,6 +11,12 @@ defmodule Vendor do
     field :known_macs, EvercamMedia.Types.JSON
   end
 
+  def by_exid_without_associations(exid) do
+    Vendor
+    |> where(exid: ^String.downcase(exid))
+    |> Repo.one
+  end
+
   def by_exid(exid) do
     Vendor
     |> where(exid: ^String.downcase(exid))

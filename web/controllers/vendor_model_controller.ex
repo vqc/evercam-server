@@ -44,8 +44,8 @@ defmodule EvercamMedia.VendorModelController do
 
   defp vendor_exists(_conn, vendor_id) when vendor_id in [nil, ""], do: {:ok, nil}
   defp vendor_exists(conn, vendor_id) do
-    case Vendor.by_exid(vendor_id) do
-      nil -> render_error(conn, 404, "model vendor not found.")
+    case Vendor.by_exid_without_associations(vendor_id) do
+      nil -> render_error(conn, 404, "Vendor not found.")
       %Vendor{} = vendor -> {:ok, vendor}
     end
   end
