@@ -257,11 +257,11 @@ defmodule EvercamMedia.Snapshot.Storage do
     url = "#{@seaweedfs}/#{camera_exid}/snapshots/archives/"
     hackney = [pool: :seaweedfs_download_pool]
     with {:year, year} <- oldest_directory_name(:year, url),
-         {:month, month} <- oldest_directory_name(:month, url <> "#{year}/"),
-         {:day, day} <- oldest_directory_name(:day, url <> "#{year}/" <> "#{month}/"),
-         {:hour, hour} <- oldest_directory_name(:hour, url <> "#{year}/" <> "#{month}/" <> "#{day}/"),
-         {:image, oldest_image} <- oldest_directory_name(:image, url <> "#{year}/" <> "#{month}/" <> "#{day}/" <> "#{hour}/?limit=3600", "Files", "name") do
-      case HTTPoison.get(url <> "#{year}/" <> "#{month}/" <> "#{day}/" <> "#{hour}/" <> "#{oldest_image}", [], hackney: hackney) do
+         {:month, month} <- oldest_directory_name(:month, "#{url}#{year}/"),
+         {:day, day} <- oldest_directory_name(:day, "#{url}#{year}/#{month}/"),
+         {:hour, hour} <- oldest_directory_name(:hour, "#{url}#{year}/#{month}/#{day}/"),
+         {:image, oldest_image} <- oldest_directory_name(:image, "#{url}#{year}/#{month}/#{day}/#{hour}/?limit=3600", "Files", "name") do
+      case HTTPoison.get("#{url}#{year}/#{month}/#{day}/#{hour}/#{oldest_image}", [], hackney: hackney) do
         {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
           {:ok, body}
         {:error, %HTTPoison.Error{reason: reason}} ->
