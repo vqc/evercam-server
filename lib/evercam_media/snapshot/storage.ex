@@ -253,10 +253,33 @@ defmodule EvercamMedia.Snapshot.Storage do
     end
   end
 
+  def oldest_snapshot(camera_exid) do
+    url = "#{@seaweedfs}/#{camera_exid}/snapshots/archives/"
+    hackney = [pool: :seaweedfs_download_pool]
+    with {:year, year} <- oldest_directory_name(:year, url),
+         {:month, month} <- oldest_directory_name(:month, "#{url}#{year}/"),
+         {:day, day} <- oldest_directory_name(:day, "#{url}#{year}/#{month}/"),
+         {:hour, hour} <- oldest_directory_name(:hour, "#{url}#{year}/#{month}/#{day}/"),
+         {:image, oldest_image} <- oldest_directory_name(:image, "#{url}#{year}/#{month}/#{day}/#{hour}/?limit=3600", "Files", "name") do
+      case HTTPoison.get("#{url}#{year}/#{month}/#{day}/#{hour}/#{oldest_image}", [], hackney: hackney) do
+        {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+          {:ok, body}
+        {:error, %HTTPoison.Error{reason: reason}} ->
+          {:error, reason}
+      end
+    else
+      _ -> {:error, "Not Found."}
+    end
+  end
+
   def save(camera_exid, _timestamp, image, "Evercam Thumbnail"), do: thumbnail_save(camera_exid, image)
   def save(camera_exid, timestamp, image, notes) do
     seaweedfs_save(camera_exid, timestamp, image, notes)
     thumbnail_save(camera_exid, image)
+  end
+
+  defp oldest_directory_name(directory, url, type \\ "Subdirectories", attribute \\ "Name") do
+    {directory, request_from_seaweedfs(url, type, attribute) |> Enum.sort(&(&2 > &1)) |> List.first}
   end
 
   defp thumbnail_save(camera_exid, image) do
