@@ -255,15 +255,13 @@ defmodule EvercamMedia.Snapshot.Storage do
 
   def oldest_snapshot(camera_exid) do
     url = "#{@seaweedfs}/#{camera_exid}/snapshots/archives/"
-    hackney = [pool: :seaweedfs_upload_pool]
-    with {:year, year} <- oldest_year(url),
-         {:month, month} <- oldest_month(url <> "#{year}/"),
-         {:day, day} <- oldest_day(url <> "#{year}/" <> "#{month}/"),
-         {:hour, hour} <- oldest_hour(url <> "#{year}/" <> "#{month}/" <> "#{day}/"),
-         {:image, oldest_image} <- oldest_image(url <> "#{year}/" <> "#{month}/" <> "#{day}/" <> "#{hour}/?limit=3600") do
+    hackney = [pool: :seaweedfs_download_pool]
+    with {:year, year} <- past_timespan(:year, %{url: url, type: "Subdirectories", attribute: "Name"}),
+         {:month, month} <- past_timespan(:month, %{url: url <> "#{year}/", type: "Subdirectories", attribute: "Name"}),
+         {:day, day} <- past_timespan(:day, %{url: url <> "#{year}/" <> "#{month}/", type: "Subdirectories", attribute: "Name"}),
+         {:hour, hour} <- past_timespan(:hour, %{url: url <> "#{year}/" <> "#{month}/" <> "#{day}/", type: "Subdirectories", attribute: "Name"}),
+         {:image, oldest_image} <- past_timespan(:image, %{url: url <> "#{year}/" <> "#{month}/" <> "#{day}/" <> "#{hour}/?limit=3600", type: "Files", attribute: "name"}) do
       case HTTPoison.get(url <> "#{year}/" <> "#{month}/" <> "#{day}/" <> "#{hour}/" <> "#{oldest_image}", [], hackney: hackney) do
-        {:ok, %HTTPoison.Response{status_code: 301}} ->
-          {:error, "Not Found."}
         {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
           {:ok, body}
         {:error, %HTTPoison.Error{reason: reason}} ->
@@ -280,24 +278,8 @@ defmodule EvercamMedia.Snapshot.Storage do
     thumbnail_save(camera_exid, image)
   end
 
-  defp oldest_year(year_url) do
-    {:year, request_from_seaweedfs(year_url, "Subdirectories", "Name") |> Enum.sort(&(&2 > &1)) |> List.first}
-  end
-
-  defp oldest_month(month_url) do
-    {:month, request_from_seaweedfs(month_url, "Subdirectories", "Name") |> Enum.sort(&(&2 > &1)) |> List.first}
-  end
-
-  defp oldest_day(day_url) do
-    {:day, request_from_seaweedfs(day_url, "Subdirectories", "Name") |> Enum.sort(&(&2 > &1)) |> List.first}
-  end
-
-  defp oldest_hour(hour_url) do
-    {:hour, request_from_seaweedfs(hour_url, "Subdirectories", "Name") |> Enum.sort(&(&2 > &1)) |> List.first}
-  end
-
-  defp oldest_image(image_url) do
-    {:image, request_from_seaweedfs(image_url, "Files", "name") |> Enum.sort(&(&2 > &1)) |> List.first}
+  defp past_timespan(timespan, %{url: url, type: type, attribute: attribute}) do
+    {timespan, request_from_seaweedfs(url, "#{type}", "#{attribute}") |> Enum.sort(&(&2 > &1)) |> List.first}
   end
 
   defp thumbnail_save(camera_exid, image) do
