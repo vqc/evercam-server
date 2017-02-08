@@ -29,9 +29,9 @@ defmodule EvercamMedia.CloudRecordingController do
         schedule: get_json(params["schedule"])
       }
 
-      cloud_recording = camera.cloud_recordings || %CloudRecording{}
+      old_cloud_recording = camera.cloud_recordings || %CloudRecording{}
       action_log = get_action_log(camera.cloud_recordings)
-      case cloud_recording |> CloudRecording.changeset(cr_params) |> Repo.insert_or_update do
+      case old_cloud_recording |> CloudRecording.changeset(cr_params) |> Repo.insert_or_update do
         {:ok, cloud_recording} ->
           camera = camera |> Repo.preload(:cloud_recordings, force: true)
           Camera.invalidate_camera(camera)
@@ -41,11 +41,23 @@ defmodule EvercamMedia.CloudRecordingController do
           |> WorkerSupervisor.update_worker(camera)
 
           CameraActivity.log_activity(current_user, camera, "cloud recordings #{action_log}", %{ip: user_request_ip(conn), status: cloud_recording.status, storage_duration: cloud_recording.storage_duration, frequency: cloud_recording.frequency})
+          send_email_on_cr_change(Application.get_env(:evercam_media, :run_spawn), current_user, camera, cloud_recording, old_cloud_recording, user_request_ip(conn))
           conn
           |> render("cloud_recording.json", %{cloud_recording: cloud_recording})
         {:error, changeset} ->
           render_error(conn, 400, changeset)
       end
+    end
+  end
+
+  defp send_email_on_cr_change(false, _current_user, _camera, _cloud_recording, _old_cloud_recording, _user_request_ip), do: :noop
+  defp send_email_on_cr_change(true, current_user, camera, cloud_recording, old_cloud_recording, user_request_ip) do
+    try do
+      Task.start(fn ->
+        EvercamMedia.UserMailer.cr_settings_changed(camera.owner, current_user, camera, cloud_recording, old_cloud_recording, user_request_ip)
+      end)
+    catch _type, error ->
+      Util.error_handler(error)
     end
   end
 
