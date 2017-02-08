@@ -158,7 +158,7 @@ defmodule EvercamMedia.ArchiveController do
         case Repo.insert(changeset) do
           {:ok, archive} ->
             CameraActivity.log_activity(current_user, camera, "archive created", %{ip: user_request_ip(conn)})
-            spawn(fn -> start_archive_creation(archive.exid) end)
+            start_archive_creation(Application.get_env(:evercam_media, :run_spawn), archive.exid)
             render(conn |> put_status(:created), ArchiveView, "show.json", %{archive: archive |> Repo.preload(:camera) |> Repo.preload(:user)})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
@@ -200,15 +200,18 @@ defmodule EvercamMedia.ArchiveController do
     end
   end
 
-  defp start_archive_creation(archive_id) do
-    case Process.whereis(:archive_creator) do
-      nil ->
-        {:ok, pid} = GenServer.start_link(EvercamMedia.ArchiveCreator.ArchiveCreator, {}, name: :archive_creator)
-        GenServer.cast(pid, {:create_archive, archive_id})
-      pid ->
-        GenServer.cast(pid, {:create_archive, archive_id})
+  defp start_archive_creation(true, archive_id) do
+    spawn fn ->
+      case Process.whereis(:archive_creator) do
+        nil ->
+          {:ok, pid} = GenServer.start_link(EvercamMedia.ArchiveCreator.ArchiveCreator, {}, name: :archive_creator)
+          GenServer.cast(pid, {:create_archive, archive_id})
+        pid ->
+          GenServer.cast(pid, {:create_archive, archive_id})
+      end
     end
   end
+  defp start_archive_creation(_mode, _archive_id), do: :noop
 
   defp ensure_camera_exists(nil, exid, conn) do
     render_error(conn, 404, "Camera '#{exid}' not found!")
