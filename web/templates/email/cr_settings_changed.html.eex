@@ -66,7 +66,7 @@
             <p class="lead" style="line-height: 1.6; margin: 0 0 10px; padding: 0;">Hi <%= full_name(@owner) %>, </p>
             <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">Cloud recording for your camera <a style="color:#428bca; text-decoration:none;" href="https://dash.evercam.io/v1/cameras/<%= @camera.exid %>"><%= @camera.name %></a> has been updated by <%= full_name(@current_user) %> [ip: <%= @user_request_ip %>].<br>See the changes below.
             </p>
-            <% if @old_cloud_recording do %>
+            <%= if @old_cloud_recording do %>
             <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">
               Your past cloud recording settings:
               <table>
@@ -92,7 +92,7 @@
             </p>
             <% end %>
             <br>
-            <% if @cloud_recording do %>
+            <%= if @cloud_recording do %>
             <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">
               Your new cloud recording settings:
               <table>
