@@ -54,7 +54,7 @@ defmodule EvercamMedia.CloudRecordingController do
   defp send_email_on_cr_change(true, current_user, camera, cloud_recording, old_cloud_recording, user_request_ip) do
     try do
       Task.start(fn ->
-        EvercamMedia.UserMailer.cr_settings_changed(camera.owner, current_user, camera, cloud_recording, old_cloud_recording, user_request_ip)
+        EvercamMedia.UserMailer.cr_settings_changed(current_user, camera, cloud_recording, old_cloud_recording, user_request_ip)
       end)
     catch _type, error ->
       Util.error_handler(error)

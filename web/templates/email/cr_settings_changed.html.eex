@@ -63,8 +63,8 @@
         <table style="font-family: Arial, Helvetica, sans-serif; width: 100%; margin: 0; padding: 0;"><tr style="font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0;">
           <td style="font-family: Arial, Helvetica, sans-serif; font-weight: normal; font-size: 14px; margin: 0; padding: 0;">
 
-            <p class="lead" style="line-height: 1.6; margin: 0 0 10px; padding: 0;">Hi <%= full_name(@owner) %>, </p>
-            <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">Cloud recording for your camera <a style="color:#428bca; text-decoration:none;" href="https://dash.evercam.io/v1/cameras/<%= @camera.exid %>"><%= @camera.name %></a> has been updated by <%= full_name(@current_user) %> [ip: <%= @user_request_ip %>].<br>See the changes below.
+            <p class="lead" style="line-height: 1.6; margin: 0 0 10px; padding: 0;">Hi Marco Herbst, </p>
+            <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">Cloud recording for camera <a style="color:#428bca; text-decoration:none;" href="https://dash.evercam.io/v1/cameras/<%= @camera.exid %>"><%= @camera.name %></a> has been updated by <%= full_name(@current_user) %> [ip: <%= @user_request_ip %>].<br>See the changes below.
             </p>
             <%= if @old_cloud_recording do %>
             <p style="line-height: 1.6; margin: 0 0 10px; padding: 0;">

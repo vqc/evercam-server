@@ -5,13 +5,13 @@ defmodule EvercamMedia.UserMailer do
   @from Application.get_env(:evercam_media, EvercamMedia.Endpoint)[:email]
   @year Calendar.DateTime.now_utc |> Calendar.Strftime.strftime!("%Y")
 
-  def cr_settings_changed(owner, current_user, camera, cloud_recording, old_cloud_recording, user_request_ip) do
+  def cr_settings_changed(current_user, camera, cloud_recording, old_cloud_recording, user_request_ip) do
     Mailgun.Client.send_email @config,
-      to: owner.email,
+      to: "marco@evercam.io",
       subject: "Cloud Recording has been updated for \"#{camera.name}\"",
       from: @from,
-      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "cr_settings_changed.html", camera: camera, owner: owner, current_user: current_user, cloud_recording: cloud_recording, old_cloud_recording: old_cloud_recording, user_request_ip: user_request_ip, year: @year),
-      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "cr_settings_changed.txt", camera: camera, owner: owner, current_user: current_user, cloud_recording: cloud_recording, old_cloud_recording: old_cloud_recording, user_request_ip: user_request_ip)
+      html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "cr_settings_changed.html", camera: camera, current_user: current_user, cloud_recording: cloud_recording, old_cloud_recording: old_cloud_recording, user_request_ip: user_request_ip, year: @year),
+      text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "cr_settings_changed.txt", camera: camera, current_user: current_user, cloud_recording: cloud_recording, old_cloud_recording: old_cloud_recording, user_request_ip: user_request_ip)
   end
 
   def confirm(user, code) do
