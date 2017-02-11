@@ -77,7 +77,7 @@ defmodule EvercamMedia.Schedule do
     case Calendar.DateTime.from_erl(erl_date_time, timezone) do
       {:ok, datetime} -> datetime |> Calendar.DateTime.Format.unix
       {:ambiguous, datetime} -> datetime.possible_date_times |> hd |> Calendar.DateTime.Format.unix
-      _ -> raise "Timezone conversion error."
+      _ -> raise "Timezone conversion error"
     end
   end
 end
