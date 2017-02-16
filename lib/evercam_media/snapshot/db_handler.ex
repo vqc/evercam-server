@@ -114,12 +114,17 @@ defmodule EvercamMedia.Snapshot.DBHandler do
   def log_camera_status(camera, false, datetime, error_code), do: do_log_camera_status(camera, "offline", datetime, %{reason: error_code})
 
   defp do_log_camera_status(camera, status, datetime, extra \\ nil) do
-    parameters = %{camera_id: camera.id, camera_exid: camera.exid, action: status, done_at: datetime, extra: extra}
-    changeset = CameraActivity.changeset(%CameraActivity{}, parameters)
-    SnapshotRepo.insert(changeset)
-    if camera.is_online_email_owner_notification do
-      EvercamMedia.UserMailer.camera_status(status, camera.owner, camera)
+    spawn fn ->
+      parameters = %{camera_id: camera.id, camera_exid: camera.exid, action: status, done_at: datetime, extra: extra}
+      changeset = CameraActivity.changeset(%CameraActivity{}, parameters)
+      SnapshotRepo.insert(changeset)
+      send_notification(status, camera, camera.alert_emails)
     end
+  end
+
+  defp send_notification(_status, _camera, alert_emails) when alert_emails in [nil, ""], do: :noop
+  defp send_notification(status, camera, _alert_emails) do
+    EvercamMedia.UserMailer.camera_status(status, camera.owner, camera)
   end
 
   defp construct_camera(datetime, online_status, online_status_unchanged)

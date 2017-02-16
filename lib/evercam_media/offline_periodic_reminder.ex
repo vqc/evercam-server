@@ -11,12 +11,12 @@ defmodule EvercamMedia.OfflinePeriodicReminder do
     Calendar.DateTime.now_utc
     |> Calendar.DateTime.advance!(seconds_to_day_before)
     |> Camera.all_offline
-    |> Enum.map(&(can_send_reminder &1, &1.is_online_email_owner_notification, &1.last_online_at))
+    |> Enum.map(&(can_send_reminder &1, &1.alert_emails, &1.last_online_at))
   end
 
-  defp can_send_reminder(_camera, _is_send, nil), do: :noop
-  defp can_send_reminder(_camera, false, _last_online_at), do: :noop
-  defp can_send_reminder(camera, true, _last_online_at) do
+  defp can_send_reminder(_camera, _alert_emails, nil), do: :noop
+  defp can_send_reminder(_camera, alert_emails, _last_online_at) when alert_emails in [nil, ""], do: :noop
+  defp can_send_reminder(camera, _alert_emails, _last_online_at) do
     current_date = Calendar.DateTime.now!("UTC")
     last_online_date =
       camera.last_online_at

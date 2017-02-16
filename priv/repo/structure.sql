@@ -2,16 +2,12 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.4.9
--- Dumped by pg_dump version 9.5.4
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET row_security = off;
 
 --
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
@@ -62,7 +58,7 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: access_rights; Type: TABLE; Schema: public; Owner: -
+-- Name: access_rights; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE access_rights (
@@ -112,7 +108,7 @@ CREATE SEQUENCE sq_access_tokens
 
 
 --
--- Name: access_tokens; Type: TABLE; Schema: public; Owner: -
+-- Name: access_tokens; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE access_tokens (
@@ -141,7 +137,7 @@ CREATE SEQUENCE add_ons_id_seq
 
 
 --
--- Name: add_ons; Type: TABLE; Schema: public; Owner: -
+-- Name: add_ons; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE add_ons (
@@ -161,7 +157,7 @@ CREATE TABLE add_ons (
 
 
 --
--- Name: apps; Type: TABLE; Schema: public; Owner: -
+-- Name: apps; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE apps (
@@ -194,7 +190,7 @@ ALTER SEQUENCE apps_id_seq OWNED BY apps.id;
 
 
 --
--- Name: archives; Type: TABLE; Schema: public; Owner: -
+-- Name: archives; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE archives (
@@ -233,7 +229,7 @@ ALTER SEQUENCE archive_id_seq OWNED BY archives.id;
 
 
 --
--- Name: billing; Type: TABLE; Schema: public; Owner: -
+-- Name: billing; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE billing (
@@ -266,7 +262,7 @@ ALTER SEQUENCE billing_id_seq OWNED BY billing.id;
 
 
 --
--- Name: camera_activities; Type: TABLE; Schema: public; Owner: -
+-- Name: camera_activities; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE camera_activities (
@@ -302,7 +298,7 @@ ALTER SEQUENCE camera_activities_id_seq OWNED BY camera_activities.id;
 
 
 --
--- Name: camera_endpoints; Type: TABLE; Schema: public; Owner: -
+-- Name: camera_endpoints; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE camera_endpoints (
@@ -334,7 +330,7 @@ ALTER SEQUENCE camera_endpoints_id_seq OWNED BY camera_endpoints.id;
 
 
 --
--- Name: camera_share_requests; Type: TABLE; Schema: public; Owner: -
+-- Name: camera_share_requests; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE camera_share_requests (
@@ -371,7 +367,7 @@ ALTER SEQUENCE camera_share_requests_id_seq OWNED BY camera_share_requests.id;
 
 
 --
--- Name: camera_shares; Type: TABLE; Schema: public; Owner: -
+-- Name: camera_shares; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE camera_shares (
@@ -418,7 +414,7 @@ CREATE SEQUENCE sq_streams
 
 
 --
--- Name: cameras; Type: TABLE; Schema: public; Owner: -
+-- Name: cameras; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE cameras (
@@ -439,7 +435,8 @@ CREATE TABLE cameras (
     model_id integer,
     discoverable boolean DEFAULT false NOT NULL,
     thumbnail_url text,
-    is_online_email_owner_notification boolean DEFAULT false NOT NULL
+    is_online_email_owner_notification boolean DEFAULT false NOT NULL,
+    alert_emails text
 );
 
 
@@ -456,7 +453,7 @@ CREATE SEQUENCE sq_clients
 
 
 --
--- Name: clients; Type: TABLE; Schema: public; Owner: -
+-- Name: clients; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE clients (
@@ -472,7 +469,7 @@ CREATE TABLE clients (
 
 
 --
--- Name: cloud_recordings; Type: TABLE; Schema: public; Owner: -
+-- Name: cloud_recordings; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE cloud_recordings (
@@ -517,7 +514,7 @@ CREATE SEQUENCE sq_countries
 
 
 --
--- Name: countries; Type: TABLE; Schema: public; Owner: -
+-- Name: countries; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE countries (
@@ -530,7 +527,7 @@ CREATE TABLE countries (
 
 
 --
--- Name: licences; Type: TABLE; Schema: public; Owner: -
+-- Name: licences; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE licences (
@@ -573,7 +570,42 @@ ALTER SEQUENCE licences_id_seq OWNED BY licences.id;
 
 
 --
--- Name: motion_detections; Type: TABLE; Schema: public; Owner: -
+-- Name: meta_datas; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE meta_datas (
+    id integer NOT NULL,
+    user_id integer,
+    camera_id integer,
+    action text NOT NULL,
+    process_id integer,
+    extra json,
+    inserted_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: meta_datas_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE meta_datas_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: meta_datas_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE meta_datas_id_seq OWNED BY meta_datas.id;
+
+
+--
+-- Name: motion_detections; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE motion_detections (
@@ -617,7 +649,7 @@ ALTER SEQUENCE motion_detections_id_seq OWNED BY motion_detections.id;
 
 
 --
--- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
+-- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE schema_migrations (
@@ -627,7 +659,7 @@ CREATE TABLE schema_migrations (
 
 
 --
--- Name: snapmail_cameras; Type: TABLE; Schema: public; Owner: -
+-- Name: snapmail_cameras; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE snapmail_cameras (
@@ -659,15 +691,15 @@ ALTER SEQUENCE snapmail_cameras_id_seq OWNED BY snapmail_cameras.id;
 
 
 --
--- Name: snapmails; Type: TABLE; Schema: public; Owner: -
+-- Name: snapmails; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE snapmails (
     id integer NOT NULL,
     exid character varying(255) NOT NULL,
-    subject character varying(255) NOT NULL,
-    recipients character varying(255),
-    message character varying(255),
+    subject text NOT NULL,
+    recipients text,
+    message text,
     notify_days character varying(255),
     notify_time character varying(255) NOT NULL,
     is_public boolean DEFAULT false NOT NULL,
@@ -699,7 +731,7 @@ ALTER SEQUENCE snapmails_id_seq OWNED BY snapmails.id;
 
 
 --
--- Name: snapshot_extractors; Type: TABLE; Schema: public; Owner: -
+-- Name: snapshot_extractors; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE snapshot_extractors (
@@ -796,7 +828,7 @@ CREATE SEQUENCE sq_vendors
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -
+-- Name: users; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE users (
@@ -823,7 +855,7 @@ CREATE TABLE users (
 
 
 --
--- Name: vendor_models; Type: TABLE; Schema: public; Owner: -
+-- Name: vendor_models; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE vendor_models (
@@ -859,7 +891,7 @@ CREATE TABLE vendor_models (
 
 
 --
--- Name: vendors; Type: TABLE; Schema: public; Owner: -
+-- Name: vendors; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE vendors (
@@ -873,7 +905,7 @@ CREATE TABLE vendors (
 
 
 --
--- Name: webhooks; Type: TABLE; Schema: public; Owner: -
+-- Name: webhooks; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE webhooks (
@@ -980,6 +1012,13 @@ ALTER TABLE ONLY licences ALTER COLUMN id SET DEFAULT nextval('licences_id_seq':
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY meta_datas ALTER COLUMN id SET DEFAULT nextval('meta_datas_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY motion_detections ALTER COLUMN id SET DEFAULT nextval('motion_detections_id_seq'::regclass);
 
 
@@ -1012,7 +1051,7 @@ ALTER TABLE ONLY webhooks ALTER COLUMN id SET DEFAULT nextval('webhooks_id_seq':
 
 
 --
--- Name: access_rights_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: access_rights_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY access_rights
@@ -1020,7 +1059,7 @@ ALTER TABLE ONLY access_rights
 
 
 --
--- Name: add_ons_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: add_ons_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY add_ons
@@ -1028,7 +1067,7 @@ ALTER TABLE ONLY add_ons
 
 
 --
--- Name: apps_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: apps_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY apps
@@ -1036,7 +1075,7 @@ ALTER TABLE ONLY apps
 
 
 --
--- Name: archives_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: archives_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY archives
@@ -1044,7 +1083,7 @@ ALTER TABLE ONLY archives
 
 
 --
--- Name: billing_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: billing_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY billing
@@ -1052,7 +1091,7 @@ ALTER TABLE ONLY billing
 
 
 --
--- Name: camera_endpoints_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: camera_endpoints_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY camera_endpoints
@@ -1060,7 +1099,7 @@ ALTER TABLE ONLY camera_endpoints
 
 
 --
--- Name: camera_share_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: camera_share_requests_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY camera_share_requests
@@ -1068,7 +1107,7 @@ ALTER TABLE ONLY camera_share_requests
 
 
 --
--- Name: camera_shares_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: camera_shares_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY camera_shares
@@ -1076,7 +1115,7 @@ ALTER TABLE ONLY camera_shares
 
 
 --
--- Name: cloud_recordings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: cloud_recordings_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY cloud_recordings
@@ -1084,7 +1123,7 @@ ALTER TABLE ONLY cloud_recordings
 
 
 --
--- Name: licences_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: licences_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY licences
@@ -1092,7 +1131,15 @@ ALTER TABLE ONLY licences
 
 
 --
--- Name: motion_detections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: meta_datas_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY meta_datas
+    ADD CONSTRAINT meta_datas_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: motion_detections_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY motion_detections
@@ -1100,7 +1147,7 @@ ALTER TABLE ONLY motion_detections
 
 
 --
--- Name: pk_access_tokens; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: pk_access_tokens; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY access_tokens
@@ -1108,7 +1155,7 @@ ALTER TABLE ONLY access_tokens
 
 
 --
--- Name: pk_clients; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: pk_clients; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY clients
@@ -1116,7 +1163,7 @@ ALTER TABLE ONLY clients
 
 
 --
--- Name: pk_countries; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: pk_countries; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY countries
@@ -1124,7 +1171,7 @@ ALTER TABLE ONLY countries
 
 
 --
--- Name: pk_firmwares; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: pk_firmwares; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY vendor_models
@@ -1132,7 +1179,7 @@ ALTER TABLE ONLY vendor_models
 
 
 --
--- Name: pk_streams; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: pk_streams; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY cameras
@@ -1140,7 +1187,7 @@ ALTER TABLE ONLY cameras
 
 
 --
--- Name: pk_users; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: pk_users; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY users
@@ -1148,7 +1195,7 @@ ALTER TABLE ONLY users
 
 
 --
--- Name: pk_vendors; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: pk_vendors; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY vendors
@@ -1156,7 +1203,7 @@ ALTER TABLE ONLY vendors
 
 
 --
--- Name: schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY schema_migrations
@@ -1164,7 +1211,7 @@ ALTER TABLE ONLY schema_migrations
 
 
 --
--- Name: snapmail_cameras_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: snapmail_cameras_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY snapmail_cameras
@@ -1172,7 +1219,7 @@ ALTER TABLE ONLY snapmail_cameras
 
 
 --
--- Name: snapmails_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: snapmails_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY snapmails
@@ -1180,7 +1227,7 @@ ALTER TABLE ONLY snapmails
 
 
 --
--- Name: snapshot_extractors_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: snapshot_extractors_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY snapshot_extractors
@@ -1188,7 +1235,7 @@ ALTER TABLE ONLY snapshot_extractors
 
 
 --
--- Name: webhooks_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: webhooks_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY webhooks
@@ -1196,161 +1243,161 @@ ALTER TABLE ONLY webhooks
 
 
 --
--- Name: access_rights_camera_id_index; Type: INDEX; Schema: public; Owner: -
+-- Name: access_rights_camera_id_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX access_rights_camera_id_index ON access_rights USING btree (camera_id);
 
 
 --
--- Name: access_rights_token_id_camera_id_right_index; Type: INDEX; Schema: public; Owner: -
+-- Name: access_rights_token_id_camera_id_right_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX access_rights_token_id_camera_id_right_index ON access_rights USING btree (token_id, camera_id, "right");
 
 
 --
--- Name: access_rights_token_id_index; Type: INDEX; Schema: public; Owner: -
+-- Name: access_rights_token_id_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX access_rights_token_id_index ON access_rights USING btree (token_id);
 
 
 --
--- Name: camera_activities_camera_id_done_at_index; Type: INDEX; Schema: public; Owner: -
+-- Name: camera_activities_camera_id_done_at_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX camera_activities_camera_id_done_at_index ON camera_activities USING btree (camera_id, done_at);
 
 
 --
--- Name: camera_endpoints_camera_id_scheme_host_port_index; Type: INDEX; Schema: public; Owner: -
+-- Name: camera_endpoints_camera_id_scheme_host_port_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX camera_endpoints_camera_id_scheme_host_port_index ON camera_endpoints USING btree (camera_id, scheme, host, port);
 
 
 --
--- Name: camera_share_requests_camera_id_email_index; Type: INDEX; Schema: public; Owner: -
+-- Name: camera_share_requests_camera_id_email_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX camera_share_requests_camera_id_email_index ON camera_share_requests USING btree (camera_id, email);
 
 
 --
--- Name: camera_share_requests_key_index; Type: INDEX; Schema: public; Owner: -
+-- Name: camera_share_requests_key_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX camera_share_requests_key_index ON camera_share_requests USING btree (key);
 
 
 --
--- Name: camera_shares_camera_id_index; Type: INDEX; Schema: public; Owner: -
+-- Name: camera_shares_camera_id_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX camera_shares_camera_id_index ON camera_shares USING btree (camera_id);
 
 
 --
--- Name: camera_shares_camera_id_user_id_index; Type: INDEX; Schema: public; Owner: -
+-- Name: camera_shares_camera_id_user_id_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX camera_shares_camera_id_user_id_index ON camera_shares USING btree (camera_id, user_id);
 
 
 --
--- Name: camera_shares_user_id_index; Type: INDEX; Schema: public; Owner: -
+-- Name: camera_shares_user_id_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX camera_shares_user_id_index ON camera_shares USING btree (user_id);
 
 
 --
--- Name: cameras_exid_index; Type: INDEX; Schema: public; Owner: -
+-- Name: cameras_exid_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX cameras_exid_index ON cameras USING btree (exid);
 
 
 --
--- Name: cameras_mac_address_index; Type: INDEX; Schema: public; Owner: -
+-- Name: cameras_mac_address_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX cameras_mac_address_index ON cameras USING btree (mac_address);
 
 
 --
--- Name: cloud_recordings_camera_id_index; Type: INDEX; Schema: public; Owner: -
+-- Name: cloud_recordings_camera_id_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX cloud_recordings_camera_id_index ON cloud_recordings USING btree (camera_id);
 
 
 --
--- Name: country_code_unique_index; Type: INDEX; Schema: public; Owner: -
+-- Name: country_code_unique_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX country_code_unique_index ON countries USING btree (iso3166_a2);
 
 
 --
--- Name: exid_unique_index; Type: INDEX; Schema: public; Owner: -
+-- Name: exid_unique_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX exid_unique_index ON snapmails USING btree (exid);
 
 
 --
--- Name: ix_access_tokens_grantee_id; Type: INDEX; Schema: public; Owner: -
+-- Name: ix_access_tokens_grantee_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX ix_access_tokens_grantee_id ON access_tokens USING btree (client_id);
 
 
 --
--- Name: ix_access_tokens_grantor_id; Type: INDEX; Schema: public; Owner: -
+-- Name: ix_access_tokens_grantor_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX ix_access_tokens_grantor_id ON access_tokens USING btree (user_id);
 
 
 --
--- Name: ix_firmwares_vendor_id; Type: INDEX; Schema: public; Owner: -
+-- Name: ix_firmwares_vendor_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX ix_firmwares_vendor_id ON vendor_models USING btree (vendor_id);
 
 
 --
--- Name: ix_streams_owner_id; Type: INDEX; Schema: public; Owner: -
+-- Name: ix_streams_owner_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX ix_streams_owner_id ON cameras USING btree (owner_id);
 
 
 --
--- Name: ix_users_country_id; Type: INDEX; Schema: public; Owner: -
+-- Name: ix_users_country_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX ix_users_country_id ON users USING btree (country_id);
 
 
 --
--- Name: snapemail_camera_id_unique_index; Type: INDEX; Schema: public; Owner: -
+-- Name: snapemail_camera_id_unique_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX snapemail_camera_id_unique_index ON snapmail_cameras USING btree (snapmail_id, camera_id);
 
 
 --
--- Name: user_email_unique_index; Type: INDEX; Schema: public; Owner: -
+-- Name: user_email_unique_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX user_email_unique_index ON users USING btree (email);
 
 
 --
--- Name: user_username_unique_index; Type: INDEX; Schema: public; Owner: -
+-- Name: user_username_unique_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX user_username_unique_index ON users USING btree (username);
@@ -1362,6 +1409,22 @@ CREATE UNIQUE INDEX user_username_unique_index ON users USING btree (username);
 
 ALTER TABLE ONLY licences
     ADD CONSTRAINT licences_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
+
+
+--
+-- Name: meta_datas_camera_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY meta_datas
+    ADD CONSTRAINT meta_datas_camera_id_fkey FOREIGN KEY (camera_id) REFERENCES cameras(id);
+
+
+--
+-- Name: meta_datas_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY meta_datas
+    ADD CONSTRAINT meta_datas_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id);
 
 
 --
@@ -1400,5 +1463,5 @@ ALTER TABLE ONLY snapshot_extractors
 -- PostgreSQL database dump complete
 --
 
-INSERT INTO "schema_migrations" (version) VALUES (20160616160229), (20160712101523), (20160720125939), (20160727112052), (20160829112743), (20160830055709), (20161202114834), (20161202115000), (20161213162000), (20161219130300), (20161221065710), (20161221070146), (20161221070226);
+INSERT INTO "schema_migrations" (version) VALUES (20160616160229), (20160712101523), (20160720125939), (20160727112052), (20160829112743), (20160830055709), (20161202114834), (20161202115000), (20161213162000), (20161219130300), (20161221070146), (20161221070226), (20170103162400), (20170112110000), (20170213140200);
 

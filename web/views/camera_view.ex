@@ -32,7 +32,7 @@ defmodule EvercamMedia.CameraView do
       updated_at: Util.ecto_datetime_to_unix(camera.updated_at),
       last_polled_at: Util.ecto_datetime_to_unix(camera.last_polled_at),
       last_online_at: Util.ecto_datetime_to_unix(camera.last_online_at),
-      is_online_email_owner_notification: camera.is_online_email_owner_notification,
+      is_online_email_owner_notification: is_send_notification?(camera.alert_emails, user.email),
       is_online: camera.is_online,
       is_public: camera.is_public,
       discoverable: camera.discoverable,
@@ -88,6 +88,11 @@ defmodule EvercamMedia.CameraView do
 
   defp thumbnail_url(camera) do
     EvercamMedia.Endpoint.static_url <> "/v1/cameras/" <> camera.exid <> "/thumbnail"
+  end
+
+  defp is_send_notification?(emails, _caller_email) when emails in [nil, ""], do: false
+  defp is_send_notification?(emails, caller_email) do
+    String.contains?(emails, caller_email)
   end
 
   defp cloud_recording(nil), do: nil

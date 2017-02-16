@@ -1,4 +1,4 @@
-Hi <%= full_name(@user) %>,
+Hi,
 
 Your camera "<%= @camera.name %>" went offline.
 

@@ -9,7 +9,7 @@ defmodule Camera do
   @mac_address_regex ~r/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/
 
   @required_fields ~w(name owner_id config is_public is_online_email_owner_notification)
-  @optional_fields ~w(exid timezone thumbnail_url is_online last_polled_at last_online_at updated_at created_at model_id location mac_address discoverable)
+  @optional_fields ~w(exid timezone thumbnail_url is_online last_polled_at alert_emails last_online_at updated_at created_at model_id location mac_address discoverable)
 
   schema "cameras" do
     belongs_to :owner, User, foreign_key: :owner_id
@@ -26,6 +26,7 @@ defmodule Camera do
     field :is_online, :boolean
     field :is_public, :boolean, default: false
     field :is_online_email_owner_notification, :boolean, default: false
+    field :alert_emails, :string
     field :discoverable, :boolean, default: false
     field :config, EvercamMedia.Types.JSON
     field :mac_address, EvercamMedia.Types.MACADDR

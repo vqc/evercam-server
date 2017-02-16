@@ -102,7 +102,7 @@ defmodule EvercamMedia.CameraController do
     with :ok <- camera_exists(conn, exid, camera),
          :ok <- user_has_rights(conn, caller, camera)
     do
-      camera_changeset = camera_update_changeset(camera, params)
+      camera_changeset = camera_update_changeset(camera, params, caller.email)
       case Repo.update(camera_changeset) do
         {:ok, camera} ->
           Camera.invalidate_camera(camera)
@@ -147,7 +147,7 @@ defmodule EvercamMedia.CameraController do
     do
       params
       |> Map.merge(%{"owner_id" => caller.id})
-      |> camera_create_changeset
+      |> camera_create_changeset(caller.email)
       |> Repo.insert
       |> case do
         {:ok, camera} ->
@@ -264,19 +264,21 @@ defmodule EvercamMedia.CameraController do
     end
   end
 
-  defp camera_update_changeset(camera, params) do
+  defp camera_update_changeset(camera, params, caller_email) do
     camera_params =
       %{config: Map.get(camera, :config)}
       |> construct_camera_parameters("update", params)
+      |> add_alert_email(camera.alert_emails, caller_email, params["is_online_email_owner_notification"])
 
     Camera.changeset(camera, camera_params)
   end
 
-  defp camera_create_changeset(params) do
+  defp camera_create_changeset(params, caller_email) do
     camera_params =
       %{config: %{"snapshots" => %{}}}
       |> add_parameter("field", :owner_id, params["owner_id"])
       |> construct_camera_parameters("create", params)
+      |> add_alert_email([], caller_email, params["is_online_email_owner_notification"])
 
     Camera.changeset(%Camera{}, camera_params)
   end
@@ -291,7 +293,6 @@ defmodule EvercamMedia.CameraController do
     |> add_parameter("field", :mac_address, params["mac_address"])
     |> add_parameter("field", :is_online, params["is_online"])
     |> add_parameter("field", :discoverable, params["discoverable"])
-    |> add_parameter("field", :is_online_email_owner_notification, params["is_online_email_owner_notification"])
     |> add_parameter("field", :location_lng, params["location_lng"])
     |> add_parameter("field", :location_lat, params["location_lat"])
     |> add_parameter("field", :is_public, params["is_public"])
@@ -310,6 +311,27 @@ defmodule EvercamMedia.CameraController do
     |> add_parameter("auth", "username", params["cam_username"])
     |> add_parameter("auth", "password", params["cam_password"])
   end
+
+  defp add_alert_email(params, emails, caller_email, send_notification) when send_notification in [true, "true"] do
+    alert_emails =
+      emails
+      |> Util.get_list
+      |> Enum.reject(fn(email) -> email == caller_email end)
+      |> List.insert_at(-1, caller_email)
+      |> Enum.join(",")
+
+    add_parameter(params, "field", :alert_emails, alert_emails)
+  end
+  defp add_alert_email(params, emails, caller_email, send_notification) when send_notification in [false, "false"] do
+    alert_emails =
+      emails
+      |> Util.get_list
+      |> Enum.reject(fn(email) -> email == caller_email end)
+      |> Enum.join(",")
+
+    add_parameter(params, "field", :alert_emails, alert_emails)
+  end
+  defp add_alert_email(params, _emails, _caller_email, _send_notification), do: params
 
   defp add_parameter(params, _field, _key, nil), do: params
   defp add_parameter(params, "field", key, value) do

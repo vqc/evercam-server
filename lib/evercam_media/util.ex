@@ -103,6 +103,12 @@ defmodule EvercamMedia.Util do
     |> Calendar.DateTime.Format.unix
   end
 
+  def get_list(values) when values in [nil, ""], do: []
+  def get_list(values) do
+    values
+    |> String.split(",", trim: true)
+  end
+
   def parse_changeset(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn
       {msg, opts} -> String.replace(msg, "%{count}", to_string(opts[:count]))
