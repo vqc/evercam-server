@@ -10,6 +10,7 @@ defmodule EvercamMedia.UserMailer do
       to: "marco@evercam.io",
       subject: "Cloud Recording has been updated for \"#{camera.name}\"",
       from: @from,
+      bcc: "vinnie@evercam.io",
       html: Phoenix.View.render_to_string(EvercamMedia.EmailView, "cr_settings_changed.html", camera: camera, current_user: current_user, cloud_recording: cloud_recording, old_cloud_recording: old_cloud_recording, user_request_ip: user_request_ip, year: @year),
       text: Phoenix.View.render_to_string(EvercamMedia.EmailView, "cr_settings_changed.txt", camera: camera, current_user: current_user, cloud_recording: cloud_recording, old_cloud_recording: old_cloud_recording, user_request_ip: user_request_ip)
   end
