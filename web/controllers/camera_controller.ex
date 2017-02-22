@@ -393,8 +393,7 @@ defmodule EvercamMedia.CameraController do
       username: Camera.username(camera),
       password: Camera.password(camera),
       vendor_exid: Camera.get_vendor_attr(camera, :exid),
-      timestamp: Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc),
-      notes: "Evercam Thumbnail"
+      timestamp: Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
     }
     timestamp = Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
     response = CamClient.fetch_snapshot(args)
@@ -413,6 +412,7 @@ defmodule EvercamMedia.CameraController do
   defp send_email_notification(true, user, camera) do
     try do
       spawn fn ->
+        WorkerSupervisor.start_worker(camera)
         mac_address = insert_mac_address(camera)
         create_thumbnail(camera, mac_address)
         EvercamMedia.UserMailer.camera_create_notification(user, camera)
