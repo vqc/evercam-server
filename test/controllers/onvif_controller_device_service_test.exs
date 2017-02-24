@@ -30,7 +30,6 @@ defmodule EvercamMedia.ONVIFControllerDeviceServiceTest do
     end
   end
 
-  @tag :skip
   test "GET /v1/onvif/v20/device_service/GetCapabilities, returns meaningful info", context do
     use_cassette "get_capabilities" do
       conn = get build_conn(), "/v1/onvif/v20/device_service/GetCapabilities?#{@access_params}&api_id=#{context[:user].api_id}&api_key=#{context[:user].api_key}"
