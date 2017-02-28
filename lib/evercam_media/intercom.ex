@@ -25,7 +25,13 @@ defmodule EvercamMedia.Intercom do
       "last_seen_user_agent": user_agent,
       "last_request_at": user.created_at |> Util.ecto_datetime_to_unix,
       "last_seen_ip": requester_ip,
-      "signed_up_at": user.created_at |> Util.ecto_datetime_to_unix
+      "signed_up_at": user.created_at |> Util.ecto_datetime_to_unix,
+      "custom_attributes": %{
+        "viewed_camera": 0,
+        "viewed_recordings": 0,
+        "has_shared": false,
+        "has_snapmail": false
+      }
     }
     json =
       case Poison.encode(intercom_new_user) do
