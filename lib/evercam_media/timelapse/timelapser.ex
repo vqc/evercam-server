@@ -149,15 +149,21 @@ defmodule EvercamMedia.Timelapse.Timelapser do
     case try_snapshot(config, 1) do
       {:ok, image} ->
         send worker, {:camera_reply, config.camera_exid, image, timestamp}
+        images_index = config.file_index
+        source_path = "#{@root_dir}/#{state.config.camera_exid}/timelapse/#{state.name}/images/#{images_index}.jpg"
+        File.write("#{path}#{index}.jpg", image)
         cond do
-          !config.hls_created && images > 25 -> create_hls(state)
-          !config.hls_created && images == 24 ->
+          !config.hls_created && images_index > 25 -> create_hls(state)
+          !config.hls_created && images_index == 24 ->
             state
             |> create_hls
             |> clean_images
-          !config.hls_created && images > 0 && images < 25 ->
-
+          !config.hls_created && images_index > 0 && images_index < 25 ->
+            false
+          true ->
+            true
         end
+        config.file_index = images_index + 1
       {:error, _error} ->
         false
     end
@@ -184,7 +190,7 @@ defmodule EvercamMedia.Timelapse.Timelapser do
 
   defp check_images_and_create_hls(images, state) do
     source_path = "#{@root_dir}/#{state.config.camera_exid}/timelapse/#{state.name}/images/#{images - 1}.jpg"
-    loop_list()
+    loop_list(source_path)
   end
 
   defp create_hls(state) do
@@ -200,9 +206,16 @@ defmodule EvercamMedia.Timelapse.Timelapser do
   def loop_list(source_path, index) do
     File.copy()
     download_snapshot(snap, camera_exid, path, index)
-    loop_list(rest, camera_exid, path, index + 1)
+    loop_list(path, index + 1)
   end
   def loop_list([], _camera_exid, _path, _index), do: :noop
+
+  def download_snapshot(snap, camera_exid, path, index) do
+    case Storage.load(camera_exid, snap.created_at, snap.notes) do
+      {:ok, image, _notes} -> File.write("#{path}#{index}.jpg", image)
+      {:error, _error} -> :noop
+    end
+  end
 
   defp clean_images(state) do
     images_path = "#{@root_dir}/#{state.config.camera_exid}/timelapse/#{state.name}/images/"
