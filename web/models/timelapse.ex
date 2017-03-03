@@ -5,7 +5,7 @@ defmodule Timelapse do
   alias EvercamMedia.Repo
 
   @required_fields ~w(camera_id title frequency status)
-  @optional_fields ~w(exid snapshot_count resolution date_always date_range time_always time_range watermark_logo watermark_position recreate_hls start_recreate_hls last_snapshot_at)
+  @optional_fields ~w(exid snapshot_count resolution date_always from_date time_always to_date watermark_logo watermark_position recreate_hls start_recreate_hls last_snapshot_at)
 
   schema "timelapses" do
     belongs_to :camera, Camera
@@ -134,6 +134,11 @@ defmodule Timelapse do
           |> String.slice(0..4)
         put_change(changeset, :exid, "#{camera_id}-#{Enum.take_random(?a..?z, 5)}")
     end
+  end
+
+  def update_timelapse(timelapse, params) do
+    timelapse_changeset = changeset(timelapse, params)
+    Repo.update(timelapse_changeset)
   end
 
   def changeset(model, params \\ :invalid) do

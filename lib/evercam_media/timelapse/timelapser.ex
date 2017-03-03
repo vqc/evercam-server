@@ -6,6 +6,7 @@ defmodule EvercamMedia.Timelapse.Timelapser do
   use GenServer
   alias EvercamMedia.Snapshot.CamClient
   alias EvercamMedia.Snapshot.Storage
+  require Logger
 
   @root_dir Application.get_env(:evercam_media, :storage_dir)
 
@@ -146,45 +147,45 @@ defmodule EvercamMedia.Timelapse.Timelapser do
   end
 
   defp get_snapshots(state, config, timestamp, worker) do
-    case try_snapshot(config, 1) do
-      {:ok, image} ->
-        send worker, {:camera_reply, config.camera_exid, image, timestamp}
-        images_index = config.file_index
-        source_path = "#{@root_dir}/#{state.config.camera_exid}/timelapse/#{state.name}/images/#{images_index}.jpg"
-        File.write("#{path}#{index}.jpg", image)
-        cond do
-          !config.hls_created && images_index > 25 -> create_hls(state)
-          !config.hls_created && images_index == 24 ->
-            state
-            |> create_hls
-            |> clean_images
-          !config.hls_created && images_index > 0 && images_index < 25 ->
-            false
-          true ->
-            true
-        end
-        config.file_index = images_index + 1
-      {:error, _error} ->
-        false
+    spawn fn ->
+      Logger.debug "Get snapshot"
+      case try_snapshot(config, 1) do
+        {:ok, image} ->
+          send worker, {:camera_reply, config.camera_exid, image, timestamp}
+          images_index = get_file_index(config.camera_exid, state.name)
+          source_path = "#{@root_dir}/#{state.config.camera_exid}/timelapse/#{state.name}/images/#{images_index}.jpg"
+          Logger.debug source_path
+          File.write(source_path, image)
+          Logger.debug "Save image"
+          hls_created = is_hls_created(config.camera_exid, state.name)
+          cond do
+            !hls_created && images_index > 25 -> create_hls(state)
+            !hls_created && images_index == 24 -> create_hls(state)
+            !hls_created && images_index > 0 && images_index < 25 ->
+              Logger.debug "start condition images_index > 0 && images_index < 25 "
+              false
+            true ->
+              Logger.debug "Last condition for already created hls"
+              true
+          end
+        {:error, _error} ->
+          false
+      end
     end
   end
 
   defp try_snapshot(config, 3) do
-    spawn fn ->
-      timestamp = Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
-      case CamClient.fetch_snapshot(config) do
-        {:ok, image} -> {:ok, image}
-        {:error, error} -> {:error, error}
-      end
+    timestamp = Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
+    case CamClient.fetch_snapshot(config) do
+      {:ok, image} -> {:ok, image}
+      {:error, error} -> {:error, error}
     end
   end
 
   defp try_snapshot(config, attempt) do
-    spawn fn ->
-      case CamClient.fetch_snapshot(config) do
-        {:ok, image} -> {:ok, image}
-        {:error, _error} -> try_snapshot(config, attempt + 1)
-      end
+    case CamClient.fetch_snapshot(config) do
+      {:ok, image} -> {:ok, image}
+      {:error, _error} -> try_snapshot(config, attempt + 1)
     end
   end
 
@@ -195,7 +196,9 @@ defmodule EvercamMedia.Timelapse.Timelapser do
 
   defp create_hls(state) do
     timelapse_path = "#{@root_dir}/#{state.config.camera_exid}/timelapse/#{state.name}/"
-    # Porcelain.shell("bash #{timelapse_path}build.sh", [err: :out]).out
+    Porcelain.shell("bash #{timelapse_path}build.sh", [err: :out]).out
+    update_timelapse_info(state)
+    clean_images(state)
     # if (update_info)
     # {
     #     TimelapseVideoInfo info = UpdateVideoInfo("");
@@ -204,22 +207,57 @@ defmodule EvercamMedia.Timelapse.Timelapser do
   end
 
   def loop_list(source_path, index) do
-    File.copy()
-    download_snapshot(snap, camera_exid, path, index)
-    loop_list(path, index + 1)
+    # File.copy()
+    # download_snapshot(snap, camera_exid, path, index)
+    # loop_list(path, index + 1)
   end
   def loop_list([], _camera_exid, _path, _index), do: :noop
 
-  def download_snapshot(snap, camera_exid, path, index) do
-    case Storage.load(camera_exid, snap.created_at, snap.notes) do
-      {:ok, image, _notes} -> File.write("#{path}#{index}.jpg", image)
-      {:error, _error} -> :noop
+  defp create_new_video_chunk(bashFile, start_number)
+            string[] maxres = MAX_RES.Split(new char[] { ',' });
+            CreateBashFile(bashFile, timelapse.FPS, timelapse.SnapsInterval, Program.DownPath, Program.TsPath, start_number);
+            RunBash(bashFile);
+            updateMenifiest(Program.TsPath, "low", chunkIndex[0]);
+            updateMenifiest(Program.TsPath, "medium", chunkIndex[1]);
+            updateMenifiest(Program.TsPath, "high", chunkIndex[2]);
+            chunkIndex[0] = chunkIndex[0] + 1;
+            chunkIndex[1] = chunkIndex[1] + 1;
+            chunkIndex[2] = chunkIndex[2] + 1;
+            TimelapseVideoInfo info = UpdateVideoInfo("");
+  end
+
+  defp is_hls_created(camera_id, timelapse_id) do
+    hls_path = "#{@root_dir}/#{camera_id}/timelapse/#{timelapse_id}/ts/"
+    case File.exists?(hls_path) do
+      true ->
+        Enum.count(File.ls!(hls_path)) > 0
+      _ ->
+        false
     end
+  end
+
+  defp get_file_index(camera_id, timelapse_id) do
+    images_path = "#{@root_dir}/#{camera_id}/timelapse/#{timelapse_id}/images/"
+    case File.exists?(images_path) do
+      true ->
+        Enum.count(File.ls!(images_path))
+      _ ->
+        0
+    end
+  end
+
+  defp update_timelapse_info(state) do
+    timelapse = Timelapse.by_exid("#{state.name}")
+    params = %{
+      resolution: "",
+      snapshot_count: timelapse.snapshot_count + 24
+    }
+    changeset = Timelapse.update_timelapse(timelapse, params)
   end
 
   defp clean_images(state) do
     images_path = "#{@root_dir}/#{state.config.camera_exid}/timelapse/#{state.name}/images/"
-    File.rmdir!(images_path)
+    File.rm_rf!(images_path)
     File.mkdir_p(images_path)
     state
   end

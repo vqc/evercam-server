@@ -67,6 +67,7 @@ defmodule EvercamMedia.Timelapse.TimelapserSupervisor do
   Given a timelapse, it returns a map of values required for starting a timelapse worker.
   """
   def get_config(timelapse) do
+    create_directory_structure(timelapse.camera.exid, timelapse.exid)
     {
       :ok,
       %{
@@ -85,7 +86,6 @@ defmodule EvercamMedia.Timelapse.TimelapserSupervisor do
           time_always: timelapse.time_always,
           from_date: timelapse.from_date,
           to_date: timelapse.to_date,
-          file_index: get_file_index(timelapse.camera.exid, timelapse.exid),
           hls_created: is_hls_created(timelapse.camera.exid, timelapse.exid),
           sleep: timelapse.frequency * 60 * 1000
         }
