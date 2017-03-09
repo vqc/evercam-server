@@ -96,13 +96,14 @@ defmodule EvercamMedia.UserController do
 
             share_default_camera(user)
             EvercamMedia.UserMailer.confirm(user, code)
+            Intercom.intercom_activity(Application.get_env(:evercam_media, :create_intercom_user), user, user_agent, requester_ip)
           else
             share_request = CameraShareRequest.by_key_and_status(share_request_key)
             create_share_for_request(share_request, user, conn)
+            Intercom.update_user(Application.get_env(:evercam_media, :create_intercom_user), user, user_agent, requester_ip)
           end
           share_requests = CameraShareRequest.by_email(user.email)
           multiple_share_create(share_requests, user, conn)
-          intercom_activity(Application.get_env(:evercam_media, :create_intercom_user), user, user_agent, requester_ip)
           Logger.info "[POST v1/users] [#{user_agent}] [#{requester_ip}] [#{user.username}] [#{user.email}] [#{params["token"]}]"
           conn
           |> put_status(:created)
@@ -200,7 +201,7 @@ defmodule EvercamMedia.UserController do
     Camera.delete_by_owner(user.id)
     CameraShare.delete_by_user(user.id)
     User.delete_by_id(user.id)
-    Intercom.delete_user(user)
+    Intercom.delete_user(user.username)
   end
 
   defp firstname(firstname, user) when firstname in [nil, ""], do: user.firstname
@@ -256,9 +257,6 @@ defmodule EvercamMedia.UserController do
   defp has_share_request_key?(value) when value in [nil, ""], do: false
   defp has_share_request_key?(_value), do: true
 
-  defp intercom_user?({:ok, _}), do: true
-  defp intercom_user?({:error, _}), do: false
-
   defp share_default_camera(user) do
     evercam_user = User.by_username("evercam")
     remembrance_camera = Camera.get_remembrance_camera
@@ -290,17 +288,6 @@ defmodule EvercamMedia.UserController do
   defp multiple_share_create(nil, _user, _conn), do: Logger.info "No share request found."
   defp multiple_share_create(share_requests, user, conn) do
     Enum.each(share_requests, fn(share_request) -> create_share_for_request(share_request, user, conn) end)
-  end
-
-  defp intercom_activity(false, _user, _user_agent, _requester_ip), do: Logger.info "Application is running in Development Mode."
-  defp intercom_activity(true, user, user_agent, requester_ip) do
-    Task.start(fn ->
-      if user |> Intercom.get_user |> intercom_user? do
-        Logger.info "User '#{user.username}' already present at Intercom."
-      else
-        Intercom.create_user(user, user_agent, requester_ip)
-      end
-    end)
   end
 
   defp parse_to(to) when to in [nil, ""], do: Calendar.DateTime.now_utc |> Calendar.DateTime.to_erl
