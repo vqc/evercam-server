@@ -16,7 +16,23 @@ defmodule EvercamMedia.Intercom do
     end
   end
 
+  def get_company(company_id) do
+    intercom_url = @intercom_url |> String.replace("users", "companies")
+    url = "#{intercom_url}?company_id=#{company_id}"
+    headers = ["Accept": "Accept:application/json"]
+    response = HTTPoison.get(url, headers, hackney: @hackney) |> elem(1)
+    case response.status_code do
+      200 -> {:ok, response.body |> Poison.decode!}
+      _ -> {:error, response}
+    end
+  end
+
   def create_user(user, user_agent, requester_ip, status) do
+    company_id =
+      case get_company(String.split(user.email, "@") |> List.last) do
+        {:ok, company} -> company["company_id"]
+        _ -> ""
+      end
     headers = ["Accept": "Accept:application/json", "Content-Type": "application/json"]
     intercom_new_user = %{
       "email": user.email,
@@ -34,13 +50,32 @@ defmodule EvercamMedia.Intercom do
     }
     |> add_userid(user.username)
     |> add_status(status)
+    |> add_company(company_id)
+
     json =
       case Poison.encode(intercom_new_user) do
         {:ok, json} -> json
         _ -> nil
       end
     HTTPoison.post(@intercom_url, json, headers, hackney: @hackney)
-    Logger.debug "Intercom user has been created"
+    tag_user(user.email, get_tag_name(company_id))
+  end
+
+  def tag_user(_email, ""), do: :noop
+  def tag_user(email, tag) do
+    intercom_url = @intercom_url |> String.replace("users", "tags")
+    headers = ["Accept": "Accept:application/json", "Content-Type": "application/json"]
+    tag_params = %{
+      "name": tag,
+      "users": [%{"email": email}]
+    }
+
+    json =
+      case Poison.encode(tag_params) do
+        {:ok, json} -> json
+        _ -> nil
+      end
+    HTTPoison.post(intercom_url, json, headers, hackney: @hackney)
   end
 
   defp add_userid(params, ""), do: params
@@ -51,6 +86,11 @@ defmodule EvercamMedia.Intercom do
   defp add_status(params, ""), do: params
   defp add_status(params, status) do
     put_in(params, [:custom_attributes, "status"], status)
+  end
+
+  defp add_company(params, ""), do: params
+  defp add_company(params, company_id) do
+    Map.put(params, "companies", [%{company_id: "#{company_id}"}])
   end
 
   def delete_user(user, by_val \\ "user_id", tries \\ 1)
@@ -100,5 +140,14 @@ defmodule EvercamMedia.Intercom do
       }
       create_user(user, user_agent, ip, "Share-Revoked")
     end)
+  end
+
+  defp get_tag_name(company_id) do
+    case company_id do
+      "sisk.ie" -> "Construction"
+      "sisk.co.uk" -> "Construction"
+      "evercam.io" -> "Evercam team"
+      _ -> ""
+    end
   end
 end
