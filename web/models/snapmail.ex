@@ -34,9 +34,12 @@ defmodule Snapmail do
     |> Repo.all
   end
 
-  def by_camera_id(id) do
+  def by_camera_id(id, user_id) do
     Snapmail
-    |> where(camera_id: ^id)
+    |> join(:inner, [snap], snap_cam in SnapmailCamera)
+    |> where([snap, snap_cam], snap.id == snap_cam.snapmail_id)
+    |> where([_, snap_cam], snap_cam.camera_id == ^id)
+    |> where(user_id: ^user_id)
     |> preload(:user)
     |> preload(:snapmail_cameras)
     |> preload([snapmail_cameras: :camera])
