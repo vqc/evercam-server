@@ -10,6 +10,8 @@ defmodule EvercamMedia.Snapshot.Error do
     case error do
       %CaseClauseError{} ->
         :bad_request
+      %UndefinedFunctionError{} ->
+        :not_a_jpeg
       %RuntimeError{} ->
         :not_a_jpeg
       error when is_map(error) ->
