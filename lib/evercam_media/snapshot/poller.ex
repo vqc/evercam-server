@@ -50,6 +50,13 @@ defmodule EvercamMedia.Snapshot.Poller do
     GenServer.cast(cam_server, {:update_camera_config, config})
   end
 
+  @doc """
+  Update the configuration of the camera worker
+  """
+  def wait_send_request(cam_server, config, seconds) do
+    GenServer.cast(cam_server, {:wait_and_send_request, config, seconds})
+  end
+
 
   ######################
   ## Server Callbacks ##
@@ -86,6 +93,15 @@ defmodule EvercamMedia.Snapshot.Poller do
     {:reply, nil, state}
   end
 
+  def handle_cast({:wait_and_send_request, config, seconds}, state) do
+    # {:ok, timer} = Map.fetch(state, :timer)
+    # :erlang.cancel_timer(timer)
+    Logger.debug "Seconds: #{seconds}, Wait process to complete previous request and then send request."
+
+    timer = start_timer(seconds, :poll, state.config.is_paused, state.config.pause_seconds)
+    {:noreply, Map.merge(state, %{timer: timer})}
+  end
+
   def handle_cast({:update_camera_config, new_config}, state) do
     {:ok, timer} = Map.fetch(state, :timer)
     :erlang.cancel_timer(timer)
@@ -113,8 +129,9 @@ defmodule EvercamMedia.Snapshot.Poller do
       {:error, _message} ->
         Logger.error "Error getting scheduler information for #{inspect state.name}"
     end
-    timer = start_timer(state.config.sleep, :poll, state.config.is_paused, state.config.pause_seconds)
-    {:noreply, Map.put(state, :timer, timer)}
+    # timer = start_timer(state.config.sleep, :poll, state.config.is_paused, state.config.pause_seconds)
+    # {:noreply, Map.put(state, :timer, timer)}
+    {:noreply, state}
   end
 
   @doc """

@@ -7,6 +7,7 @@ defmodule EvercamMedia.Snapshot.Worker do
 
   use GenServer
   alias EvercamMedia.Snapshot.CamClient
+  alias EvercamMedia.Snapshot.Poller
 
   ################
   ## Client API ##
@@ -139,7 +140,7 @@ defmodule EvercamMedia.Snapshot.Worker do
   @doc """
   Server callback for camera_reply
   """
-  def handle_info({:camera_reply, result, timestamp, reply_to}, state) do
+  def handle_info({:camera_reply, result, timestamp, reply_to, request_time}, state) do
     case result do
       {:ok, image} ->
         data = {state.name, timestamp, image}
@@ -148,6 +149,10 @@ defmodule EvercamMedia.Snapshot.Worker do
         data = {state.name, timestamp, error}
         GenEvent.sync_notify(state.event_manager, {:snapshot_error, data})
     end
+    seconds = get_seconds(state.config.sleep, request_time)
+    GenEvent.sync_notify(state.event_manager, {:wait_and_send_request, state, seconds})
+    # Poller.wait_send_request(state.poller, state, seconds)
+
     if is_pid(reply_to) do
       send reply_to, result
     end
@@ -174,22 +179,23 @@ defmodule EvercamMedia.Snapshot.Worker do
   end
 
   defp _get_snapshot(state, timestamp, reply_to \\ nil) do
+    request_time = Calendar.DateTime.now!("UTC")
     config = get_config_from_state(:config, state)
     camera_exid = config.camera_exid
     worker = self
-    try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, 1)
+    try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, request_time, 1)
   end
 
-  defp try_snapshot(_state, config, camera_exid, _timestamp, reply_to, worker, 3) do
+  defp try_snapshot(state, config, camera_exid, _timestamp, reply_to, worker, request_time, 3) do
     spawn fn ->
       timestamp = Calendar.DateTime.Format.unix(Calendar.DateTime.now_utc)
       result = CamClient.fetch_snapshot(config)
       ConCache.delete(:camera_lock, camera_exid)
-      send worker, {:camera_reply, result, timestamp, reply_to}
+      send worker, {:camera_reply, result, timestamp, reply_to, request_time}
     end
   end
 
-  defp try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, attempt) do
+  defp try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, request_time, attempt) do
     camera = Camera.get(camera_exid)
     spawn fn ->
       result = CamClient.fetch_snapshot(config)
@@ -199,11 +205,23 @@ defmodule EvercamMedia.Snapshot.Worker do
             Process.exit self, :shutdown
           end
           ConCache.put(:camera_lock, camera_exid, camera_exid)
-          try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, attempt + 1)
+          try_snapshot(state, config, camera_exid, timestamp, reply_to, worker, request_time, attempt + 1)
         _ ->
           ConCache.delete(:camera_lock, camera_exid)
-          send worker, {:camera_reply, result, timestamp, reply_to}
+          send worker, {:camera_reply, result, timestamp, reply_to, request_time}
       end
+    end
+  end
+
+  defp get_seconds(1000, _request_time), do: 1
+  defp get_seconds(sleep, request_time) do
+    request_end_time = Calendar.DateTime.now!("UTC")
+    sleep = sleep - 1000
+    case Calendar.DateTime.diff(request_end_time, request_time) do
+      {:ok, _seconds, microseconds, :after} ->
+        diff = div(microseconds, 1000)
+        sleep - diff
+      _ -> 0
     end
   end
 end
