@@ -34,6 +34,7 @@ defmodule AccessToken do
     AccessToken
     |> where(request: ^token)
     |> preload(:user)
+    |> preload(:grantor)
     |> Repo.one
   end
 

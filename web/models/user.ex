@@ -102,6 +102,7 @@ defmodule User do
     cond do
       nil == token -> nil
       user = token.user -> user
+      grantor = token.grantor -> grantor
       true -> token
     end
   end
