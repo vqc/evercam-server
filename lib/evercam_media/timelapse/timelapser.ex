@@ -213,17 +213,51 @@ defmodule EvercamMedia.Timelapse.Timelapser do
   end
   def loop_list([], _camera_exid, _path, _index), do: :noop
 
-  defp create_new_video_chunk(bashFile, start_number)
-            string[] maxres = MAX_RES.Split(new char[] { ',' });
-            CreateBashFile(bashFile, timelapse.FPS, timelapse.SnapsInterval, Program.DownPath, Program.TsPath, start_number);
-            RunBash(bashFile);
-            updateMenifiest(Program.TsPath, "low", chunkIndex[0]);
-            updateMenifiest(Program.TsPath, "medium", chunkIndex[1]);
-            updateMenifiest(Program.TsPath, "high", chunkIndex[2]);
-            chunkIndex[0] = chunkIndex[0] + 1;
-            chunkIndex[1] = chunkIndex[1] + 1;
-            chunkIndex[2] = chunkIndex[2] + 1;
-            TimelapseVideoInfo info = UpdateVideoInfo("");
+  defp create_new_video_chunk(state) do
+    timelapse_path = "#{@root_dir}/#{state.config.camera_exid}/timelapse/#{state.name}/"
+    new_index = get_ts_fileindex(timelapse_path)
+    create_bashfile(timelapse_path, new_index)
+    Porcelain.shell("bash #{timelapse_path}build.sh", [err: :out]).out
+
+    update_menifiest(timelapse_path, "low", new_index.low);
+    update_menifiest(timelapse_path, "medium", new_index.medium);
+    update_menifiest(timelapse_path, "high", new_index.high);
+
+    update_timelapse_info(state)
+    clean_images(state)
+  end
+
+  defp get_ts_fileindex(timelapse_path) do
+    hls_path = "#{@timelapse_path}ts/"
+    files = File.ls!(hls_path)
+    low = files |> Enum.filter(fn(f) -> String.match?(f, ~r/low/) and !String.match?(f, ~r/low.m3u8/) end) |> Enum.count
+    medium = files |> Enum.filter(files, fn(f) -> String.match?(f, ~r/medium/) and !String.match?(f, ~r/medium.m3u8/) end) |> Enum.count
+    high = files |> Enum.filter(files, fn(f) -> String.match?(f, ~r/high/) and !String.match?(f, ~r/high.m3u8/) end) |> Enum.count
+
+    %{low: low, medium: medium, high: high}
+  end
+
+  defp update_menifiest(timelapse_path, filename, file_index) do
+    tsPath = "#{timelapse_path}ts/"
+    content = File.read!("#{tsPath}#{filename}.m3u8") |> String.replace("\n#EXT-X-ENDLIST", "")
+    content = content <> "\n#EXT-X-DISCONTINUITY"
+    content = content <> "\n#EXTINF:2.100000,"
+    content = content <> "\n#{filename}#{file_index}"
+    content = content <> "\n#EXT-X-ENDLIST"
+
+    File.write(file, content, [:write])
+  end
+
+  defp create_bashfile(timelapse_path, file_index) do
+    File.rm("#{timelapse_path}build.sh")
+    imagesPath = "#{timelapse_path}images/"
+    tsPath = "#{timelapse_path}ts/"
+
+    bash_content = "#!/bin/bash"
+    bash_content = bash_content <> "\nffmpeg -threads 1 -y -framerate 24 -i #{imagesPath}/%d.jpg -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 2.1 -maxrate 500K -bufsize 2M -crf 18 -r 24 -g 30 -s 480x270 #{tsPath}/low#{file_index.low}.ts"
+    bash_content = bash_content <> "\nffmpeg -threads 1 -y -framerate 24 -i #{imagesPath}/%d.jpg -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.1 -maxrate 1M -bufsize 3M -crf 18 -r 24 -g 72 -s 640x360 #{tsPath}/medium#{file_index.medium}.ts"
+    bash_content = bash_content <> "\nffmpeg -threads 1 -y -framerate 24 -i #{imagesPath}/%d.jpg -c:v libx264 -pix_fmt yuv420p -profile:v high -level 3.2 -maxrate 4M -crf 18 -r 24 -g 100 #{tsPath}/high#{file_index.high}.ts"
+    File.write("#{timelapse_path}build.sh", bash_content)
   end
 
   defp is_hls_created(camera_id, timelapse_id) do
@@ -252,7 +286,7 @@ defmodule EvercamMedia.Timelapse.Timelapser do
       resolution: "",
       snapshot_count: timelapse.snapshot_count + 24
     }
-    changeset = Timelapse.update_timelapse(timelapse, params)
+    Timelapse.update_timelapse(timelapse, params)
   end
 
   defp clean_images(state) do
