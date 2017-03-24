@@ -136,7 +136,7 @@ defmodule Snapmail do
 
     %{year: year, month: month, day: day} = current_date
     {:ok, notify_date_time} =
-      {{year, month, day}, {h, m, 0}}
+      {{year, month, day}, {h, m, 59}}
       |> Calendar.DateTime.from_erl(timezone)
     case Calendar.DateTime.diff(notify_date_time, current_date) do
       {:ok, 0, _, :after} -> get_next_day_seconds(h, m, current_date, timezone)
@@ -149,7 +149,7 @@ defmodule Snapmail do
     seconds_of_next_day_alert = (60 * 60 * 24)
     %{year: year, month: month, day: day} = current_date
     notify_date_time =
-      {{year, month, day}, {hours, minutes, 0}}
+      {{year, month, day}, {hours, minutes, 59}}
       |> Calendar.DateTime.from_erl(timezone)
       |> elem(1)
       |> Calendar.DateTime.advance!(seconds_of_next_day_alert)
