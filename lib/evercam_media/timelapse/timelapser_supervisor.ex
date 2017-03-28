@@ -60,7 +60,7 @@ defmodule EvercamMedia.Timelapse.TimelapserSupervisor do
   """
   def initiate_workers do
     Logger.info "Initiate workers for timelapse."
-    # Timelapse.all |> Enum.map(&(start_timelapse_worker &1))
+    Timelapse.all |> Enum.map(&(start_timelapse_worker &1))
   end
 
   @doc """

@@ -159,15 +159,18 @@ defmodule EvercamMedia.Timelapse.Timelapser do
           Logger.debug "Save image"
           hls_created = is_hls_created(config.camera_exid, state.name)
           cond do
-            !hls_created && images_index > 25 -> create_hls(state)
-            !hls_created && images_index == 24 -> create_hls(state)
+            !hls_created && images_index > 25 -> create_hls(state, images_index)
+            !hls_created && images_index == 24 -> create_hls(state, images_index)
             !hls_created && images_index > 0 && images_index < 25 ->
               Logger.debug "start condition images_index > 0 && images_index < 25 "
               false
+            hls_created && images_index >= 24 ->
+              create_new_video_chunk(state, images_index)
             true ->
               Logger.debug "Last condition for already created hls"
               true
           end
+          spawn(fn -> update_last_snap_date(state, timestamp) end)
         {:error, _error} ->
           false
       end
@@ -194,15 +197,12 @@ defmodule EvercamMedia.Timelapse.Timelapser do
     loop_list(source_path)
   end
 
-  defp create_hls(state) do
+  defp create_hls(state, images_count) do
     timelapse_path = "#{@root_dir}/#{state.config.camera_exid}/timelapse/#{state.name}/"
     Porcelain.shell("bash #{timelapse_path}build.sh", [err: :out]).out
-    update_timelapse_info(state)
+
+    update_snapshot_count(state, images_count)
     clean_images(state)
-    # if (update_info)
-    # {
-    #     TimelapseVideoInfo info = UpdateVideoInfo("");
-    # }
     state
   end
 
@@ -213,7 +213,7 @@ defmodule EvercamMedia.Timelapse.Timelapser do
   end
   def loop_list([], _camera_exid, _path, _index), do: :noop
 
-  defp create_new_video_chunk(state) do
+  defp create_new_video_chunk(state, images_count) do
     timelapse_path = "#{@root_dir}/#{state.config.camera_exid}/timelapse/#{state.name}/"
     new_index = get_ts_fileindex(timelapse_path)
     create_bashfile(timelapse_path, new_index)
@@ -223,16 +223,17 @@ defmodule EvercamMedia.Timelapse.Timelapser do
     update_menifiest(timelapse_path, "medium", new_index.medium);
     update_menifiest(timelapse_path, "high", new_index.high);
 
-    update_timelapse_info(state)
+    update_snapshot_count(state, images_count)
     clean_images(state)
   end
 
   defp get_ts_fileindex(timelapse_path) do
-    hls_path = "#{@timelapse_path}ts/"
+    hls_path = "#{timelapse_path}ts/"
+    Logger.debug hls_path
     files = File.ls!(hls_path)
     low = files |> Enum.filter(fn(f) -> String.match?(f, ~r/low/) and !String.match?(f, ~r/low.m3u8/) end) |> Enum.count
-    medium = files |> Enum.filter(files, fn(f) -> String.match?(f, ~r/medium/) and !String.match?(f, ~r/medium.m3u8/) end) |> Enum.count
-    high = files |> Enum.filter(files, fn(f) -> String.match?(f, ~r/high/) and !String.match?(f, ~r/high.m3u8/) end) |> Enum.count
+    medium = files |> Enum.filter(fn(f) -> String.match?(f, ~r/medium/) and !String.match?(f, ~r/medium.m3u8/) end) |> Enum.count
+    high = files |> Enum.filter(fn(f) -> String.match?(f, ~r/high/) and !String.match?(f, ~r/high.m3u8/) end) |> Enum.count
 
     %{low: low, medium: medium, high: high}
   end
@@ -240,12 +241,12 @@ defmodule EvercamMedia.Timelapse.Timelapser do
   defp update_menifiest(timelapse_path, filename, file_index) do
     tsPath = "#{timelapse_path}ts/"
     content = File.read!("#{tsPath}#{filename}.m3u8") |> String.replace("\n#EXT-X-ENDLIST", "")
-    content = content <> "\n#EXT-X-DISCONTINUITY"
+    content = content <> "#EXT-X-DISCONTINUITY"
     content = content <> "\n#EXTINF:2.100000,"
-    content = content <> "\n#{filename}#{file_index}"
-    content = content <> "\n#EXT-X-ENDLIST"
+    content = content <> "\n#{filename}#{file_index}.ts"
+    content = content <> "\n#EXT-X-ENDLIST\n"
 
-    File.write(file, content, [:write])
+    File.write("#{tsPath}#{filename}.m3u8", content, [:write])
   end
 
   defp create_bashfile(timelapse_path, file_index) do
@@ -280,12 +281,20 @@ defmodule EvercamMedia.Timelapse.Timelapser do
     end
   end
 
-  defp update_timelapse_info(state) do
+  defp update_snapshot_count(state, count) do
     timelapse = Timelapse.by_exid("#{state.name}")
-    params = %{
-      resolution: "",
-      snapshot_count: timelapse.snapshot_count + 24
-    }
+    params = %{snapshot_count: timelapse.snapshot_count + count}
+    Timelapse.update_timelapse(timelapse, params)
+  end
+
+  defp update_last_snap_date(state, timestamp) do
+    timelapse = Timelapse.by_exid("#{state.name}")
+    snap_date =
+      timestamp
+      |> Calendar.DateTime.Parse.unix!
+      |> Calendar.DateTime.to_erl
+      |> Calendar.DateTime.from_erl!("Etc/UTC")
+    params = %{last_snapshot_at: snap_date}
     Timelapse.update_timelapse(timelapse, params)
   end
 
