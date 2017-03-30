@@ -618,4 +618,16 @@ defmodule EvercamMedia.Snapshot.Storage do
       {:error, error} -> Logger.info "[save_hls] [#{camera_exid}] [#{timelapse_id}] [#{inspect error}]"
     end
   end
+
+  def save_timelapse_manifest(camera_id, timelapse_id, content) do
+    hackney = [pool: :seaweedfs_upload_pool]
+    file_path = "/#{camera_id}/timelapses/#{timelapse_id}/index.m3u8"
+    url = @seaweedfs <> file_path
+
+    case HTTPoison.get(url, [], hackney: hackney) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> :noop
+      _ ->
+        HTTPoison.post!(url, {:multipart, [{file_path, content, []}]}, [], hackney: hackney)
+    end
+  end
 end

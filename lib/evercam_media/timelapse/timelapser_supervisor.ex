@@ -92,33 +92,13 @@ defmodule EvercamMedia.Timelapse.TimelapserSupervisor do
     }
   end
 
-  # defp is_hls_created(camera_id, timelapse_id) do
-  #   hls_path = "#{@root_dir}/#{camera_id}/timelapses/#{timelapse_id}/ts/"
-  #   case File.exists?(hls_path) do
-  #     true ->
-  #       Enum.count(File.ls!(hls_path)) > 0
-  #     _ ->
-  #       false
-  #   end
-  # end
-
-  # defp get_file_index(camera_id, timelapse_id) do
-  #   images_path = "#{@root_dir}/#{camera_id}/timelapses/#{timelapse_id}/images/"
-  #   case File.exists?(images_path) do
-  #     true ->
-  #       Enum.count(File.ls!(images_path))
-  #     _ ->
-  #       0
-  #   end
-  # end
-
   defp create_directory_structure(camera_id, timelapse_id) do
     timelapse_path = "#{@root_dir}/#{camera_id}/timelapses/#{timelapse_id}/"
     File.mkdir_p(timelapse_path)
     File.mkdir_p("#{timelapse_path}ts")
     File.mkdir_p("#{timelapse_path}images")
     create_bash_file(timelapse_path)
-    create_manifest_file(timelapse_path)
+    create_manifest_file(camera_id, timelapse_id)
   end
 
   defp create_bash_file(timelapse_path) do
@@ -132,7 +112,7 @@ defmodule EvercamMedia.Timelapse.TimelapserSupervisor do
     File.write("#{timelapse_path}build.sh", bash_content)
   end
 
-  defp create_manifest_file(timelapse_path) do
+  defp create_manifest_file(camera_exid, timelapse_id) do
     m3u8_file = "#EXTM3U"
     m3u8_file = m3u8_file <> "\n#EXT-X-STREAM-INF:BANDWIDTH=500000"
     m3u8_file = m3u8_file <> "\nts/low.m3u8"
@@ -140,6 +120,6 @@ defmodule EvercamMedia.Timelapse.TimelapserSupervisor do
     m3u8_file = m3u8_file <> "\nts/medium.m3u8"
     m3u8_file = m3u8_file <> "\n#EXT-X-STREAM-INF:BANDWIDTH=4000000"
     m3u8_file = m3u8_file <> "\nts/high.m3u8"
-    File.write("#{timelapse_path}index.m3u8", m3u8_file)
+    EvercamMedia.Snapshot.Storage.save_timelapse_manifest(camera_exid, timelapse_id, m3u8_file)
   end
 end
