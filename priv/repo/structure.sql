@@ -828,6 +828,53 @@ CREATE SEQUENCE sq_vendors
 
 
 --
+-- Name: timelapses; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE timelapses (
+    id integer NOT NULL,
+    camera_id integer NOT NULL,
+    exid character varying(255) NOT NULL,
+    title character varying(255) NOT NULL,
+    frequency integer NOT NULL,
+    snapshot_count integer DEFAULT 0,
+    resolution character varying(255),
+    status integer NOT NULL,
+    date_always boolean DEFAULT false,
+    from_datetime timestamp without time zone,
+    time_always boolean DEFAULT false,
+    to_datetime timestamp without time zone,
+    watermark_logo character varying(255),
+    watermark_position character varying(255),
+    recreate_hls boolean DEFAULT false,
+    start_recreate_hls boolean DEFAULT false,
+    hls_created boolean DEFAULT false,
+    last_snapshot_at timestamp without time zone,
+    inserted_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: timelapses_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE timelapses_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: timelapses_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE timelapses_id_seq OWNED BY timelapses.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1047,6 +1094,13 @@ ALTER TABLE ONLY snapshot_extractors ALTER COLUMN id SET DEFAULT nextval('snapsh
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY timelapses ALTER COLUMN id SET DEFAULT nextval('timelapses_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY webhooks ALTER COLUMN id SET DEFAULT nextval('webhooks_id_seq'::regclass);
 
 
@@ -1235,6 +1289,14 @@ ALTER TABLE ONLY snapshot_extractors
 
 
 --
+-- Name: timelapses_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY timelapses
+    ADD CONSTRAINT timelapses_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: webhooks_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1390,6 +1452,13 @@ CREATE UNIQUE INDEX snapemail_camera_id_unique_index ON snapmail_cameras USING b
 
 
 --
+-- Name: timelapse_exid_unique_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX timelapse_exid_unique_index ON timelapses USING btree (exid);
+
+
+--
 -- Name: user_email_unique_index; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -1460,8 +1529,16 @@ ALTER TABLE ONLY snapshot_extractors
 
 
 --
+-- Name: timelapses_camera_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY timelapses
+    ADD CONSTRAINT timelapses_camera_id_fkey FOREIGN KEY (camera_id) REFERENCES cameras(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-INSERT INTO "schema_migrations" (version) VALUES (20160616160229), (20160712101523), (20160720125939), (20160727112052), (20160829112743), (20160830055709), (20161202114834), (20161202115000), (20161213162000), (20161219130300), (20161221070146), (20161221070226), (20170103162400), (20170112110000), (20170213140200);
+INSERT INTO "schema_migrations" (version) VALUES (20160616160229), (20160712101523), (20160720125939), (20160727112052), (20160829112743), (20160830055709), (20161202114834), (20161202115000), (20161213162000), (20161219130300), (20161221070146), (20161221070226), (20170103162400), (20170112110000), (20170213140200), (20170222114100);
 
