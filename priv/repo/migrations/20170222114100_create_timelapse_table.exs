@@ -11,9 +11,9 @@ defmodule EvercamMedia.Repo.Migrations.CreateTimelapseTable do
       add :resolution, :string
       add :status, :int, null: false
       add :date_always, :boolean, default: false
-      add :from_date, :datetime
+      add :from_datetime, :datetime
       add :time_always, :boolean, default: false
-      add :to_date, :datetime
+      add :to_datetime, :datetime
       add :watermark_logo, :string
       add :watermark_position, :string
       add :recreate_hls, :boolean, default: false

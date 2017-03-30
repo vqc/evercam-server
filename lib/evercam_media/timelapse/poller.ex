@@ -99,7 +99,7 @@ defmodule EvercamMedia.Timelapse.Poller do
   def handle_info(:poll, state) do
     {:ok, timer} = Map.fetch(state, :timer)
     :erlang.cancel_timer(timer)
-    case Timelapse.scheduled_now?(state.config.timezone, state.config.from_date, state.config.to_date, state.config.date_always, state.config.time_always) do
+    case Timelapse.scheduled_now?(state.config.timezone, state.config.from_datetime, state.config.to_datetime, state.config.date_always, state.config.time_always) do
       {:ok, true} ->
         Logger.debug "Polling timelapse: #{state.name} for timelapse"
         timestamp = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.unix

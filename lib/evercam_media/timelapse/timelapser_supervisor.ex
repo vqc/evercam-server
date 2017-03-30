@@ -41,12 +41,12 @@ defmodule EvercamMedia.Timelapse.TimelapserSupervisor do
   @doc """
   Reinitialize timelapse worker with new configuration
   """
-  def update_worker(nil, _timelapse), do: :noop
-  def update_worker(worker, timelapse) do
+  def update_timelapse_worker(nil, _timelapse), do: :noop
+  def update_timelapse_worker(worker, timelapse) do
     case get_config(timelapse) do
       {:ok, settings} ->
         Logger.debug "Updating worker for #{settings.name}"
-        # Timelapser.update_config(worker, settings)
+        Timelapser.update_config(worker, settings)
       {:error, _message} ->
         Logger.info "Skipping timelapse worker update as the arguments are invalid"
     end
@@ -84,48 +84,41 @@ defmodule EvercamMedia.Timelapse.TimelapserSupervisor do
           timezone: Camera.get_timezone(timelapse.camera),
           date_always: timelapse.date_always,
           time_always: timelapse.time_always,
-          from_date: timelapse.from_date,
-          to_date: timelapse.to_date,
-          hls_created: is_hls_created(timelapse.camera.exid, timelapse.exid),
+          from_datetime: timelapse.from_datetime,
+          to_datetime: timelapse.to_datetime,
           sleep: timelapse.frequency * 60 * 1000
         }
       }
     }
   end
 
-  defp is_hls_created(camera_id, timelapse_id) do
-    hls_path = "#{@root_dir}/#{camera_id}/timelapse/#{timelapse_id}/ts/"
-    case File.exists?(hls_path) do
-      true ->
-        Enum.count(File.ls!(hls_path)) > 0
-      _ ->
-        false
-    end
-  end
+  # defp is_hls_created(camera_id, timelapse_id) do
+  #   hls_path = "#{@root_dir}/#{camera_id}/timelapses/#{timelapse_id}/ts/"
+  #   case File.exists?(hls_path) do
+  #     true ->
+  #       Enum.count(File.ls!(hls_path)) > 0
+  #     _ ->
+  #       false
+  #   end
+  # end
 
-  defp get_file_index(camera_id, timelapse_id) do
-    images_path = "#{@root_dir}/#{camera_id}/timelapse/#{timelapse_id}/images/"
-    case File.exists?(images_path) do
-      true ->
-        Enum.count(File.ls!(images_path))
-      _ ->
-        0
-    end
-  end
+  # defp get_file_index(camera_id, timelapse_id) do
+  #   images_path = "#{@root_dir}/#{camera_id}/timelapses/#{timelapse_id}/images/"
+  #   case File.exists?(images_path) do
+  #     true ->
+  #       Enum.count(File.ls!(images_path))
+  #     _ ->
+  #       0
+  #   end
+  # end
 
   defp create_directory_structure(camera_id, timelapse_id) do
-    timelapse_path = "#{@root_dir}/#{camera_id}/timelapse/#{timelapse_id}/"
+    timelapse_path = "#{@root_dir}/#{camera_id}/timelapses/#{timelapse_id}/"
     File.mkdir_p(timelapse_path)
     File.mkdir_p("#{timelapse_path}ts")
     File.mkdir_p("#{timelapse_path}images")
     create_bash_file(timelapse_path)
     create_manifest_file(timelapse_path)
-    # case File.exists?(timelapse_path) do
-    #   true ->
-    #     false
-    #   _ ->
-    #     false
-    # end
   end
 
   defp create_bash_file(timelapse_path) do

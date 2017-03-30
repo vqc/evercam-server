@@ -4,23 +4,25 @@ defmodule Timelapse do
   import Ecto.Query
   alias EvercamMedia.Repo
 
-  @required_fields ~w(camera_id title frequency status)
-  @optional_fields ~w(exid snapshot_count resolution date_always from_date time_always to_date watermark_logo watermark_position recreate_hls start_recreate_hls last_snapshot_at)
+  @required_fields ~w(camera_id title frequency status date_always time_always)
+  @optional_fields ~w(exid snapshot_count resolution from_datetime to_datetime watermark_logo watermark_position recreate_hls start_recreate_hls last_snapshot_at)
+
+  @status %{active: 0, scheduled: 1, expired: 2, paused: 3}
 
   schema "timelapses" do
-    belongs_to :camera, Camera
+    belongs_to :camera, Camera, foreign_key: :camera_id
 
     field :exid, :string
     field :title, :string
     field :frequency, :integer
     field :snapshot_count, :integer
     field :resolution, :string
-    field :status, :integer
+    field :status, :integer, default: 0
 
-    field :date_always, :boolean, default: false
-    field :from_date, Ecto.DateTime, default: Ecto.DateTime.utc
-    field :time_always, :boolean, default: false
-    field :to_date, Ecto.DateTime, default: Ecto.DateTime.utc
+    field :date_always, :boolean
+    field :from_datetime, Ecto.DateTime, default: Ecto.DateTime.utc
+    field :time_always, :boolean
+    field :to_datetime, Ecto.DateTime, default: Ecto.DateTime.utc
     field :watermark_logo, :string
     field :watermark_position, :string
     field :recreate_hls, :boolean, default: false
@@ -44,6 +46,7 @@ defmodule Timelapse do
     Timelapse
     |> where(camera_id: ^id)
     |> preload(:camera)
+    |> preload([camera: :owner])
     |> Repo.all
   end
 
@@ -51,6 +54,7 @@ defmodule Timelapse do
     Timelapse
     |> where(exid: ^String.downcase(exid))
     |> preload(:camera)
+    |> preload([camera: :owner])
     |> Repo.one
   end
 
@@ -60,11 +64,10 @@ defmodule Timelapse do
     |> Repo.delete_all
   end
 
-  defp validate_exid(changeset) do
-    case get_field(changeset, :exid) do
-      nil -> auto_generate_camera_id(changeset)
-      _exid -> changeset |> update_change(:exid, &String.downcase/1)
-    end
+  def delete_by_id(id) do
+    Timelapse
+    |> where(id: ^id)
+    |> Repo.delete_all
   end
 
   def scheduled_now?(timezone, from_date, to_date, date_always, time_always) do
@@ -121,6 +124,46 @@ defmodule Timelapse do
     end
   end
 
+  def create_timelapse(timelapse_params) do
+    timelapse_changeset = create_changeset(%Timelapse{}, timelapse_params)
+
+    case Repo.insert(timelapse_changeset) do
+      {:ok, timelapse} ->
+        camera_timelapse =
+          timelapse
+          |> Repo.preload(:camera)
+          |> Repo.preload([camera: :owner])
+          |> Repo.preload([camera: :vendor_model])
+          |> Repo.preload([camera: [vendor_model: :vendor]])
+        {:ok, camera_timelapse}
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
+  def update_timelapse(timelapse, params) do
+    timelapse_changeset = changeset(timelapse, params)
+    case Repo.update(timelapse_changeset) do
+      {:ok, timelapse} ->
+        camera_timelapse =
+          timelapse
+          |> Repo.preload(:camera)
+          |> Repo.preload([camera: :owner])
+          |> Repo.preload([camera: :vendor_model])
+          |> Repo.preload([camera: [vendor_model: :vendor]])
+        {:ok, camera_timelapse}
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
+  defp validate_exid(changeset) do
+    case get_field(changeset, :exid) do
+      nil -> auto_generate_camera_id(changeset)
+      _exid -> changeset |> update_change(:exid, &String.downcase/1)
+    end
+  end
+
   defp auto_generate_camera_id(changeset) do
     case get_field(changeset, :title) do
       nil ->
@@ -136,9 +179,43 @@ defmodule Timelapse do
     end
   end
 
-  def update_timelapse(timelapse, params) do
-    timelapse_changeset = changeset(timelapse, params)
-    Repo.update(timelapse_changeset)
+  defp validate_from_to_datetime(changeset) do
+    date_always = get_field(changeset, :date_always)
+    time_always = get_field(changeset, :time_always)
+    from_datetime = get_field(changeset, :from_datetime) |> Ecto.DateTime.to_erl |> Calendar.DateTime.from_erl!("UTC")
+    to_datetime = get_field(changeset, :to_datetime) |> Ecto.DateTime.to_erl |> Calendar.DateTime.from_erl!("UTC")
+    case validate_datetime_parameter(from_datetime, to_datetime, date_always, time_always) do
+      {:ok} -> changeset
+      {:invalid, message} -> add_error(changeset, :invalid_from_to_datetime, message)
+    end
+  end
+
+  defp validate_datetime_parameter(_from, _to, true, true), do: {:ok}
+  defp validate_datetime_parameter(from, to, date_always, time_alwasy) do
+    cond do
+      !date_always && is_nil(from) || is_nil(to) ->
+        {:invalid, "From and To date can't be blank."}
+      !time_alwasy && is_nil(from) || is_nil(to) ->
+        {:invalid, "From and To time can't be blank."}
+      is_valid_datetime?(from, to) ->
+        {:invalid, "From date cannot be greater than current time."}
+      is_valid_datetime?(Calendar.DateTime.now!("UTC"), to) ->
+        {:invalid, "To date cannot be less than current time."}
+      true -> {:ok}
+    end
+  end
+
+  def is_valid_datetime?(from, to) do
+    case Calendar.DateTime.diff(from, to) do
+      {:ok, _, _, :after} -> true
+      _ -> false
+    end
+  end
+
+  def create_changeset(model, params \\ :invalid) do
+    model
+    |> changeset(params)
+    |> validate_from_to_datetime
   end
 
   def changeset(model, params \\ :invalid) do
