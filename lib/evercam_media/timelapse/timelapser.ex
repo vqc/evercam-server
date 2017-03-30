@@ -244,7 +244,7 @@ defmodule EvercamMedia.Timelapse.Timelapser do
   end
 
   defp update_menifiest(camera_exid, timelapse_id, file_name, file_index) do
-    content = Storage.load_hls_menifiest("gpocam", "timelapse_gpocam", "#{file_name}.m3u8") |> String.replace("\n#EXT-X-ENDLIST", "")
+    content = Storage.load_hls_menifiest(camera_exid, timelapse_id, "#{file_name}.m3u8") |> String.replace("\n#EXT-X-ENDLIST", "")
     content = content <> "#EXT-X-DISCONTINUITY"
     content = content <> "\n#EXTINF:1.100000,"
     content = content <> "\n#{file_name}#{file_index}.ts"
