@@ -8,7 +8,7 @@ defmodule EvercamMedia.TimelapseView do
 
   def render("show.json", %{timelapse: nil}), do: %{timelapse: []}
   def render("show.json", %{timelapse: timelapse}) do
-    %{snapmails: render_many([timelapse], __MODULE__, "timelapse.json")}
+    %{timelapses: render_many([timelapse], __MODULE__, "timelapse.json")}
   end
 
   def render("timelapse.json", %{timelapse: timelapse}) do
@@ -29,6 +29,7 @@ defmodule EvercamMedia.TimelapseView do
       to_date: Util.ecto_datetime_to_unix(timelapse.to_datetime),
       recreate_hls: timelapse.recreate_hls,
       status: status(timelapse.status),
+      last_snapshot_at: Util.ecto_datetime_to_unix(timelapse.last_snapshot_at),
       created_at: Util.ecto_datetime_to_unix(timelapse.inserted_at)
     }
   end

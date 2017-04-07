@@ -625,7 +625,7 @@ defmodule EvercamMedia.Snapshot.Storage do
     url = @seaweedfs <> file_path
 
     case HTTPoison.get(url, [], hackney: hackney) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> :noop
+      {:ok, %HTTPoison.Response{status_code: 200, body: _body}} -> :noop
       _ ->
         HTTPoison.post!(url, {:multipart, [{file_path, content, []}]}, [], hackney: hackney)
     end

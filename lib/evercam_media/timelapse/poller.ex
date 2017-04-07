@@ -103,7 +103,7 @@ defmodule EvercamMedia.Timelapse.Poller do
       {:ok, true} ->
         Logger.debug "Polling timelapse: #{state.name} for timelapse"
         timestamp = Calendar.DateTime.now!("UTC") |> Calendar.DateTime.Format.unix
-        Timelapser.get_snapshot(state.name, {:poll, timestamp})
+        send_request(state.config.status, state, timestamp)
       {:ok, false} ->
         Logger.debug "Not Scheduled. Skip timelapse for #{inspect state.name}"
     end
@@ -123,6 +123,11 @@ defmodule EvercamMedia.Timelapse.Poller do
   #######################
   ## Private functions ##
   #######################
+
+  defp send_request(3, _state, _timestamp), do: :noop
+  defp send_request(_status, state, timestamp) do
+    Timelapser.get_snapshot(state.name, {:poll, timestamp})
+  end
 
   defp start_timer(sleep, message) do
     Process.send_after(self, message, sleep)

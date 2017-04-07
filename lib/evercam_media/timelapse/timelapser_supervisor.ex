@@ -53,6 +53,13 @@ defmodule EvercamMedia.Timelapse.TimelapserSupervisor do
   end
 
   @doc """
+  Stop timelapse process
+  """
+  def stop_timelapse_worker(timelapse) do
+    Supervisor.terminate_child(__MODULE__, timelapse.exid |> String.to_atom |> Process.whereis)
+  end
+
+  @doc """
   Start a worker for each timelapse in the database.
 
   This function is intended to be called after the EvercamMedia.Timelapse.TimelapserSupervisor
@@ -86,6 +93,7 @@ defmodule EvercamMedia.Timelapse.TimelapserSupervisor do
           time_always: timelapse.time_always,
           from_datetime: timelapse.from_datetime,
           to_datetime: timelapse.to_datetime,
+          status: timelapse.status,
           sleep: timelapse.frequency * 60 * 1000
         }
       }

@@ -47,6 +47,7 @@ defmodule Timelapse do
     |> where(camera_id: ^id)
     |> preload(:camera)
     |> preload([camera: :owner])
+    |> order_by([t], desc: t.inserted_at)
     |> Repo.all
   end
 
@@ -92,23 +93,24 @@ defmodule Timelapse do
     %{year: current_year, month: current_month, day: current_day} = current_time
     %{hour: from_hour, minute: from_minute} = from_date
     %{hour: to_hour, minute: to_minute} = to_date
-    start_date = {{current_year, current_month, current_day}, {from_hour, from_minute, 0}} |> Calendar.DateTime.from_erl(timezone)
+    start_date = {{current_year, current_month, current_day}, {from_hour, from_minute, 0}} |> Calendar.DateTime.from_erl!(timezone)
 
     case Calendar.DateTime.diff(from_date, to_date) do
       {:ok, _seconds, _, :after} ->
         %{year: next_year, month: next_month, day: next_day} = current_time |> Calendar.DateTime.advance!(60 * 60 * 24)
-        end_date = {{next_year, next_month, next_day}, {to_hour, to_minute, 59}} |> Calendar.DateTime.from_erl(timezone)
+        end_date = {{next_year, next_month, next_day}, {to_hour, to_minute, 59}} |> Calendar.DateTime.from_erl!(timezone)
         between?(current_time, start_date, end_date)
       _ ->
-        end_date = {{current_year, current_month, current_day}, {to_hour, to_minute, 59}} |> Calendar.DateTime.from_erl(timezone)
+        end_date = {{current_year, current_month, current_day}, {to_hour, to_minute, 59}} |> Calendar.DateTime.from_erl!(timezone)
         between?(current_time, start_date, end_date)
     end
   end
   def is_scheduled_now?(timezone, current_time, from_date, to_date, false, true) do
     %{year: from_year, month: from_month, day: from_day} = from_date
     %{year: to_year, month: to_month, day: to_day} = to_date
-    start_date = {{from_year, from_month, from_day}, {0, 0, 0}} |> Calendar.DateTime.from_erl(timezone)
-    end_date = {{to_year, to_month, to_day}, {23, 59, 59}} |> Calendar.DateTime.from_erl(timezone)
+    start_date = {{from_year, from_month, from_day}, {0, 0, 0}} |> Calendar.DateTime.from_erl!(timezone)
+    end_date = {{to_year, to_month, to_day}, {23, 59, 59}} |> Calendar.DateTime.from_erl!(timezone)
+
     between?(current_time, start_date, end_date)
   end
 

@@ -69,6 +69,7 @@ defmodule EvercamMedia.TimelapseController do
     with :ok <- user_can_delete(conn, caller, camera),
          {:ok, timelapse} <- timelapse_exist(conn, timelapse_exid)
     do
+      stop_timelapse_worker(Application.get_env(:evercam_media, :run_spawn), timelapse)
       Timelapse.delete_by_id(timelapse.id)
       json(conn, %{})
     end
@@ -161,4 +162,11 @@ defmodule EvercamMedia.TimelapseController do
     end
   end
   defp update_timelapse_worker(_mode, _timelapse), do: :noop
+
+  defp stop_timelapse_worker(true, timelapse) do
+    spawn fn ->
+      TimelapserSupervisor.stop_timelapse_worker(timelapse)
+    end
+  end
+  defp stop_timelapse_worker(_mode, _timelapse), do: :noop
 end
