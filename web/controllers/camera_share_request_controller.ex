@@ -1,6 +1,7 @@
 defmodule EvercamMedia.CameraShareRequestController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.CameraShareRequestView
+  alias EvercamMedia.Intercom
 
   def show(conn, %{"id" => exid} = params) do
     caller = conn.assigns[:current_user]
@@ -59,6 +60,7 @@ defmodule EvercamMedia.CameraShareRequestController do
       |> CameraShareRequest.update_changeset(params)
       |> Repo.update!
       |> revoked_notification(key)
+      Intercom.delete_or_update_user(Application.get_env(:evercam_media, :create_intercom_user), email, get_user_agent(conn), user_request_ip(conn), key)
       json(conn, %{})
     end
   end

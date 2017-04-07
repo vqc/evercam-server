@@ -10,6 +10,8 @@ defmodule EvercamMedia.Snapshot.Error do
     case error do
       %CaseClauseError{} ->
         :bad_request
+      %UndefinedFunctionError{} ->
+        :not_a_jpeg
       %RuntimeError{} ->
         :not_a_jpeg
       error when is_map(error) ->
@@ -63,11 +65,11 @@ defmodule EvercamMedia.Snapshot.Error do
         {504, %{message: "Request to the camera timed out."}}
       :timeout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [timeout]"
-        update_camera_status("#{camera_exid}", timestamp, false, "timeout", 1)
+        update_camera_status("#{camera_exid}", timestamp, false, "timeout", 5)
         {504, %{message: "Camera response timed out."}}
       :connect_timeout ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [connect_timeout]"
-        update_camera_status("#{camera_exid}", timestamp, false, "connect_timeout", 1)
+        update_camera_status("#{camera_exid}", timestamp, false, "connect_timeout", 5)
         {504, %{message: "Connection to the camera timed out."}}
       :econnrefused ->
         Logger.debug "[#{camera_exid}] [snapshot_error] [econnrefused]"

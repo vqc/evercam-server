@@ -3,12 +3,13 @@ defmodule EvercamMedia.SnapmailController do
   alias EvercamMedia.SnapmailView
   alias EvercamMedia.Snapmail.SnapmailerSupervisor
 
-  def all(conn, _) do
+  def all(conn, params) do
     current_user = conn.assigns[:current_user]
+    camera = get_camera(params["camera_id"])
 
-    with :ok <- authorized(conn, current_user)
+    with :ok <- authorized(conn, current_user),
+         {:ok, snapmails} <- get_by_user_camera(conn, current_user, camera, params["camera_id"])
     do
-      snapmails = Snapmail.by_user_id(current_user.id)
       render(conn, SnapmailView, "index.json", %{snapmails: snapmails})
     end
   end
@@ -171,6 +172,20 @@ defmodule EvercamMedia.SnapmailController do
     end
   end
 
+  defp get_by_user_camera(_conn, caller, _camera, nil) do
+    snapmails = Snapmail.by_user_id(caller.id)
+    {:ok, snapmails}
+  end
+  defp get_by_user_camera(conn, _caller, nil, camera_id), do: render_error(conn, 404, "Camera '#{camera_id}' not found!")
+  defp get_by_user_camera(conn, caller, camera, _camera_id) do
+    case Permission.Camera.can_list?(caller, camera) do
+      true ->
+        snapmails = Snapmail.by_camera_id(camera.id, caller.id)
+        {:ok, snapmails}
+      false -> render_error(conn, 403, "Forbidden.")
+    end
+  end
+
   defp snapmail_exist(conn, snapmail_exid) do
     case Snapmail.by_exid(snapmail_exid) do
       nil -> render_error(conn, 404, "Snapmail not found.")
@@ -233,6 +248,9 @@ defmodule EvercamMedia.SnapmailController do
     |> Enum.map(fn(camera) -> %{id: camera.id, exid: camera.exid} end)
     |> Enum.sort
   end
+
+  defp get_camera(camera_exid) when camera_exid in ["", nil], do: nil
+  defp get_camera(camera_exid), do: Camera.get_full(camera_exid)
 
   defp refine_cameras(list1, list2) do
     list1

@@ -33,6 +33,8 @@ defmodule AccessToken do
   def by_request_token(token) do
     AccessToken
     |> where(request: ^token)
+    |> preload(:user)
+    |> preload(:grantor)
     |> Repo.one
   end
 

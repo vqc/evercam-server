@@ -97,6 +97,16 @@ defmodule User do
     "#{user.firstname} #{user.lastname}"
   end
 
+  def get_user_from_token(token) do
+    token = AccessToken.by_request_token(token)
+    cond do
+      nil == token -> nil
+      user = token.user -> user
+      grantor = token.grantor -> grantor
+      true -> token
+    end
+  end
+
   def delete_by_id(user_id) do
     User
     |> where(id: ^user_id)

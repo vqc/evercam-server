@@ -2,6 +2,7 @@ defmodule EvercamMedia.CameraShareController do
   use EvercamMedia.Web, :controller
   alias EvercamMedia.CameraShareView
   alias EvercamMedia.CameraShareRequestView
+  alias EvercamMedia.Intercom
 
   def show(conn, %{"id" => exid} = params) do
     current_user = conn.assigns[:current_user]
@@ -36,6 +37,7 @@ defmodule EvercamMedia.CameraShareController do
     with :ok <- camera_exists(conn, params["id"], camera),
          :ok <- user_can_create_share(conn, caller, camera)
     do
+      requester_ip = user_request_ip(conn)
       if sharee do
         case CameraShare.create_share(camera, sharee, caller, params["rights"], params["message"]) do
           {:ok, camera_share} ->
@@ -44,7 +46,7 @@ defmodule EvercamMedia.CameraShareController do
             end
             Camera.invalidate_user(sharee)
             Camera.invalidate_camera(camera)
-            CameraActivity.log_activity(caller, camera, "shared", %{with: sharee.email, ip: user_request_ip(conn)})
+            CameraActivity.log_activity(caller, camera, "shared", %{with: sharee.email, ip: requester_ip})
             conn |> put_status(:created) |> render(CameraShareView, "show.json", %{camera_share: camera_share})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
@@ -53,7 +55,8 @@ defmodule EvercamMedia.CameraShareController do
         case CameraShareRequest.create_share_request(camera, params["email"], caller, params["rights"], params["message"]) do
           {:ok, camera_share_request} ->
             send_email_notification(caller, camera, params["email"], camera_share_request.message, camera_share_request.key)
-            CameraActivity.log_activity(caller, camera, "shared", %{with: params["email"], ip: user_request_ip(conn)})
+            CameraActivity.log_activity(caller, camera, "shared", %{with: params["email"], ip: requester_ip})
+            Intercom.intercom_activity(Application.get_env(:evercam_media, :create_intercom_user), get_user_model(params["email"]), get_user_agent(conn), requester_ip, "Shared-Non-Registered")
             conn |> put_status(:created) |> render(CameraShareRequestView, "show.json", %{camera_share_requests: camera_share_request})
           {:error, changeset} ->
             render_error(conn, 400, Util.parse_changeset(changeset))
@@ -192,5 +195,15 @@ defmodule EvercamMedia.CameraShareController do
     catch _type, error ->
       Util.error_handler(error)
     end
+  end
+
+  defp get_user_model(email) do
+    %User{
+      username: "",
+      firstname: "",
+      lastname: "",
+      email: email,
+      created_at: Ecto.DateTime.utc
+    }
   end
 end

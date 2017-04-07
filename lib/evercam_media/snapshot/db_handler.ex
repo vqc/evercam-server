@@ -115,10 +115,22 @@ defmodule EvercamMedia.Snapshot.DBHandler do
 
   defp do_log_camera_status(camera, status, datetime, extra \\ nil) do
     spawn fn ->
-      parameters = %{camera_id: camera.id, camera_exid: camera.exid, action: status, done_at: datetime, extra: extra}
-      changeset = CameraActivity.changeset(%CameraActivity{}, parameters)
-      SnapshotRepo.insert(changeset)
-      send_notification(status, camera, camera.alert_emails)
+      case check_last_camera_status(camera.id, status) do
+        true ->
+          parameters = %{camera_id: camera.id, camera_exid: camera.exid, action: status, done_at: datetime, extra: extra}
+          changeset = CameraActivity.changeset(%CameraActivity{}, parameters)
+          SnapshotRepo.insert(changeset)
+          send_notification(status, camera, camera.alert_emails)
+        false -> :noop
+      end
+    end
+  end
+
+  defp check_last_camera_status(camera_id, status) do
+    case CameraActivity.get_last_on_off_log(camera_id) do
+      nil -> true
+      %CameraActivity{} = camera_activity ->
+        camera_activity.action != status
     end
   end
 
