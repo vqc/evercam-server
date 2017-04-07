@@ -547,4 +547,87 @@ defmodule EvercamMedia.Snapshot.Storage do
       _ -> false
     end
   end
+
+  ######################################
+  ## Timelapse functions to save/load ##
+  ######################################
+
+  def save_timelapse_metadata(camera_id, timelapse_id, low, medium, high) do
+    hackney = [pool: :seaweedfs_upload_pool]
+    file_path = "/#{camera_id}/timelapses/#{timelapse_id}/metadata.json"
+    url = @seaweedfs <> file_path
+
+    data =
+      case HTTPoison.get(url, [], hackney: hackney) do
+        {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+          body
+          |> Poison.decode!
+          |> Map.put("low", low)
+          |> Map.put("medium", medium)
+          |> Map.put("high", high)
+          |> Poison.encode!
+        {:ok, %HTTPoison.Response{status_code: 404}} ->
+          Poison.encode!(%{low: low, medium: medium, high: high})
+        error ->
+          raise "Metadata upload at '#{file_path}' failed with: #{inspect error}"
+      end
+    HTTPoison.post!(url, {:multipart, [{file_path, data, []}]}, [], hackney: hackney)
+  end
+
+  def load_timelapse_metadata(camera_id, timelapse_id) do
+    file_path = "/#{camera_id}/timelapses/#{timelapse_id}/metadata.json"
+    url = @seaweedfs <> file_path
+
+    hackney = [pool: :seaweedfs_download_pool]
+    case HTTPoison.get(url, [], hackney: hackney) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        Poison.decode!(body)
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        %{}
+      error ->
+        raise "Metadata download from '#{url}' failed with: #{inspect error}"
+    end
+  end
+
+  def load_hls_menifiest(camera_exid, timelapse_id, file_name) do
+    hackney = [pool: :seaweedfs_download_pool]
+    url = "#{@seaweedfs}/#{camera_exid}/timelapses/#{timelapse_id}/ts/#{file_name}"
+    case HTTPoison.get(url, [], hackney: hackney) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> body
+      {:ok, %HTTPoison.Response{status_code: 404}} -> nil
+      error ->
+        raise "Menifiest load at '#{url}' failed with: #{inspect error}"
+    end
+  end
+
+  def save_hls_files(camera_exid, timelapse_id, file_name) do
+    "#{@root_dir}/#{camera_exid}/timelapses/#{timelapse_id}/ts/#{file_name}"
+    |> File.open([:read, :binary, :raw], fn(file) -> IO.binread(file, :all) end)
+    |> case do
+      {:ok, content} -> seaweedfs_save_hls_file(camera_exid, timelapse_id, content, file_name)
+      {:error, _error} -> {:error, "Failed to read video file."}
+    end
+  end
+
+  def seaweedfs_save_hls_file(camera_exid, timelapse_id, content, file_name) do
+    hackney = [pool: :seaweedfs_upload_pool]
+    file_path = "/#{camera_exid}/timelapses/#{timelapse_id}/ts/#{file_name}"
+    post_url = "#{@seaweedfs}#{file_path}"
+    case HTTPoison.post(post_url, {:multipart, [{file_path, content, []}]}, [], hackney: hackney) do
+      {:ok, _response} -> :noop
+      {:error, error} -> Logger.info "[save_hls] [#{camera_exid}] [#{timelapse_id}] [#{inspect error}]"
+    end
+  end
+
+  def save_timelapse_manifest(camera_id, timelapse_id, content) do
+    hackney = [pool: :seaweedfs_upload_pool]
+    file_path = "/#{camera_id}/timelapses/#{timelapse_id}/index.m3u8"
+    url = @seaweedfs <> file_path
+
+    case HTTPoison.get(url, [], hackney: hackney) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: _body}} -> :noop
+      _ ->
+        HTTPoison.post!(url, {:multipart, [{file_path, content, []}]}, [], hackney: hackney)
+    end
+  end
 end
