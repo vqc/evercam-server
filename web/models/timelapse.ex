@@ -71,6 +71,12 @@ defmodule Timelapse do
     |> Repo.delete_all
   end
 
+  def delete_by_camera_id(camera_id) do
+    Timelapse
+    |> where(camera_id: ^camera_id)
+    |> Repo.delete_all
+  end
+
   def scheduled_now?(timezone, from_date, to_date, date_always, time_always) do
     current_time = Calendar.DateTime.now!(timezone)
     from_date =

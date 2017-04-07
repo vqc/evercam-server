@@ -377,6 +377,7 @@ defmodule EvercamMedia.CameraController do
     CameraShare.delete_by_camera_id(camera.id)
     CameraShareRequest.delete_by_camera_id(camera.id)
     Archive.delete_by_camera(camera.id)
+    Timelapse.delete_by_camera_id(camera.id)
     Camera.delete_by_id(camera.id)
   end
 
