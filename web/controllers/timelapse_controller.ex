@@ -36,7 +36,7 @@ defmodule EvercamMedia.TimelapseController do
 
       case Timelapse.create_timelapse(timelapse_params) do
         {:ok, timelapse} ->
-          start_timelapse_worker(Application.get_env(:evercam_media, :run_spawn), timelapse)
+          start_timelapse_worker(Application.get_env(:evercam_media, :start_timelapse_workers), timelapse)
           render(conn |> put_status(:created), TimelapseView, "show.json", %{timelapse: timelapse})
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))
@@ -54,7 +54,7 @@ defmodule EvercamMedia.TimelapseController do
       timelapse_params = construct_timelapse_parameters(%{}, params, Camera.get_timezone(camera))
       case Timelapse.update_timelapse(timelapse, timelapse_params) do
         {:ok, timelapse} ->
-          update_timelapse_worker(Application.get_env(:evercam_media, :run_spawn), timelapse)
+          update_timelapse_worker(Application.get_env(:evercam_media, :start_timelapse_workers), timelapse)
           render(conn, TimelapseView, "show.json", %{timelapse: timelapse})
         {:error, changeset} ->
           render_error(conn, 400, Util.parse_changeset(changeset))
@@ -69,7 +69,7 @@ defmodule EvercamMedia.TimelapseController do
     with :ok <- user_can_delete(conn, caller, camera),
          {:ok, timelapse} <- timelapse_exist(conn, timelapse_exid)
     do
-      stop_timelapse_worker(Application.get_env(:evercam_media, :run_spawn), timelapse)
+      stop_timelapse_worker(Application.get_env(:evercam_media, :start_timelapse_workers), timelapse)
       Timelapse.delete_by_id(timelapse.id)
       json(conn, %{})
     end
