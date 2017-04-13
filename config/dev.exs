@@ -3,6 +3,9 @@ use Mix.Config
 config :evercam_media,
   start_camera_workers: System.get_env["START_CAMERA_WORKERS"]
 
+config :evercam_media,
+  start_timelapse_workers: false
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 config :evercam_media, EvercamMedia.Endpoint,

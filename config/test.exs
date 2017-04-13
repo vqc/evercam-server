@@ -3,6 +3,9 @@ use Mix.Config
 config :evercam_media,
   start_camera_workers: false
 
+config :evercam_media,
+  start_timelapse_workers: false
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :evercam_media, EvercamMedia.Endpoint,
@@ -43,7 +46,7 @@ config :evercam_media, EvercamMedia.SnapshotRepo,
   database: "evercam_tst",
   pool: Ecto.Adapters.SQL.Sandbox
 
-config :exvcr, 
+config :exvcr,
   [
     vcr_cassette_library_dir: "test/fixtures/vcr_cassettes",
     custom_cassette_library_dir: "test/fixtures/custom_cassettes",

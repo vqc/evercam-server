@@ -19,7 +19,9 @@ defmodule EvercamMedia.Timelapse.TimelapserSupervisor do
   end
 
   def init(:ok) do
-    Task.start_link(&initiate_workers/0)
+    if Application.get_env(:evercam_media, :start_timelapse_workers) do
+      Task.start_link(&initiate_workers/0)
+    end
     children = [worker(Timelapser, [], restart: :permanent)]
     supervise(children, strategy: :simple_one_for_one, max_restarts: 1_000_000)
   end
