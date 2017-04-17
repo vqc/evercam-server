@@ -89,6 +89,7 @@ defmodule EvercamMedia.TimelapseController do
     |> add_parameter("field", :watermark_position, params["watermark_position"])
     |> add_parameter("field", :recreate_hls, params["recreate_hls"])
     |> add_parameter("field", :start_recreate_hls, params["start_recreate_hls"])
+    |> add_parameter("extra", :extra, params["extra"])
 
     |> add_datetime_parameter(:from_datetime, params["from_datetime"], timezone)
     |> add_datetime_parameter(:to_datetime, params["to_datetime"], timezone)
@@ -97,6 +98,9 @@ defmodule EvercamMedia.TimelapseController do
   defp add_parameter(params, _field, _key, nil), do: params
   defp add_parameter(params, "field", key, value) do
     Map.put(params, key, value)
+  end
+  defp add_parameter(params, "extra", key, value) do
+    Map.put(params, key, get_json(value))
   end
 
   defp add_datetime_parameter(params, _key, value, _timezone) when value in [nil, ""], do: params
@@ -143,6 +147,12 @@ defmodule EvercamMedia.TimelapseController do
     case Timelapse.by_exid(timelapse_exid) do
       nil -> render_error(conn, 404, "Timelapse not found.")
       %Timelapse{} = timelapse -> {:ok, timelapse}
+    end
+  end
+
+  defp get_json(schedule) do
+    case Poison.decode(schedule) do
+      {:ok, json} -> json
     end
   end
 

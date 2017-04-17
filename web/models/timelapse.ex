@@ -4,12 +4,13 @@ defmodule Timelapse do
   import Ecto.Query
   alias EvercamMedia.Repo
 
-  @required_fields ~w(camera_id title frequency status date_always time_always)
-  @optional_fields ~w(exid snapshot_count resolution from_datetime to_datetime watermark_logo watermark_position recreate_hls start_recreate_hls last_snapshot_at)
+  @required_fields ~w(camera_id user_id title frequency status date_always time_always)
+  @optional_fields ~w(exid snapshot_count resolution from_datetime to_datetime watermark_logo watermark_position recreate_hls start_recreate_hls last_snapshot_at extra)
 
-  @status %{active: 0, scheduled: 1, expired: 2, paused: 3}
+  @status %{active: 0, scheduled: 1, expired: 2, paused: 3, stopped: 4}
 
   schema "timelapses" do
+    belongs_to :user, User, foreign_key: :user_id
     belongs_to :camera, Camera, foreign_key: :camera_id
 
     field :exid, :string
@@ -29,6 +30,7 @@ defmodule Timelapse do
     field :start_recreate_hls, :boolean, default: false
     field :hls_created, :boolean, default: false
     field :last_snapshot_at, Ecto.DateTime
+    field :extra, EvercamMedia.Types.JSON
 
     timestamps(type: Ecto.DateTime, default: Ecto.DateTime.utc)
   end
