@@ -53,6 +53,15 @@ defmodule Timelapse do
     |> Repo.all
   end
 
+  def by_user_id(user_id) do
+    Timelapse
+    |> where(user_id: ^user_id)
+    |> preload(:camera)
+    |> preload([camera: :owner])
+    |> order_by([t], desc: t.inserted_at)
+    |> Repo.all
+  end
+
   def by_exid(exid) do
     Timelapse
     |> where(exid: ^String.downcase(exid))
