@@ -127,6 +127,7 @@ defmodule EvercamMedia.Router do
       delete "/snapmails/:id", SnapmailController, :delete
       options "/snapmails/:id", SnapmailController, :nothing
 
+      get "/timelapses", TimelapseController, :user_all
       get "/cameras/:id/timelapses", TimelapseController, :all
       get "/cameras/:id/timelapses/:timelapse_id", TimelapseController, :show
       post "/cameras/:id/timelapses", TimelapseController, :create

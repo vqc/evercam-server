@@ -3,6 +3,16 @@ defmodule EvercamMedia.TimelapseController do
   alias EvercamMedia.TimelapseView
   alias EvercamMedia.Timelapse.TimelapserSupervisor
 
+  def user_all(conn, _params) do
+    caller = conn.assigns[:current_user]
+
+    with :ok <- authorized(conn, caller)
+    do
+      timelapses = Timelapse.by_user_id(caller.id)
+      render(conn, TimelapseView, "index.json", %{timelapses: timelapses})
+    end
+  end
+
   def all(conn, %{"id" => exid}) do
     caller = conn.assigns[:current_user]
     camera = Camera.get_full(exid)
@@ -32,7 +42,11 @@ defmodule EvercamMedia.TimelapseController do
 
     with :ok <- user_can_list(conn, caller, camera)
     do
-      timelapse_params = add_parameter(%{}, "field", :camera_id, camera.id) |> construct_timelapse_parameters(params, Camera.get_timezone(camera))
+      timelapse_params =
+        %{}
+        |> add_parameter("field", :camera_id, camera.id)
+        |> add_parameter("field", :user_id, caller.id)
+        |> construct_timelapse_parameters(params, Camera.get_timezone(camera))
 
       case Timelapse.create_timelapse(timelapse_params) do
         {:ok, timelapse} ->
@@ -48,7 +62,7 @@ defmodule EvercamMedia.TimelapseController do
     caller = conn.assigns[:current_user]
     camera = Camera.get_full(camera_exid)
 
-    with :ok <- user_can_edit(conn, caller, camera),
+    with :ok <- user_can_list(conn, caller, camera),
          {:ok, timelapse} <- timelapse_exist(conn, timelapse_exid)
     do
       timelapse_params = construct_timelapse_parameters(%{}, params, Camera.get_timezone(camera))
@@ -66,7 +80,7 @@ defmodule EvercamMedia.TimelapseController do
     caller = conn.assigns[:current_user]
     camera = Camera.get_full(camera_exid)
 
-    with :ok <- user_can_delete(conn, caller, camera),
+    with :ok <- user_can_list(conn, caller, camera),
          {:ok, timelapse} <- timelapse_exist(conn, timelapse_exid)
     do
       stop_timelapse_worker(Application.get_env(:evercam_media, :start_timelapse_workers), timelapse)
@@ -118,22 +132,6 @@ defmodule EvercamMedia.TimelapseController do
 
   defp user_can_list(conn, user, camera) do
     if !Permission.Camera.can_list?(user, camera) do
-      render_error(conn, 403, "Forbidden.")
-    else
-      :ok
-    end
-  end
-
-  defp user_can_edit(conn, user, camera) do
-    if !Permission.Camera.can_edit?(user, camera) do
-      render_error(conn, 403, "Forbidden.")
-    else
-      :ok
-    end
-  end
-
-  defp user_can_delete(conn, user, camera) do
-    if !Permission.Camera.can_delete?(user, camera) do
       render_error(conn, 403, "Forbidden.")
     else
       :ok
