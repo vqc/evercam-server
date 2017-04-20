@@ -29,6 +29,8 @@ defmodule EvercamMedia.TimelapseView do
       to_date: Util.ecto_datetime_to_unix(timelapse.to_datetime),
       recreate_hls: timelapse.recreate_hls,
       status: status(timelapse.status),
+      watermark_position: timelapse.watermark_position,
+      watermark_logo: get_logo(timelapse.watermark_logo),
       last_snapshot_at: Util.ecto_datetime_to_unix(timelapse.last_snapshot_at),
       created_at: Util.ecto_datetime_to_unix(timelapse.inserted_at)
     }
@@ -38,4 +40,9 @@ defmodule EvercamMedia.TimelapseView do
   defp status(1), do: "Scheduled"
   defp status(2), do: "Expired"
   defp status(3), do: "Paused"
+
+  defp get_logo(image_binary) when image_binary in ["", nil], do: ""
+  defp get_logo(image_binary) do
+    "data:image/jpeg;base64,#{image_binary}"
+  end
 end
